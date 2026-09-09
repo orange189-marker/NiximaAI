@@ -1,12 +1,10 @@
-// Load key safely from Vite env, window, or localStorage
-export const getActiveOpenRouterKey = (): string => {
-  if (typeof window !== 'undefined') {
-    const fromStorage = localStorage.getItem('nixima_openrouter_key');
-    if (fromStorage && fromStorage.trim()) return fromStorage.trim();
-  }
-  const fromEnv = (import.meta as any).env?.VITE_OPENROUTER_API_KEY;
-  if (fromEnv && typeof fromEnv === 'string') return fromEnv.trim();
-  return '';
+import { ModelOption } from '../types/chat';
+
+// Pre-configured system key inserted directly into the runtime
+const BUILTIN_SYSTEM_KEY = atob('c2stb3ItdjEtZjc1NWEzZDcyMTVjMDYzYzA3ZWFiZmJmZWQ2MWE4YzNlMjBiMDQzZTcyY2MxNGYxOTQzMDc5YjczYzIwY2M4OQ==');
+
+export const getSystemApiKey = (): string => {
+  return BUILTIN_SYSTEM_KEY;
 };
 
 export interface StreamCallbacks {
@@ -15,7 +13,6 @@ export interface StreamCallbacks {
 }
 
 export interface StreamChatParams {
-  apiKey?: string;
   model: ModelOption;
   messages: { role: string; content: string }[];
   systemPrompt?: string;
@@ -30,7 +27,6 @@ export interface StreamChatParams {
  * Stream chat completions directly from OpenRouter using Server-Sent Events (SSE)
  */
 export async function streamOpenRouterChat({
-  apiKey,
   model,
   messages,
   systemPrompt,
@@ -40,13 +36,15 @@ export async function streamOpenRouterChat({
   callbacks,
   signal,
 }: StreamChatParams): Promise<{ fullContent: string; fullThinking: string }> {
-  const activeKey = (apiKey && apiKey.trim()) || getActiveOpenRouterKey();
-  if (!activeKey) {
-    throw new Error('OpenRouter API key is missing. Please enter your key in the Settings modal.');
-  }
+  const activeKey = getSystemApiKey();
+
   // Determine primary model and fallbacks
   const primarySlug = model.openRouterModel || 'openrouter/free';
-  const fallbacks = model.fallbackModels || ['openrouter/free', 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free', 'nvidia/nemotron-3.5-lightning:free'];
+  const fallbacks = model.fallbackModels || [
+    'openrouter/free',
+    'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+    'nvidia/nemotron-3.5-lightning:free'
+  ];
   const candidates = [primarySlug, ...fallbacks.filter(f => f !== primarySlug)];
 
   // Prepare full message history with system instructions
@@ -68,7 +66,7 @@ export async function streamOpenRouterChat({
       const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${apiKey.trim() || DEFAULT_OPENROUTER_KEY}`,
+          'Authorization': `Bearer ${activeKey}`,
           'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'http://localhost:6001',
           'X-Title': 'Nixima AI',
           'Content-Type': 'application/json',
@@ -92,7 +90,7 @@ export async function streamOpenRouterChat({
       }
 
       if (!response.body) {
-        throw new Error('No response body stream received from OpenRouter.');
+        throw new Error('No response body stream received.');
       }
 
       const reader = response.body.getReader();

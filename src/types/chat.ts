@@ -44,7 +44,6 @@ export interface Conversation {
 
 export interface UserSettings {
   userName: string;
-  openRouterApiKey: string;
   temperature: number;
   topP: number;
   maxTokens: number;

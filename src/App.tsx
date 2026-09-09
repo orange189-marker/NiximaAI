@@ -9,7 +9,7 @@ import { CompanyModal } from './components/CompanyModal';
 import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry } from './types/chat';
 import { NIXIMA_MODELS, DEFAULT_MODEL } from './data/models';
 import { INITIAL_CONVERSATIONS } from './data/initialChats';
-import { getActiveOpenRouterKey, streamOpenRouterChat } from './utils/openrouter';
+import { streamOpenRouterChat } from './utils/openrouter';
 import { playTypingTick, playCompletionChime } from './utils/sound';
 
 const STORAGE_KEY_CONVS = 'nixima_conversations_v3';
@@ -21,17 +21,10 @@ export const App: React.FC = () => {
   const [settings, setSettings] = useState<UserSettings>(() => {
     const saved = localStorage.getItem(STORAGE_KEY_SETTINGS);
     if (saved) {
-      try { 
-        const parsed = JSON.parse(saved);
-        if (!parsed.openRouterApiKey) {
-          parsed.openRouterApiKey = getActiveOpenRouterKey();
-        }
-        return parsed; 
-      } catch (e) { /* ignore */ }
+      try { return JSON.parse(saved); } catch (e) { /* ignore */ }
     }
     return {
       userName: 'Bogdan',
-      openRouterApiKey: getActiveOpenRouterKey(),
       temperature: 0.7,
       topP: 0.95,
       maxTokens: 4096,
@@ -272,7 +265,6 @@ export const App: React.FC = () => {
       ];
 
       const { fullContent, fullThinking } = await streamOpenRouterChat({
-        apiKey: settings.openRouterApiKey || getActiveOpenRouterKey(),
         model: currentModel,
         messages: historyForApi,
         systemPrompt: settings.systemPrompt,
