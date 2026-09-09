@@ -119,3 +119,20 @@ export function registerUser(name: string, handle: string, passphrase: string): 
 export function logoutUser(): void {
   setActiveUser(null);
 }
+
+export function checkHandleAvailability(handle: string): { available: boolean; reason?: string } {
+  const cleanHandle = handle.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '').replace('@nixima.ai', '');
+  if (!cleanHandle) {
+    return { available: false, reason: 'Enter a handle' };
+  }
+  if (cleanHandle.length < 3) {
+    return { available: false, reason: 'At least 3 characters needed' };
+  }
+  const users = getAllUsers();
+  const exists = users.some(u => u.handle.toLowerCase() === cleanHandle);
+  if (exists) {
+    return { available: false, reason: 'Handle already taken' };
+  }
+  return { available: true };
+}
+
