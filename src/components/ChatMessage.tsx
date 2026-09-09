@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Message } from '../types/chat';
 import { MarkdownTable, TableBlockData } from './MarkdownTable';
+import { NiximaIdLogo } from './NiximaIdLogo';
 
 interface ChatMessageProps {
   message: Message;
@@ -300,8 +301,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               <User className="w-4 h-4" />
             </div>
           ) : (
-            <div className="w-8 h-8 rounded-lg bg-white border border-zinc-300 flex items-center justify-center text-black font-black text-sm tracking-tighter shadow-glow-subtle font-mono">
-              N
+            <div className={`relative w-8 h-8 rounded-lg bg-zinc-950 border border-zinc-700/80 flex items-center justify-center text-white shadow-glow-subtle transition-all ${
+              message.isStreaming ? 'border-white/60 shadow-[0_0_15px_rgba(255,255,255,0.35)] ring-1 ring-white/30' : ''
+            }`}>
+              <NiximaIdLogo size={18} animated={message.isStreaming} glow={false} />
             </div>
           )}
         </div>
@@ -375,6 +378,12 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                       <span className="font-mono text-[11px] font-medium text-zinc-300">
                         Reasoning Process
                       </span>
+                      {message.isStreaming && !message.content && (
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-800/80 text-[10px] text-emerald-400 font-mono">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+                          <span>Generating trace...</span>
+                        </span>
+                      )}
                       <span className="text-[10px] text-zinc-500 font-mono">
                         (Chain-of-thought)
                       </span>
@@ -396,9 +405,52 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
               {/* Main content */}
               <div className="text-zinc-200">
-                {renderFormattedContent(message.content)}
-                {message.isStreaming && (
-                  <span className="inline-block w-1.5 h-4 ml-1 bg-white animate-pulse align-middle" />
+                {!message.content.trim() && message.isStreaming ? (
+                  /* Cool Animated Thinking UI with Bouncing Neural Dots */
+                  <div className="py-2.5 animate-fade-in select-none">
+                    <div className="inline-flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-[#0e0e13]/90 border border-zinc-800/90 shadow-[0_4px_25px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl">
+                      {/* Animated Multi-Ring Neural Core */}
+                      <div className="relative flex items-center justify-center w-5 h-5">
+                        <span className="absolute -inset-1 rounded-full bg-white/10 animate-ping opacity-60 pointer-events-none" />
+                        <NiximaIdLogo size={16} animated glow={false} />
+                      </div>
+
+                      {/* Thinking / Reasoning Label */}
+                      <div className="flex items-center gap-2.5 font-mono text-xs">
+                        <span className="text-zinc-300 font-medium tracking-tight">
+                          {message.thinking ? 'Nixima is reasoning' : 'Nixima is thinking'}
+                        </span>
+
+                        {/* 3 Glowing Bouncing Fluid Dots */}
+                        <div className="flex items-center gap-1.5 pl-0.5">
+                          <span
+                            className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)] animate-bounce"
+                            style={{ animationDuration: '0.85s', animationDelay: '0ms' }}
+                          />
+                          <span
+                            className="w-1.5 h-1.5 rounded-full bg-zinc-300 shadow-[0_0_6px_rgba(255,255,255,0.6)] animate-bounce"
+                            style={{ animationDuration: '0.85s', animationDelay: '180ms' }}
+                          />
+                          <span
+                            className="w-1.5 h-1.5 rounded-full bg-zinc-500 shadow-[0_0_4px_rgba(255,255,255,0.3)] animate-bounce"
+                            style={{ animationDuration: '0.85s', animationDelay: '360ms' }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {renderFormattedContent(message.content)}
+                    {message.isStreaming && (
+                      <span className="inline-flex items-center align-middle ml-1.5 -translate-y-[1px]">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-50" />
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-white shadow-[0_0_8px_rgba(255,255,255,0.95)]" />
+                        </span>
+                      </span>
+                    )}
+                  </>
                 )}
               </div>
 
