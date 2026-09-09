@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Plus, 
   MessageSquare, 
@@ -13,11 +13,14 @@ import {
   Edit2,
   Check,
   Download,
-  LogOut
+  LogOut,
+  Sliders
 } from 'lucide-react';
 import { Conversation } from '../types/chat';
 import { NiximaUser } from '../types/user';
 import { NiximaIdLogo } from './NiximaIdLogo';
+import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotkeys';
+import { HotkeyCustomizerModal } from './HotkeyCustomizerModal';
 
 interface SidebarProps {
   conversations: Conversation[];
@@ -53,6 +56,20 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
+  const [hotkeyConfig, setHotkeyConfig] = useState<HotkeyConfig>(() => getSavedHotkey());
+  const [isHotkeyModalOpen, setIsHotkeyModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleUpdate = (e: any) => {
+      if (e.detail) {
+        setHotkeyConfig(e.detail);
+      } else {
+        setHotkeyConfig(getSavedHotkey());
+      }
+    };
+    window.addEventListener(HOTKEY_CHANGE_EVENT, handleUpdate);
+    return () => window.removeEventListener(HOTKEY_CHANGE_EVENT, handleUpdate);
+  }, []);
 
   // Start renaming
   const handleStartRename = (conv: Conversation) => {
@@ -259,10 +276,25 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </span>
               </div>
 
-              {/* Tactile Keycap Badge */}
-              <kbd className="inline-flex items-center gap-0.5 text-[10px] font-mono font-bold bg-zinc-950/10 border border-zinc-950/15 px-2 py-0.5 rounded-md text-zinc-800 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
-                <span>Ctrl+N</span>
-              </kbd>
+              {/* Tactile Keycap or Adaptive Touch Badge with Quick Customizer */}
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsHotkeyModalOpen(true);
+                }}
+                title={`Hotkey: ${hotkeyConfig.label} (Click to customize for Windows/Mac/Mobile)`}
+                className="inline-flex items-center gap-1 text-[10px] font-mono font-bold bg-zinc-950/10 hover:bg-zinc-950/20 border border-zinc-950/15 px-2 py-0.5 rounded-md text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] transition-all cursor-pointer group/key select-none"
+              >
+                {hotkeyConfig.isTouchBadge ? (
+                  <span className="flex items-center gap-1 text-emerald-800 font-bold">
+                    <Sparkles className="w-2.5 h-2.5 text-emerald-600 animate-pulse" />
+                    <span>{hotkeyConfig.label}</span>
+                  </span>
+                ) : (
+                  <span>{hotkeyConfig.label}</span>
+                )}
+                <Sliders className="w-2.5 h-2.5 text-zinc-600 opacity-60 group-hover/key:opacity-100 transition-opacity ml-0.5" />
+              </div>
             </button>
           </div>
 
@@ -367,6 +399,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <ExternalLink className="w-3 h-3 text-zinc-400" />
           </button>
         </div>
+
+        {/* Hotkey & Gesture Customizer Modal */}
+        <HotkeyCustomizerModal
+          isOpen={isHotkeyModalOpen}
+          onClose={() => setIsHotkeyModalOpen(false)}
+          onHotkeyChange={(cfg) => setHotkeyConfig(cfg)}
+        />
       </aside>
     </>
   );

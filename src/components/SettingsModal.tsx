@@ -17,12 +17,15 @@ import {
   Flame, 
   FileText,
   ShieldAlert,
-  Zap
+  Zap,
+  Keyboard
 } from 'lucide-react';
 import { UserSettings, Conversation } from '../types/chat';
 import { NiximaUser } from '../types/user';
 import { playTypingTick } from '../utils/sound';
 import { NiximaIdLogo } from './NiximaIdLogo';
+import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotkeys';
+import { HotkeyCustomizerModal } from './HotkeyCustomizerModal';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -52,7 +55,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
   const [apiKeyCopied, setApiKeyCopied] = useState(false);
   const [importStatus, setImportStatus] = useState<string | null>(null);
+  const [hotkeyConfig, setHotkeyConfig] = useState<HotkeyConfig>(() => getSavedHotkey());
+  const [isHotkeyModalOpen, setIsHotkeyModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    const handleUpdate = (e: any) => {
+      if (e.detail) {
+        setHotkeyConfig(e.detail);
+      } else {
+        setHotkeyConfig(getSavedHotkey());
+      }
+    };
+    window.addEventListener(HOTKEY_CHANGE_EVENT, handleUpdate);
+    return () => window.removeEventListener(HOTKEY_CHANGE_EVENT, handleUpdate);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -317,6 +334,29 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <div className="text-[11px] text-zinc-400 mt-1">True zero-light black (#000000)</div>
                   </button>
                 </div>
+              </div>
+
+              {/* Adaptive Hotkey & Gesture Customizer */}
+              <div className="p-3.5 rounded-xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-between">
+                <div className="space-y-0.5 pr-4">
+                  <div className="flex items-center gap-2">
+                    <Keyboard className="w-4 h-4 text-white" />
+                    <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                      New Conversation Hotkey
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-400">
+                    Active keybinding: <span className="text-white font-mono font-bold">{hotkeyConfig.label}</span> (Windows, macOS, iPad, and Phones).
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsHotkeyModalOpen(true)}
+                  className="px-3.5 py-2 rounded-xl bg-white hover:bg-zinc-200 text-black text-xs font-mono font-bold transition-all shadow-glow-subtle flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
+                >
+                  <Sliders className="w-3.5 h-3.5" />
+                  <span>Customize</span>
+                </button>
               </div>
             </div>
           )}
@@ -618,6 +658,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
         </div>
       </div>
+
+      {/* Embedded Hotkey & Gesture Customizer */}
+      <HotkeyCustomizerModal
+        isOpen={isHotkeyModalOpen}
+        onClose={() => setIsHotkeyModalOpen(false)}
+        onHotkeyChange={(cfg) => setHotkeyConfig(cfg)}
+      />
     </div>
   );
 };

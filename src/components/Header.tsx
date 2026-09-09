@@ -16,6 +16,7 @@ import {
 import { ModelOption } from '../types/chat';
 import { NIXIMA_MODELS } from '../data/models';
 import { NiximaIdLogo } from './NiximaIdLogo';
+import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotkeys';
 
 interface HeaderProps {
   currentModel: ModelOption;
@@ -37,7 +38,20 @@ export const Header: React.FC<HeaderProps> = ({
   onNewChat
 }) => {
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  const [hotkeyConfig, setHotkeyConfig] = useState<HotkeyConfig>(() => getSavedHotkey());
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleUpdate = (e: any) => {
+      if (e.detail) {
+        setHotkeyConfig(e.detail);
+      } else {
+        setHotkeyConfig(getSavedHotkey());
+      }
+    };
+    window.addEventListener(HOTKEY_CHANGE_EVENT, handleUpdate);
+    return () => window.removeEventListener(HOTKEY_CHANGE_EVENT, handleUpdate);
+  }, []);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -73,10 +87,13 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onNewChat}
             className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all shadow-[0_0_12px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95 group cursor-pointer"
-            title="New conversation (Ctrl+N)"
+            title={`New conversation (${hotkeyConfig.label})`}
           >
             <Plus className="w-3.5 h-3.5 stroke-[3] group-hover:rotate-90 transition-transform duration-200" />
             <span className="hidden sm:inline">New chat</span>
+            <span className="text-[10px] font-mono text-zinc-600 hidden md:inline ml-0.5">
+              {hotkeyConfig.label}
+            </span>
           </button>
         )}
 

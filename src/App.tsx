@@ -14,6 +14,7 @@ import { INITIAL_CONVERSATIONS } from './data/initialChats';
 import { streamOpenRouterChat } from './utils/openrouter';
 import { playTypingTick, playCompletionChime } from './utils/sound';
 import { getActiveUser, logoutUser, syncAccountsWithServer } from './utils/auth';
+import { getSavedHotkey, matchesHotkey } from './utils/hotkeys';
 
 const STORAGE_KEY_MODEL = 'nixima_active_model_v4';
 
@@ -175,21 +176,23 @@ All conversations and model preferences in this workspace are private to your Ni
     localStorage.setItem(STORAGE_KEY_MODEL, currentModel.id);
   }, [currentModel]);
 
-  // Keyboard shortcuts
+  // Keyboard shortcuts (Adaptive & Customized)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+      const config = getSavedHotkey();
+      if (matchesHotkey(e, config)) {
         e.preventDefault();
         handleNewChat();
+        return;
       }
-      if ((e.ctrlKey || e.metaKey) && e.key === 'b') {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b') {
         e.preventDefault();
         setIsSidebarOpen(prev => !prev);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [currentModel.id]);
 
   const activeConversation = conversations.find(c => c.id === activeId);
 
