@@ -478,7 +478,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                           placeholder="e.g. alex or bogdan"
                           autoFocus
                           required
-                          className="w-full pl-3 pr-24 py-2.5 bg-zinc-950/80 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono text-xs"
+                          className="w-full pl-3.5 pr-24 py-2.5 bg-[#09090d]/90 border border-zinc-800/90 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400 focus:ring-1 focus:ring-white/20 focus:bg-[#0d0d12] transition-all duration-200 shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)] font-mono text-xs"
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 text-[11px] pointer-events-none">
                           @nixima.ai
@@ -581,7 +581,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                         placeholder="e.g. Alex Rivera or Bogdan"
                         autoFocus
                         required
-                        className="w-full px-3 py-2.5 bg-zinc-950/80 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono text-xs"
+                        className="w-full px-3.5 py-2.5 bg-[#09090d]/90 border border-zinc-800/90 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400 focus:ring-1 focus:ring-white/20 focus:bg-[#0d0d12] transition-all duration-200 shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)] font-mono text-xs"
                       />
                     </div>
 
@@ -596,7 +596,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                           onChange={(e) => setRegPassphrase(e.target.value)}
                           placeholder="At least 4 characters..."
                           required
-                          className="w-full pl-3 pr-10 py-2.5 bg-zinc-950/80 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono text-xs"
+                          className="w-full pl-3.5 pr-10 py-2.5 bg-[#09090d]/90 border border-zinc-800/90 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400 focus:ring-1 focus:ring-white/20 focus:bg-[#0d0d12] transition-all duration-200 shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)] font-mono text-xs"
                         />
                         <button
                           type="button"
@@ -666,7 +666,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                           placeholder="e.g. bogdan or alex"
                           autoFocus
                           required
-                          className="w-full pl-3 pr-24 py-2.5 bg-zinc-950/80 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono text-xs"
+                          className="w-full pl-3.5 pr-24 py-2.5 bg-[#09090d]/90 border border-zinc-800/90 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400 focus:ring-1 focus:ring-white/20 focus:bg-[#0d0d12] transition-all duration-200 shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)] font-mono text-xs"
                         />
                         {!loginHandle.includes('@') && (
                           <span className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 text-[11px] pointer-events-none">
@@ -687,7 +687,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                           onChange={(e) => setLoginPassphrase(e.target.value)}
                           placeholder="Enter passphrase..."
                           required
-                          className="w-full pl-3 pr-10 py-2.5 bg-zinc-950/80 border border-zinc-800 rounded-xl text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 font-mono text-xs"
+                          className="w-full pl-3.5 pr-10 py-2.5 bg-[#09090d]/90 border border-zinc-800/90 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400 focus:ring-1 focus:ring-white/20 focus:bg-[#0d0d12] transition-all duration-200 shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)] font-mono text-xs"
                         />
                         <button
                           type="button"

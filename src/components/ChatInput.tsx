@@ -10,9 +10,12 @@ import {
   Code2,
   Zap,
   Table,
-  CheckCircle2
+  Sparkles,
+  CornerDownLeft,
+  X
 } from 'lucide-react';
 import { ModelOption } from '../types/chat';
+import { NiximaIdLogo } from './NiximaIdLogo';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -40,20 +43,29 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onToggleSound,
 }) => {
   const [input, setInput] = useState('');
+  const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  // Auto-resize textarea height
+  // Auto-resize textarea height smoothly
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 200)}px`;
+      textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 220)}px`;
     }
   }, [input]);
 
   const handleSubmit = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!input.trim() || isLoading) return;
-    onSendMessage(input.trim());
+    if ((!input.trim() && attachedFiles.length === 0) || isLoading) return;
+
+    let finalMessage = input.trim();
+    if (attachedFiles.length > 0) {
+      const attachmentsHeader = attachedFiles.map(f => `[Attached Document: ${f}]`).join('\n');
+      finalMessage = finalMessage ? `${attachmentsHeader}\n\n${finalMessage}` : attachmentsHeader;
+      setAttachedFiles([]);
+    }
+
+    onSendMessage(finalMessage);
     setInput('');
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -79,24 +91,40 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     textareaRef.current?.focus();
   };
 
+  const handleAttachMockFile = () => {
+    const fileName = `dataset_${Math.floor(Math.random() * 899 + 100)}.json`;
+    if (!attachedFiles.includes(fileName)) {
+      setAttachedFiles(prev => [...prev, fileName]);
+    }
+  };
+
+  const removeAttachment = (fileName: string) => {
+    setAttachedFiles(prev => prev.filter(f => f !== fileName));
+  };
+
   const modifiers = [
-    { label: 'Concise', icon: <Zap className="w-3 h-3" />, prompt: '[Be concise and direct]' },
-    { label: 'Code Only', icon: <Code2 className="w-3 h-3" />, prompt: '[Provide production-ready code with minimal explanation]' },
-    { label: 'Deep Proof', icon: <BrainCircuit className="w-3 h-3" />, prompt: '[Formulate rigorous mathematical or logical derivation]' },
-    { label: 'Table', icon: <Table className="w-3 h-3" />, prompt: '[Format output into comparison markdown tables]' },
+    { label: 'Concise', icon: <Zap className="w-3 h-3 text-amber-400" />, prompt: '[Be concise and direct]' },
+    { label: 'Code Only', icon: <Code2 className="w-3 h-3 text-emerald-400" />, prompt: '[Provide production-ready code with minimal explanation]' },
+    { label: 'Deep Proof', icon: <BrainCircuit className="w-3 h-3 text-cyan-400" />, prompt: '[Formulate rigorous mathematical or logical derivation]' },
+    { label: 'Comparison Table', icon: <Table className="w-3 h-3 text-violet-400" />, prompt: '[Format output into structured markdown comparison tables]' },
   ];
+
+  const canSubmit = (input.trim().length > 0 || attachedFiles.length > 0) && !isLoading;
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4 pb-4 pt-1">
-      {/* Quick Modifier Pills */}
+      {/* Quick Prompt Modifiers Rail */}
       <div className="flex items-center gap-1.5 pb-2 overflow-x-auto text-[11px] font-mono select-none scrollbar-none">
-        <span className="text-zinc-400 pl-1 text-[10px] uppercase tracking-wider">Modifier:</span>
+        <span className="text-zinc-500 pl-1 text-[10px] uppercase tracking-wider font-semibold flex items-center gap-1 flex-shrink-0">
+          <Sparkles className="w-3 h-3 text-zinc-500" />
+          <span>Modifier:</span>
+        </span>
         {modifiers.map((m, idx) => (
           <button
             key={idx}
             type="button"
             onClick={() => applyModifier(m.prompt)}
-            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-zinc-900/90 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800/80 hover:border-zinc-700 transition-colors whitespace-nowrap"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-700 transition-all duration-150 whitespace-nowrap active:scale-95 shadow-sm"
           >
             {m.icon}
             <span>{m.label}</span>
@@ -104,125 +132,166 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         ))}
       </div>
 
-      {/* Main Input Dock */}
-      <div className="relative rounded-2xl bg-[#121216] border border-zinc-800 shadow-2xl transition-all focus-within:border-zinc-600 focus-within:shadow-glow-subtle">
-        {/* Textarea */}
-        <textarea
-          ref={textareaRef}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder={`Ask ${currentModel.name}... (Shift+Enter for newline)`}
-          rows={1}
-          disabled={isLoading}
-          className="w-full bg-transparent text-zinc-100 placeholder-zinc-500 text-sm px-4 pt-3.5 pb-2 resize-none focus:outline-none max-h-48 overflow-y-auto leading-relaxed font-sans"
-        />
+      {/* Main Elevated Input Dock */}
+      <div className="relative group">
+        {/* Ambient Glow Halo when focused */}
+        <div className="absolute -inset-0.5 bg-gradient-to-r from-white/[0.04] via-white/[0.12] to-white/[0.04] rounded-3xl blur-md opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
-        {/* Toolbar footer */}
-        <div className="flex items-center justify-between px-3 pb-2.5 pt-1">
-          {/* Left tools: Mode switches */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            {/* Deep think mode toggle */}
-            <button
-              type="button"
-              onClick={onToggleDeepThink}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs transition-colors border ${
-                deepThink 
-                  ? 'bg-white text-black font-semibold border-white shadow-glow-subtle' 
-                  : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:border-zinc-700'
-              }`}
-              title="Activate extended chain-of-thought reasoning"
-            >
-              <BrainCircuit className="w-3.5 h-3.5" />
-              <span>Deep Think</span>
-            </button>
+        <div className="relative rounded-2xl sm:rounded-3xl bg-gradient-to-b from-[#131317]/95 via-[#0e0e12]/98 to-[#0a0a0d]/98 border border-zinc-800/90 hover:border-zinc-700/80 focus-within:border-zinc-500/90 shadow-[0_15px_40px_-5px_rgba(0,0,0,0.85),inset_0_1px_0_0_rgba(255,255,255,0.08)] backdrop-blur-2xl transition-all duration-300">
+          
+          {/* Active Attached Files Chip Strip */}
+          {attachedFiles.length > 0 && (
+            <div className="flex items-center gap-2 px-4 pt-3 pb-1 flex-wrap">
+              {attachedFiles.map((file, idx) => (
+                <span
+                  key={idx}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 border border-zinc-700 text-xs font-mono text-zinc-200 shadow-inner-light animate-fade-in"
+                >
+                  <Paperclip className="w-3 h-3 text-zinc-400" />
+                  <span>{file}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeAttachment(file)}
+                    className="hover:text-red-400 ml-0.5"
+                    title="Remove attachment"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
 
-            {/* Web search toggle */}
-            <button
-              type="button"
-              onClick={onToggleWebSearch}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs transition-colors border ${
-                webSearch 
-                  ? 'bg-zinc-200 text-black font-semibold border-zinc-200' 
-                  : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:border-zinc-700'
-              }`}
-              title="Query real-time web telemetry"
-            >
-              <Globe className="w-3.5 h-3.5" />
-              <span>Search</span>
-            </button>
+          {/* Primary Textarea Field */}
+          <textarea
+            ref={textareaRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={`Message ${currentModel.name}... (Shift+Enter for newline)`}
+            rows={1}
+            disabled={isLoading}
+            className="w-full bg-transparent text-zinc-100 placeholder:text-zinc-500 text-sm sm:text-[14.5px] px-4.5 pt-3.5 pb-2 resize-none focus:outline-none max-h-48 overflow-y-auto leading-relaxed font-sans select-text scrollbar-thin scrollbar-thumb-zinc-700"
+          />
 
-            {/* Audio Keystroke Sound Toggle */}
-            <button
-              type="button"
-              onClick={onToggleSound}
-              className={`p-1.5 rounded-full border transition-colors ${
-                soundEnabled
-                  ? 'bg-zinc-800 border-zinc-600 text-white'
-                  : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-zinc-300'
-              }`}
-              title={soundEnabled ? "Mute synthetic typing audio" : "Enable synthetic typing audio"}
-            >
-              {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
-            </button>
-
-            {/* Attach button placeholder */}
-            <button
-              type="button"
-              className="p-1.5 rounded-full text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60 transition-colors"
-              title="Attach context document"
-              onClick={() => {
-                setInput(prev => prev + '\n[Attached context: nixima_dataset.json]\n');
-              }}
-            >
-              <Paperclip className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* Right action: Send or Stop */}
-          <div className="flex items-center gap-2">
-            <span className="hidden sm:inline text-[11px] font-mono text-zinc-400">
-              {input.length} chars
-            </span>
-
-            {isLoading ? (
-              <button
-                type="button"
-                onClick={onStopGeneration}
-                className="relative group w-9 h-9 rounded-xl bg-white text-black flex items-center justify-center transition-all duration-200 shadow-[0_0_20px_rgba(255,255,255,0.35)] hover:bg-zinc-200 hover:scale-105 active:scale-95"
-                title="Stop generation (Esc)"
+          {/* High-Tech Capability Toolbar (Bottom Dock) */}
+          <div className="flex items-center justify-between px-3.5 pb-3 pt-1 border-t border-white/[0.04]">
+            {/* Left Controls: Brain & Capability Switches */}
+            <div className="flex items-center gap-1.5 flex-wrap">
+              {/* Active Model Indicator Chip */}
+              <div 
+                className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 border border-zinc-800 text-[11px] font-mono text-zinc-300 shadow-inner-light select-none mr-1"
+                title={`Active Inference Engine: ${currentModel.name}`}
               >
-                {/* Subtle pulse ring */}
-                <span className="absolute -inset-0.5 rounded-xl bg-white/30 animate-pulse pointer-events-none" />
-                <Square className="w-3.5 h-3.5 fill-black text-black transition-transform group-hover:scale-90" />
-              </button>
-            ) : (
+                <NiximaIdLogo size={13} glow={false} />
+                <span className="font-medium truncate max-w-[130px]">{currentModel.name}</span>
+              </div>
+
+              <div className="hidden sm:block h-3.5 w-[1px] bg-zinc-800 mx-0.5" />
+
+              {/* Deep Think Mode Toggle */}
               <button
                 type="button"
-                onClick={() => handleSubmit()}
-                disabled={!input.trim()}
-                className={`relative group h-9 flex items-center justify-center transition-all duration-200 ${
-                  input.trim()
-                    ? 'w-9 rounded-xl bg-white text-black hover:bg-zinc-100 hover:scale-105 active:scale-95 shadow-[0_0_22px_rgba(255,255,255,0.4)] cursor-pointer ring-1 ring-white/50'
-                    : 'w-9 rounded-xl bg-zinc-900/90 text-zinc-600 border border-zinc-800 cursor-not-allowed'
+                onClick={onToggleDeepThink}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono transition-all duration-150 border ${
+                  deepThink 
+                    ? 'bg-white text-black font-bold border-white shadow-[0_0_15px_rgba(255,255,255,0.35)] scale-[1.02]' 
+                    : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-800/80'
                 }`}
-                title={input.trim() ? "Send message (Enter)" : "Type a message to send"}
+                title="Activate extended multi-step reasoning"
               >
-                <ArrowUp className={`w-4 h-4 stroke-[2.5] transition-transform duration-200 ${
-                  input.trim() ? 'group-hover:-translate-y-0.5' : ''
-                }`} />
+                <BrainCircuit className="w-3.5 h-3.5" />
+                <span>Deep Think</span>
+                {deepThink && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse ml-0.5" />}
               </button>
-            )}
+
+              {/* Web Search Telemetry Toggle */}
+              <button
+                type="button"
+                onClick={onToggleWebSearch}
+                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono transition-all duration-150 border ${
+                  webSearch 
+                    ? 'bg-zinc-200 text-black font-bold border-zinc-200 shadow-glow-subtle' 
+                    : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-800/80'
+                }`}
+                title="Search live web data"
+              >
+                <Globe className="w-3.5 h-3.5" />
+                <span>Search</span>
+              </button>
+
+              {/* Audio Keystroke Sound Toggle */}
+              <button
+                type="button"
+                onClick={onToggleSound}
+                className={`p-1.5 rounded-lg border transition-all duration-150 ${
+                  soundEnabled
+                    ? 'bg-zinc-850 border-zinc-700 text-white shadow-inner-light'
+                    : 'bg-zinc-900/80 border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
+                }`}
+                title={soundEnabled ? "Mute typing audio" : "Enable typing audio"}
+              >
+                {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-zinc-200" /> : <VolumeX className="w-3.5 h-3.5" />}
+              </button>
+
+              {/* Context Attachment Button */}
+              <button
+                type="button"
+                onClick={handleAttachMockFile}
+                className="p-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-white hover:bg-zinc-800/80 hover:border-zinc-700 transition-all duration-150"
+                title="Attach document context"
+              >
+                <Paperclip className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            {/* Right Controls: Telemetry & Send/Stop Beacon */}
+            <div className="flex items-center gap-2.5">
+              {input.length > 0 && (
+                <span className="hidden md:inline text-[10.5px] font-mono text-zinc-500 select-none">
+                  {input.length} chars
+                </span>
+              )}
+
+              {isLoading ? (
+                <button
+                  type="button"
+                  onClick={onStopGeneration}
+                  className="relative group w-9 h-9 rounded-xl bg-white text-black flex items-center justify-center transition-all duration-150 shadow-[0_0_24px_rgba(255,255,255,0.4)] hover:bg-zinc-200 hover:scale-105 active:scale-95 cursor-pointer"
+                  title="Stop generation (Esc)"
+                >
+                  <span className="absolute -inset-0.5 rounded-xl bg-white/40 animate-pulse pointer-events-none" />
+                  <Square className="w-3.5 h-3.5 fill-black text-black" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleSubmit()}
+                  disabled={!canSubmit}
+                  className={`relative group w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 ${
+                    canSubmit
+                      ? 'bg-white text-black hover:bg-zinc-100 hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(255,255,255,0.45)] ring-1 ring-white/60 cursor-pointer'
+                      : 'bg-zinc-900/90 text-zinc-600 border border-zinc-800 cursor-not-allowed'
+                  }`}
+                  title={canSubmit ? "Send message (Enter)" : "Type a prompt to send"}
+                >
+                  <ArrowUp className={`w-4 h-4 stroke-[2.5] transition-transform duration-150 ${
+                    canSubmit ? 'group-hover:-translate-y-0.5 text-black' : 'text-zinc-600'
+                  }`} />
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-2 text-center text-[11px] text-zinc-400 font-mono tracking-tight flex items-center justify-center gap-2">
-        <span>Nixima AI</span>
+      {/* Subtitle Telemetry & Keyboard Hint */}
+      <div className="mt-2 text-center text-[10.5px] text-zinc-500 font-mono tracking-tight flex items-center justify-center gap-2 select-none">
+        <span>Nixima AI Mesh</span>
         <span>•</span>
         <span>Port 6001</span>
         <span>•</span>
-        <span>Active Model: {currentModel.name}</span>
+        <span className="hidden sm:inline">Press <kbd className="px-1 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">Enter ↵</kbd> to submit</span>
       </div>
     </div>
   );
