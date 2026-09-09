@@ -17,6 +17,7 @@ import { playTypingTick, playCompletionChime, playOpticToggle } from '../utils/s
 
 import { DynamicWallpaper } from './DynamicWallpaper';
 import { AnimatedEye } from './AnimatedEye';
+import { NiximaIdLogo } from './NiximaIdLogo';
 
 interface AuthPortalProps {
   onAuthenticated: (user: NiximaUser) => void;
@@ -88,14 +89,17 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
       <div className="relative z-10 w-full max-w-md my-auto rounded-3xl bg-[#101014]/85 border border-zinc-800/80 shadow-[0_0_60px_rgba(0,0,0,0.8)] p-6 sm:p-8 backdrop-blur-2xl animate-fade-in">
         {/* Nixima Brand Emblem */}
         <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white text-black font-black text-xl font-mono shadow-[0_0_30px_rgba(255,255,255,0.25)] mb-3">
-            N
+          <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-zinc-950/90 border border-zinc-800 shadow-[0_0_35px_rgba(255,255,255,0.14)] mb-3">
+            <NiximaIdLogo size={42} animated glow />
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-white font-mono uppercase">
-            NIXIMA <span className="text-zinc-500 font-normal">AI ACCESS</span>
-          </h1>
-          <p className="text-xs text-zinc-400 mt-1 font-mono">
-            Frontier Intelligence Mesh • Secure Identity Vault
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <NiximaIdLogo size={18} glow={false} />
+            <h1 className="text-xl font-bold tracking-tight text-white font-mono uppercase">
+              NIXIMA <span className="text-zinc-500 font-normal">ID ACCESS</span>
+            </h1>
+          </div>
+          <p className="text-xs text-zinc-400 font-mono">
+            Frontier Intelligence Mesh • Sovereign Identity Vault
           </p>
         </div>
 
@@ -104,24 +108,26 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
           <button
             type="button"
             onClick={() => { setMode('signin'); setError(null); }}
-            className={`py-2 rounded-lg font-medium transition-all ${
+            className={`py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 ${
               mode === 'signin'
                 ? 'bg-white text-black font-bold shadow-glow-subtle'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
-            Sign In
+            <Key className="w-3.5 h-3.5" />
+            <span>Sign In</span>
           </button>
           <button
             type="button"
             onClick={() => { setMode('register'); setError(null); }}
-            className={`py-2 rounded-lg font-medium transition-all ${
+            className={`py-2 px-3 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 ${
               mode === 'register'
                 ? 'bg-white text-black font-bold shadow-glow-subtle'
                 : 'text-zinc-400 hover:text-white'
             }`}
           >
-            Create Nixima ID
+            <NiximaIdLogo size={14} glow={false} />
+            <span>Create Nixima ID</span>
           </button>
         </div>
 
@@ -189,9 +195,10 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full mt-2 py-3 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs uppercase tracking-wider transition-all duration-150 shadow-[0_0_20px_rgba(255,255,255,0.25)] flex items-center justify-center gap-2"
+              className="w-full mt-2 py-3 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs uppercase tracking-wider transition-all duration-150 shadow-[0_0_20px_rgba(255,255,255,0.25)] flex items-center justify-center gap-2 group"
             >
-              <span>Authenticate & Enter</span>
+              <NiximaIdLogo size={16} glow={false} className="group-hover:scale-110 transition-transform" />
+              <span>Authenticate Nixima ID</span>
               <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
             </button>
           </form>
@@ -231,9 +238,12 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                   @nixima.ai
                 </span>
               </div>
-              <div className="p-2 rounded-lg bg-zinc-900/60 border border-zinc-800/80 text-[11px] text-zinc-400 flex items-center justify-between">
-                <span>Assigned Address:</span>
-                <span className="text-white font-semibold font-mono">{previewEmail}</span>
+              <div className="p-2.5 rounded-xl bg-zinc-950/70 border border-zinc-800/80 text-[11px] text-zinc-400 flex items-center justify-between">
+                <span className="flex items-center gap-1.5 text-zinc-400">
+                  <NiximaIdLogo size={13} glow={false} />
+                  <span>Assigned Nixima ID:</span>
+                </span>
+                <span className="text-white font-semibold font-mono tracking-tight">{previewEmail}</span>
               </div>
             </div>
 
@@ -269,10 +279,11 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full mt-2 py-3 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs uppercase tracking-wider transition-all duration-150 shadow-[0_0_20px_rgba(255,255,255,0.25)] flex items-center justify-center gap-2"
+              className="w-full mt-2 py-3 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs uppercase tracking-wider transition-all duration-150 shadow-[0_0_20px_rgba(255,255,255,0.25)] flex items-center justify-center gap-2 group"
             >
+              <NiximaIdLogo size={16} glow={false} className="group-hover:scale-110 transition-transform" />
               <span>Initialize Nixima ID & Enter</span>
-              <Sparkles className="w-3.5 h-3.5" />
+              <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
             </button>
           </form>
         )}

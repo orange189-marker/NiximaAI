@@ -22,6 +22,7 @@ import {
 import { UserSettings, Conversation } from '../types/chat';
 import { NiximaUser } from '../types/user';
 import { playTypingTick } from '../utils/sound';
+import { NiximaIdLogo } from './NiximaIdLogo';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -201,14 +202,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div className="p-4 rounded-xl bg-zinc-900/90 border border-zinc-700/80 shadow-inner-light space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-white text-black font-black flex items-center justify-center text-sm font-mono shadow-glow-subtle">
-                        {currentUser.name.charAt(0).toUpperCase()}
+                      <div className="w-10 h-10 rounded-xl bg-zinc-950 border border-zinc-700 flex items-center justify-center shadow-glow-subtle flex-shrink-0">
+                        <NiximaIdLogo size={24} glow />
                       </div>
                       <div>
                         <div className="text-sm font-bold text-white flex items-center gap-2">
                           <span>{currentUser.name}</span>
-                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
-                            {currentUser.role}
+                          <span className="inline-flex items-center gap-1 text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
+                            <NiximaIdLogo size={10} glow={false} />
+                            <span>Nixima ID</span>
                           </span>
                         </div>
                         <div className="text-xs text-zinc-400 font-mono">

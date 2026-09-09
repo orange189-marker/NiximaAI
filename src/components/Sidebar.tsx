@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Conversation } from '../types/chat';
 import { NiximaUser } from '../types/user';
+import { NiximaIdLogo } from './NiximaIdLogo';
 
 interface SidebarProps {
   conversations: Conversation[];
@@ -315,13 +316,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
             className="flex items-center justify-between p-2 rounded-lg hover:bg-zinc-800/60 cursor-pointer transition-colors group"
           >
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
-              <div className="w-7 h-7 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
-                {(currentUser?.name || 'N').charAt(0).toUpperCase()}
+              <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-700/80 flex items-center justify-center flex-shrink-0 shadow-inner-light">
+                <NiximaIdLogo size={17} glow={false} />
               </div>
               <div className="flex flex-col min-w-0 flex-1">
-                <span className="text-xs font-medium text-zinc-200 leading-tight truncate">
-                  {currentUser?.name || 'Nixima Operator'}
-                </span>
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <span className="text-xs font-medium text-zinc-200 leading-tight truncate">
+                    {currentUser?.name || 'Nixima Operator'}
+                  </span>
+                  <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[8px] font-mono font-semibold bg-white/10 text-white border border-white/20 flex-shrink-0">
+                    <NiximaIdLogo size={9} glow={false} /> ID
+                  </span>
+                </div>
                 <span className="text-[10px] text-zinc-500 font-mono truncate">
                   {currentUser?.email || 'operator@nixima.ai'}
                 </span>
