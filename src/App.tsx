@@ -9,26 +9,33 @@ import { CompanyModal } from './components/CompanyModal';
 import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry } from './types/chat';
 import { NIXIMA_MODELS, DEFAULT_MODEL } from './data/models';
 import { INITIAL_CONVERSATIONS } from './data/initialChats';
-import { generateNiximaResponse } from './utils/aiResponse';
+import { getActiveOpenRouterKey, streamOpenRouterChat } from './utils/openrouter';
 import { playTypingTick, playCompletionChime } from './utils/sound';
 
-const STORAGE_KEY_CONVS = 'nixima_conversations_v2';
-const STORAGE_KEY_SETTINGS = 'nixima_settings_v2';
-const STORAGE_KEY_MODEL = 'nixima_active_model_v2';
+const STORAGE_KEY_CONVS = 'nixima_conversations_v3';
+const STORAGE_KEY_SETTINGS = 'nixima_settings_v3';
+const STORAGE_KEY_MODEL = 'nixima_active_model_v3';
 
 export const App: React.FC = () => {
   // 1. Settings state
   const [settings, setSettings] = useState<UserSettings>(() => {
     const saved = localStorage.getItem(STORAGE_KEY_SETTINGS);
     if (saved) {
-      try { return JSON.parse(saved); } catch (e) { /* ignore */ }
+      try { 
+        const parsed = JSON.parse(saved);
+        if (!parsed.openRouterApiKey) {
+          parsed.openRouterApiKey = getActiveOpenRouterKey();
+        }
+        return parsed; 
+      } catch (e) { /* ignore */ }
     }
     return {
       userName: 'Bogdan',
+      openRouterApiKey: getActiveOpenRouterKey(),
       temperature: 0.7,
       topP: 0.95,
       maxTokens: 4096,
-      systemPrompt: 'You are Nixima AI, a cutting-edge synthetic intelligence built on Nixima-0.1.',
+      systemPrompt: 'You are Nixima AI, a high-performance frontier reasoning intelligence. Provide clean, well-formatted, intelligent, and accurate responses.',
       personaTone: 'architect',
       deepThinkEnabled: false,
       webSearchEnabled: false,
@@ -74,7 +81,7 @@ export const App: React.FC = () => {
   // 6. Streaming & generation state
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const abortControllerRef = useRef<boolean>(false);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   // Persistence effects
   useEffect(() => {
@@ -195,7 +202,7 @@ export const App: React.FC = () => {
     setActiveId(freshId);
   };
 
-  // Handler: Send Message
+  // Handler: Send Message with Real OpenRouter Streaming
   const handleSendMessage = async (userText: string) => {
     if (!userText.trim() || isLoading) return;
 
@@ -251,49 +258,65 @@ export const App: React.FC = () => {
     }));
 
     setIsLoading(true);
-    abortControllerRef.current = false;
+    const abortCtrl = new AbortController();
+    abortControllerRef.current = abortCtrl;
     setTimeout(() => scrollToBottom(), 50);
 
     const startTime = performance.now();
+    let tokenTickCount = 0;
 
-    // Generate response
-    const generated = generateNiximaResponse({
-      prompt: userText,
-      model: currentModel,
-      deepThink: settings.deepThinkEnabled,
-      history: currentConv.messages.map(m => ({ role: m.role, content: m.content }))
-    });
+    try {
+      const historyForApi = [
+        ...currentConv.messages.map(m => ({ role: m.role, content: m.content })),
+        { role: 'user', content: userText }
+      ];
 
-    const fullContent = generated.response;
-    const fullThinking = generated.thinking;
-    let streamIndex = 0;
+      const { fullContent, fullThinking } = await streamOpenRouterChat({
+        apiKey: settings.openRouterApiKey || getActiveOpenRouterKey(),
+        model: currentModel,
+        messages: historyForApi,
+        systemPrompt: settings.systemPrompt,
+        temperature: settings.temperature,
+        topP: settings.topP,
+        maxTokens: settings.maxTokens,
+        callbacks: {
+          onToken: (contentChunk) => {
+            tokenTickCount++;
+            if (settings.soundEnabled && tokenTickCount % 3 === 0) {
+              playTypingTick();
+            }
+            setConversations(prev => prev.map(c => {
+              if (c.id === targetConvId) {
+                return {
+                  ...c,
+                  messages: c.messages.map(m => m.id === aiMessageId ? { ...m, content: contentChunk } : m)
+                };
+              }
+              return c;
+            }));
+            scrollToBottom();
+          },
+          onThinking: (thinkingChunk) => {
+            setConversations(prev => prev.map(c => {
+              if (c.id === targetConvId) {
+                return {
+                  ...c,
+                  messages: c.messages.map(m => m.id === aiMessageId ? { ...m, thinking: thinkingChunk } : m)
+                };
+              }
+              return c;
+            }));
+          }
+        },
+        signal: abortCtrl.signal,
+      });
 
-    // Determine speed configuration
-    const speedConfig = {
-      cinematic: { interval: 35, step: 2 },
-      fast: { interval: 15, step: 4 },
-      instant: { interval: 0, step: 99999 },
-    }[settings.streamSpeed || 'fast'];
-
-    // Set thinking trace first
-    setConversations(prev => prev.map(c => {
-      if (c.id === targetConvId) {
-        return {
-          ...c,
-          messages: c.messages.map(m => m.id === aiMessageId ? { ...m, thinking: fullThinking } : m)
-        };
-      }
-      return c;
-    }));
-
-    if (speedConfig.interval === 0) {
-      // Instant generation
       const durationMs = Math.round(performance.now() - startTime);
       const estTokens = Math.round(fullContent.length / 4);
       const telemetry: MessageTelemetry = {
         tokens: estTokens,
         durationMs,
-        tokensPerSec: Math.round((estTokens / (durationMs || 1)) * 1000),
+        tokensPerSec: Math.round((estTokens / (durationMs / 1000 || 1))),
         model: currentModel.name,
       };
 
@@ -303,23 +326,21 @@ export const App: React.FC = () => {
             ...c,
             messages: c.messages.map(m => m.id === aiMessageId ? { 
               ...m, 
-              content: fullContent, 
+              content: fullContent,
+              thinking: fullThinking || undefined,
               isStreaming: false,
-              telemetry
+              telemetry 
             } : m)
           };
         }
         return c;
       }));
-      setIsLoading(false);
-      if (settings.soundEnabled) playCompletionChime();
-      return;
-    }
 
-    const streamInterval = setInterval(() => {
-      if (abortControllerRef.current) {
-        clearInterval(streamInterval);
-        setIsLoading(false);
+      if (settings.soundEnabled) {
+        playCompletionChime();
+      }
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
         setConversations(prev => prev.map(c => {
           if (c.id === targetConvId) {
             return {
@@ -329,65 +350,33 @@ export const App: React.FC = () => {
           }
           return c;
         }));
-        return;
-      }
-
-      streamIndex += speedConfig.step;
-      const currentChunk = fullContent.slice(0, streamIndex);
-
-      // Play audio mechanical tick if sound is enabled
-      if (settings.soundEnabled && streamIndex % 8 === 0) {
-        playTypingTick();
-      }
-
-      setConversations(prev => prev.map(c => {
-        if (c.id === targetConvId) {
-          return {
-            ...c,
-            messages: c.messages.map(m => m.id === aiMessageId ? { ...m, content: currentChunk } : m)
-          };
-        }
-        return c;
-      }));
-
-      scrollToBottom();
-
-      if (streamIndex >= fullContent.length) {
-        clearInterval(streamInterval);
-        setIsLoading(false);
-        const durationMs = Math.round(performance.now() - startTime);
-        const estTokens = Math.round(fullContent.length / 4);
-        const telemetry: MessageTelemetry = {
-          tokens: estTokens,
-          durationMs,
-          tokensPerSec: Math.round((estTokens / (durationMs || 1)) * 1000),
-          model: currentModel.name,
-        };
-
+      } else {
+        console.error('OpenRouter streaming error:', err);
         setConversations(prev => prev.map(c => {
           if (c.id === targetConvId) {
             return {
               ...c,
-              messages: c.messages.map(m => m.id === aiMessageId ? { 
-                ...m, 
-                content: fullContent, 
+              messages: c.messages.map(m => m.id === aiMessageId ? {
+                ...m,
+                content: `Error connecting to ${currentModel.name} cluster: ${err.message || 'Check connection'}.`,
                 isStreaming: false,
-                telemetry 
               } : m)
             };
           }
           return c;
         }));
-
-        if (settings.soundEnabled) {
-          playCompletionChime();
-        }
       }
-    }, speedConfig.interval);
+    } finally {
+      setIsLoading(false);
+      abortControllerRef.current = null;
+    }
   };
 
   const handleStopGeneration = () => {
-    abortControllerRef.current = true;
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+    }
     setIsLoading(false);
   };
 
@@ -401,11 +390,9 @@ export const App: React.FC = () => {
 
   const handleEditUserMessage = (msgId: string, newContent: string) => {
     if (!activeConversation) return;
-    // Find index of message
     const msgIdx = activeConversation.messages.findIndex(m => m.id === msgId);
     if (msgIdx === -1) return;
 
-    // Truncate subsequent messages and re-send
     const truncated = activeConversation.messages.slice(0, msgIdx);
     setConversations(prev => prev.map(c => 
       c.id === activeConversation.id ? { ...c, messages: truncated } : c

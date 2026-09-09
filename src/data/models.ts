@@ -6,45 +6,65 @@ export const NIXIMA_MODELS: ModelOption[] = [
     name: 'Nixima-0.1',
     shortName: '0.1 Default',
     badge: 'FLAGSHIP',
-    description: 'Nixima AI core frontier model. Balanced for deep reasoning, mathematical deduction, complex coding, and nuanced conversation.',
-    contextWindow: '2,048,000 tokens',
-    latency: '~45 ms / token',
+    description: 'Frontier reasoning and general synthetic intelligence, dynamically routed to top-tier free intelligence clusters.',
+    contextWindow: '200,000 tokens',
+    latency: '~35 ms / token',
     strengths: ['General Intelligence', 'High-Order Logic', 'Multi-turn Memory', 'Agentic Workflows'],
-    parameters: '480B Mixture-of-Experts',
+    parameters: 'Auto-Routing Ensemble',
     isFlagship: true,
+    openRouterModel: 'openrouter/free',
+    fallbackModels: [
+      'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+      'nvidia/nemotron-3.5-lightning:free'
+    ]
   },
   {
     id: 'nixima-0.1-reasoning',
     name: 'Nixima-0.1 Reasoning',
     shortName: '0.1 Reason',
     badge: 'CHAIN-OF-THOUGHT',
-    description: 'Reinforcement learning enhanced for autonomous step-by-step verification, formal proofs, and rigorous analysis.',
-    contextWindow: '1,000,000 tokens',
-    latency: '~65 ms / token',
-    strengths: ['Math & Physics', 'Algorithmic Puzzles', 'Deep Deduction', 'Code Auditing'],
-    parameters: '480B MoE (Think Enabled)',
+    description: 'Extended step-by-step chain-of-thought problem solver, powered by NVIDIA Nemotron Nano Omni Reasoning.',
+    contextWindow: '256,000 tokens',
+    latency: '~45 ms / token',
+    strengths: ['Math & Physics', 'Formal Logic', 'Deep Deduction', 'Verification'],
+    parameters: '30B Omni Reasoning',
+    openRouterModel: 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+    fallbackModels: [
+      'openrouter/free',
+      'nvidia/nemotron-3.5-lightning:free'
+    ]
   },
   {
     id: 'nixima-0.1-coder',
     name: 'Nixima-0.1 Coder',
     shortName: '0.1 Coder',
     badge: 'DEV',
-    description: 'Fine-tuned on trillions of syntax trees, full-stack architectures, and zero-defect systems programming.',
-    contextWindow: '1,000,000 tokens',
-    latency: '~38 ms / token',
+    description: 'Specialized code generation, debugging, and systems engineering powered by Cohere North Mini Code.',
+    contextWindow: '256,000 tokens',
+    latency: '~30 ms / token',
     strengths: ['Full-stack App Gen', 'Refactoring', 'Bug Hunting', 'CLI & DevOps'],
-    parameters: '128B Dense',
+    parameters: 'Specialized Code Engine',
+    openRouterModel: 'cohere/north-mini-code:free',
+    fallbackModels: [
+      'openrouter/free',
+      'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free'
+    ]
   },
   {
     id: 'nixima-0.1-flash',
     name: 'Nixima-0.1 Flash',
     shortName: '0.1 Flash',
     badge: 'FAST',
-    description: 'Sub-millisecond latency for instant chat, high-throughput parsing, and rapid summaries.',
-    contextWindow: '512,000 tokens',
-    latency: '~12 ms / token',
+    description: 'Sub-millisecond latency for ultra-fast conversation and document parsing, powered by NVIDIA Nemotron Lightning.',
+    contextWindow: '1,000,000 tokens',
+    latency: '~15 ms / token',
     strengths: ['Instant Responses', 'Document Scanning', 'Rapid Brainstorming'],
-    parameters: '32B Dense',
+    parameters: 'Lightning High-Throughput',
+    openRouterModel: 'nvidia/nemotron-3.5-lightning:free',
+    fallbackModels: [
+      'openrouter/free',
+      'cohere/north-mini-code:free'
+    ]
   }
 ];
 

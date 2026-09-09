@@ -512,51 +512,83 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           )}
 
-          {/* TAB 5: MESH API */}
+          {/* TAB 5: OPENROUTER ENGINE */}
           {activeTab === 'api' && (
             <div className="space-y-5">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
-                  Local REST / OpenAI Compatible Endpoint
-                </label>
-                <div className="p-3 rounded-lg bg-zinc-900 border border-zinc-800 font-mono text-xs text-zinc-200 flex items-center justify-between">
-                  <span>http://localhost:6001/v1/chat/completions</span>
-                  <span className="px-1.5 py-0.5 rounded bg-emerald-950 border border-emerald-800 text-emerald-300 text-[10px]">
-                    ACTIVE
-                  </span>
+              <div className="p-3.5 rounded-xl bg-emerald-950/20 border border-emerald-800/40 space-y-1">
+                <div className="flex items-center gap-2 text-emerald-400 font-mono text-xs font-semibold">
+                  <Check className="w-4 h-4" />
+                  <span>Real AI Engine: OpenRouter Connected</span>
                 </div>
+                <p className="text-[11px] text-zinc-400">
+                  Nixima models are now routed to verified high-performance free AI models on OpenRouter with live streaming and fallback failover.
+                </p>
               </div>
 
+              {/* OpenRouter API Key Input */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
-                  Simulated Nixima API Key
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono flex items-center gap-1.5">
+                    <Key className="w-3.5 h-3.5 text-zinc-400" />
+                    OpenRouter API Secret Key
+                  </label>
+                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-900">
+                    Free Tier Active
+                  </span>
+                </div>
+
                 <div className="flex items-center gap-2">
                   <input
                     type="password"
-                    value={mockApiKey}
-                    readOnly
-                    className="flex-1 px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-300 text-xs font-mono focus:outline-none"
+                    value={settings.openRouterApiKey || ''}
+                    onChange={(e) => onUpdateSettings({ openRouterApiKey: e.target.value })}
+                    className="flex-1 px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-xs font-mono focus:outline-none focus:border-zinc-500"
+                    placeholder="sk-or-v1-..."
                   />
                   <button
                     type="button"
-                    onClick={copyApiKey}
+                    onClick={() => {
+                      navigator.clipboard.writeText(settings.openRouterApiKey);
+                      setApiKeyCopied(true);
+                      setTimeout(() => setApiKeyCopied(false), 2000);
+                    }}
                     className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-mono flex items-center gap-1.5 border border-zinc-700"
                   >
-                    {apiKeyCopied ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5" />}
-                    {apiKeyCopied ? 'Copied' : 'Copy'}
+                    {apiKeyCopied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{apiKeyCopied ? 'Copied' : 'Copy'}</span>
                   </button>
                 </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs text-zinc-400 space-y-2">
-                <div className="text-white font-semibold font-mono">Quick cURL Integration</div>
-                <pre className="p-3 bg-black rounded border border-zinc-800 text-[11px] font-mono text-zinc-300 overflow-x-auto">
-{`curl http://localhost:6001/v1/chat/completions \\
-  -H "Authorization: Bearer ${mockApiKey}" \\
-  -H "Content-Type: application/json" \\
-  -d '{"model": "nixima-0.1", "messages": [{"role": "user", "content": "Hello Nixima!"}]}'`}
-                </pre>
+              {/* Underlying Free Model Architecture Mapping */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
+                  Nixima Neural Routing Matrix
+                </label>
+                <div className="rounded-xl border border-zinc-800 overflow-hidden text-xs font-mono">
+                  <div className="grid grid-cols-2 p-2.5 bg-zinc-900/90 border-b border-zinc-800 text-zinc-400 text-[11px] font-semibold">
+                    <span>Nixima Model</span>
+                    <span>Active Free AI Engine</span>
+                  </div>
+                  <div className="divide-y divide-zinc-800/60 bg-zinc-950/50">
+                    <div className="grid grid-cols-2 p-2.5 items-center">
+                      <span className="text-white font-medium">Nixima-0.1 (Flagship)</span>
+                      <span className="text-zinc-400 text-[11px]">openrouter/free (Auto-Router)</span>
+                    </div>
+                    <div className="grid grid-cols-2 p-2.5 items-center">
+                      <span className="text-white font-medium">Nixima-0.1 Reasoning</span>
+                      <span className="text-zinc-400 text-[11px]">nvidia/nemotron-nano-reasoning</span>
+                    </div>
+                    <div className="grid grid-cols-2 p-2.5 items-center">
+                      <span className="text-white font-medium">Nixima-0.1 Coder</span>
+                      <span className="text-zinc-400 text-[11px]">cohere/north-mini-code</span>
+                    </div>
+                    <div className="grid grid-cols-2 p-2.5 items-center">
+                      <span className="text-white font-medium">Nixima-0.1 Flash</span>
+                      <span className="text-zinc-400 text-[11px]">nvidia/nemotron-3.5-lightning</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           )}

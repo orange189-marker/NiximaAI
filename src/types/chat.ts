@@ -9,6 +9,8 @@ export interface ModelOption {
   strengths: string[];
   parameters: string;
   isFlagship?: boolean;
+  openRouterModel?: string;
+  fallbackModels?: string[];
 }
 
 export interface MessageTelemetry {
@@ -42,6 +44,7 @@ export interface Conversation {
 
 export interface UserSettings {
   userName: string;
+  openRouterApiKey: string;
   temperature: number;
   topP: number;
   maxTokens: number;
