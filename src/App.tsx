@@ -6,25 +6,36 @@ import { ChatInput } from './components/ChatInput';
 import { EmptyChat } from './components/EmptyChat';
 import { SettingsModal } from './components/SettingsModal';
 import { CompanyModal } from './components/CompanyModal';
+import { AuthPortal } from './components/AuthPortal';
 import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry } from './types/chat';
+import { NiximaUser } from './types/user';
 import { NIXIMA_MODELS, DEFAULT_MODEL } from './data/models';
 import { INITIAL_CONVERSATIONS } from './data/initialChats';
 import { streamOpenRouterChat } from './utils/openrouter';
 import { playTypingTick, playCompletionChime } from './utils/sound';
+import { getActiveUser, logoutUser } from './utils/auth';
 
-const STORAGE_KEY_CONVS = 'nixima_conversations_v3';
-const STORAGE_KEY_SETTINGS = 'nixima_settings_v3';
-const STORAGE_KEY_MODEL = 'nixima_active_model_v3';
+const STORAGE_KEY_MODEL = 'nixima_active_model_v4';
 
 export const App: React.FC = () => {
-  // 1. Settings state
+  // 1. Authentication state
+  const [currentUser, setCurrentUser] = useState<NiximaUser | null>(() => getActiveUser());
+
+  // Helper key generators for user isolation
+  const getConvKey = (uid: string) => `nixima_user_${uid}_convs_v1`;
+  const getSettingsKey = (uid: string) => `nixima_user_${uid}_settings_v1`;
+
+  // 2. Settings state (isolated per user)
   const [settings, setSettings] = useState<UserSettings>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY_SETTINGS);
-    if (saved) {
-      try { return JSON.parse(saved); } catch (e) { /* ignore */ }
+    const active = getActiveUser();
+    if (active) {
+      const saved = localStorage.getItem(getSettingsKey(active.id));
+      if (saved) {
+        try { return JSON.parse(saved); } catch (e) { /* ignore */ }
+      }
     }
     return {
-      userName: 'Bogdan',
+      userName: active?.name || 'Bogdan',
       temperature: 0.7,
       topP: 0.95,
       maxTokens: 4096,
@@ -38,7 +49,7 @@ export const App: React.FC = () => {
     };
   });
 
-  // 2. Active Model (defaults to Nixima-0.1)
+  // 3. Active Model
   const [currentModel, setCurrentModel] = useState<ModelOption>(() => {
     const savedModelId = localStorage.getItem(STORAGE_KEY_MODEL);
     if (savedModelId) {
@@ -48,42 +59,112 @@ export const App: React.FC = () => {
     return DEFAULT_MODEL; // Nixima-0.1
   });
 
-  // 3. Conversations state
+  // 4. Conversations state (isolated per user)
   const [conversations, setConversations] = useState<Conversation[]>(() => {
-    const saved = localStorage.getItem(STORAGE_KEY_CONVS);
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      } catch (e) { /* ignore */ }
+    const active = getActiveUser();
+    if (active) {
+      const saved = localStorage.getItem(getConvKey(active.id));
+      if (saved) {
+        try {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) return parsed;
+        } catch (e) { /* ignore */ }
+      }
     }
     return INITIAL_CONVERSATIONS;
   });
 
-  // 4. Active conversation ID
+  // 5. Active conversation ID
   const [activeId, setActiveId] = useState<string>(() => {
     if (conversations.length > 0) return conversations[0].id;
     return 'new-chat';
   });
 
-  // 5. Sidebar and Modals
+  // 6. UI & Modals
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
 
-  // 6. Streaming & generation state
+  // 7. Streaming & generation state
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  // Persistence effects
+  // Load user data on authentication change
+  const handleAuthenticated = (user: NiximaUser) => {
+    setCurrentUser(user);
+
+    // Load user's conversations
+    const userConvRaw = localStorage.getItem(getConvKey(user.id));
+    if (userConvRaw) {
+      try {
+        const parsed = JSON.parse(userConvRaw);
+        setConversations(parsed);
+        if (parsed.length > 0) setActiveId(parsed[0].id);
+        else handleNewChat();
+      } catch (e) {
+        setConversations(INITIAL_CONVERSATIONS);
+        setActiveId(INITIAL_CONVERSATIONS[0].id);
+      }
+    } else {
+      // Seed welcome conversation for new user
+      const welcomeChat: Conversation = {
+        id: 'chat-welcome-' + Date.now(),
+        title: `Welcome to Nixima, ${user.name}`,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        modelId: 'nixima-0.1',
+        pinned: true,
+        messages: [
+          {
+            id: 'wm-1',
+            role: 'assistant',
+            content: `### Welcome to Nixima AI, **${user.name}**!
+
+Your Sovereign Nixima Identity has been provisioned:
+- **Nixima Email**: \`${user.email}\`
+- **Role**: \`${user.role}\`
+- **Inference Engine**: \`Nixima-0.1\` Active
+
+All conversations and model preferences in this workspace are private to your Nixima ID. Ask a question below or pick a research prompt to begin.`,
+            timestamp: Date.now(),
+            model: 'Nixima-0.1',
+          }
+        ]
+      };
+      setConversations([welcomeChat]);
+      setActiveId(welcomeChat.id);
+    }
+
+    // Load user's settings
+    const userSettingsRaw = localStorage.getItem(getSettingsKey(user.id));
+    if (userSettingsRaw) {
+      try {
+        setSettings(JSON.parse(userSettingsRaw));
+      } catch (e) { /* ignore */ }
+    } else {
+      setSettings(prev => ({ ...prev, userName: user.name }));
+    }
+  };
+
+  // Sign out handler
+  const handleLogout = () => {
+    logoutUser();
+    setCurrentUser(null);
+  };
+
+  // Persistence effects for active user
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY_CONVS, JSON.stringify(conversations));
-  }, [conversations]);
+    if (currentUser) {
+      localStorage.setItem(getConvKey(currentUser.id), JSON.stringify(conversations));
+    }
+  }, [conversations, currentUser]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(settings));
-  }, [settings]);
+    if (currentUser) {
+      localStorage.setItem(getSettingsKey(currentUser.id), JSON.stringify(settings));
+    }
+  }, [settings, currentUser]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY_MODEL, currentModel.id);
@@ -394,6 +475,11 @@ export const App: React.FC = () => {
 
   const isPureBlack = settings.themeContrast === 'pure-black';
 
+  // If no user session is active, render the Nixima Auth Portal
+  if (!currentUser) {
+    return <AuthPortal onAuthenticated={handleAuthenticated} />;
+  }
+
   return (
     <div className={`flex h-screen w-full text-[#f4f4f5] overflow-hidden font-sans transition-colors duration-300 ${isPureBlack ? 'bg-black' : 'bg-[#09090b]'}`}>
       {/* Left Sidebar */}
@@ -407,7 +493,8 @@ export const App: React.FC = () => {
         onRenameConversation={handleRenameConversation}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
-        userName={settings.userName}
+        currentUser={currentUser}
+        onLogout={handleLogout}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenCompanyInfo={() => setIsCompanyModalOpen(true)}
       />
@@ -471,6 +558,8 @@ export const App: React.FC = () => {
         onClearAllChats={handleClearAllChats}
         conversations={conversations}
         onImportConversations={handleImportConversations}
+        currentUser={currentUser}
+        onLogout={handleLogout}
       />
 
       {/* Company Overview Modal */}

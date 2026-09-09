@@ -12,9 +12,11 @@ import {
   PinOff,
   Edit2,
   Check,
-  Download
+  Download,
+  LogOut
 } from 'lucide-react';
 import { Conversation } from '../types/chat';
+import { NiximaUser } from '../types/user';
 
 interface SidebarProps {
   conversations: Conversation[];
@@ -26,7 +28,8 @@ interface SidebarProps {
   onRenameConversation: (id: string, newTitle: string) => void;
   isOpen: boolean;
   onClose: () => void;
-  userName: string;
+  currentUser: NiximaUser | null;
+  onLogout: () => void;
   onOpenSettings: () => void;
   onOpenCompanyInfo: () => void;
 }
@@ -41,7 +44,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onRenameConversation,
   isOpen,
   onClose,
-  userName,
+  currentUser,
+  onLogout,
   onOpenSettings,
   onOpenCompanyInfo,
 }) => {
@@ -308,22 +312,32 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="p-3 border-t border-[#27272a] bg-[#09090b]/60 space-y-2">
           <div 
             onClick={onOpenSettings}
-            className="flex items-center justify-between p-2 rounded-lg hover:bg-zinc-800/60 cursor-pointer transition-colors"
+            className="flex items-center justify-between p-2 rounded-lg hover:bg-zinc-800/60 cursor-pointer transition-colors group"
           >
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-xs font-medium text-white">
-                {userName.charAt(0).toUpperCase()}
+            <div className="flex items-center gap-2.5 min-w-0 flex-1">
+              <div className="w-7 h-7 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-xs font-bold text-white flex-shrink-0">
+                {(currentUser?.name || 'N').charAt(0).toUpperCase()}
               </div>
-              <div className="flex flex-col">
-                <span className="text-xs font-medium text-zinc-200 leading-tight">
-                  {userName}
+              <div className="flex flex-col min-w-0 flex-1">
+                <span className="text-xs font-medium text-zinc-200 leading-tight truncate">
+                  {currentUser?.name || 'Nixima Operator'}
                 </span>
-                <span className="text-[10px] text-zinc-400 font-mono">
-                  Nixima Pro Plan
+                <span className="text-[10px] text-zinc-500 font-mono truncate">
+                  {currentUser?.email || 'operator@nixima.ai'}
                 </span>
               </div>
             </div>
-            <ShieldCheck className="w-4 h-4 text-zinc-400" />
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onLogout();
+              }}
+              className="p-1 rounded text-zinc-500 hover:text-red-400 hover:bg-zinc-800 transition-colors"
+              title="Sign out / Switch account"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
           </div>
 
           <button

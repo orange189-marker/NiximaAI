@@ -20,6 +20,7 @@ import {
   Zap
 } from 'lucide-react';
 import { UserSettings, Conversation } from '../types/chat';
+import { NiximaUser } from '../types/user';
 import { playTypingTick } from '../utils/sound';
 
 interface SettingsModalProps {
@@ -30,6 +31,8 @@ interface SettingsModalProps {
   onClearAllChats: () => void;
   conversations: Conversation[];
   onImportConversations: (imported: Conversation[]) => void;
+  currentUser: NiximaUser | null;
+  onLogout: () => void;
 }
 
 type SettingsTab = 'general' | 'inference' | 'persona' | 'data' | 'api';
@@ -42,6 +45,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onClearAllChats,
   conversations,
   onImportConversations,
+  currentUser,
+  onLogout,
 }) => {
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
   const [apiKeyCopied, setApiKeyCopied] = useState(false);
@@ -191,10 +196,45 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* TAB 1: GENERAL */}
           {activeTab === 'general' && (
             <div className="space-y-5">
+              {/* Nixima Account Identity Card */}
+              {currentUser && (
+                <div className="p-4 rounded-xl bg-zinc-900/90 border border-zinc-700/80 shadow-inner-light space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-white text-black font-black flex items-center justify-center text-sm font-mono shadow-glow-subtle">
+                        {currentUser.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div className="text-sm font-bold text-white flex items-center gap-2">
+                          <span>{currentUser.name}</span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
+                            {currentUser.role}
+                          </span>
+                        </div>
+                        <div className="text-xs text-zinc-400 font-mono">
+                          {currentUser.email}
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        onClose();
+                        onLogout();
+                      }}
+                      className="px-3 py-1.5 rounded-lg border border-red-900/60 bg-red-950/30 hover:bg-red-900/50 text-red-300 text-xs font-mono transition-colors"
+                    >
+                      Sign Out
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Operator Name */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
-                  Operator Identifier
+                  Display Nickname
                 </label>
                 <input
                   type="text"
