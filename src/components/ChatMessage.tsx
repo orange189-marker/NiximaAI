@@ -15,6 +15,7 @@ import {
   Edit3 
 } from 'lucide-react';
 import { Message } from '../types/chat';
+import { MarkdownTable, TableBlockData } from './MarkdownTable';
 
 interface ChatMessageProps {
   message: Message;
@@ -49,7 +50,109 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     }
   };
 
-  // Helper function to render text with code blocks and basic markdown
+  // Helper to detect and extract Markdown tables from normal text
+  const parseTablesFromText = (textContent: string): Array<
+    | { type: 'text'; content: string }
+    | { type: 'table'; data: TableBlockData }
+  > => {
+    const lines = textContent.split('\n');
+    const blocks: Array<
+      | { type: 'text'; content: string }
+      | { type: 'table'; data: TableBlockData }
+    > = [];
+    let textBuffer: string[] = [];
+    let i = 0;
+
+    const isTableRow = (line: string) => {
+      const trimmed = line.trim();
+      return trimmed.includes('|') && trimmed.split('|').length >= 2;
+    };
+
+    const isTableSeparator = (line: string) => {
+      const trimmed = line.trim();
+      if (!trimmed.includes('-') || !trimmed.includes('|')) return false;
+      const inner = trimmed.replace(/^\|/, '').replace(/\|$/, '');
+      const parts = inner.split('|');
+      if (parts.length < 2) return false;
+      return parts.every(p => /^\s*:?-{2,}:?\s*$/.test(p));
+    };
+
+    while (i < lines.length) {
+      const currentLine = lines[i];
+      const nextLine = i + 1 < lines.length ? lines[i + 1] : null;
+
+      if (nextLine && isTableRow(currentLine) && isTableSeparator(nextLine)) {
+        // Table found: flush preceding text
+        if (textBuffer.length > 0) {
+          blocks.push({ type: 'text', content: textBuffer.join('\n') });
+          textBuffer = [];
+        }
+
+        const rawHeaders = currentLine
+          .trim()
+          .replace(/^\|/, '')
+          .replace(/\|$/, '')
+          .split('|')
+          .map(c => c.trim());
+
+        const rawSeparators = nextLine
+          .trim()
+          .replace(/^\|/, '')
+          .replace(/\|$/, '')
+          .split('|')
+          .map(c => c.trim());
+
+        const alignments: ('left' | 'center' | 'right')[] = rawSeparators.map(sep => {
+          const hasLeft = sep.startsWith(':');
+          const hasRight = sep.endsWith(':');
+          if (hasLeft && hasRight) return 'center';
+          if (hasRight) return 'right';
+          return 'left';
+        });
+
+        const rows: string[][] = [];
+        const tableLines = [currentLine, nextLine];
+        i += 2;
+
+        while (i < lines.length && isTableRow(lines[i])) {
+          tableLines.push(lines[i]);
+          const rowCells = lines[i]
+            .trim()
+            .replace(/^\|/, '')
+            .replace(/\|$/, '')
+            .split('|')
+            .map(c => c.trim());
+
+          while (rowCells.length < rawHeaders.length) {
+            rowCells.push('');
+          }
+          rows.push(rowCells.slice(0, Math.max(rawHeaders.length, rowCells.length)));
+          i++;
+        }
+
+        blocks.push({
+          type: 'table',
+          data: {
+            headers: rawHeaders,
+            alignments,
+            rows,
+            rawMarkdown: tableLines.join('\n'),
+          },
+        });
+      } else {
+        textBuffer.push(currentLine);
+        i++;
+      }
+    }
+
+    if (textBuffer.length > 0) {
+      blocks.push({ type: 'text', content: textBuffer.join('\n') });
+    }
+
+    return blocks;
+  };
+
+  // Helper function to render text with code blocks, tables, and basic markdown
   const renderFormattedContent = (content: string) => {
     const codeBlockRegex = /```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g;
     const parts = [];
@@ -65,7 +168,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
       parts.push({
         type: 'code',
         language: match[1] || 'plaintext',
-        code: match[2].trimEnd()
+        code: match[2].trimEnd(),
       });
 
       lastIndex = match.index + match[0].length;
@@ -91,11 +194,26 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         );
       }
 
-      return (
-        <div key={idx} className="space-y-2.5 text-[14px] leading-relaxed text-zinc-200">
-          {renderTextWithMarkdown(part.content)}
-        </div>
-      );
+      const textBlocks = parseTablesFromText(part.content);
+
+      return textBlocks.map((block, bIdx) => {
+        if (block.type === 'table') {
+          return (
+            <MarkdownTable
+              key={`${idx}-${bIdx}`}
+              data={block.data}
+            />
+          );
+        }
+
+        if (!block.content.trim()) return null;
+
+        return (
+          <div key={`${idx}-${bIdx}`} className="space-y-2.5 text-[14px] leading-relaxed text-zinc-200">
+            {renderTextWithMarkdown(block.content)}
+          </div>
+        );
+      });
     });
   };
 

@@ -52,7 +52,7 @@ export async function streamOpenRouterChat({
   if (systemPrompt && systemPrompt.trim()) {
     formattedMessages.push({
       role: 'system',
-      content: `${systemPrompt.trim()}\n\nIdentity: You are Nixima AI, operating on ${model.name}. Deliver accurate, direct, and high-quality responses.`
+      content: `${systemPrompt.trim()}\n\nIdentity: You are Nixima AI, operating on ${model.name}. Deliver accurate, direct, and high-quality responses. When presenting comparisons, rankings, structured metrics, or tabular datasets, format them as standard Markdown tables (| Col 1 | Col 2 |\\n|---|---|) so they render as rich interactive data tables.`
     });
   }
 
