@@ -6,14 +6,15 @@ import { ChatInput } from './components/ChatInput';
 import { EmptyChat } from './components/EmptyChat';
 import { SettingsModal } from './components/SettingsModal';
 import { CompanyModal } from './components/CompanyModal';
-import { Conversation, Message, ModelOption, UserSettings } from './types/chat';
+import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry } from './types/chat';
 import { NIXIMA_MODELS, DEFAULT_MODEL } from './data/models';
 import { INITIAL_CONVERSATIONS } from './data/initialChats';
 import { generateNiximaResponse } from './utils/aiResponse';
+import { playTypingTick, playCompletionChime } from './utils/sound';
 
-const STORAGE_KEY_CONVS = 'nixima_conversations_v1';
-const STORAGE_KEY_SETTINGS = 'nixima_settings_v1';
-const STORAGE_KEY_MODEL = 'nixima_active_model_v1';
+const STORAGE_KEY_CONVS = 'nixima_conversations_v2';
+const STORAGE_KEY_SETTINGS = 'nixima_settings_v2';
+const STORAGE_KEY_MODEL = 'nixima_active_model_v2';
 
 export const App: React.FC = () => {
   // 1. Settings state
@@ -25,10 +26,15 @@ export const App: React.FC = () => {
     return {
       userName: 'Bogdan',
       temperature: 0.7,
+      topP: 0.95,
+      maxTokens: 4096,
       systemPrompt: 'You are Nixima AI, a cutting-edge synthetic intelligence built on Nixima-0.1.',
+      personaTone: 'architect',
       deepThinkEnabled: false,
       webSearchEnabled: false,
-      streamResponse: true,
+      soundEnabled: true,
+      streamSpeed: 'fast',
+      themeContrast: 'titanium',
     };
   });
 
@@ -101,7 +107,7 @@ export const App: React.FC = () => {
 
   const activeConversation = conversations.find(c => c.id === activeId);
 
-  // Scroll to bottom when messages update
+  // Scroll to bottom
   const scrollToBottom = (smooth = true) => {
     messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' });
   };
@@ -120,6 +126,7 @@ export const App: React.FC = () => {
       createdAt: Date.now(),
       updatedAt: Date.now(),
       modelId: currentModel.id,
+      pinned: false,
     };
     setConversations(prev => [newConv, ...prev]);
     setActiveId(newId);
@@ -138,6 +145,7 @@ export const App: React.FC = () => {
           createdAt: Date.now(),
           updatedAt: Date.now(),
           modelId: currentModel.id,
+          pinned: false,
         };
         setActiveId(freshId);
         return [freshConv];
@@ -147,6 +155,28 @@ export const App: React.FC = () => {
       }
       return remaining;
     });
+  };
+
+  // Handler: Toggle Pin
+  const handleTogglePinConversation = (id: string) => {
+    setConversations(prev => prev.map(c => 
+      c.id === id ? { ...c, pinned: !c.pinned } : c
+    ));
+  };
+
+  // Handler: Rename
+  const handleRenameConversation = (id: string, newTitle: string) => {
+    setConversations(prev => prev.map(c => 
+      c.id === id ? { ...c, title: newTitle, updatedAt: Date.now() } : c
+    ));
+  };
+
+  // Handler: Import
+  const handleImportConversations = (imported: Conversation[]) => {
+    if (imported.length > 0) {
+      setConversations(imported);
+      setActiveId(imported[0].id);
+    }
   };
 
   // Handler: Clear All
@@ -159,6 +189,7 @@ export const App: React.FC = () => {
       createdAt: Date.now(),
       updatedAt: Date.now(),
       modelId: currentModel.id,
+      pinned: false,
     };
     setConversations([freshConv]);
     setActiveId(freshId);
@@ -171,7 +202,6 @@ export const App: React.FC = () => {
     let targetConvId = activeId;
     let currentConv = conversations.find(c => c.id === targetConvId);
 
-    // If conversation doesn't exist yet, create it
     if (!currentConv) {
       targetConvId = 'chat-' + Date.now();
       currentConv = {
@@ -181,6 +211,7 @@ export const App: React.FC = () => {
         createdAt: Date.now(),
         updatedAt: Date.now(),
         modelId: currentModel.id,
+        pinned: false,
       };
       setConversations(prev => [currentConv!, ...prev]);
       setActiveId(targetConvId);
@@ -193,11 +224,9 @@ export const App: React.FC = () => {
       timestamp: Date.now(),
     };
 
-    // Auto title if first message
     const isFirstMessage = currentConv.messages.length === 0;
     const newTitle = isFirstMessage ? (userText.length > 28 ? userText.slice(0, 28) + '...' : userText) : currentConv.title;
 
-    // AI message placeholder
     const aiMessageId = 'ai-' + Date.now();
     const aiMessagePlaceholder: Message = {
       id: aiMessageId,
@@ -209,7 +238,6 @@ export const App: React.FC = () => {
       isStreaming: true,
     };
 
-    // Update state with user message and placeholder
     setConversations(prev => prev.map(c => {
       if (c.id === targetConvId) {
         return {
@@ -226,6 +254,8 @@ export const App: React.FC = () => {
     abortControllerRef.current = false;
     setTimeout(() => scrollToBottom(), 50);
 
+    const startTime = performance.now();
+
     // Generate response
     const generated = generateNiximaResponse({
       prompt: userText,
@@ -234,13 +264,18 @@ export const App: React.FC = () => {
       history: currentConv.messages.map(m => ({ role: m.role, content: m.content }))
     });
 
-    // Simulate streaming
     const fullContent = generated.response;
     const fullThinking = generated.thinking;
     let streamIndex = 0;
-    const chunkSize = 3;
 
-    // First assign thinking trace
+    // Determine speed configuration
+    const speedConfig = {
+      cinematic: { interval: 35, step: 2 },
+      fast: { interval: 15, step: 4 },
+      instant: { interval: 0, step: 99999 },
+    }[settings.streamSpeed || 'fast'];
+
+    // Set thinking trace first
     setConversations(prev => prev.map(c => {
       if (c.id === targetConvId) {
         return {
@@ -250,6 +285,36 @@ export const App: React.FC = () => {
       }
       return c;
     }));
+
+    if (speedConfig.interval === 0) {
+      // Instant generation
+      const durationMs = Math.round(performance.now() - startTime);
+      const estTokens = Math.round(fullContent.length / 4);
+      const telemetry: MessageTelemetry = {
+        tokens: estTokens,
+        durationMs,
+        tokensPerSec: Math.round((estTokens / (durationMs || 1)) * 1000),
+        model: currentModel.name,
+      };
+
+      setConversations(prev => prev.map(c => {
+        if (c.id === targetConvId) {
+          return {
+            ...c,
+            messages: c.messages.map(m => m.id === aiMessageId ? { 
+              ...m, 
+              content: fullContent, 
+              isStreaming: false,
+              telemetry
+            } : m)
+          };
+        }
+        return c;
+      }));
+      setIsLoading(false);
+      if (settings.soundEnabled) playCompletionChime();
+      return;
+    }
 
     const streamInterval = setInterval(() => {
       if (abortControllerRef.current) {
@@ -267,8 +332,13 @@ export const App: React.FC = () => {
         return;
       }
 
-      streamIndex += chunkSize;
+      streamIndex += speedConfig.step;
       const currentChunk = fullContent.slice(0, streamIndex);
+
+      // Play audio mechanical tick if sound is enabled
+      if (settings.soundEnabled && streamIndex % 8 === 0) {
+        playTypingTick();
+      }
 
       setConversations(prev => prev.map(c => {
         if (c.id === targetConvId) {
@@ -285,17 +355,35 @@ export const App: React.FC = () => {
       if (streamIndex >= fullContent.length) {
         clearInterval(streamInterval);
         setIsLoading(false);
+        const durationMs = Math.round(performance.now() - startTime);
+        const estTokens = Math.round(fullContent.length / 4);
+        const telemetry: MessageTelemetry = {
+          tokens: estTokens,
+          durationMs,
+          tokensPerSec: Math.round((estTokens / (durationMs || 1)) * 1000),
+          model: currentModel.name,
+        };
+
         setConversations(prev => prev.map(c => {
           if (c.id === targetConvId) {
             return {
               ...c,
-              messages: c.messages.map(m => m.id === aiMessageId ? { ...m, content: fullContent, isStreaming: false } : m)
+              messages: c.messages.map(m => m.id === aiMessageId ? { 
+                ...m, 
+                content: fullContent, 
+                isStreaming: false,
+                telemetry 
+              } : m)
             };
           }
           return c;
         }));
+
+        if (settings.soundEnabled) {
+          playCompletionChime();
+        }
       }
-    }, 20);
+    }, speedConfig.interval);
   };
 
   const handleStopGeneration = () => {
@@ -311,8 +399,24 @@ export const App: React.FC = () => {
     }
   };
 
+  const handleEditUserMessage = (msgId: string, newContent: string) => {
+    if (!activeConversation) return;
+    // Find index of message
+    const msgIdx = activeConversation.messages.findIndex(m => m.id === msgId);
+    if (msgIdx === -1) return;
+
+    // Truncate subsequent messages and re-send
+    const truncated = activeConversation.messages.slice(0, msgIdx);
+    setConversations(prev => prev.map(c => 
+      c.id === activeConversation.id ? { ...c, messages: truncated } : c
+    ));
+    handleSendMessage(newContent);
+  };
+
+  const isPureBlack = settings.themeContrast === 'pure-black';
+
   return (
-    <div className="flex h-screen w-full bg-[#09090b] text-[#f4f4f5] overflow-hidden font-sans">
+    <div className={`flex h-screen w-full text-[#f4f4f5] overflow-hidden font-sans transition-colors duration-300 ${isPureBlack ? 'bg-black' : 'bg-[#09090b]'}`}>
       {/* Left Sidebar */}
       <Sidebar
         conversations={conversations}
@@ -320,6 +424,8 @@ export const App: React.FC = () => {
         onSelectConversation={setActiveId}
         onNewChat={handleNewChat}
         onDeleteConversation={handleDeleteConversation}
+        onTogglePinConversation={handleTogglePinConversation}
+        onRenameConversation={handleRenameConversation}
         isOpen={isSidebarOpen}
         onClose={() => setIsSidebarOpen(false)}
         userName={settings.userName}
@@ -328,7 +434,7 @@ export const App: React.FC = () => {
       />
 
       {/* Main Chat Canvas */}
-      <div className="flex-1 flex flex-col h-full min-w-0 bg-[#09090b] relative">
+      <div className={`flex-1 flex flex-col h-full min-w-0 relative ${isPureBlack ? 'bg-black' : 'bg-[#09090b]'}`}>
         {/* Header with Model Selector */}
         <Header
           currentModel={currentModel}
@@ -353,6 +459,7 @@ export const App: React.FC = () => {
                   key={msg.id}
                   message={msg}
                   onRegenerate={msg.role === 'assistant' ? handleRegenerate : undefined}
+                  onEditMessage={msg.role === 'user' ? (newContent) => handleEditUserMessage(msg.id, newContent) : undefined}
                   activeModelName={currentModel.name}
                 />
               ))}
@@ -371,16 +478,20 @@ export const App: React.FC = () => {
           onToggleDeepThink={() => setSettings(s => ({ ...s, deepThinkEnabled: !s.deepThinkEnabled }))}
           webSearch={settings.webSearchEnabled}
           onToggleWebSearch={() => setSettings(s => ({ ...s, webSearchEnabled: !s.webSearchEnabled }))}
+          soundEnabled={settings.soundEnabled}
+          onToggleSound={() => setSettings(s => ({ ...s, soundEnabled: !s.soundEnabled }))}
         />
       </div>
 
-      {/* Settings Modal */}
+      {/* Expanded Settings Modal */}
       <SettingsModal
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         settings={settings}
         onUpdateSettings={(updated) => setSettings(s => ({ ...s, ...updated }))}
         onClearAllChats={handleClearAllChats}
+        conversations={conversations}
+        onImportConversations={handleImportConversations}
       />
 
       {/* Company Overview Modal */}

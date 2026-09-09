@@ -1,6 +1,26 @@
-import React from 'react';
-import { X, Sliders, Server, User, Sparkles, Trash2, Check } from 'lucide-react';
-import { UserSettings } from '../types/chat';
+import React, { useState, useRef } from 'react';
+import { 
+  X, 
+  Sliders, 
+  Server, 
+  User, 
+  Sparkles, 
+  Trash2, 
+  Volume2, 
+  VolumeX, 
+  Download, 
+  Upload, 
+  Key, 
+  Check, 
+  Copy, 
+  Cpu, 
+  Flame, 
+  FileText,
+  ShieldAlert,
+  Zap
+} from 'lucide-react';
+import { UserSettings, Conversation } from '../types/chat';
+import { playTypingTick } from '../utils/sound';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -8,7 +28,11 @@ interface SettingsModalProps {
   settings: UserSettings;
   onUpdateSettings: (newSettings: Partial<UserSettings>) => void;
   onClearAllChats: () => void;
+  conversations: Conversation[];
+  onImportConversations: (imported: Conversation[]) => void;
 }
+
+type SettingsTab = 'general' | 'inference' | 'persona' | 'data' | 'api';
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
@@ -16,18 +40,93 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   settings,
   onUpdateSettings,
   onClearAllChats,
+  conversations,
+  onImportConversations,
 }) => {
+  const [activeTab, setActiveTab] = useState<SettingsTab>('general');
+  const [apiKeyCopied, setApiKeyCopied] = useState(false);
+  const [importStatus, setImportStatus] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   if (!isOpen) return null;
 
+  const mockApiKey = 'nxm-frontier-99a4e21b88e1467df83c921';
+
+  const copyApiKey = () => {
+    navigator.clipboard.writeText(mockApiKey);
+    setApiKeyCopied(true);
+    setTimeout(() => setApiKeyCopied(false), 2000);
+  };
+
+  // Export all conversations to JSON
+  const handleExportJSON = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(conversations, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", dataStr);
+    downloadAnchor.setAttribute("download", `nixima_ai_backup_${new Date().toISOString().slice(0, 10)}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  };
+
+  // Import conversations from JSON
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const json = JSON.parse(event.target?.result as string);
+        if (Array.isArray(json)) {
+          onImportConversations(json);
+          setImportStatus(`Successfully imported ${json.length} conversations!`);
+          setTimeout(() => setImportStatus(null), 3500);
+        } else {
+          setImportStatus('Error: Invalid JSON format.');
+        }
+      } catch (err) {
+        setImportStatus('Error: Could not parse JSON file.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const tones = [
+    {
+      id: 'architect',
+      name: 'Frontier Architect',
+      desc: 'Rigorous, highly technical, precise systems design.'
+    },
+    {
+      id: 'cyberpunk',
+      name: 'Cyberpunk Hacker',
+      desc: 'Direct, sharp, minimal fluff, maximum execution speed.'
+    },
+    {
+      id: 'academic',
+      name: 'Academic Researcher',
+      desc: 'Theoretical rigor, mathematical deduction, citations.'
+    },
+    {
+      id: 'executive',
+      name: 'Executive Strategist',
+      desc: 'High-level synthesis, product vision, commercial impact.'
+    }
+  ];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in">
-      <div className="w-full max-w-lg rounded-2xl bg-[#121215] border border-zinc-700/80 shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+      <div className="w-full max-w-2xl rounded-2xl bg-[#121216] border border-zinc-700/80 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
         {/* Header */}
         <div className="px-6 py-4 border-b border-zinc-800 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Sliders className="w-4 h-4 text-white" />
+          <div className="flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded bg-white text-black font-black text-xs flex items-center justify-center font-mono">
+              N
+            </div>
             <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono">
-              Nixima AI Preferences
+              Nixima AI Control Panel
             </h2>
           </div>
           <button
@@ -38,98 +137,441 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </button>
         </div>
 
-        {/* Content */}
-        <div className="p-6 space-y-5 text-sm">
-          {/* User Name */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-zinc-400" />
-              Operator Name
-            </label>
-            <input
-              type="text"
-              value={settings.userName}
-              onChange={(e) => onUpdateSettings({ userName: e.target.value })}
-              className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-xs focus:outline-none focus:border-zinc-500"
-            />
-          </div>
+        {/* Tab Navigation */}
+        <div className="flex items-center border-b border-zinc-800 bg-[#0e0e11] px-4 overflow-x-auto text-xs font-mono">
+          <button
+            onClick={() => setActiveTab('general')}
+            className={`px-3.5 py-2.5 border-b-2 font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+              activeTab === 'general' ? 'border-white text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <User className="w-3.5 h-3.5" />
+            General
+          </button>
+          <button
+            onClick={() => setActiveTab('inference')}
+            className={`px-3.5 py-2.5 border-b-2 font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+              activeTab === 'inference' ? 'border-white text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <Cpu className="w-3.5 h-3.5" />
+            Inference
+          </button>
+          <button
+            onClick={() => setActiveTab('persona')}
+            className={`px-3.5 py-2.5 border-b-2 font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+              activeTab === 'persona' ? 'border-white text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            Persona
+          </button>
+          <button
+            onClick={() => setActiveTab('data')}
+            className={`px-3.5 py-2.5 border-b-2 font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+              activeTab === 'data' ? 'border-white text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <Download className="w-3.5 h-3.5" />
+            Data & Backup
+          </button>
+          <button
+            onClick={() => setActiveTab('api')}
+            className={`px-3.5 py-2.5 border-b-2 font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+              activeTab === 'api' ? 'border-white text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <Key className="w-3.5 h-3.5" />
+            Mesh API
+          </button>
+        </div>
 
-          {/* Temperature */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
-                Sampling Temperature
-              </label>
-              <span className="text-xs font-mono text-white bg-zinc-800 px-2 py-0.5 rounded">
-                {settings.temperature.toFixed(2)}
-              </span>
+        {/* Tab Body */}
+        <div className="p-6 overflow-y-auto space-y-5 text-sm flex-1">
+          {/* TAB 1: GENERAL */}
+          {activeTab === 'general' && (
+            <div className="space-y-5">
+              {/* Operator Name */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
+                  Operator Identifier
+                </label>
+                <input
+                  type="text"
+                  value={settings.userName}
+                  onChange={(e) => onUpdateSettings({ userName: e.target.value })}
+                  className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-xs focus:outline-none focus:border-zinc-500 font-mono"
+                  placeholder="e.g. Bogdan"
+                />
+              </div>
+
+              {/* Sound Synthesizer Keystrokes */}
+              <div className="p-3.5 rounded-xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-between">
+                <div className="space-y-0.5 pr-4">
+                  <div className="flex items-center gap-2">
+                    <Volume2 className="w-4 h-4 text-white" />
+                    <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                      Synthetic Typing Audio
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-400">
+                    Play real-time mechanical keystrokes generated via Web Audio API during token streaming.
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => playTypingTick()}
+                    className="px-2 py-1 text-[10px] font-mono text-zinc-400 hover:text-white bg-zinc-800 rounded border border-zinc-700"
+                    title="Test audio tick"
+                  >
+                    Test
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => onUpdateSettings({ soundEnabled: !settings.soundEnabled })}
+                    className={`w-11 h-6 rounded-full transition-colors relative flex items-center px-1 ${
+                      settings.soundEnabled ? 'bg-white' : 'bg-zinc-800'
+                    }`}
+                  >
+                    <div
+                      className={`w-4 h-4 rounded-full bg-black transition-transform ${
+                        settings.soundEnabled ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+
+              {/* Theme Contrast Mode */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
+                  Contrast Atmosphere
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => onUpdateSettings({ themeContrast: 'titanium' })}
+                    className={`p-3 rounded-xl border text-left transition-all ${
+                      settings.themeContrast === 'titanium'
+                        ? 'bg-zinc-800 border-white text-white shadow-glow-subtle'
+                        : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                    }`}
+                  >
+                    <div className="text-xs font-bold font-mono">Titanium Slate</div>
+                    <div className="text-[11px] text-zinc-400 mt-1">Deep zinc with frosted layers (#09090b)</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => onUpdateSettings({ themeContrast: 'pure-black' })}
+                    className={`p-3 rounded-xl border text-left transition-all ${
+                      settings.themeContrast === 'pure-black'
+                        ? 'bg-black border-white text-white shadow-glow-subtle'
+                        : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                    }`}
+                  >
+                    <div className="text-xs font-bold font-mono">Pitch OLED Black</div>
+                    <div className="text-[11px] text-zinc-400 mt-1">True zero-light black (#000000)</div>
+                  </button>
+                </div>
+              </div>
             </div>
-            <input
-              type="range"
-              min="0.0"
-              max="1.0"
-              step="0.05"
-              value={settings.temperature}
-              onChange={(e) => onUpdateSettings({ temperature: parseFloat(e.target.value) })}
-              className="w-full accent-white h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
-            />
-            <div className="flex justify-between text-[10px] font-mono text-zinc-500">
-              <span>Deterministic (0.0)</span>
-              <span>Balanced (0.7)</span>
-              <span>Creative (1.0)</span>
+          )}
+
+          {/* TAB 2: INFERENCE */}
+          {activeTab === 'inference' && (
+            <div className="space-y-5">
+              {/* Temperature Slider */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
+                    Sampling Temperature
+                  </label>
+                  <span className="text-xs font-mono text-white bg-zinc-800 px-2 py-0.5 rounded border border-zinc-700">
+                    {settings.temperature.toFixed(2)}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0.0"
+                  max="1.0"
+                  step="0.05"
+                  value={settings.temperature}
+                  onChange={(e) => onUpdateSettings({ temperature: parseFloat(e.target.value) })}
+                  className="w-full accent-white h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+                />
+                <div className="flex justify-between text-[10px] font-mono text-zinc-400">
+                  <span>Deterministic (0.0)</span>
+                  <span>Balanced (0.7)</span>
+                  <span>Creative (1.0)</span>
+                </div>
+              </div>
+
+              {/* Top-P Slider */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
+                    Top-P Nucleus Cutoff
+                  </label>
+                  <span className="text-xs font-mono text-white bg-zinc-800 px-2 py-0.5 rounded border border-zinc-700">
+                    {(settings.topP || 0.95).toFixed(2)}
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min="0.1"
+                  max="1.0"
+                  step="0.05"
+                  value={settings.topP || 0.95}
+                  onChange={(e) => onUpdateSettings({ topP: parseFloat(e.target.value) })}
+                  className="w-full accent-white h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+                />
+                <div className="flex justify-between text-[10px] font-mono text-zinc-400">
+                  <span>Focused (0.1)</span>
+                  <span>Standard (0.95)</span>
+                  <span>Broad (1.0)</span>
+                </div>
+              </div>
+
+              {/* Max Tokens */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
+                  Max Output Tokens
+                </label>
+                <div className="grid grid-cols-4 gap-2">
+                  {[1024, 2048, 4096, 8192].map((num) => (
+                    <button
+                      key={num}
+                      type="button"
+                      onClick={() => onUpdateSettings({ maxTokens: num })}
+                      className={`py-1.5 px-2 rounded-lg text-xs font-mono border transition-all ${
+                        settings.maxTokens === num
+                          ? 'bg-white text-black font-bold border-white'
+                          : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:border-zinc-700'
+                      }`}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Stream Speed */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
+                  Streaming Throughput Emulation
+                </label>
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { id: 'cinematic', label: 'Cinematic', desc: 'Slow typewriter' },
+                    { id: 'fast', label: 'Fast (Default)', desc: 'Frontier speed' },
+                    { id: 'instant', label: 'Instant', desc: 'Zero latency' },
+                  ].map((spd) => (
+                    <button
+                      key={spd.id}
+                      type="button"
+                      onClick={() => onUpdateSettings({ streamSpeed: spd.id as any })}
+                      className={`p-2 rounded-lg text-left border transition-all ${
+                        settings.streamSpeed === spd.id
+                          ? 'bg-white text-black font-semibold border-white'
+                          : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:border-zinc-700'
+                      }`}
+                    >
+                      <div className="text-xs font-mono">{spd.label}</div>
+                      <div className="text-[10px] opacity-75">{spd.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* System Prompt */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
-              System Persona Directive
-            </label>
-            <textarea
-              rows={3}
-              value={settings.systemPrompt}
-              onChange={(e) => onUpdateSettings({ systemPrompt: e.target.value })}
-              className="w-full px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-xs focus:outline-none focus:border-zinc-500 resize-none font-mono"
-              placeholder="Custom system instructions..."
-            />
-          </div>
+          {/* TAB 3: PERSONA & TONE */}
+          {activeTab === 'persona' && (
+            <div className="space-y-5">
+              {/* Tone Presets */}
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
+                  Frontier Persona Archetype
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {tones.map((t) => {
+                    const isSelected = settings.personaTone === t.id;
+                    return (
+                      <button
+                        key={t.id}
+                        type="button"
+                        onClick={() => onUpdateSettings({ personaTone: t.id as any })}
+                        className={`p-3 rounded-xl border text-left transition-all ${
+                          isSelected
+                            ? 'bg-zinc-800 border-white text-white shadow-glow-subtle'
+                            : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                        }`}
+                      >
+                        <div className="text-xs font-bold text-white flex items-center justify-between">
+                          <span>{t.name}</span>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
+                        </div>
+                        <p className="text-[11px] text-zinc-400 mt-1 leading-snug">{t.desc}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
 
-          {/* Server Info */}
-          <div className="p-3 rounded-lg bg-zinc-900/80 border border-zinc-800/90 flex items-center justify-between text-xs">
-            <div className="flex items-center gap-2 text-zinc-300">
-              <Server className="w-4 h-4 text-emerald-400" />
-              <span className="font-mono">Local Host Binding:</span>
+              {/* System Directive */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
+                  Custom System Instructions
+                </label>
+                <textarea
+                  rows={4}
+                  value={settings.systemPrompt}
+                  onChange={(e) => onUpdateSettings({ systemPrompt: e.target.value })}
+                  className="w-full px-3 py-2.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-xs focus:outline-none focus:border-zinc-500 resize-none font-mono leading-relaxed"
+                  placeholder="You are Nixima AI..."
+                />
+              </div>
             </div>
-            <span className="font-mono text-white font-bold bg-zinc-800 px-2 py-0.5 rounded">
-              http://localhost:6001
-            </span>
-          </div>
+          )}
 
-          {/* Clear conversations danger zone */}
-          <div className="pt-2 border-t border-zinc-800">
-            <button
-              onClick={() => {
-                if (confirm('Are you sure you want to clear all conversation history?')) {
-                  onClearAllChats();
-                  onClose();
-                }
-              }}
-              className="w-full py-2 px-3 rounded-lg border border-red-900/60 bg-red-950/20 hover:bg-red-950/40 text-red-400 hover:text-red-300 text-xs font-medium flex items-center justify-center gap-2 transition-colors"
-            >
-              <Trash2 className="w-3.5 h-3.5" />
-              Reset & Clear All Conversations
-            </button>
-          </div>
+          {/* TAB 4: DATA & BACKUP */}
+          {activeTab === 'data' && (
+            <div className="space-y-5">
+              {importStatus && (
+                <div className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-xs text-white font-mono flex items-center gap-2">
+                  <Check className="w-4 h-4 text-emerald-400" />
+                  {importStatus}
+                </div>
+              )}
+
+              <div className="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-3">
+                <div>
+                  <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                    Conversation Vault Backup
+                  </h3>
+                  <p className="text-xs text-zinc-400 mt-1">
+                    Export your full conversation sessions as a JSON file or restore from a backup.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2.5 pt-1">
+                  <button
+                    type="button"
+                    onClick={handleExportJSON}
+                    className="px-3.5 py-2 rounded-lg bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition-colors flex items-center gap-2"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    Export All Chats ({conversations.length})
+                  </button>
+
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept=".json"
+                    className="hidden"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="px-3.5 py-2 rounded-lg bg-zinc-800 text-zinc-200 hover:text-white font-medium text-xs hover:bg-zinc-700 transition-colors flex items-center gap-2 border border-zinc-700"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    Import From Backup
+                  </button>
+                </div>
+              </div>
+
+              {/* Danger Zone */}
+              <div className="p-4 rounded-xl border border-red-900/40 bg-red-950/10 space-y-2">
+                <div className="flex items-center gap-2 text-red-400">
+                  <ShieldAlert className="w-4 h-4" />
+                  <span className="text-xs font-bold uppercase tracking-wider font-mono">
+                    Danger Zone
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-400">
+                  Permanently erase all stored conversations and reset local preferences.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (confirm('Are you sure you want to permanently clear all conversation history?')) {
+                      onClearAllChats();
+                      onClose();
+                    }
+                  }}
+                  className="mt-2 py-2 px-3 rounded-lg border border-red-800/80 bg-red-950/40 hover:bg-red-900/60 text-red-300 text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Clear Entire Vault
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 5: MESH API */}
+          {activeTab === 'api' && (
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
+                  Local REST / OpenAI Compatible Endpoint
+                </label>
+                <div className="p-3 rounded-lg bg-zinc-900 border border-zinc-800 font-mono text-xs text-zinc-200 flex items-center justify-between">
+                  <span>http://localhost:6001/v1/chat/completions</span>
+                  <span className="px-1.5 py-0.5 rounded bg-emerald-950 border border-emerald-800 text-emerald-300 text-[10px]">
+                    ACTIVE
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
+                  Simulated Nixima API Key
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="password"
+                    value={mockApiKey}
+                    readOnly
+                    className="flex-1 px-3 py-2 bg-zinc-900 border border-zinc-800 rounded-lg text-zinc-300 text-xs font-mono focus:outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={copyApiKey}
+                    className="px-3 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-mono flex items-center gap-1.5 border border-zinc-700"
+                  >
+                    {apiKeyCopied ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5" />}
+                    {apiKeyCopied ? 'Copied' : 'Copy'}
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs text-zinc-400 space-y-2">
+                <div className="text-white font-semibold font-mono">Quick cURL Integration</div>
+                <pre className="p-3 bg-black rounded border border-zinc-800 text-[11px] font-mono text-zinc-300 overflow-x-auto">
+{`curl http://localhost:6001/v1/chat/completions \\
+  -H "Authorization: Bearer ${mockApiKey}" \\
+  -H "Content-Type: application/json" \\
+  -d '{"model": "nixima-0.1", "messages": [{"role": "user", "content": "Hello Nixima!"}]}'`}
+                </pre>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-3 border-t border-zinc-800 bg-zinc-900/40 flex justify-end">
+        <div className="px-6 py-3 border-t border-zinc-800 bg-[#0e0e11] flex items-center justify-between">
+          <span className="text-[11px] font-mono text-zinc-500">
+            Nixima AI v0.1 • :6001
+          </span>
           <button
             onClick={onClose}
             className="px-4 py-1.5 rounded-lg bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition-colors shadow-glow-subtle"
           >
-            Done
+            Save & Close
           </button>
         </div>
       </div>

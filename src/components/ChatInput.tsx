@@ -5,8 +5,12 @@ import {
   Globe, 
   Paperclip, 
   Square, 
-  Sparkles,
-  Zap
+  Volume2,
+  VolumeX,
+  Code2,
+  Zap,
+  Table,
+  CheckCircle2
 } from 'lucide-react';
 import { ModelOption } from '../types/chat';
 
@@ -19,6 +23,8 @@ interface ChatInputProps {
   onToggleDeepThink: () => void;
   webSearch: boolean;
   onToggleWebSearch: () => void;
+  soundEnabled: boolean;
+  onToggleSound: () => void;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -30,6 +36,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onToggleDeepThink,
   webSearch,
   onToggleWebSearch,
+  soundEnabled,
+  onToggleSound,
 }) => {
   const [input, setInput] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -52,15 +60,47 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaEvent>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }
   };
 
+  const applyModifier = (prefix: string) => {
+    setInput(prev => {
+      if (prev.startsWith(prefix)) return prev;
+      return `${prefix} ${prev}`.trim();
+    });
+    textareaRef.current?.focus();
+  };
+
+  const modifiers = [
+    { label: 'Concise', icon: <Zap className="w-3 h-3" />, prompt: '[Be concise and direct]' },
+    { label: 'Code Only', icon: <Code2 className="w-3 h-3" />, prompt: '[Provide production-ready code with minimal explanation]' },
+    { label: 'Deep Proof', icon: <BrainCircuit className="w-3 h-3" />, prompt: '[Formulate rigorous mathematical or logical derivation]' },
+    { label: 'Table', icon: <Table className="w-3 h-3" />, prompt: '[Format output into comparison markdown tables]' },
+  ];
+
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 pb-4 pt-2">
+    <div className="w-full max-w-3xl mx-auto px-4 pb-4 pt-1">
+      {/* Quick Modifier Pills */}
+      <div className="flex items-center gap-1.5 pb-2 overflow-x-auto text-[11px] font-mono select-none scrollbar-none">
+        <span className="text-zinc-400 pl-1 text-[10px] uppercase tracking-wider">Modifier:</span>
+        {modifiers.map((m, idx) => (
+          <button
+            key={idx}
+            type="button"
+            onClick={() => applyModifier(m.prompt)}
+            className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-zinc-900/90 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800/80 hover:border-zinc-700 transition-colors whitespace-nowrap"
+          >
+            {m.icon}
+            <span>{m.label}</span>
+          </button>
+        ))}
+      </div>
+
+      {/* Main Input Dock */}
       <div className="relative rounded-2xl bg-[#121216] border border-zinc-800 shadow-2xl transition-all focus-within:border-zinc-600 focus-within:shadow-glow-subtle">
         {/* Textarea */}
         <textarea
@@ -71,7 +111,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           placeholder={`Ask ${currentModel.name}... (Shift+Enter for newline)`}
           rows={1}
           disabled={isLoading}
-          className="w-full bg-transparent text-zinc-100 placeholder-zinc-500 text-sm px-4 pt-3.5 pb-2 resize-none focus:outline-none max-h-48 overflow-y-auto leading-relaxed"
+          className="w-full bg-transparent text-zinc-100 placeholder-zinc-500 text-sm px-4 pt-3.5 pb-2 resize-none focus:outline-none max-h-48 overflow-y-auto leading-relaxed font-sans"
         />
 
         {/* Toolbar footer */}
@@ -108,13 +148,27 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               <span>Search</span>
             </button>
 
+            {/* Audio Keystroke Sound Toggle */}
+            <button
+              type="button"
+              onClick={onToggleSound}
+              className={`p-1.5 rounded-full border transition-colors ${
+                soundEnabled
+                  ? 'bg-zinc-800 border-zinc-600 text-white'
+                  : 'bg-zinc-900 border-zinc-800 text-zinc-500 hover:text-zinc-300'
+              }`}
+              title={soundEnabled ? "Mute synthetic typing audio" : "Enable synthetic typing audio"}
+            >
+              {soundEnabled ? <Volume2 className="w-3.5 h-3.5" /> : <VolumeX className="w-3.5 h-3.5" />}
+            </button>
+
             {/* Attach button placeholder */}
             <button
               type="button"
               className="p-1.5 rounded-full text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60 transition-colors"
-              title="Attach code or context document"
+              title="Attach context document"
               onClick={() => {
-                setInput(prev => prev + '\n[Attached context: nixima_config.json]\n');
+                setInput(prev => prev + '\n[Attached context: nixima_dataset.json]\n');
               }}
             >
               <Paperclip className="w-3.5 h-3.5" />

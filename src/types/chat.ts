@@ -11,6 +11,13 @@ export interface ModelOption {
   isFlagship?: boolean;
 }
 
+export interface MessageTelemetry {
+  tokens: number;
+  durationMs: number;
+  tokensPerSec: number;
+  model: string;
+}
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -20,6 +27,7 @@ export interface Message {
   timestamp: number;
   model?: string;
   isStreaming?: boolean;
+  telemetry?: MessageTelemetry;
 }
 
 export interface Conversation {
@@ -35,8 +43,13 @@ export interface Conversation {
 export interface UserSettings {
   userName: string;
   temperature: number;
+  topP: number;
+  maxTokens: number;
   systemPrompt: string;
+  personaTone: 'architect' | 'cyberpunk' | 'academic' | 'executive';
   deepThinkEnabled: boolean;
   webSearchEnabled: boolean;
-  streamResponse: boolean;
+  soundEnabled: boolean;
+  streamSpeed: 'fast' | 'cinematic' | 'instant';
+  themeContrast: 'titanium' | 'pure-black';
 }
