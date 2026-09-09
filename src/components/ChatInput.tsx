@@ -141,7 +141,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           
           {/* Active Attached Files Chip Strip */}
           {attachedFiles.length > 0 && (
-            <div className="flex items-center gap-2 px-4 pt-3 pb-1 flex-wrap">
+            <div className="flex items-center gap-2 px-5 sm:px-6 pt-3.5 pb-1 flex-wrap">
               {attachedFiles.map((file, idx) => (
                 <span
                   key={idx}
@@ -168,10 +168,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={`Message ${currentModel.name}... (Shift+Enter for newline)`}
+            placeholder="Ask Nixima anything..."
             rows={1}
             disabled={isLoading}
-            className="w-full bg-transparent text-zinc-100 placeholder:text-zinc-500 text-sm sm:text-[14.5px] px-4.5 pt-3.5 pb-2 resize-none focus:outline-none max-h-48 overflow-y-auto leading-relaxed font-sans select-text scrollbar-thin scrollbar-thumb-zinc-700"
+            className="w-full bg-transparent text-zinc-100 placeholder:text-zinc-500 text-sm sm:text-base px-5 sm:px-6 pt-3.5 sm:pt-4 pb-2.5 resize-none focus:outline-none max-h-48 overflow-y-auto leading-relaxed font-sans select-text scrollbar-thin scrollbar-thumb-zinc-700"
           />
 
           {/* High-Tech Capability Toolbar (Bottom Dock) */}
@@ -291,7 +291,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <span>•</span>
         <span>Port 6001</span>
         <span>•</span>
-        <span className="hidden sm:inline">Press <kbd className="px-1 py-0.2 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">Enter ↵</kbd> to submit</span>
+        <span className="hidden sm:inline">
+          Press <kbd className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">Enter ↵</kbd> to send
+          <span className="mx-1 text-zinc-600">·</span>
+          <kbd className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">Shift + Enter</kbd> for newline
+        </span>
       </div>
     </div>
   );
