@@ -608,7 +608,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         {/* Footer */}
         <div className="px-6 py-3 border-t border-zinc-800 bg-[#0e0e11] flex items-center justify-between">
           <span className="text-[11px] font-mono text-zinc-500">
-            Nixima AI v0.1 • :6001
+            Nixima AI v0.1 • Production Mesh
           </span>
           <button
             onClick={onClose}

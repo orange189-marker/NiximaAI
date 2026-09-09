@@ -62,7 +62,7 @@ How can I assist your engineering, research, or creative tasks today?`
 | **Architecture** | Mixture-of-Experts (Sparse MoE) |
 | **Context Window** | ${model.contextWindow} |
 | **Token Throughput** | ${model.latency} |
-| **Inference Host** | \`localhost:6001\` |
+| **Inference Host** | \`nixima.ai / Cloud Mesh\` |
 | **Safety Alignment** | Nixima Constitutional Layer v4 |
 
 > **Tip:** You can switch between **Nixima-0.1**, **Nixima-0.1 Reasoning**, **Nixima-0.1 Coder**, and **Nixima-0.1 Flash** anytime using the model selector in the top navigation bar.`

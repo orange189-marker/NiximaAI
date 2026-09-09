@@ -67,7 +67,7 @@ export async function streamOpenRouterChat({
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${activeKey}`,
-          'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'http://localhost:6001',
+          'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'https://nixima.ai',
           'X-Title': 'Nixima AI',
           'Content-Type': 'application/json',
         },

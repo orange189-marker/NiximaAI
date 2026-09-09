@@ -13,7 +13,7 @@ The official frontend and conversational web interface for **Nixima AI** — an 
 - **Conversational Sidebar**: Full conversation management with new chat creation, history search, active indicator, and chat deletion.
 - **Deep Reasoning Traces**: Step-by-step reasoning dropdowns simulating internal verification and chain-of-thought processes.
 - **Code Highlighting**: Syntax-highlighted code blocks with 1-click clipboard copy.
-- **Localhost 6001 Binding**: Configured to run strictly at `http://localhost:6001`.
+- **Sovereign Mesh Identity**: Cross-device account crossover and distributed identity synchronization.
 
 ## Tech Stack
 

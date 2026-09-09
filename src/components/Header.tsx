@@ -124,7 +124,7 @@ export const Header: React.FC<HeaderProps> = ({
                 Select Nixima Model
               </span>
               <span className="text-[11px] text-zinc-500 font-mono">
-                Port 6001 Local
+                Sovereign Engine
               </span>
             </div>
 
@@ -182,7 +182,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="mt-2 pt-2 border-t border-zinc-800/80 px-2 flex items-center justify-between text-xs text-zinc-400">
               <span className="flex items-center gap-1.5 text-[11px] font-mono">
                 <Cpu className="w-3.5 h-3.5 text-zinc-500" />
-                Inference: Local Mesh (Port 6001)
+                Inference: Neural Sovereign Mesh
               </span>
               <button
                 onClick={() => {
@@ -203,7 +203,7 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-2">
         <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[11px] font-mono text-zinc-400">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>Online :6001</span>
+          <span>Mesh Active</span>
         </div>
 
         <button

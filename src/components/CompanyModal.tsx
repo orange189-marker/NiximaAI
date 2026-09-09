@@ -82,7 +82,7 @@ export const CompanyModal: React.FC<CompanyModalProps> = ({ isOpen, onClose }) =
                 <span className="font-semibold text-xs text-white">Edge Deployment</span>
               </div>
               <p className="text-[11px] text-zinc-400 leading-normal">
-                High-performance local bindings running on host port 6001 with sub-50ms latency.
+                High-performance distributed edge mesh running globally with sub-50ms latency.
               </p>
             </div>
           </div>

@@ -935,7 +935,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                 <span>Nixima Sovereign Mesh</span>
               </span>
               <span>•</span>
-              <span>Port 6001</span>
+              <span>nixima.ai</span>
             </div>
           </>
         )}
@@ -996,14 +996,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
                   <Globe className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Method 1: Local Mesh Sync (Same Wi-Fi)</span>
+                  <span>Method 1: Cloud Mesh Sync</span>
                 </span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-400">
                   Automatic
                 </span>
               </div>
               <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
-                When your phone and laptop connect to the same Wi-Fi network, accounts synchronize automatically with the server registry.
+                Your accounts synchronize automatically with the Nixima mesh cloud whenever you register or sign in across devices.
               </p>
               <button
                 type="button"
@@ -1012,7 +1012,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                 className="w-full py-2.5 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white font-mono text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin text-emerald-400' : ''}`} />
-                <span>{isSyncing ? 'Synchronizing with Mesh Server...' : 'Force Sync With Server Registry'}</span>
+                <span>{isSyncing ? 'Synchronizing with Nixima Cloud...' : 'Force Sync With Nixima Cloud'}</span>
               </button>
             </div>
 
