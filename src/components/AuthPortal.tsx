@@ -9,15 +9,14 @@ import {
   Check, 
   AtSign,
   Cpu,
-  Lock,
-  Eye,
-  EyeOff
+  Lock
 } from 'lucide-react';
 import { NiximaUser } from '../types/user';
 import { loginUser, registerUser } from '../utils/auth';
-import { playTypingTick, playCompletionChime } from '../utils/sound';
+import { playTypingTick, playCompletionChime, playOpticToggle } from '../utils/sound';
 
 import { DynamicWallpaper } from './DynamicWallpaper';
+import { AnimatedEye } from './AnimatedEye';
 
 interface AuthPortalProps {
   onAuthenticated: (user: NiximaUser) => void;
@@ -173,10 +172,16 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassphrase(!showPassphrase)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
+                  onClick={() => {
+                    const next = !showPassphrase;
+                    setShowPassphrase(next);
+                    playOpticToggle(next);
+                  }}
+                  aria-label={showPassphrase ? "Hide security passphrase" : "Show security passphrase"}
+                  title={showPassphrase ? "Hide passphrase" : "Show passphrase"}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 active:scale-90 transition-all duration-150 focus:outline-none"
                 >
-                  {showPassphrase ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  <AnimatedEye isShowing={showPassphrase} size={15} />
                 </button>
               </div>
             </div>
@@ -247,10 +252,16 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassphrase(!showPassphrase)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
+                  onClick={() => {
+                    const next = !showPassphrase;
+                    setShowPassphrase(next);
+                    playOpticToggle(next);
+                  }}
+                  aria-label={showPassphrase ? "Hide security passphrase" : "Show security passphrase"}
+                  title={showPassphrase ? "Hide passphrase" : "Show passphrase"}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 active:scale-90 transition-all duration-150 focus:outline-none"
                 >
-                  {showPassphrase ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                  <AnimatedEye isShowing={showPassphrase} size={15} />
                 </button>
               </div>
             </div>

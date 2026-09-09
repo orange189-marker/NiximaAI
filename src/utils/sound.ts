@@ -76,3 +76,42 @@ export function playCompletionChime(): void {
     // Ignore
   }
 }
+
+/**
+ * Play a high-tech optic shutter micro-tick for eye visibility toggle
+ */
+export function playOpticToggle(isRevealing: boolean): void {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    if (isRevealing) {
+      // Ascending crisp chirping focus sound (opening eye)
+      osc.frequency.setValueAtTime(680, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(1350, ctx.currentTime + 0.03);
+      gain.gain.setValueAtTime(0.035, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.03);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.03);
+    } else {
+      // Descending crisp lock sound (crossing eye)
+      osc.frequency.setValueAtTime(1150, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(480, ctx.currentTime + 0.03);
+      gain.gain.setValueAtTime(0.035, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.03);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.03);
+    }
+  } catch (e) {
+    // Ignore
+  }
+}
+
