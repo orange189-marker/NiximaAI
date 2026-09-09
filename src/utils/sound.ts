@@ -115,3 +115,40 @@ export function playOpticToggle(isRevealing: boolean): void {
   }
 }
 
+/**
+ * Play a cinematic cybernetic vault unlock chord when successfully authenticating / entering workspace
+ */
+export function playVaultUnlockChord(): void {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    // Harmonic frequencies for majestic high-tech chord: A4, E5, A5
+    const freqs = [440, 659.25, 880];
+    const startTime = ctx.currentTime;
+
+    freqs.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq * 0.8, startTime);
+      osc.frequency.exponentialRampToValueAtTime(freq, startTime + 0.08);
+
+      const delay = idx * 0.04;
+      gain.gain.setValueAtTime(0.0001, startTime);
+      gain.gain.setValueAtTime(0.03, startTime + delay);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + 0.35 + delay);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(startTime + delay);
+      osc.stop(startTime + 0.35 + delay);
+    });
+  } catch (e) {
+    // Ignore
+  }
+}
+
+

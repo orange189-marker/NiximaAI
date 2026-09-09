@@ -74,6 +74,7 @@ export function loginUser(handleOrEmail: string, passphrase: string): NiximaUser
   }
 
   setActiveUser(matched);
+  saveQuickPassUser(matched);
   return matched;
 }
 
@@ -113,11 +114,58 @@ export function registerUser(name: string, handle: string, passphrase: string): 
   const updated = [newUser, ...users];
   saveUsers(updated);
   setActiveUser(newUser);
+  saveQuickPassUser(newUser);
   return newUser;
 }
 
 export function logoutUser(): void {
   setActiveUser(null);
+}
+
+const STORAGE_QUICK_PASS_PROFILE = 'nixima_quick_pass_profile_v1';
+const STORAGE_QUICK_PASS_ENABLED = 'nixima_quick_pass_enabled_v1';
+
+export function isQuickPassEnabled(): boolean {
+  if (typeof window === 'undefined') return true;
+  const stored = localStorage.getItem(STORAGE_QUICK_PASS_ENABLED);
+  return stored !== 'false';
+}
+
+export function setQuickPassEnabled(enabled: boolean): void {
+  if (typeof window === 'undefined') return;
+  localStorage.setItem(STORAGE_QUICK_PASS_ENABLED, enabled ? 'true' : 'false');
+  if (!enabled) {
+    localStorage.removeItem(STORAGE_QUICK_PASS_PROFILE);
+  }
+}
+
+export function getQuickPassUser(): NiximaUser | null {
+  if (typeof window === 'undefined') return null;
+  if (!isQuickPassEnabled()) return null;
+  try {
+    const raw = localStorage.getItem(STORAGE_QUICK_PASS_PROFILE);
+    if (!raw) return null;
+    const profile = JSON.parse(raw);
+    const users = getAllUsers();
+    // Validate against user registry
+    return users.find(u => u.id === profile.id) || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+export function saveQuickPassUser(user: NiximaUser | null): void {
+  if (typeof window === 'undefined') return;
+  if (user && isQuickPassEnabled()) {
+    localStorage.setItem(STORAGE_QUICK_PASS_PROFILE, JSON.stringify(user));
+  } else if (!user) {
+    localStorage.removeItem(STORAGE_QUICK_PASS_PROFILE);
+  }
+}
+
+export function clearQuickPass(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(STORAGE_QUICK_PASS_PROFILE);
 }
 
 export function checkHandleAvailability(handle: string): { available: boolean; reason?: string } {
@@ -135,4 +183,5 @@ export function checkHandleAvailability(handle: string): { available: boolean; r
   }
   return { available: true };
 }
+
 

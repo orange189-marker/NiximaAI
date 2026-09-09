@@ -481,7 +481,7 @@ All conversations and model preferences in this workspace are private to your Ni
   }
 
   return (
-    <div className={`flex h-screen w-full text-[#f4f4f5] overflow-hidden font-sans transition-colors duration-300 ${isPureBlack ? 'bg-black' : 'bg-[#09090b]'}`}>
+    <div className={`flex h-screen w-full text-[#f4f4f5] overflow-hidden font-sans transition-colors duration-300 animate-fade-in ${isPureBlack ? 'bg-black' : 'bg-[#09090b]'}`}>
       {/* Left Sidebar */}
       <Sidebar
         conversations={conversations}
