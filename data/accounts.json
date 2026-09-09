@@ -1,0 +1,12 @@
+[
+  {
+    "id": "usr-founder",
+    "name": "Bogdan",
+    "handle": "bogdan",
+    "email": "bogdan@nixima.ai",
+    "passphrase": "nixima2026",
+    "role": "Founding Operator",
+    "createdAt": 1700000000000,
+    "avatarBg": "from-zinc-100 to-zinc-400 text-black"
+  }
+]

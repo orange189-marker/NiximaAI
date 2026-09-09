@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ArrowRight, 
   Key, 
@@ -8,13 +8,26 @@ import {
   ChevronLeft,
   ShieldCheck,
   Zap,
-  UserCheck
+  UserCheck,
+  RefreshCw,
+  Copy,
+  Smartphone,
+  Laptop,
+  Globe,
+  X,
+  Share2
 } from 'lucide-react';
 import { NiximaUser } from '../types/user';
 import { 
   loginUser, 
+  loginUserAsync,
   registerUser, 
+  registerUserAsync,
   checkHandleAvailability, 
+  checkHandleAvailabilityAsync,
+  syncAccountsWithServer,
+  exportSovereignSyncKey,
+  importSovereignSyncKey,
   getQuickPassUser, 
   saveQuickPassUser, 
   clearQuickPass,
@@ -57,6 +70,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isVerifyingStep1, setIsVerifyingStep1] = useState(false);
 
+  // Cross-device sync & crossover states
+  const [isSyncing, setIsSyncing] = useState(false);
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'synced' | 'error'>('idle');
+  const [showCrossoverModal, setShowCrossoverModal] = useState(false);
+  const [crossoverInputKey, setCrossoverInputKey] = useState('');
+  const [crossoverMsg, setCrossoverMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [copiedKey, setCopiedKey] = useState(false);
+
   // Cinematic launch transition states
   const [launchingUser, setLaunchingUser] = useState<NiximaUser | null>(null);
   const [launchProgress, setLaunchProgress] = useState(0);
@@ -64,7 +85,132 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
 
   // Normalized handle preview
   const cleanHandle = regHandle.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '').replace('@nixima.ai', '');
-  const availability = checkHandleAvailability(cleanHandle);
+  const [asyncAvailability, setAsyncAvailability] = useState<{ available: boolean; reason?: string } | null>(null);
+  const [isCheckingHandle, setIsCheckingHandle] = useState(false);
+
+  // Initial accounts sync on mount (connect laptop <-> phone)
+  useEffect(() => {
+    let isMounted = true;
+    setIsSyncing(true);
+    syncAccountsWithServer()
+      .then(() => {
+        if (isMounted) {
+          setQuickPassUser(getQuickPassUser());
+          setSyncStatus('synced');
+          setIsSyncing(false);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setSyncStatus('idle');
+          setIsSyncing(false);
+        }
+      });
+    return () => { isMounted = false; };
+  }, []);
+
+  // Real-time debounced handle availability check with server
+  useEffect(() => {
+    if (!cleanHandle || cleanHandle.length < 3) {
+      setAsyncAvailability(null);
+      return;
+    }
+    let active = true;
+    setIsCheckingHandle(true);
+    const timer = setTimeout(async () => {
+      try {
+        const res = await checkHandleAvailabilityAsync(cleanHandle);
+        if (active) {
+          setAsyncAvailability(res);
+          setIsCheckingHandle(false);
+        }
+      } catch (e) {
+        if (active) {
+          setAsyncAvailability(checkHandleAvailability(cleanHandle));
+          setIsCheckingHandle(false);
+        }
+      }
+    }, 250);
+
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
+  }, [cleanHandle]);
+
+  const availability = asyncAvailability || checkHandleAvailability(cleanHandle);
+
+  // Force Mesh Sync trigger
+  const handleForceSync = async () => {
+    setIsSyncing(true);
+    setCrossoverMsg(null);
+    try {
+      const merged = await syncAccountsWithServer();
+      setQuickPassUser(getQuickPassUser());
+      setSyncStatus('synced');
+      setCrossoverMsg({
+        type: 'success',
+        text: `Sync complete! Mesh registry active with ${merged.length} registered sovereign accounts.`
+      });
+    } catch (e: any) {
+      setCrossoverMsg({
+        type: 'error',
+        text: 'Mesh sync network error. Please verify server connectivity.'
+      });
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // Copy Sovereign Link Key to clipboard
+  const handleCopySovereignKey = () => {
+    try {
+      const key = exportSovereignSyncKey();
+      navigator.clipboard.writeText(key);
+      setCopiedKey(true);
+      playCompletionChime();
+      setTimeout(() => setCopiedKey(false), 2500);
+      setCrossoverMsg({
+        type: 'success',
+        text: 'Sovereign Link Key copied! Paste it into your phone or other device to link accounts.'
+      });
+    } catch (e) {
+      setCrossoverMsg({
+        type: 'error',
+        text: 'Clipboard access denied. Please copy manually.'
+      });
+    }
+  };
+
+  // Import Sovereign Link Key
+  const handleImportSovereignKey = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!crossoverInputKey.trim()) return;
+
+    try {
+      const res = await importSovereignSyncKey(crossoverInputKey);
+      if (res.success) {
+        playVaultUnlockChord();
+        const updatedUser = getQuickPassUser();
+        setQuickPassUser(updatedUser);
+        setCrossoverInputKey('');
+        setCrossoverMsg({
+          type: 'success',
+          text: `Success! Linked ${res.count} accounts into this terminal.`
+        });
+      } else {
+        setCrossoverMsg({
+          type: 'error',
+          text: res.error || 'Invalid key format.'
+        });
+      }
+    } catch (err: any) {
+      setCrossoverMsg({
+        type: 'error',
+        text: err.message || 'Key import failed.'
+      });
+    }
+  };
 
   // Silky smooth cinematic launch sequence
   const triggerCinematicLaunch = (user: NiximaUser) => {
@@ -103,8 +249,8 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
     }
   };
 
-  // Step 1 -> Step 2 transition with micro-verification delay
-  const handleProceedToStep2 = (e: React.FormEvent) => {
+  // Step 1 -> Step 2 transition with async server verification
+  const handleProceedToStep2 = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -116,30 +262,41 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
       setError('Nixima handle must be at least 3 characters.');
       return;
     }
-    if (!availability.available) {
-      setError(availability.reason || 'This Nixima handle is already taken.');
-      return;
-    }
 
     // High-tech verification pulse
     setIsVerifyingStep1(true);
     playOpticToggle(true);
 
+    try {
+      const check = await checkHandleAvailabilityAsync(cleanHandle);
+      if (!check.available) {
+        setIsVerifyingStep1(false);
+        setError(check.reason || 'This Nixima handle is already taken on another terminal.');
+        return;
+      }
+    } catch (err) {
+      if (!availability.available) {
+        setIsVerifyingStep1(false);
+        setError(availability.reason || 'This Nixima handle is already taken.');
+        return;
+      }
+    }
+
     setTimeout(() => {
       setIsVerifyingStep1(false);
       setRegisterStep(2);
-    }, 420);
+    }, 380);
   };
 
-  // Step 2 final registration submission
-  const handleRegister = (e: React.FormEvent) => {
+  // Step 2 final registration submission (Async with Server Broadcast)
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsSubmitting(true);
 
     try {
       playTypingTick();
-      const user = registerUser(regName, cleanHandle, regPassphrase);
+      const user = await registerUserAsync(regName, cleanHandle, regPassphrase);
       if (quickPassEnabled) {
         saveQuickPassUser(user);
       }
@@ -150,15 +307,15 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
     }
   };
 
-  // Standard Sign In submission
-  const handleSignIn = (e: React.FormEvent) => {
+  // Standard Sign In submission (Async with Server Sync fallback)
+  const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setIsSubmitting(true);
 
     try {
       playTypingTick();
-      const user = loginUser(loginHandle, loginPassphrase);
+      const user = await loginUserAsync(loginHandle, loginPassphrase);
       if (quickPassEnabled) {
         saveQuickPassUser(user);
       }
@@ -460,9 +617,18 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                         </label>
                         {cleanHandle.length >= 3 && (
                           <span className={`text-[10px] font-mono flex items-center gap-1 ${
-                            availability.available ? 'text-emerald-400' : 'text-red-400'
+                            isCheckingHandle ? 'text-zinc-400' : availability.available ? 'text-emerald-400' : 'text-red-400'
                           }`}>
-                            {availability.available ? '✓ Available' : '✕ Taken'}
+                            {isCheckingHandle ? (
+                              <>
+                                <RefreshCw className="w-2.5 h-2.5 animate-spin" />
+                                <span>Checking mesh...</span>
+                              </>
+                            ) : availability.available ? (
+                              <span>✓ Available</span>
+                            ) : (
+                              <span>✕ Taken</span>
+                            )}
                           </span>
                         )}
                       </div>
@@ -734,15 +900,193 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
               </div>
             )}
 
+            {/* Cross-Device Crossover Bar */}
+            <div className="mt-4 pt-3.5 border-t border-zinc-800/80 flex items-center justify-between text-[11px] font-mono">
+              <button
+                type="button"
+                onClick={() => {
+                  setCrossoverMsg(null);
+                  setShowCrossoverModal(true);
+                }}
+                className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors cursor-pointer group"
+              >
+                <Smartphone className="w-3.5 h-3.5 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
+                <span className="underline underline-offset-2 decoration-zinc-700 hover:decoration-white">
+                  Cross-Device Crossover (Laptop ↔ Phone)
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleForceSync}
+                disabled={isSyncing}
+                title="Force refresh account registry from mesh server"
+                className="inline-flex items-center gap-1 text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
+              >
+                <RefreshCw className={`w-3 h-3 ${isSyncing ? 'animate-spin text-amber-400' : ''}`} />
+                <span>{isSyncing ? 'Syncing...' : 'Sync Mesh'}</span>
+              </button>
+            </div>
+
             {/* Footer info */}
-            <div className="mt-5 text-center text-[10px] font-mono text-zinc-500 flex items-center justify-center gap-2">
-              <span>Nixima Sovereign Auth</span>
+            <div className="mt-3 text-center text-[10px] font-mono text-zinc-500 flex items-center justify-center gap-2">
+              <span className="flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                <span>Nixima Sovereign Mesh</span>
+              </span>
               <span>•</span>
               <span>Port 6001</span>
             </div>
           </>
         )}
       </div>
+
+      {/* ============================================================== */}
+      {/* CROSS-DEVICE CROSSOVER MODAL                                    */}
+      {/* ============================================================== */}
+      {showCrossoverModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-fade-in font-mono">
+          <div className="relative w-full max-w-lg rounded-2xl bg-[#111116] border border-zinc-700 p-6 shadow-[0_0_50px_rgba(0,0,0,0.9)] space-y-5 text-xs text-white">
+            
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-zinc-900 border border-zinc-700 flex items-center justify-center">
+                  <Smartphone className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold tracking-tight text-white uppercase flex items-center gap-1.5">
+                    <span>Cross-Device Crossover</span>
+                    <span className="px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-800 text-emerald-400 text-[9px]">
+                      Live
+                    </span>
+                  </h3>
+                  <p className="text-[11px] text-zinc-400 font-sans">
+                    Seamlessly link your accounts between Laptop, Phone, and other terminals.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowCrossoverModal(false)}
+                className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Notification alert */}
+            {crossoverMsg && (
+              <div className={`p-3 rounded-xl text-xs flex items-start gap-2 animate-fade-in ${
+                crossoverMsg.type === 'success' 
+                  ? 'bg-emerald-950/50 border border-emerald-800/80 text-emerald-300' 
+                  : 'bg-red-950/50 border border-red-800/80 text-red-300'
+              }`}>
+                {crossoverMsg.type === 'success' ? (
+                  <Check className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                ) : (
+                  <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                )}
+                <span>{crossoverMsg.text}</span>
+              </div>
+            )}
+
+            {/* Option 1: Automatic Mesh Sync */}
+            <div className="p-4 rounded-xl bg-zinc-950/70 border border-zinc-800/80 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5 text-blue-400" />
+                  <span>Method 1: Local Mesh Sync (Same Wi-Fi)</span>
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-400">
+                  Automatic
+                </span>
+              </div>
+              <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
+                When your phone and laptop connect to the same Wi-Fi network, accounts synchronize automatically with the server registry.
+              </p>
+              <button
+                type="button"
+                onClick={handleForceSync}
+                disabled={isSyncing}
+                className="w-full py-2.5 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white font-mono text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin text-emerald-400' : ''}`} />
+                <span>{isSyncing ? 'Synchronizing with Mesh Server...' : 'Force Sync With Server Registry'}</span>
+              </button>
+            </div>
+
+            {/* Option 2: Sovereign Link Key */}
+            <div className="p-4 rounded-xl bg-zinc-950/70 border border-zinc-800/80 space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <Key className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Method 2: Sovereign Link Key (Air-Gapped / Universal)</span>
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-800 text-emerald-400">
+                  Universal
+                </span>
+              </div>
+              <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
+                Export an encrypted sovereign link key from your laptop and paste it into your phone to instantly merge all accounts without needing shared Wi-Fi.
+              </p>
+
+              {/* Copy Key Button */}
+              <button
+                type="button"
+                onClick={handleCopySovereignKey}
+                className="w-full py-2.5 px-3 rounded-lg bg-white hover:bg-zinc-200 text-black font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer shadow-glow-subtle"
+              >
+                {copiedKey ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 stroke-[3]" />
+                    <span>Key Copied to Clipboard!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Export & Copy Sovereign Link Key</span>
+                  </>
+                )}
+              </button>
+
+              {/* Paste & Import Form */}
+              <form onSubmit={handleImportSovereignKey} className="pt-2 space-y-2">
+                <label className="text-[10px] text-zinc-400 uppercase tracking-wider">
+                  Or Paste Link Key from Other Device:
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={crossoverInputKey}
+                    onChange={(e) => setCrossoverInputKey(e.target.value)}
+                    placeholder="NXK-..."
+                    className="flex-1 px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-white font-mono text-[11px] placeholder-zinc-600 focus:outline-none focus:border-zinc-400"
+                  />
+                  <button
+                    type="submit"
+                    disabled={!crossoverInputKey.trim()}
+                    className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-800 disabled:text-zinc-600 rounded-lg text-white font-bold text-xs transition-colors cursor-pointer"
+                  >
+                    Link & Sync
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Modal Close Button */}
+            <div className="text-right pt-1">
+              <button
+                type="button"
+                onClick={() => setShowCrossoverModal(false)}
+                className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

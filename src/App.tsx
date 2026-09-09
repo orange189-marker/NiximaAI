@@ -13,13 +13,18 @@ import { NIXIMA_MODELS, DEFAULT_MODEL } from './data/models';
 import { INITIAL_CONVERSATIONS } from './data/initialChats';
 import { streamOpenRouterChat } from './utils/openrouter';
 import { playTypingTick, playCompletionChime } from './utils/sound';
-import { getActiveUser, logoutUser } from './utils/auth';
+import { getActiveUser, logoutUser, syncAccountsWithServer } from './utils/auth';
 
 const STORAGE_KEY_MODEL = 'nixima_active_model_v4';
 
 export const App: React.FC = () => {
   // 1. Authentication state
   const [currentUser, setCurrentUser] = useState<NiximaUser | null>(() => getActiveUser());
+
+  // Background accounts synchronization across devices
+  useEffect(() => {
+    syncAccountsWithServer().catch(() => {});
+  }, []);
 
   // Helper key generators for user isolation
   const getConvKey = (uid: string) => `nixima_user_${uid}_convs_v1`;
