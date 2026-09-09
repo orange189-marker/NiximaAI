@@ -14,8 +14,10 @@ import {
   EyeOff
 } from 'lucide-react';
 import { NiximaUser } from '../types/user';
-import { loginUser, registerUser, getAllUsers } from '../utils/auth';
+import { loginUser, registerUser } from '../utils/auth';
 import { playTypingTick, playCompletionChime } from '../utils/sound';
+
+import { DynamicWallpaper } from './DynamicWallpaper';
 
 interface AuthPortalProps {
   onAuthenticated: (user: NiximaUser) => void;
@@ -76,12 +78,15 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
     : 'handle@nixima.ai';
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#070709] text-white p-4 font-sans select-none overflow-y-auto">
-      {/* Subtle background ambient mesh */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-30 pointer-events-none" />
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[550px] h-[350px] bg-white/[0.02] rounded-full blur-3xl pointer-events-none" />
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[#070709] text-white p-4 font-sans select-none overflow-hidden">
+      {/* Dynamic Interactive Canvas Wallpaper */}
+      <DynamicWallpaper />
 
-      <div className="relative w-full max-w-md my-auto rounded-3xl bg-[#101014]/90 border border-zinc-800 shadow-2xl p-6 sm:p-8 backdrop-blur-2xl animate-fade-in">
+      {/* Ambient background glow */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-white/[0.02] rounded-full blur-3xl pointer-events-none" />
+
+      {/* Main Authentication Card */}
+      <div className="relative z-10 w-full max-w-md my-auto rounded-3xl bg-[#101014]/85 border border-zinc-800/80 shadow-[0_0_60px_rgba(0,0,0,0.8)] p-6 sm:p-8 backdrop-blur-2xl animate-fade-in">
         {/* Nixima Brand Emblem */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white text-black font-black text-xl font-mono shadow-[0_0_30px_rgba(255,255,255,0.25)] mb-3">
