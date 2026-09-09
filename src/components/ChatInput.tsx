@@ -290,7 +290,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         <span>Nixima AI Mesh</span>
         <span>•</span>
         <span>Online</span>
-        <span>•</span>
+        <span className="hidden sm:inline text-zinc-600">•</span>
         <span className="hidden sm:inline">
           Press <kbd className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">Enter ↵</kbd> to send
           <span className="mx-1 text-zinc-600">·</span>
