@@ -10,10 +10,12 @@ import {
   Zap, 
   Terminal, 
   BrainCircuit,
-  Sliders
+  Sliders,
+  Plus
 } from 'lucide-react';
 import { ModelOption } from '../types/chat';
 import { NIXIMA_MODELS } from '../data/models';
+import { NiximaIdLogo } from './NiximaIdLogo';
 
 interface HeaderProps {
   currentModel: ModelOption;
@@ -22,6 +24,7 @@ interface HeaderProps {
   onOpenCompanyInfo: () => void;
   isSidebarOpen: boolean;
   onToggleSidebar: () => void;
+  onNewChat?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -30,7 +33,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSettings,
   onOpenCompanyInfo,
   isSidebarOpen,
-  onToggleSidebar
+  onToggleSidebar,
+  onNewChat
 }) => {
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -65,10 +69,21 @@ export const Header: React.FC<HeaderProps> = ({
           <Menu className="w-5 h-5" />
         </button>
 
+        {onNewChat && !isSidebarOpen && (
+          <button
+            onClick={onNewChat}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all shadow-[0_0_12px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95 group cursor-pointer"
+            title="New conversation (Ctrl+N)"
+          >
+            <Plus className="w-3.5 h-3.5 stroke-[3] group-hover:rotate-90 transition-transform duration-200" />
+            <span className="hidden sm:inline">New chat</span>
+          </button>
+        )}
+
         <div className="flex items-center gap-2.5">
           {/* Logo mark */}
-          <div className="w-7 h-7 rounded-lg bg-white flex items-center justify-center text-black font-black text-sm tracking-tighter shadow-glow-subtle">
-            N
+          <div className="p-1 rounded-lg bg-zinc-950 border border-zinc-800 flex items-center justify-center shadow-glow-subtle">
+            <NiximaIdLogo size={18} glow={false} />
           </div>
           <div className="flex items-center gap-2">
             <span className="font-bold text-base tracking-tight text-white font-mono">

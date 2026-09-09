@@ -509,6 +509,7 @@ All conversations and model preferences in this workspace are private to your Ni
           onOpenCompanyInfo={() => setIsCompanyModalOpen(true)}
           isSidebarOpen={isSidebarOpen}
           onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
+          onNewChat={handleNewChat}
         />
 
         {/* Chat Messages Container */}
