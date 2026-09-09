@@ -60,7 +60,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaEvent>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Escape' && isLoading && onStopGeneration) {
+      e.preventDefault();
+      onStopGeneration();
+    }
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
@@ -185,24 +189,28 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               <button
                 type="button"
                 onClick={onStopGeneration}
-                className="w-8 h-8 rounded-xl bg-white hover:bg-zinc-200 text-black flex items-center justify-center transition-all shadow-glow-subtle"
-                title="Stop generation"
+                className="relative group w-9 h-9 rounded-xl bg-white text-black flex items-center justify-center transition-all duration-200 shadow-[0_0_20px_rgba(255,255,255,0.35)] hover:bg-zinc-200 hover:scale-105 active:scale-95"
+                title="Stop generation (Esc)"
               >
-                <Square className="w-3.5 h-3.5 fill-current" />
+                {/* Subtle pulse ring */}
+                <span className="absolute -inset-0.5 rounded-xl bg-white/30 animate-pulse pointer-events-none" />
+                <Square className="w-3.5 h-3.5 fill-black text-black transition-transform group-hover:scale-90" />
               </button>
             ) : (
               <button
                 type="button"
                 onClick={() => handleSubmit()}
                 disabled={!input.trim()}
-                className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all duration-150 ${
+                className={`relative group h-9 flex items-center justify-center transition-all duration-200 ${
                   input.trim()
-                    ? 'bg-white text-black hover:bg-zinc-200 shadow-glow-subtle cursor-pointer'
-                    : 'bg-zinc-800/80 text-zinc-500 cursor-not-allowed border border-zinc-800'
+                    ? 'w-9 rounded-xl bg-white text-black hover:bg-zinc-100 hover:scale-105 active:scale-95 shadow-[0_0_22px_rgba(255,255,255,0.4)] cursor-pointer ring-1 ring-white/50'
+                    : 'w-9 rounded-xl bg-zinc-900/90 text-zinc-600 border border-zinc-800 cursor-not-allowed'
                 }`}
-                title="Send message"
+                title={input.trim() ? "Send message (Enter)" : "Type a message to send"}
               >
-                <ArrowUp className="w-4 h-4 stroke-[2.5]" />
+                <ArrowUp className={`w-4 h-4 stroke-[2.5] transition-transform duration-200 ${
+                  input.trim() ? 'group-hover:-translate-y-0.5' : ''
+                }`} />
               </button>
             )}
           </div>
