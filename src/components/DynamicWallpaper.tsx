@@ -1,25 +1,51 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Sparkles, Layers, Activity } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
 
-export type WallpaperStyle = 'neural' | 'matrix' | 'waves';
-
-interface DynamicWallpaperProps {
-  currentStyle?: WallpaperStyle;
-  onStyleChange?: (style: WallpaperStyle) => void;
+interface Particle {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  radius: number;
+  baseAlpha: number;
+  phase: number;
+  pulseSpeed: number;
+  ringRadius?: number;
+  ringAlpha?: number;
 }
 
-export const DynamicWallpaper: React.FC<DynamicWallpaperProps> = ({
-  currentStyle = 'neural',
-  onStyleChange,
-}) => {
-  const [style, setStyle] = useState<WallpaperStyle>(currentStyle);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const mouseRef = useRef<{ x: number; y: number; radius: number }>({ x: -1000, y: -1000, radius: 160 });
+interface StarParticle {
+  x: number;
+  y: number;
+  z: number;
+  vx: number;
+  vy: number;
+  radius: number;
+  alpha: number;
+  pulse: number;
+}
 
-  const handleSelectStyle = (newStyle: WallpaperStyle) => {
-    setStyle(newStyle);
-    if (onStyleChange) onStyleChange(newStyle);
-  };
+interface DataPacket {
+  fromIdx: number;
+  toIdx: number;
+  progress: number;
+  speed: number;
+}
+
+export const DynamicWallpaper: React.FC = () => {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const mouseRef = useRef<{
+    x: number;
+    y: number;
+    targetX: number;
+    targetY: number;
+    active: boolean;
+  }>({
+    x: -1000,
+    y: -1000,
+    targetX: -1000,
+    targetY: -1000,
+    active: false,
+  });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -28,234 +54,328 @@ export const DynamicWallpaper: React.FC<DynamicWallpaperProps> = ({
     if (!ctx) return;
 
     let animationFrameId: number;
-    let width = (canvas.width = window.innerWidth);
-    let height = (canvas.height = window.innerHeight);
+    let width = window.innerWidth;
+    let height = window.innerHeight;
 
-    const handleResize = () => {
+    const setupDimensions = () => {
       if (!canvas) return;
-      width = canvas.width = window.innerWidth;
-      height = canvas.height = window.innerHeight;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      width = window.innerWidth;
+      height = window.innerHeight;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      canvas.style.width = `${width}px`;
+      canvas.style.height = `${height}px`;
+      ctx.resetTransform?.();
+      ctx.scale(dpr, dpr);
     };
-    window.addEventListener('resize', handleResize);
+
+    setupDimensions();
+    window.addEventListener('resize', setupDimensions);
 
     const handleMouseMove = (e: MouseEvent) => {
-      mouseRef.current.x = e.clientX;
-      mouseRef.current.y = e.clientY;
+      mouseRef.current.targetX = e.clientX;
+      mouseRef.current.targetY = e.clientY;
+      mouseRef.current.active = true;
     };
+
     const handleMouseLeave = () => {
-      mouseRef.current.x = -1000;
-      mouseRef.current.y = -1000;
+      mouseRef.current.active = false;
+      mouseRef.current.targetX = -1000;
+      mouseRef.current.targetY = -1000;
     };
+
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseleave', handleMouseLeave);
 
-    // ==========================================
-    // 1. NEURAL MESH MODE SETUP
-    // ==========================================
-    const particleCount = Math.min(Math.floor((width * height) / 12000), 90);
-    const particles: Array<{
-      x: number;
-      y: number;
-      vx: number;
-      vy: number;
-      radius: number;
-      alpha: number;
-      pulseSpeed: number;
-    }> = [];
-
-    for (let i = 0; i < particleCount; i++) {
-      particles.push({
+    // ==============================================================
+    // 1. BACKGROUND DEEP STARFIELD (Distant 3D Particles)
+    // ==============================================================
+    const starCount = Math.min(Math.floor((width * height) / 9000), 110);
+    const stars: StarParticle[] = [];
+    for (let i = 0; i < starCount; i++) {
+      stars.push({
         x: Math.random() * width,
         y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.7,
-        vy: (Math.random() - 0.5) * 0.7,
-        radius: Math.random() * 2 + 1,
-        alpha: Math.random() * 0.6 + 0.3,
-        pulseSpeed: 0.02 + Math.random() * 0.03,
+        z: Math.random() * 0.8 + 0.2, // Depth factor
+        vx: (Math.random() - 0.5) * 0.15,
+        vy: -0.05 - Math.random() * 0.15, // Slow upward ambient drift
+        radius: Math.random() * 1.2 + 0.5,
+        alpha: Math.random() * 0.4 + 0.1,
+        pulse: Math.random() * Math.PI * 2,
       });
     }
 
-    // Packet pulses traveling along connection lines
-    const pulses: Array<{
-      fromIdx: number;
-      toIdx: number;
-      progress: number;
-      speed: number;
-    }> = [];
-
-    // ==========================================
-    // 2. CYBER MATRIX MODE SETUP
-    // ==========================================
-    const chars = '01NIXIMA01AI789XYZ';
-    const fontSize = 14;
-    const columns = Math.floor(width / fontSize);
-    const drops: number[] = [];
-    for (let i = 0; i < columns; i++) {
-      drops[i] = Math.floor(Math.random() * -100);
+    // ==============================================================
+    // 2. NEURAL CONSTELLATION NODES
+    // ==============================================================
+    const nodeCount = Math.min(Math.floor((width * height) / 14000), 75);
+    const nodes: Particle[] = [];
+    for (let i = 0; i < nodeCount; i++) {
+      nodes.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.45,
+        vy: (Math.random() - 0.5) * 0.45,
+        radius: Math.random() * 2 + 1.2,
+        baseAlpha: Math.random() * 0.5 + 0.35,
+        phase: Math.random() * Math.PI * 2,
+        pulseSpeed: 0.02 + Math.random() * 0.025,
+        ringRadius: 0,
+        ringAlpha: 0,
+      });
     }
 
-    // ==========================================
-    // 3. QUANTUM WAVES MODE SETUP
-    // ==========================================
-    let waveTick = 0;
+    // Dynamic data packets gliding through connections
+    const packets: DataPacket[] = [];
+    let tick = 0;
 
-    // ==========================================
-    // MAIN RENDER LOOP
-    // ==========================================
+    // ==============================================================
+    // 3. ANIMATION RENDER LOOP (60 FPS)
+    // ==============================================================
     const render = () => {
-      ctx.clearRect(0, 0, width, height);
+      tick += 0.02;
 
-      // --- STYLE 1: NEURAL MESH ---
-      if (style === 'neural') {
-        // Draw connection lines
-        const maxDist = 130;
-        const mouseDist = mouseRef.current.radius;
+      // Smooth mouse interpolation (spring feel)
+      const mouse = mouseRef.current;
+      if (mouse.active) {
+        mouse.x += (mouse.targetX - mouse.x) * 0.12;
+        mouse.y += (mouse.targetY - mouse.y) * 0.12;
+      } else {
+        mouse.x += (-1000 - mouse.x) * 0.1;
+        mouse.y += (-1000 - mouse.y) * 0.1;
+      }
 
-        for (let i = 0; i < particles.length; i++) {
-          const p1 = particles[i];
+      // Clear canvas with deep void tone
+      ctx.fillStyle = '#060608';
+      ctx.fillRect(0, 0, width, height);
 
-          // Update position
-          p1.x += p1.vx;
-          p1.y += p1.vy;
+      // --- Ambient Radial Glow in the center/card area ---
+      const ambientGlow = ctx.createRadialGradient(
+        width / 2,
+        height * 0.45,
+        50,
+        width / 2,
+        height * 0.45,
+        Math.max(width, height) * 0.65
+      );
+      ambientGlow.addColorStop(0, 'rgba(28, 28, 36, 0.45)');
+      ambientGlow.addColorStop(0.5, 'rgba(14, 14, 18, 0.25)');
+      ambientGlow.addColorStop(1, 'rgba(6, 6, 8, 0)');
+      ctx.fillStyle = ambientGlow;
+      ctx.fillRect(0, 0, width, height);
 
-          if (p1.x < 0 || p1.x > width) p1.vx *= -1;
-          if (p1.y < 0 || p1.y > height) p1.vy *= -1;
+      // --- Draw Distant Ambient Starfield ---
+      for (let i = 0; i < stars.length; i++) {
+        const star = stars[i];
+        star.x += star.vx * star.z;
+        star.y += star.vy * star.z;
+        star.pulse += 0.02;
 
-          // Connect with other particles
-          for (let j = i + 1; j < particles.length; j++) {
-            const p2 = particles[j];
-            const dx = p1.x - p2.x;
-            const dy = p1.y - p2.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
+        // Wrap around boundaries
+        if (star.x < 0) star.x = width;
+        if (star.x > width) star.x = 0;
+        if (star.y < 0) star.y = height;
+        if (star.y > height) star.y = 0;
 
-            if (dist < maxDist) {
-              const alpha = (1 - dist / maxDist) * 0.18;
-              ctx.beginPath();
-              ctx.moveTo(p1.x, p1.y);
-              ctx.lineTo(p2.x, p2.y);
-              ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
-              ctx.lineWidth = 0.75;
-              ctx.stroke();
+        const currentAlpha = star.alpha + Math.sin(star.pulse) * 0.15;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius * star.z, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(220, 225, 240, ${Math.max(0.05, currentAlpha)})`;
+        ctx.fill();
+      }
 
-              // Spawn dynamic data packet occasionally
-              if (Math.random() < 0.0006 && pulses.length < 15) {
-                pulses.push({
-                  fromIdx: i,
-                  toIdx: j,
-                  progress: 0,
-                  speed: 0.015 + Math.random() * 0.02,
-                });
-              }
+      // --- Draw Neural Constellation Connections & Nodes ---
+      const maxConnectDist = 145;
+      const mouseRadius = 180;
+
+      for (let i = 0; i < nodes.length; i++) {
+        const n1 = nodes[i];
+
+        // Particle movement
+        n1.x += n1.vx;
+        n1.y += n1.vy;
+
+        // Soft screen bounds bounce
+        if (n1.x < 20) {
+          n1.x = 20;
+          n1.vx = Math.abs(n1.vx);
+        } else if (n1.x > width - 20) {
+          n1.x = width - 20;
+          n1.vx = -Math.abs(n1.vx);
+        }
+        if (n1.y < 20) {
+          n1.y = 20;
+          n1.vy = Math.abs(n1.vy);
+        } else if (n1.y > height - 20) {
+          n1.y = height - 20;
+          n1.vy = -Math.abs(n1.vy);
+        }
+
+        // Connection lines between nodes
+        for (let j = i + 1; j < nodes.length; j++) {
+          const n2 = nodes[j];
+          const dx = n1.x - n2.x;
+          const dy = n1.y - n2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < maxConnectDist) {
+            const factor = 1 - dist / maxConnectDist;
+            const lineAlpha = factor * factor * 0.22; // Smooth quadratic falloff
+
+            ctx.beginPath();
+            ctx.moveTo(n1.x, n1.y);
+            ctx.lineTo(n2.x, n2.y);
+            ctx.strokeStyle = `rgba(255, 255, 255, ${lineAlpha})`;
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+
+            // Randomly spawn data packet pulse between active links
+            if (Math.random() < 0.0008 && packets.length < 18) {
+              packets.push({
+                fromIdx: i,
+                toIdx: j,
+                progress: 0,
+                speed: 0.012 + Math.random() * 0.018,
+              });
             }
           }
+        }
 
-          // Connect with mouse cursor
-          const mdx = p1.x - mouseRef.current.x;
-          const mdy = p1.y - mouseRef.current.y;
+        // Interaction with Cursor
+        if (mouse.active) {
+          const mdx = n1.x - mouse.x;
+          const mdy = n1.y - mouse.y;
           const mdist = Math.sqrt(mdx * mdx + mdy * mdy);
 
-          if (mdist < mouseDist) {
-            const mAlpha = (1 - mdist / mouseDist) * 0.4;
+          if (mdist < mouseRadius) {
+            const mFactor = 1 - mdist / mouseRadius;
+            const mAlpha = mFactor * 0.45;
+
+            // Tether line to mouse
             ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(mouseRef.current.x, mouseRef.current.y);
+            ctx.moveTo(n1.x, n1.y);
+            ctx.lineTo(mouse.x, mouse.y);
             ctx.strokeStyle = `rgba(255, 255, 255, ${mAlpha})`;
             ctx.lineWidth = 1;
             ctx.stroke();
 
-            // Gentle repulsion away from mouse
-            p1.x += (mdx / mdist) * 0.5;
-            p1.y += (mdy / mdist) * 0.5;
+            // Subtle magnetic gravitational influence
+            n1.x -= (mdx / mdist) * 0.45;
+            n1.y -= (mdy / mdist) * 0.45;
           }
-
-          // Draw node particle
-          ctx.beginPath();
-          ctx.arc(p1.x, p1.y, p1.radius, 0, Math.PI * 2);
-          ctx.fillStyle = `rgba(255, 255, 255, ${p1.alpha})`;
-          ctx.fill();
-
-          // Subtle glow on node
-          ctx.shadowBlur = 8;
-          ctx.shadowColor = 'rgba(255, 255, 255, 0.4)';
-          ctx.shadowBlur = 0;
         }
 
-        // Draw and update active data packet pulses
-        for (let k = pulses.length - 1; k >= 0; k--) {
-          const pulse = pulses[k];
-          pulse.progress += pulse.speed;
+        // Node Glow & Pulsing Core
+        n1.phase += n1.pulseSpeed;
+        const pulseRatio = Math.sin(n1.phase);
+        const nodeAlpha = Math.min(1, Math.max(0.2, n1.baseAlpha + pulseRatio * 0.25));
 
-          if (pulse.progress >= 1 || !particles[pulse.fromIdx] || !particles[pulse.toIdx]) {
-            pulses.splice(k, 1);
-            continue;
-          }
+        // Node inner core
+        ctx.beginPath();
+        ctx.arc(n1.x, n1.y, n1.radius + pulseRatio * 0.4, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${nodeAlpha})`;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = 'rgba(255, 255, 255, 0.6)';
+        ctx.fill();
+        ctx.shadowBlur = 0;
 
-          const fromP = particles[pulse.fromIdx];
-          const toP = particles[pulse.toIdx];
-          const curX = fromP.x + (toP.x - fromP.x) * pulse.progress;
-          const curY = fromP.y + (toP.y - fromP.y) * pulse.progress;
-
+        // Render expanding ripple wave if triggered
+        if (n1.ringAlpha && n1.ringAlpha > 0.01) {
           ctx.beginPath();
-          ctx.arc(curX, curY, 2.5, 0, Math.PI * 2);
-          ctx.fillStyle = '#ffffff';
-          ctx.shadowBlur = 10;
-          ctx.shadowColor = '#ffffff';
-          ctx.fill();
-          ctx.shadowBlur = 0;
-        }
-      }
-
-      // --- STYLE 2: CYBER MATRIX STREAM ---
-      else if (style === 'matrix') {
-        ctx.fillStyle = 'rgba(7, 7, 9, 0.2)';
-        ctx.fillRect(0, 0, width, height);
-
-        ctx.font = `${fontSize}px 'JetBrains Mono', monospace`;
-
-        for (let i = 0; i < drops.length; i++) {
-          const char = chars[Math.floor(Math.random() * chars.length)];
-          const x = i * fontSize;
-          const y = drops[i] * fontSize;
-
-          // Head of the stream is pure bright white
-          ctx.fillStyle = '#ffffff';
-          ctx.fillText(char, x, y);
-
-          // Trail text is silver/zinc
-          ctx.fillStyle = 'rgba(180, 180, 190, 0.4)';
-          const prevChar = chars[Math.floor(Math.random() * chars.length)];
-          ctx.fillText(prevChar, x, y - fontSize);
-
-          if (y > height && Math.random() > 0.985) {
-            drops[i] = 0;
-          }
-          drops[i]++;
-        }
-      }
-
-      // --- STYLE 3: QUANTUM WAVES ---
-      else if (style === 'waves') {
-        waveTick += 0.015;
-        const waveCount = 5;
-
-        for (let w = 0; w < waveCount; w++) {
-          ctx.beginPath();
-          const baseHeight = height * 0.5 + Math.sin(waveTick + w) * 80;
-          const amplitude = 50 + w * 25;
-          const frequency = 0.002 + w * 0.001;
-
-          ctx.moveTo(0, baseHeight);
-          for (let x = 0; x <= width; x += 10) {
-            const y = baseHeight + Math.sin(x * frequency + waveTick + w) * amplitude;
-            ctx.lineTo(x, y);
-          }
-
-          const alpha = 0.08 + w * 0.03;
-          ctx.strokeStyle = `rgba(255, 255, 255, ${alpha})`;
-          ctx.lineWidth = 1.5;
+          ctx.arc(n1.x, n1.y, n1.ringRadius || 0, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(255, 255, 255, ${n1.ringAlpha})`;
+          ctx.lineWidth = 1;
           ctx.stroke();
+
+          n1.ringRadius = (n1.ringRadius || 0) + 0.7;
+          n1.ringAlpha *= 0.94;
         }
       }
+
+      // --- Draw Traveling Data Packets ---
+      for (let k = packets.length - 1; k >= 0; k--) {
+        const p = packets[k];
+        p.progress += p.speed;
+
+        const from = nodes[p.fromIdx];
+        const to = nodes[p.toIdx];
+
+        if (p.progress >= 1 || !from || !to) {
+          if (to) {
+            // Trigger target node ping ripple
+            to.ringRadius = 3;
+            to.ringAlpha = 0.6;
+          }
+          packets.splice(k, 1);
+          continue;
+        }
+
+        const px = from.x + (to.x - from.x) * p.progress;
+        const py = from.y + (to.y - from.y) * p.progress;
+
+        // Packet core with intense white glow
+        ctx.beginPath();
+        ctx.arc(px, py, 2.2, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowBlur = 12;
+        ctx.shadowColor = '#ffffff';
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // Mini trail spark
+        const trailX = from.x + (to.x - from.x) * Math.max(0, p.progress - 0.05);
+        const trailY = from.y + (to.y - from.y) * Math.max(0, p.progress - 0.05);
+        ctx.beginPath();
+        ctx.moveTo(px, py);
+        ctx.lineTo(trailX, trailY);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+
+      // --- Mouse Beacon Glow & Target Rings ---
+      if (mouse.active && mouse.x > 0 && mouse.y > 0) {
+        // Soft aura around cursor
+        const mouseAura = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, 140);
+        mouseAura.addColorStop(0, 'rgba(255, 255, 255, 0.1)');
+        mouseAura.addColorStop(0.5, 'rgba(255, 255, 255, 0.02)');
+        mouseAura.addColorStop(1, 'rgba(255, 255, 255, 0)');
+        ctx.fillStyle = mouseAura;
+        ctx.beginPath();
+        ctx.arc(mouse.x, mouse.y, 140, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Delicate pulsing reticle ring around cursor
+        const ringSize = 18 + Math.sin(tick * 3) * 3;
+        ctx.beginPath();
+        ctx.arc(mouse.x, mouse.y, ringSize, 0, Math.PI * 2);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(mouse.x, mouse.y, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowBlur = 8;
+        ctx.shadowColor = '#ffffff';
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      // --- Cinematic Vignette Overlay ---
+      const vignette = ctx.createRadialGradient(
+        width / 2,
+        height / 2,
+        Math.min(width, height) * 0.4,
+        width / 2,
+        height / 2,
+        Math.max(width, height) * 0.8
+      );
+      vignette.addColorStop(0, 'rgba(6, 6, 8, 0)');
+      vignette.addColorStop(1, 'rgba(6, 6, 8, 0.7)');
+      ctx.fillStyle = vignette;
+      ctx.fillRect(0, 0, width, height);
 
       animationFrameId = requestAnimationFrame(render);
     };
@@ -264,66 +384,17 @@ export const DynamicWallpaper: React.FC<DynamicWallpaperProps> = ({
 
     return () => {
       cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', setupDimensions);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseleave', handleMouseLeave);
     };
-  }, [style]);
+  }, []);
 
   return (
-    <>
-      {/* Background HTML5 Canvas */}
-      <canvas
-        ref={canvasRef}
-        className="absolute inset-0 z-0 pointer-events-none"
-      />
-
-      {/* Floating Theme / Wallpaper Style Switcher Pill */}
-      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1.5 p-1 bg-zinc-950/80 border border-zinc-800/80 rounded-full backdrop-blur-xl shadow-2xl text-[11px] font-mono select-none">
-        <span className="px-2 text-zinc-500 font-bold uppercase tracking-wider text-[9px] flex items-center gap-1">
-          <Activity className="w-3 h-3 text-zinc-400" />
-          <span>Wallpaper:</span>
-        </span>
-
-        <button
-          type="button"
-          onClick={() => handleSelectStyle('neural')}
-          className={`px-3 py-1 rounded-full transition-all flex items-center gap-1.5 ${
-            style === 'neural'
-              ? 'bg-white text-black font-bold shadow-glow-subtle'
-              : 'text-zinc-400 hover:text-white'
-          }`}
-        >
-          <Sparkles className="w-3 h-3" />
-          <span>Neural Mesh</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleSelectStyle('matrix')}
-          className={`px-3 py-1 rounded-full transition-all flex items-center gap-1.5 ${
-            style === 'matrix'
-              ? 'bg-white text-black font-bold shadow-glow-subtle'
-              : 'text-zinc-400 hover:text-white'
-          }`}
-        >
-          <Layers className="w-3 h-3" />
-          <span>Cyber Matrix</span>
-        </button>
-
-        <button
-          type="button"
-          onClick={() => handleSelectStyle('waves')}
-          className={`px-3 py-1 rounded-full transition-all flex items-center gap-1.5 ${
-            style === 'waves'
-              ? 'bg-white text-black font-bold shadow-glow-subtle'
-              : 'text-zinc-400 hover:text-white'
-          }`}
-        >
-          <Activity className="w-3 h-3" />
-          <span>Quantum Waves</span>
-        </button>
-      </div>
-    </>
+    <canvas
+      ref={canvasRef}
+      aria-hidden="true"
+      className="absolute inset-0 z-0 pointer-events-none w-full h-full block"
+    />
   );
 };
