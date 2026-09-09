@@ -37,8 +37,6 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const existingUsers = getAllUsers();
-
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -70,17 +68,6 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
       setError(err.message || 'Registration failed.');
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const handleQuickLogin = (user: NiximaUser) => {
-    setError(null);
-    try {
-      const logged = loginUser(user.handle, user.passphrase);
-      playCompletionChime();
-      onAuthenticated(logged);
-    } catch (err: any) {
-      setError(err.message);
     }
   };
 
@@ -273,31 +260,6 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
             </button>
           </form>
         )}
-
-        {/* Quick Demo Switcher (Effortless Testing) */}
-        <div className="mt-6 pt-5 border-t border-zinc-800/80">
-          <div className="text-[10px] uppercase font-mono tracking-wider text-zinc-400 mb-2.5 text-center font-bold">
-            Quick Sign In / Switch Account
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {existingUsers.slice(0, 4).map((u) => (
-              <button
-                key={u.id}
-                type="button"
-                onClick={() => handleQuickLogin(u)}
-                className="p-2 rounded-xl bg-zinc-900/60 hover:bg-zinc-800 border border-zinc-800/80 text-left transition-colors flex items-center gap-2 group"
-              >
-                <div className="w-6 h-6 rounded-lg bg-zinc-800 border border-zinc-700 text-white flex items-center justify-center font-bold text-xs font-mono group-hover:bg-white group-hover:text-black transition-colors">
-                  {u.name.charAt(0).toUpperCase()}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="text-xs font-medium text-white truncate">{u.name}</div>
-                  <div className="text-[10px] text-zinc-400 truncate font-mono">{u.email}</div>
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
 
         {/* Footer info */}
         <div className="mt-5 text-center text-[10px] font-mono text-zinc-400 flex items-center justify-center gap-2">

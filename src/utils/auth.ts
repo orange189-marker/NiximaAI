@@ -13,16 +13,6 @@ const DEFAULT_USERS: NiximaUser[] = [
     role: 'Founding Operator',
     createdAt: Date.now() - 86400000 * 7,
     avatarBg: 'from-zinc-100 to-zinc-400 text-black',
-  },
-  {
-    id: 'usr-pioneer',
-    name: 'Pioneer Guest',
-    handle: 'guest',
-    email: 'guest@nixima.ai',
-    passphrase: 'nixima2026',
-    role: 'Pioneer Researcher',
-    createdAt: Date.now() - 86400000 * 2,
-    avatarBg: 'from-zinc-800 to-zinc-900 text-white',
   }
 ];
 
