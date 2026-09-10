@@ -21,6 +21,7 @@ import { NiximaIdLogo } from './NiximaIdLogo';
 import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotkeys';
 import { useLanguage } from '../context/LanguageContext';
 import { CountryFlag } from './CountryFlag';
+import { CreditBalanceChip } from './AnimatedCredits';
 
 interface HeaderProps {
   currentModel: ModelOption;
@@ -267,21 +268,13 @@ export const Header: React.FC<HeaderProps> = ({
           <span>{t.header.meshActive}</span>
         </div>
 
-        {/* Nixima Credits Balance Chip */}
-        <button
-          type="button"
+        {/* Animated Nixima Credits Balance Chip */}
+        <CreditBalanceChip
+          credits={credits}
+          unit={t.credits.unit || 'CR'}
           onClick={onOpenCredits || onOpenSettings}
-          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-500/10 via-zinc-900 to-amber-500/5 border border-amber-500/30 hover:border-amber-500/60 text-amber-300 hover:text-amber-200 transition-all text-xs font-mono select-none cursor-pointer shadow-[0_0_12px_rgba(245,158,11,0.12)] group"
           title={`${t.credits.balance}: ${credits.toLocaleString()} ${t.credits.unit}`}
-        >
-          <Coins className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
-          <span className="font-bold tracking-tight text-white">
-            {credits.toLocaleString()}
-          </span>
-          <span className="text-[10px] text-amber-400 font-semibold hidden min-[480px]:inline">
-            CR
-          </span>
-        </button>
+        />
 
         {/* Quick Language Toggle Button with SVG Flag */}
         <button

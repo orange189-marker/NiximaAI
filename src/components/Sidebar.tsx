@@ -24,6 +24,7 @@ import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotk
 import { HotkeyCustomizerModal } from './HotkeyCustomizerModal';
 import { useLanguage } from '../context/LanguageContext';
 import { CountryFlag } from './CountryFlag';
+import { CreditSidebarBadge } from './AnimatedCredits';
 
 interface SidebarProps {
   conversations: Conversation[];
@@ -379,10 +380,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <CountryFlag country={language === 'uk' ? 'ua' : 'us'} size="xs" />
                     <span className="truncate">{currentUser?.email || 'operator@nixima.ai'}</span>
                   </div>
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 font-bold border border-amber-500/20 text-[9px] flex-shrink-0 ml-1">
-                    <Coins className="w-2.5 h-2.5 text-amber-400" />
-                    <span>{(currentUser?.credits ?? 1000).toLocaleString()} CR</span>
-                  </span>
+                  <CreditSidebarBadge
+                    credits={currentUser?.credits ?? 1000}
+                    unit="CR"
+                    className="ml-1"
+                  />
                 </div>
               </div>
             </div>

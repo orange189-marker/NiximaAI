@@ -20,6 +20,7 @@ import { MarkdownTable, TableBlockData } from './MarkdownTable';
 import { NiximaIdLogo } from './NiximaIdLogo';
 import { useLanguage } from '../context/LanguageContext';
 import { MathRenderer } from './MathRenderer';
+import { CreditTelemetryPill } from './AnimatedCredits';
 
 interface ChatMessageProps {
   message: Message;
@@ -620,13 +621,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                   {/* Telemetry pill */}
                   <div className="flex items-center gap-2">
                     {message.telemetry?.creditsSpent !== undefined && (
-                      <span
-                        className="inline-flex items-center gap-1 text-[10px] font-mono text-amber-300 bg-amber-950/40 px-2 py-0.5 rounded border border-amber-800/60 shadow-[0_0_8px_rgba(245,158,11,0.1)] select-none"
-                        title={`${t.credits.badge}: -${message.telemetry.creditsSpent} CR`}
-                      >
-                        <Coins className="w-2.5 h-2.5 text-amber-400" />
-                        <span>-{message.telemetry.creditsSpent} CR</span>
-                      </span>
+                      <CreditTelemetryPill
+                        creditsSpent={message.telemetry.creditsSpent}
+                        unit={t.credits.unit || 'CR'}
+                      />
                     )}
 
                     <span className="inline-flex items-center gap-1 text-[10px] font-mono text-zinc-500 bg-zinc-900/80 px-2 py-0.5 rounded border border-zinc-800">

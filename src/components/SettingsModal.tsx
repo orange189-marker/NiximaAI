@@ -33,6 +33,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { CountryFlag } from './CountryFlag';
 import { grantUserCredits, getUserCredits } from '../utils/credits';
 import { MODELS } from '../data/models';
+import { CreditHeroCounter } from './AnimatedCredits';
 
 export type SettingsTab = 'general' | 'inference' | 'persona' | 'data' | 'api' | 'credits';
 
@@ -756,14 +757,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </span>
                 </div>
 
-                <div className="flex items-baseline gap-2 pt-1">
-                  <span className="text-4xl font-extrabold font-mono tracking-tight text-white drop-shadow-[0_0_15px_rgba(245,158,11,0.3)]">
-                    {getUserCredits(currentUser).toLocaleString()}
-                  </span>
-                  <span className="text-sm font-bold font-mono text-amber-400">
-                    {t.credits.unit}
-                  </span>
-                </div>
+                <CreditHeroCounter
+                  credits={getUserCredits(currentUser)}
+                  unit={t.credits.unit}
+                />
 
                 <p className="text-xs text-zinc-400 leading-relaxed">
                   {t.credits.initialBonusNotice}

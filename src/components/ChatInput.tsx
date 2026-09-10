@@ -13,7 +13,8 @@ import {
   Sparkles,
   CornerDownLeft,
   X,
-  Coins
+  Coins,
+  Flame
 } from 'lucide-react';
 import { ModelOption } from '../types/chat';
 import { NiximaIdLogo } from './NiximaIdLogo';
@@ -260,16 +261,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
             {/* Right Controls: Telemetry & Send/Stop Beacon */}
             <div className="flex items-center gap-2">
-              {/* Live Credit Estimate Badge */}
+              {/* Live Cost Estimation Indicator with Smooth Transition */}
               <button
                 type="button"
                 onClick={onOpenCredits}
-                className={`hidden min-[360px]:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-mono border transition-all select-none cursor-pointer ${
+                className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10.5px] font-mono border transition-all duration-300 select-none cursor-pointer ${
                   !hasCredits
-                    ? 'bg-red-950/60 border-red-800 text-red-300'
+                    ? 'bg-red-950/40 border-red-800 text-red-300 animate-pulse'
                     : estimated.isHardPrompt
-                    ? 'bg-amber-950/40 border-amber-800/60 text-amber-300 hover:border-amber-600'
-                    : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200'
+                    ? 'bg-amber-950/40 border-amber-500/50 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.2)] hover:border-amber-400 scale-[1.02]'
+                    : 'bg-zinc-900/90 border-zinc-800/80 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
                 }`}
                 title={
                   !hasCredits
@@ -277,10 +278,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     : `${t.credits.badge}: ${t.credits.estCost(estimated.minCost, estimated.maxCost)} (${currentModel.shortName})`
                 }
               >
-                <Coins className={`w-3 h-3 ${!hasCredits ? 'text-red-400' : 'text-amber-400'}`} />
-                <span>{t.credits.estCost(estimated.minCost, estimated.maxCost)}</span>
+                <Coins className={`w-3 h-3 transition-transform duration-300 ${!hasCredits ? 'text-red-400' : estimated.isHardPrompt ? 'text-amber-400 scale-110' : 'text-zinc-400'}`} />
+                <span className="tabular-nums font-medium">{t.credits.estCost(estimated.minCost, estimated.maxCost)}</span>
                 {estimated.isHardPrompt && (
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  <span className="flex items-center gap-0.5 text-[9px] font-bold text-amber-300 px-1 py-0.2 rounded bg-amber-500/20 border border-amber-500/30 animate-pulse">
+                    <Flame className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
+                    <span>DIFFICULT</span>
+                  </span>
                 )}
               </button>
 

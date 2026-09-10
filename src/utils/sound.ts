@@ -151,4 +151,66 @@ export function playVaultUnlockChord(): void {
   }
 }
 
+/**
+ * Play a futuristic subtle soft laser/coin spend micro-tone when credits are deducted
+ */
+export function playCreditSpendSound(): void {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(780, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(360, ctx.currentTime + 0.045);
+
+    gain.gain.setValueAtTime(0.025, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.045);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.045);
+  } catch (e) {
+    // Ignore
+  }
+}
+
+/**
+ * Play an ascending crystal sparkle chime when credits are granted
+ */
+export function playCreditGrantSound(): void {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const freqs = [650, 980, 1320];
+    const startTime = ctx.currentTime;
+
+    freqs.forEach((freq, idx) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, startTime + idx * 0.035);
+
+      gain.gain.setValueAtTime(0.0001, startTime);
+      gain.gain.setValueAtTime(0.03, startTime + idx * 0.035);
+      gain.gain.exponentialRampToValueAtTime(0.0001, startTime + idx * 0.035 + 0.12);
+
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.start(startTime + idx * 0.035);
+      osc.stop(startTime + idx * 0.035 + 0.12);
+    });
+  } catch (e) {
+    // Ignore
+  }
+}
+
+
 
