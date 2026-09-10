@@ -30,10 +30,11 @@ import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotk
 import { HotkeyCustomizerModal } from './HotkeyCustomizerModal';
 import { useLanguage } from '../context/LanguageContext';
 import { CountryFlag } from './CountryFlag';
-import { claimDailyGrant, getDailyGrantStatus, getUserCredits } from '../utils/credits';
+import { claimDailyGrant, getDailyGrantStatus, getUserCredits, isCreatorAccount } from '../utils/credits';
 import { MODELS } from '../data/models';
 import { CreditHeroCounter } from './AnimatedCredits';
 import { NiximaCreditLogo } from './NiximaCreditLogo';
+import { InfinitySymbol } from './InfinitySymbol';
 
 export type SettingsTab = 'general' | 'inference' | 'persona' | 'data' | 'api' | 'credits';
 
@@ -802,7 +803,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       {t.credits.dailyGrantDesc}
                     </p>
                   </div>
-                  {dailyGrantStatus.canClaim ? (
+                  {isCreatorAccount(currentUser) ? (
+                    <div
+                      className="px-3 py-1.5 rounded-lg bg-zinc-800/90 border border-zinc-700/80 text-zinc-300 text-xs font-mono flex items-center gap-1.5 select-none flex-shrink-0"
+                      title="Creator Sovereign Clearance"
+                    >
+                      <InfinitySymbol size={11} className="text-zinc-200" />
+                      <span>{language === 'uk' ? 'Безлімітний доступ' : 'Unlimited Clearance'}</span>
+                    </div>
+                  ) : dailyGrantStatus.canClaim ? (
                     <button
                       onClick={handleClaimDailyGrant}
                       className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs font-mono transition-all flex items-center gap-1.5 shadow-md flex-shrink-0 cursor-pointer"

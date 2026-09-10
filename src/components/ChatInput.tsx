@@ -20,6 +20,7 @@ import { NiximaIdLogo } from './NiximaIdLogo';
 import { useLanguage } from '../context/LanguageContext';
 import { calculateEstimatedCost } from '../utils/credits';
 import { NiximaCreditLogo } from './NiximaCreditLogo';
+import { InfinitySymbol } from './InfinitySymbol';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -283,8 +284,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 }
               >
                 <NiximaCreditLogo size={12} />
-                <span className="tabular-nums font-medium">
-                  {userCredits === Infinity ? '0 CR (Creator ∞)' : t.credits.estCost(estimated.minCost, estimated.maxCost)}
+                <span className="tabular-nums font-medium inline-flex items-center gap-1">
+                  {userCredits === Infinity ? (
+                    <>0 CR (Creator <InfinitySymbol size={10} className="inline-block text-zinc-300" />)</>
+                  ) : (
+                    t.credits.estCost(estimated.minCost, estimated.maxCost)
+                  )}
                 </span>
                 {userCredits !== Infinity && estimated.isHardPrompt && (
                   <span className="flex items-center gap-0.5 text-[9px] font-bold text-zinc-300 px-1 py-0.2 rounded bg-zinc-800 border border-zinc-700">

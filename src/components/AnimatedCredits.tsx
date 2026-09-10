@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { NiximaCreditLogo } from './NiximaCreditLogo';
+import { InfinitySymbol } from './InfinitySymbol';
 
 interface UseAnimatedNumberOptions {
   duration?: number;
@@ -102,8 +103,8 @@ export const CreditBalanceChip: React.FC<CreditBalanceChipProps> = ({
       title={title}
     >
       <NiximaCreditLogo size={14} />
-      <span className="font-semibold tracking-tight tabular-nums font-mono text-zinc-100">
-        {isInfinite ? '∞' : displayValue.toLocaleString()}
+      <span className="font-semibold tracking-tight tabular-nums font-mono text-zinc-100 inline-flex items-center">
+        {isInfinite ? <InfinitySymbol size={13} className="text-zinc-100" /> : displayValue.toLocaleString()}
       </span>
       <span className="text-[10px] text-zinc-400 font-semibold uppercase">
         {unit}
@@ -136,8 +137,8 @@ export const CreditHeroCounter: React.FC<CreditHeroCounterProps> = ({
   return (
     <div className={`relative flex items-baseline gap-2 pt-1 ${className}`}>
       <NiximaCreditLogo size={24} className="self-center mr-0.5" />
-      <span className="text-4xl font-extrabold font-mono tracking-tight text-white tabular-nums">
-        {isInfinite ? '∞' : displayValue.toLocaleString()}
+      <span className="text-4xl font-extrabold font-mono tracking-tight text-white tabular-nums inline-flex items-center">
+        {isInfinite ? <InfinitySymbol size={32} glow className="text-white my-auto" /> : displayValue.toLocaleString()}
       </span>
       <span className="text-sm font-bold font-mono text-zinc-400">
         {unit}
@@ -172,7 +173,9 @@ export const CreditSidebarBadge: React.FC<CreditSidebarBadgeProps> = ({
       className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold border border-zinc-700/60 bg-zinc-900/90 text-zinc-300 flex-shrink-0 tabular-nums select-none ${className}`}
     >
       <NiximaCreditLogo size={11} />
-      <span>{isInfinite ? '∞' : displayValue.toLocaleString()} {unit}</span>
+      <span className="inline-flex items-center gap-0.5">
+        {isInfinite ? <InfinitySymbol size={10} className="text-zinc-200" /> : displayValue.toLocaleString()} {unit}
+      </span>
     </span>
   );
 };
