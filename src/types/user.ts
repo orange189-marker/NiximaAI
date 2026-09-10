@@ -7,6 +7,7 @@ export interface NiximaUser {
   role: string;   // e.g. "Founding Operator", "Pioneer Researcher"
   createdAt: number;
   avatarBg?: string;
+  preferredLanguage?: 'en' | 'uk';
 }
 
 export interface AuthSession {

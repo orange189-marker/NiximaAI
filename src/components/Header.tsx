@@ -18,6 +18,7 @@ import { ModelOption } from '../types/chat';
 import { NIXIMA_MODELS } from '../data/models';
 import { NiximaIdLogo } from './NiximaIdLogo';
 import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotkeys';
+import { useLanguage } from '../context/LanguageContext';
 
 interface HeaderProps {
   currentModel: ModelOption;
@@ -38,6 +39,7 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleSidebar,
   onNewChat
 }) => {
+  const { language, t } = useLanguage();
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [hotkeyConfig, setHotkeyConfig] = useState<HotkeyConfig>(() => getSavedHotkey());
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -78,8 +80,8 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
         <button
           onClick={onToggleSidebar}
-          className="p-1.5 sm:p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors"
-          title={isSidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+          className="p-1.5 sm:p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors cursor-pointer"
+          title={isSidebarOpen ? t.header.collapseSidebarTooltip : t.header.expandSidebarTooltip}
         >
           <Menu className="w-5 h-5" />
         </button>
@@ -89,10 +91,10 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onNewChat}
             className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all shadow-[0_0_12px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95 group cursor-pointer flex-shrink-0"
-            title={`New conversation (${hotkeyConfig.label})`}
+            title={`${t.header.newChatTooltip} (${hotkeyConfig.label})`}
           >
             <Plus className="w-3.5 h-3.5 stroke-[3] group-hover:rotate-90 transition-transform duration-200" />
-            <span>New chat</span>
+            <span>{t.header.newChatMobile}</span>
             <span className="text-[10px] font-mono text-zinc-600 hidden md:inline ml-0.5">
               {hotkeyConfig.label}
             </span>
@@ -121,17 +123,17 @@ export const Header: React.FC<HeaderProps> = ({
           type="button"
           onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
           className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/70 hover:border-zinc-500 transition-all duration-150 shadow-inner-light select-none cursor-pointer max-w-[170px] sm:max-w-none"
-          title={`Active model: ${currentModel.name}`}
+          title={`${t.common.active}: ${currentModel.name}`}
         >
           <div className="flex items-center gap-1.5 min-w-0">
             <span className="flex-shrink-0">{getModelIcon(currentModel.id)}</span>
             <span className="font-semibold text-xs sm:text-sm text-white tracking-tight whitespace-nowrap truncate">
-              {currentModel.name}
+              {t.models[currentModel.id]?.name || currentModel.name}
             </span>
           </div>
 
           <span className="hidden sm:inline-block text-[10px] font-mono px-1.5 py-0.2 rounded bg-white text-black font-bold tracking-wider uppercase flex-shrink-0">
-            {currentModel.badge}
+            {t.models[currentModel.id]?.badge || currentModel.badge}
           </span>
 
           <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 flex-shrink-0 transition-transform duration-200 ${isModelDropdownOpen ? 'rotate-180' : ''}`} />
@@ -150,17 +152,17 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="fixed left-3 right-3 top-16 z-50 max-w-sm mx-auto sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96 sm:max-w-none rounded-2xl bg-[#121215] border border-zinc-700/90 shadow-[0_10px_40px_rgba(0,0,0,0.9)] p-2.5 animate-fade-in backdrop-blur-2xl">
             <div className="px-3 py-2 border-b border-zinc-800/80 flex items-center justify-between">
               <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider font-mono">
-                Select Nixima Model
+                {t.header.selectModel}
               </span>
               <div className="flex items-center gap-2">
                 <span className="text-[11px] text-zinc-500 font-mono hidden sm:inline">
-                  Sovereign Engine
+                  {t.header.sovereignEngine}
                 </span>
                 <button
                   type="button"
                   onClick={() => setIsModelDropdownOpen(false)}
                   className="p-1 rounded-md text-zinc-400 hover:text-white sm:hidden cursor-pointer"
-                  title="Close menu"
+                  title={t.header.closeMenu}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -170,6 +172,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="mt-1 space-y-1 max-h-[60vh] sm:max-h-none overflow-y-auto">
               {NIXIMA_MODELS.map((model) => {
                 const isSelected = currentModel.id === model.id;
+                const modelTr = t.models[model.id];
                 return (
                   <button
                     key={model.id}
@@ -188,16 +191,16 @@ export const Header: React.FC<HeaderProps> = ({
                       <div className="flex items-center gap-2">
                         <span className="flex-shrink-0">{getModelIcon(model.id)}</span>
                         <span className="font-semibold text-sm text-white group-hover:text-white truncate">
-                          {model.name}
+                          {modelTr?.name || model.name}
                         </span>
                         {model.isFlagship && (
                           <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-white text-black font-bold flex-shrink-0">
-                            DEFAULT
+                            {t.header.defaultBadge}
                           </span>
                         )}
                       </div>
                       <p className="text-xs text-zinc-400 line-clamp-1">
-                        {model.description}
+                        {modelTr?.description || model.description}
                       </p>
                       <div className="flex items-center gap-2 pt-1">
                         <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">
@@ -222,7 +225,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="mt-2 pt-2 border-t border-zinc-800/80 px-2 flex items-center justify-between text-xs text-zinc-400">
               <span className="flex items-center gap-1.5 text-[11px] font-mono truncate mr-2">
                 <Cpu className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
-                <span className="truncate">Neural Sovereign Mesh</span>
+                <span className="truncate">{t.header.sovereignEngine}</span>
               </span>
               <button
                 type="button"
@@ -233,7 +236,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className="text-[11px] text-white hover:underline flex items-center gap-1 flex-shrink-0 cursor-pointer"
               >
                 <Sliders className="w-3 h-3" />
-                <span>Tuning</span>
+                <span>{t.header.tuning}</span>
               </button>
             </div>
           </div>
@@ -247,7 +250,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onNewChat}
             className="sm:hidden p-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black transition-all shadow-[0_0_10px_rgba(255,255,255,0.2)] active:scale-95 cursor-pointer flex items-center justify-center"
-            title={`New conversation (${hotkeyConfig.label})`}
+            title={`${t.header.newChatTooltip} (${hotkeyConfig.label})`}
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
           </button>
@@ -255,13 +258,13 @@ export const Header: React.FC<HeaderProps> = ({
 
         <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[11px] font-mono text-zinc-400">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span>Mesh Active</span>
+          <span>{t.header.meshActive}</span>
         </div>
 
         <button
           onClick={onOpenCompanyInfo}
           className="p-1.5 sm:p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors cursor-pointer"
-          title="About Nixima AI"
+          title={t.header.aboutTooltip}
         >
           <Info className="w-4 h-4" />
         </button>
@@ -269,7 +272,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           onClick={onOpenSettings}
           className="p-1.5 sm:p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors cursor-pointer"
-          title="Model & System Settings"
+          title={t.header.settingsTooltip}
         >
           <Settings className="w-4 h-4" />
         </button>

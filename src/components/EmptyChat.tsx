@@ -10,6 +10,7 @@ import {
   Code2
 } from 'lucide-react';
 import { ModelOption } from '../types/chat';
+import { useLanguage } from '../context/LanguageContext';
 
 interface EmptyChatProps {
   currentModel: ModelOption;
@@ -20,32 +21,21 @@ export const EmptyChat: React.FC<EmptyChatProps> = ({
   currentModel,
   onSelectPrompt
 }) => {
-  const promptSuggestions = [
-    {
-      icon: <Terminal className="w-4 h-4 text-zinc-300" />,
-      title: 'Distributed Rust Service',
-      prompt: 'Write an asynchronous high-throughput event loop in Rust using Tokio with lock-free queues.',
-      category: 'SYSTEMS'
-    },
-    {
-      icon: <Cpu className="w-4 h-4 text-zinc-300" />,
-      title: 'Nixima-0.1 Architecture',
-      prompt: 'Explain the internal Sparse Rotary Attention and Mixture-of-Experts architecture of Nixima-0.1.',
-      category: 'DEEP DIVE'
-    },
-    {
-      icon: <Code2 className="w-4 h-4 text-zinc-300" />,
-      title: 'Full-Stack React & AI',
-      prompt: 'Create a responsive React component that streams token embeddings with real-time audio visualization.',
-      category: 'FRONTEND'
-    },
-    {
-      icon: <Zap className="w-4 h-4 text-zinc-300" />,
-      title: 'System Optimization',
-      prompt: 'Diagnose memory leaks in Node.js event listeners and propose deterministic garbage collection tuning.',
-      category: 'PERFORMANCE'
-    }
+  const { t } = useLanguage();
+
+  const promptIcons = [
+    <Terminal className="w-4 h-4 text-zinc-300" />,
+    <Cpu className="w-4 h-4 text-zinc-300" />,
+    <Code2 className="w-4 h-4 text-zinc-300" />,
+    <Zap className="w-4 h-4 text-zinc-300" />,
   ];
+
+  const promptSuggestions = t.emptyChat.promptCards.map((card, idx) => ({
+    icon: promptIcons[idx % promptIcons.length],
+    title: card.title,
+    prompt: card.prompt,
+    category: card.category,
+  }));
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-6 max-w-3xl mx-auto w-full text-center select-none animate-fade-in">
@@ -53,17 +43,17 @@ export const EmptyChat: React.FC<EmptyChatProps> = ({
       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-700/60 mb-6 shadow-inner-light">
         <span className="w-2 h-2 rounded-full bg-white"></span>
         <span className="text-xs font-mono text-zinc-300">
-          Nixima Neural Engine • Model: {currentModel.name}
+          {t.emptyChat.brandBadge(currentModel.name)}
         </span>
       </div>
 
       {/* Hero Title */}
       <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-3 font-sans">
-        Where intelligence meets precision.
+        {t.emptyChat.heroTitle}
       </h1>
 
       <p className="text-sm text-zinc-400 max-w-md mx-auto mb-10 leading-relaxed">
-        Autonomous synthetic intelligence powered by the high-throughput <span className="text-white font-medium">{currentModel.name}</span> frontier reasoning engine.
+        {t.emptyChat.heroSubtitle(currentModel.name)}
       </p>
 
       {/* Suggestion Cards Grid */}
@@ -102,19 +92,19 @@ export const EmptyChat: React.FC<EmptyChatProps> = ({
           <div className="text-lg font-bold font-mono text-white">
             {currentModel.contextWindow.split(' ')[0]}
           </div>
-          <div className="text-[11px] text-zinc-400 uppercase tracking-wider font-mono">Context Window</div>
+          <div className="text-[11px] text-zinc-400 uppercase tracking-wider font-mono">{t.emptyChat.contextWindowLabel}</div>
         </div>
         <div>
           <div className="text-lg font-bold font-mono text-white">
             {currentModel.latency}
           </div>
-          <div className="text-[11px] text-zinc-400 uppercase tracking-wider font-mono">Throughput</div>
+          <div className="text-[11px] text-zinc-400 uppercase tracking-wider font-mono">{t.emptyChat.throughputLabel}</div>
         </div>
         <div>
           <div className="text-lg font-bold font-mono text-white">
             99.98%
           </div>
-          <div className="text-[11px] text-zinc-400 uppercase tracking-wider font-mono">Precision SLA</div>
+          <div className="text-[11px] text-zinc-400 uppercase tracking-wider font-mono">{t.emptyChat.precisionSlaLabel}</div>
         </div>
       </div>
     </div>

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { ModelOption } from '../types/chat';
 import { NiximaIdLogo } from './NiximaIdLogo';
+import { useLanguage } from '../context/LanguageContext';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -42,6 +43,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   soundEnabled,
   onToggleSound,
 }) => {
+  const { t } = useLanguage();
   const [input, setInput] = useState('');
   const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -103,10 +105,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   const modifiers = [
-    { label: 'Concise', icon: <Zap className="w-3 h-3 text-amber-400" />, prompt: '[Be concise and direct]' },
-    { label: 'Code Only', icon: <Code2 className="w-3 h-3 text-emerald-400" />, prompt: '[Provide production-ready code with minimal explanation]' },
-    { label: 'Deep Proof', icon: <BrainCircuit className="w-3 h-3 text-cyan-400" />, prompt: '[Formulate rigorous mathematical or logical derivation]' },
-    { label: 'Comparison Table', icon: <Table className="w-3 h-3 text-violet-400" />, prompt: '[Format output into structured markdown comparison tables]' },
+    { label: t.chatInput.modifiers.concise.label, icon: <Zap className="w-3 h-3 text-amber-400" />, prompt: t.chatInput.modifiers.concise.prompt },
+    { label: t.chatInput.modifiers.codeOnly.label, icon: <Code2 className="w-3 h-3 text-emerald-400" />, prompt: t.chatInput.modifiers.codeOnly.prompt },
+    { label: t.chatInput.modifiers.deepProof.label, icon: <BrainCircuit className="w-3 h-3 text-cyan-400" />, prompt: t.chatInput.modifiers.deepProof.prompt },
+    { label: t.chatInput.modifiers.table.label, icon: <Table className="w-3 h-3 text-violet-400" />, prompt: t.chatInput.modifiers.table.prompt },
   ];
 
   const canSubmit = (input.trim().length > 0 || attachedFiles.length > 0) && !isLoading;
@@ -117,7 +119,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       <div className="flex items-center gap-1.5 pb-2 overflow-x-auto text-[11px] font-mono select-none scrollbar-none">
         <span className="text-zinc-500 pl-1 text-[10px] uppercase tracking-wider font-semibold flex items-center gap-1 flex-shrink-0">
           <Sparkles className="w-3 h-3 text-zinc-500" />
-          <span>Modifier:</span>
+          <span>{t.chatInput.modifierLabel}</span>
         </span>
         {modifiers.map((m, idx) => (
           <button
@@ -168,7 +170,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask Nixima anything..."
+            placeholder={t.chatInput.placeholder}
             rows={1}
             disabled={isLoading}
             className="w-full bg-transparent text-zinc-100 placeholder:text-zinc-500 text-sm sm:text-base px-5 sm:px-6 pt-3.5 sm:pt-4 pb-2.5 resize-none focus:outline-none max-h-48 overflow-y-auto leading-relaxed font-sans select-text scrollbar-thin scrollbar-thumb-zinc-700"
@@ -181,7 +183,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               {/* Active Model Indicator Chip */}
               <div 
                 className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 border border-zinc-800 text-[11px] font-mono text-zinc-300 shadow-inner-light select-none mr-1"
-                title={`Active Inference Engine: ${currentModel.name}`}
+                title={`${t.header.sovereignEngine}: ${currentModel.name}`}
               >
                 <NiximaIdLogo size={13} glow={false} />
                 <span className="font-medium truncate max-w-[130px]">{currentModel.name}</span>
@@ -198,10 +200,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     ? 'bg-white text-black font-bold border-white shadow-[0_0_15px_rgba(255,255,255,0.35)] scale-[1.02]' 
                     : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-800/80'
                 }`}
-                title="Activate extended multi-step reasoning"
+                title={t.chatInput.deepThinkTooltip}
               >
                 <BrainCircuit className="w-3.5 h-3.5" />
-                <span>Deep Think</span>
+                <span>{t.chatInput.deepThink}</span>
                 {deepThink && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse ml-0.5" />}
               </button>
 
@@ -214,10 +216,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     ? 'bg-zinc-200 text-black font-bold border-zinc-200 shadow-glow-subtle' 
                     : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-800/80'
                 }`}
-                title="Search live web data"
+                title={t.chatInput.searchTooltip}
               >
                 <Globe className="w-3.5 h-3.5" />
-                <span>Search</span>
+                <span>{t.chatInput.search}</span>
               </button>
 
               {/* Audio Keystroke Sound Toggle */}
@@ -229,7 +231,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     ? 'bg-zinc-850 border-zinc-700 text-white shadow-inner-light'
                     : 'bg-zinc-900/80 border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
                 }`}
-                title={soundEnabled ? "Mute typing audio" : "Enable typing audio"}
+                title={soundEnabled ? t.chatInput.audioMute : t.chatInput.audioEnable}
               >
                 {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-zinc-200" /> : <VolumeX className="w-3.5 h-3.5" />}
               </button>
@@ -239,7 +241,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 type="button"
                 onClick={handleAttachMockFile}
                 className="p-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-white hover:bg-zinc-800/80 hover:border-zinc-700 transition-all duration-150"
-                title="Attach document context"
+                title={t.chatInput.attachTooltip}
               >
                 <Paperclip className="w-3.5 h-3.5" />
               </button>
@@ -249,7 +251,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             <div className="flex items-center gap-2.5">
               {input.length > 0 && (
                 <span className="hidden md:inline text-[10.5px] font-mono text-zinc-500 select-none">
-                  {input.length} chars
+                  {input.length} {t.chatInput.chars}
                 </span>
               )}
 
@@ -258,7 +260,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   type="button"
                   onClick={onStopGeneration}
                   className="relative group w-9 h-9 rounded-xl bg-white text-black flex items-center justify-center transition-all duration-150 shadow-[0_0_24px_rgba(255,255,255,0.4)] hover:bg-zinc-200 hover:scale-105 active:scale-95 cursor-pointer"
-                  title="Stop generation (Esc)"
+                  title={t.chatInput.stopTooltip}
                 >
                   <span className="absolute -inset-0.5 rounded-xl bg-white/40 animate-pulse pointer-events-none" />
                   <Square className="w-3.5 h-3.5 fill-black text-black" />
@@ -273,7 +275,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                       ? 'bg-white text-black hover:bg-zinc-100 hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(255,255,255,0.45)] ring-1 ring-white/60 cursor-pointer'
                       : 'bg-zinc-900/90 text-zinc-600 border border-zinc-800 cursor-not-allowed'
                   }`}
-                  title={canSubmit ? "Send message (Enter)" : "Type a prompt to send"}
+                  title={canSubmit ? t.chatInput.sendTooltip : t.chatInput.placeholder}
                 >
                   <ArrowUp className={`w-4 h-4 stroke-[2.5] transition-transform duration-150 ${
                     canSubmit ? 'group-hover:-translate-y-0.5 text-black' : 'text-zinc-600'
@@ -289,12 +291,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       <div className="mt-2 text-center text-[10.5px] text-zinc-500 font-mono tracking-tight flex items-center justify-center gap-2 select-none">
         <span>Nixima AI Mesh</span>
         <span>•</span>
-        <span>Online</span>
+        <span>{t.chatInput.meshOnline}</span>
         <span className="hidden sm:inline text-zinc-600">•</span>
         <span className="hidden sm:inline">
-          Press <kbd className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">Enter ↵</kbd> to send
+          {t.chatInput.enterToSend}
           <span className="mx-1 text-zinc-600">·</span>
-          <kbd className="px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">Shift + Enter</kbd> for newline
+          {t.chatInput.shiftEnterNewline}
         </span>
       </div>
     </div>

@@ -16,9 +16,12 @@ import { playTypingTick, playCompletionChime } from './utils/sound';
 import { getActiveUser, logoutUser, syncAccountsWithServer } from './utils/auth';
 import { getSavedHotkey, matchesHotkey } from './utils/hotkeys';
 
+import { LanguageProvider, useLanguage } from './context/LanguageContext';
+
 const STORAGE_KEY_MODEL = 'nixima_active_model_v4';
 
-export const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const { language, setLanguage, t } = useLanguage();
   // 1. Authentication state
   const [currentUser, setCurrentUser] = useState<NiximaUser | null>(() => getActiveUser());
 
@@ -99,6 +102,11 @@ export const App: React.FC = () => {
   // Load user data on authentication change
   const handleAuthenticated = (user: NiximaUser) => {
     setCurrentUser(user);
+    if (user.preferredLanguage) {
+      setLanguage(user.preferredLanguage);
+    }
+
+    const isUk = (user.preferredLanguage || language) === 'uk';
 
     // Load user's conversations
     const userConvRaw = localStorage.getItem(getConvKey(user.id));
@@ -116,7 +124,7 @@ export const App: React.FC = () => {
       // Seed welcome conversation for new user
       const welcomeChat: Conversation = {
         id: 'chat-welcome-' + Date.now(),
-        title: `Welcome to Nixima, ${user.name}`,
+        title: isUk ? `Вітаємо в Nixima, ${user.name}` : `Welcome to Nixima, ${user.name}`,
         createdAt: Date.now(),
         updatedAt: Date.now(),
         modelId: 'nixima-0.1',
@@ -125,7 +133,14 @@ export const App: React.FC = () => {
           {
             id: 'wm-1',
             role: 'assistant',
-            content: `### Welcome to Nixima AI, **${user.name}**!
+            content: isUk ? `### Ласкаво просимо до Nixima AI, **${user.name}**!
+
+Вашу суверенну ідентичність Nixima успішно активовано:
+- **Nixima Email**: \`${user.email}\`
+- **Роль**: \`${user.role}\`
+- **Нейрорушій**: \`Nixima-0.1\` Активний
+
+Усі діалоги та налаштування моделі в цьому робочому просторі є приватними та захищеними для вашого Nixima ID. Задайте питання нижче або оберіть підказку для дослідження.` : `### Welcome to Nixima AI, **${user.name}**!
 
 Your Sovereign Nixima Identity has been provisioned:
 - **Nixima Email**: \`${user.email}\`
@@ -210,7 +225,7 @@ All conversations and model preferences in this workspace are private to your Ni
     const newId = 'chat-' + Date.now();
     const newConv: Conversation = {
       id: newId,
-      title: 'New conversation',
+      title: t.sidebar.newChatButton,
       messages: [],
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -229,7 +244,7 @@ All conversations and model preferences in this workspace are private to your Ni
         const freshId = 'chat-' + Date.now();
         const freshConv: Conversation = {
           id: freshId,
-          title: 'New conversation',
+          title: t.sidebar.newChatButton,
           messages: [],
           createdAt: Date.now(),
           updatedAt: Date.now(),
@@ -273,7 +288,7 @@ All conversations and model preferences in this workspace are private to your Ni
     const freshId = 'chat-' + Date.now();
     const freshConv: Conversation = {
       id: freshId,
-      title: 'New conversation',
+      title: t.sidebar.newChatButton,
       messages: [],
       createdAt: Date.now(),
       updatedAt: Date.now(),
@@ -577,6 +592,14 @@ All conversations and model preferences in this workspace are private to your Ni
         onClose={() => setIsCompanyModalOpen(false)}
       />
     </div>
+  );
+};
+
+export const App: React.FC = () => {
+  return (
+    <LanguageProvider>
+      <AppContent />
+    </LanguageProvider>
   );
 };
 

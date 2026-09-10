@@ -1,5 +1,6 @@
 import React from 'react';
 import { X, Shield, Cpu, Zap, Globe, Sparkles, Terminal } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 interface CompanyModalProps {
   isOpen: boolean;
@@ -7,6 +8,7 @@ interface CompanyModalProps {
 }
 
 export const CompanyModal: React.FC<CompanyModalProps> = ({ isOpen, onClose }) => {
+  const { t } = useLanguage();
   if (!isOpen) return null;
 
   return (
@@ -34,13 +36,13 @@ export const CompanyModal: React.FC<CompanyModalProps> = ({ isOpen, onClose }) =
         <div className="p-6 space-y-6 text-sm text-zinc-300">
           <div>
             <div className="inline-block text-[10px] font-mono font-bold uppercase tracking-widest text-zinc-400 mb-1">
-              Company Overview
+              {t.company.overviewBadge}
             </div>
             <h3 className="text-lg font-bold text-white tracking-tight">
-              Architecting Sovereign Synthetic Intelligence
+              {t.company.heroHeading}
             </h3>
             <p className="mt-2 text-xs text-zinc-400 leading-relaxed">
-              Nixima AI is an artificial intelligence research and frontier technology company. We build sparse mixture-of-experts architectures that deliver radical inference efficiency, extended reasoning horizons, and verified mathematical correctness.
+              {t.company.heroDescription}
             </p>
           </div>
 
@@ -49,58 +51,58 @@ export const CompanyModal: React.FC<CompanyModalProps> = ({ isOpen, onClose }) =
             <div className="p-3 rounded-xl bg-zinc-900/80 border border-zinc-800">
               <div className="flex items-center gap-2 mb-1.5">
                 <Cpu className="w-4 h-4 text-white" />
-                <span className="font-semibold text-xs text-white">Nixima-0.1 Engine</span>
+                <span className="font-semibold text-xs text-white">{t.company.pillars.engineTitle}</span>
               </div>
               <p className="text-[11px] text-zinc-400 leading-normal">
-                480B parameter MoE flagship with dynamic token routing and 2M token context window.
+                {t.company.pillars.engineDesc}
               </p>
             </div>
 
             <div className="p-3 rounded-xl bg-zinc-900/80 border border-zinc-800">
               <div className="flex items-center gap-2 mb-1.5">
                 <Shield className="w-4 h-4 text-white" />
-                <span className="font-semibold text-xs text-white">Deterministic Logic</span>
+                <span className="font-semibold text-xs text-white">{t.company.pillars.logicTitle}</span>
               </div>
               <p className="text-[11px] text-zinc-400 leading-normal">
-                Autonomous step-by-step verification pipeline minimizing hallucinations to near-zero.
+                {t.company.pillars.logicDesc}
               </p>
             </div>
 
             <div className="p-3 rounded-xl bg-zinc-900/80 border border-zinc-800">
               <div className="flex items-center gap-2 mb-1.5">
                 <Terminal className="w-4 h-4 text-white" />
-                <span className="font-semibold text-xs text-white">Developer First</span>
+                <span className="font-semibold text-xs text-white">{t.company.pillars.developerTitle}</span>
               </div>
               <p className="text-[11px] text-zinc-400 leading-normal">
-                Native code synthesis, terminal tooling, and zero-latency streaming pipelines.
+                {t.company.pillars.developerDesc}
               </p>
             </div>
 
             <div className="p-3 rounded-xl bg-zinc-900/80 border border-zinc-800">
               <div className="flex items-center gap-2 mb-1.5">
                 <Globe className="w-4 h-4 text-white" />
-                <span className="font-semibold text-xs text-white">Edge Deployment</span>
+                <span className="font-semibold text-xs text-white">{t.company.pillars.edgeTitle}</span>
               </div>
               <p className="text-[11px] text-zinc-400 leading-normal">
-                High-performance distributed edge mesh running globally with sub-50ms latency.
+                {t.company.pillars.edgeDesc}
               </p>
             </div>
           </div>
 
           <div className="p-3 rounded-lg bg-zinc-900 border border-zinc-800/80 flex items-center justify-between text-xs font-mono">
-            <span className="text-zinc-400">Headquarters</span>
-            <span className="text-white">Zurich • San Francisco</span>
+            <span className="text-zinc-400">{t.company.hqLabel}</span>
+            <span className="text-white">{t.company.hqValue}</span>
           </div>
         </div>
 
         {/* Footer */}
         <div className="px-6 py-3 border-t border-zinc-800 bg-zinc-900/40 flex justify-between items-center text-xs text-zinc-500 font-mono">
-          <span>Nixima AI © 2026</span>
+          <span>{t.company.copyright}</span>
           <button
             onClick={onClose}
             className="px-4 py-1.5 rounded-lg bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition-colors shadow-glow-subtle"
           >
-            Close
+            {t.company.closeBtn}
           </button>
         </div>
       </div>

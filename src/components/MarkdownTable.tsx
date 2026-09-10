@@ -10,6 +10,7 @@ import {
   Download, 
   FileSpreadsheet
 } from 'lucide-react';
+import { useLanguage } from '../context/LanguageContext';
 
 export interface TableBlockData {
   headers: string[];
@@ -23,6 +24,7 @@ interface MarkdownTableProps {
 }
 
 export const MarkdownTable: React.FC<MarkdownTableProps> = ({ data }) => {
+  const { t } = useLanguage();
   const [sortCol, setSortCol] = useState<number | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('asc');
   const [filterQuery, setFilterQuery] = useState('');
@@ -181,7 +183,7 @@ export const MarkdownTable: React.FC<MarkdownTableProps> = ({ data }) => {
             <span className="font-semibold text-white uppercase tracking-wider">Data Matrix</span>
             <span className="text-zinc-600">•</span>
             <span className="text-zinc-400">
-              {filterQuery ? `${filteredRowCount} of ${totalRowCount} rows` : `${totalRowCount} rows`}
+              {t.table.showingRows(filteredRowCount, totalRowCount)}
             </span>
             <span className="text-zinc-600">•</span>
             <span className="text-zinc-500">{data.headers.length} cols</span>
@@ -198,7 +200,7 @@ export const MarkdownTable: React.FC<MarkdownTableProps> = ({ data }) => {
                 type="text"
                 value={filterQuery}
                 onChange={(e) => setFilterQuery(e.target.value)}
-                placeholder="Filter table..."
+                placeholder={t.table.filterPlaceholder}
                 autoFocus
                 className="pl-6 pr-2 py-1 w-32 sm:w-44 text-[11px] bg-zinc-950 border border-zinc-700/90 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400 focus:ring-1 focus:ring-white/20 transition-all font-mono"
               />
@@ -221,7 +223,7 @@ export const MarkdownTable: React.FC<MarkdownTableProps> = ({ data }) => {
               title="Search and filter table rows"
             >
               <Search className="w-3 h-3" />
-              <span className="hidden sm:inline">Filter</span>
+              <span className="hidden sm:inline">{t.common.filter}</span>
             </button>
           )}
 
@@ -235,7 +237,7 @@ export const MarkdownTable: React.FC<MarkdownTableProps> = ({ data }) => {
             title="Copy as CSV data"
           >
             {copiedCsv ? <Check className="w-3 h-3 text-emerald-400" /> : <FileSpreadsheet className="w-3 h-3" />}
-            <span className="hidden md:inline">{copiedCsv ? 'Copied' : 'CSV'}</span>
+            <span className="hidden md:inline">{copiedCsv ? t.table.copiedCsv : t.table.copyCsv}</span>
           </button>
 
           {/* Copy Markdown */}
@@ -246,7 +248,7 @@ export const MarkdownTable: React.FC<MarkdownTableProps> = ({ data }) => {
             title="Copy as Markdown table"
           >
             {copiedMd ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
-            <span className="hidden md:inline">{copiedMd ? 'Copied' : 'Markdown'}</span>
+            <span className="hidden md:inline">{copiedMd ? t.table.copiedMarkdown : t.table.copyMarkdown}</span>
           </button>
 
           {/* Download CSV File */}
@@ -257,7 +259,7 @@ export const MarkdownTable: React.FC<MarkdownTableProps> = ({ data }) => {
             title="Download CSV spreadsheet file"
           >
             <Download className="w-3 h-3" />
-            <span className="hidden sm:inline">Export</span>
+            <span className="hidden sm:inline">{t.table.exportCsv}</span>
           </button>
         </div>
       </div>

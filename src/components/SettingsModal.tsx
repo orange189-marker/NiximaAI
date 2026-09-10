@@ -18,7 +18,8 @@ import {
   FileText,
   ShieldAlert,
   Zap,
-  Keyboard
+  Keyboard,
+  Globe
 } from 'lucide-react';
 import { UserSettings, Conversation } from '../types/chat';
 import { NiximaUser } from '../types/user';
@@ -26,6 +27,7 @@ import { playTypingTick } from '../utils/sound';
 import { NiximaIdLogo } from './NiximaIdLogo';
 import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotkeys';
 import { HotkeyCustomizerModal } from './HotkeyCustomizerModal';
+import { useLanguage } from '../context/LanguageContext';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -52,6 +54,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   currentUser,
   onLogout,
 }) => {
+  const { language, setLanguage, t } = useLanguage();
   const [activeTab, setActiveTab] = useState<SettingsTab>('general');
   const [apiKeyCopied, setApiKeyCopied] = useState(false);
   const [importStatus, setImportStatus] = useState<string | null>(null);
@@ -116,28 +119,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     e.target.value = '';
   };
 
-  const tones = [
-    {
-      id: 'architect',
-      name: 'Frontier Architect',
-      desc: 'Rigorous, highly technical, precise systems design.'
-    },
-    {
-      id: 'cyberpunk',
-      name: 'Cyberpunk Hacker',
-      desc: 'Direct, sharp, minimal fluff, maximum execution speed.'
-    },
-    {
-      id: 'academic',
-      name: 'Academic Researcher',
-      desc: 'Theoretical rigor, mathematical deduction, citations.'
-    },
-    {
-      id: 'executive',
-      name: 'Executive Strategist',
-      desc: 'High-level synthesis, product vision, commercial impact.'
-    }
-  ];
+  const tones = t.settings.tones;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
@@ -149,7 +131,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               N
             </div>
             <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono">
-              Nixima AI Control Panel
+              {t.settings.title}
             </h2>
           </div>
           <button
@@ -169,7 +151,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             }`}
           >
             <User className="w-3.5 h-3.5" />
-            General
+            {t.settings.tabs.general}
           </button>
           <button
             onClick={() => setActiveTab('inference')}
@@ -178,7 +160,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             }`}
           >
             <Cpu className="w-3.5 h-3.5" />
-            Inference
+            {t.settings.tabs.inference}
           </button>
           <button
             onClick={() => setActiveTab('persona')}
@@ -187,7 +169,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             }`}
           >
             <Sparkles className="w-3.5 h-3.5" />
-            Persona
+            {t.settings.tabs.persona}
           </button>
           <button
             onClick={() => setActiveTab('data')}
@@ -196,7 +178,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             }`}
           >
             <Download className="w-3.5 h-3.5" />
-            Data & Backup
+            {t.settings.tabs.data}
           </button>
           <button
             onClick={() => setActiveTab('api')}
@@ -205,7 +187,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             }`}
           >
             <Key className="w-3.5 h-3.5" />
-            Mesh API
+            {t.settings.tabs.api}
           </button>
         </div>
 
@@ -214,6 +196,63 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* TAB 1: GENERAL */}
           {activeTab === 'general' && (
             <div className="space-y-5">
+              {/* Language Preference Selector */}
+              <div className="p-4 rounded-xl bg-zinc-900/90 border border-zinc-700/80 shadow-inner-light space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-white" />
+                    <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                      {t.settings.languageSectionTitle}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
+                    {language === 'uk' ? 'UA • 100% Локалізовано' : 'EN • Native Interface'}
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-400">
+                  {t.settings.languageSectionDesc}
+                </p>
+                <div className="grid grid-cols-2 gap-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setLanguage('uk')}
+                    className={`p-3 rounded-xl border text-left transition-all ${
+                      language === 'uk'
+                        ? 'bg-zinc-800 border-white text-white shadow-glow-subtle'
+                        : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                    }`}
+                  >
+                    <div className="text-xs font-bold font-mono flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <span className="text-base">🇺🇦</span>
+                        <span>{t.settings.languageUkTitle}</span>
+                      </span>
+                      {language === 'uk' && <Check className="w-3.5 h-3.5 text-white" />}
+                    </div>
+                    <div className="text-[11px] text-zinc-400 mt-1">{t.settings.languageUkDesc}</div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setLanguage('en')}
+                    className={`p-3 rounded-xl border text-left transition-all ${
+                      language === 'en'
+                        ? 'bg-zinc-800 border-white text-white shadow-glow-subtle'
+                        : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                    }`}
+                  >
+                    <div className="text-xs font-bold font-mono flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <span className="text-base">🇺🇸</span>
+                        <span>{t.settings.languageEnTitle}</span>
+                      </span>
+                      {language === 'en' && <Check className="w-3.5 h-3.5 text-white" />}
+                    </div>
+                    <div className="text-[11px] text-zinc-400 mt-1">{t.settings.languageEnDesc}</div>
+                  </button>
+                </div>
+              </div>
+
               {/* Nixima Account Identity Card */}
               {currentUser && (
                 <div className="p-4 rounded-xl bg-zinc-900/90 border border-zinc-700/80 shadow-inner-light space-y-3">
@@ -244,7 +283,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       }}
                       className="px-3 py-1.5 rounded-lg border border-red-900/60 bg-red-950/30 hover:bg-red-900/50 text-red-300 text-xs font-mono transition-colors"
                     >
-                      Sign Out
+                      {language === 'uk' ? 'Вийти' : 'Sign Out'}
                     </button>
                   </div>
                 </div>
@@ -253,7 +292,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               {/* Operator Name */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
-                  Display Nickname
+                  {language === 'uk' ? 'Відображуваний нікнейм' : 'Display Nickname'}
                 </label>
                 <input
                   type="text"
@@ -270,11 +309,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <div className="flex items-center gap-2">
                     <Volume2 className="w-4 h-4 text-white" />
                     <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">
-                      Synthetic Typing Audio
+                      {t.settings.audioEffectsTitle}
                     </span>
                   </div>
                   <p className="text-xs text-zinc-400">
-                    Play real-time mechanical keystrokes generated via Web Audio API during token streaming.
+                    {t.settings.audioEffectsDesc}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -282,9 +321,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     type="button"
                     onClick={() => playTypingTick()}
                     className="px-2 py-1 text-[10px] font-mono text-zinc-400 hover:text-white bg-zinc-800 rounded border border-zinc-700"
-                    title="Test audio tick"
+                    title={language === 'uk' ? 'Тестувати звук' : 'Test audio tick'}
                   >
-                    Test
+                    {language === 'uk' ? 'Тест' : 'Test'}
                   </button>
                   <button
                     type="button"
@@ -305,7 +344,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               {/* Theme Contrast Mode */}
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
-                  Contrast Atmosphere
+                  {t.settings.wallpaperTitle}
                 </label>
                 <div className="grid grid-cols-2 gap-3">
                   <button
@@ -317,8 +356,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:border-zinc-700'
                     }`}
                   >
-                    <div className="text-xs font-bold font-mono">Titanium Slate</div>
-                    <div className="text-[11px] text-zinc-400 mt-1">Deep zinc with frosted layers (#09090b)</div>
+                    <div className="text-xs font-bold font-mono">{language === 'uk' ? 'Титановий сланець' : 'Titanium Slate'}</div>
+                    <div className="text-[11px] text-zinc-400 mt-1">{language === 'uk' ? 'Глибокий цинк з матовими шарами (#09090b)' : 'Deep zinc with frosted layers (#09090b)'}</div>
                   </button>
 
                   <button
@@ -330,8 +369,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         : 'bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:border-zinc-700'
                     }`}
                   >
-                    <div className="text-xs font-bold font-mono">Pitch OLED Black</div>
-                    <div className="text-[11px] text-zinc-400 mt-1">True zero-light black (#000000)</div>
+                    <div className="text-xs font-bold font-mono">{language === 'uk' ? 'Глибокий OLED чорний' : 'Pitch OLED Black'}</div>
+                    <div className="text-[11px] text-zinc-400 mt-1">{language === 'uk' ? 'Справжній нульовий чорний (#000000)' : 'True zero-light black (#000000)'}</div>
                   </button>
                 </div>
               </div>
@@ -342,11 +381,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <div className="flex items-center gap-2">
                     <Keyboard className="w-4 h-4 text-white" />
                     <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">
-                      New Conversation Hotkey
+                      {t.settings.hotkeySectionTitle}
                     </span>
                   </div>
                   <p className="text-xs text-zinc-400">
-                    Active keybinding: <span className="text-white font-mono font-bold">{hotkeyConfig.label}</span> (Windows, macOS, iPad, and Phones).
+                    {t.settings.hotkeySectionDesc}: <span className="text-white font-mono font-bold">{hotkeyConfig.label}</span>.
                   </p>
                 </div>
                 <button
@@ -355,7 +394,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   className="px-3.5 py-2 rounded-xl bg-white hover:bg-zinc-200 text-black text-xs font-mono font-bold transition-all shadow-glow-subtle flex items-center gap-1.5 cursor-pointer whitespace-nowrap"
                 >
                   <Sliders className="w-3.5 h-3.5" />
-                  <span>Customize</span>
+                  <span>{t.settings.btnCustomizeHotkey}</span>
                 </button>
               </div>
             </div>
@@ -384,9 +423,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   className="w-full accent-white h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="flex justify-between text-[10px] font-mono text-zinc-400">
-                  <span>Deterministic (0.0)</span>
-                  <span>Balanced (0.7)</span>
-                  <span>Creative (1.0)</span>
+                  <span>{language === 'uk' ? 'Точний (0.0)' : 'Deterministic (0.0)'}</span>
+                  <span>{language === 'uk' ? 'Збалансований (0.7)' : 'Balanced (0.7)'}</span>
+                  <span>{language === 'uk' ? 'Творчий (1.0)' : 'Creative (1.0)'}</span>
                 </div>
               </div>
 
@@ -394,7 +433,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
-                    Top-P Nucleus Cutoff
+                    {t.settings.topPTitle}
                   </label>
                   <span className="text-xs font-mono text-white bg-zinc-800 px-2 py-0.5 rounded border border-zinc-700">
                     {(settings.topP || 0.95).toFixed(2)}
@@ -410,16 +449,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   className="w-full accent-white h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
                 />
                 <div className="flex justify-between text-[10px] font-mono text-zinc-400">
-                  <span>Focused (0.1)</span>
-                  <span>Standard (0.95)</span>
-                  <span>Broad (1.0)</span>
+                  <span>{language === 'uk' ? 'Фокусований (0.1)' : 'Focused (0.1)'}</span>
+                  <span>{language === 'uk' ? 'Стандартний (0.95)' : 'Standard (0.95)'}</span>
+                  <span>{language === 'uk' ? 'Широкий (1.0)' : 'Broad (1.0)'}</span>
                 </div>
               </div>
 
               {/* Max Tokens */}
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
-                  Max Output Tokens
+                  {t.settings.contextLimitTitle}
                 </label>
                 <div className="grid grid-cols-4 gap-2">
                   {[1024, 2048, 4096, 8192].map((num) => (
@@ -442,13 +481,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               {/* Stream Speed */}
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
-                  Streaming Throughput Emulation
+                  {language === 'uk' ? 'Швидкість стрімінгу генерації' : 'Streaming Throughput Emulation'}
                 </label>
                 <div className="grid grid-cols-3 gap-2">
                   {[
-                    { id: 'cinematic', label: 'Cinematic', desc: 'Slow typewriter' },
-                    { id: 'fast', label: 'Fast (Default)', desc: 'Frontier speed' },
-                    { id: 'instant', label: 'Instant', desc: 'Zero latency' },
+                    { id: 'cinematic', label: language === 'uk' ? 'Кінематографічна' : 'Cinematic', desc: language === 'uk' ? 'Повільний друк' : 'Slow typewriter' },
+                    { id: 'fast', label: language === 'uk' ? 'Швидка (Стандарт)' : 'Fast (Default)', desc: language === 'uk' ? 'Фронтирна швидкість' : 'Frontier speed' },
+                    { id: 'instant', label: language === 'uk' ? 'Миттєва' : 'Instant', desc: language === 'uk' ? 'Нульова затримка' : 'Zero latency' },
                   ].map((spd) => (
                     <button
                       key={spd.id}
@@ -475,16 +514,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               {/* Tone Presets */}
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
-                  Frontier Persona Archetype
+                  {t.settings.personaToneTitle}
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {tones.map((t) => {
-                    const isSelected = settings.personaTone === t.id;
+                  {tones.map((toneItem) => {
+                    const isSelected = settings.personaTone === toneItem.id;
                     return (
                       <button
-                        key={t.id}
+                        key={toneItem.id}
                         type="button"
-                        onClick={() => onUpdateSettings({ personaTone: t.id as any })}
+                        onClick={() => onUpdateSettings({ personaTone: toneItem.id as any })}
                         className={`p-3 rounded-xl border text-left transition-all ${
                           isSelected
                             ? 'bg-zinc-800 border-white text-white shadow-glow-subtle'
@@ -492,10 +531,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         }`}
                       >
                         <div className="text-xs font-bold text-white flex items-center justify-between">
-                          <span>{t.name}</span>
+                          <span>{toneItem.name}</span>
                           {isSelected && <Check className="w-3.5 h-3.5 text-white" />}
                         </div>
-                        <p className="text-[11px] text-zinc-400 mt-1 leading-snug">{t.desc}</p>
+                        <p className="text-[11px] text-zinc-400 mt-1 leading-snug">{toneItem.desc}</p>
                       </button>
                     );
                   })}
@@ -505,7 +544,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               {/* System Directive */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
-                  Custom System Instructions
+                  {t.settings.systemPromptTitle}
                 </label>
                 <textarea
                   rows={4}
@@ -531,10 +570,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="p-4 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-3">
                 <div>
                   <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
-                    Conversation Vault Backup
+                    {t.settings.exportDataTitle}
                   </h3>
                   <p className="text-xs text-zinc-400 mt-1">
-                    Export your full conversation sessions as a JSON file or restore from a backup.
+                    {t.settings.exportDataDesc}
                   </p>
                 </div>
 
@@ -545,7 +584,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     className="px-3.5 py-2 rounded-lg bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition-colors flex items-center gap-2"
                   >
                     <Download className="w-3.5 h-3.5" />
-                    Export All Chats ({conversations.length})
+                    {t.settings.btnExportJson} ({conversations.length})
                   </button>
 
                   <input
@@ -561,7 +600,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     className="px-3.5 py-2 rounded-lg bg-zinc-800 text-zinc-200 hover:text-white font-medium text-xs hover:bg-zinc-700 transition-colors flex items-center gap-2 border border-zinc-700"
                   >
                     <Upload className="w-3.5 h-3.5" />
-                    Import From Backup
+                    {t.settings.btnImportJson}
                   </button>
                 </div>
               </div>
@@ -571,16 +610,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div className="flex items-center gap-2 text-red-400">
                   <ShieldAlert className="w-4 h-4" />
                   <span className="text-xs font-bold uppercase tracking-wider font-mono">
-                    Danger Zone
+                    {t.settings.dangerZoneTitle}
                   </span>
                 </div>
                 <p className="text-xs text-zinc-400">
-                  Permanently erase all stored conversations and reset local preferences.
+                  {t.settings.dangerZoneDesc}
                 </p>
                 <button
                   type="button"
                   onClick={() => {
-                    if (confirm('Are you sure you want to permanently clear all conversation history?')) {
+                    if (confirm(language === 'uk' ? 'Ви впевнені, що хочете назавжди очистити всю історію діалогів?' : 'Are you sure you want to permanently clear all conversation history?')) {
                       onClearAllChats();
                       onClose();
                     }
@@ -588,7 +627,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   className="mt-2 py-2 px-3 rounded-lg border border-red-800/80 bg-red-950/40 hover:bg-red-900/60 text-red-300 text-xs font-semibold flex items-center justify-center gap-2 transition-colors"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  Clear Entire Vault
+                  {t.settings.btnClearAll}
                 </button>
               </div>
             </div>
@@ -600,26 +639,26 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="p-4 rounded-xl bg-emerald-950/20 border border-emerald-800/40 space-y-1.5">
                 <div className="flex items-center gap-2 text-emerald-400 font-mono text-xs font-semibold">
                   <Check className="w-4 h-4" />
-                  <span>Real AI Engine: Active & Pre-configured</span>
+                  <span>{language === 'uk' ? 'Реальний AI рушій: Активний та налаштований' : 'Real AI Engine: Active & Pre-configured'}</span>
                 </div>
                 <p className="text-xs text-zinc-300">
-                  Your models are directly connected and powered by high-performance free AI clusters. No API key setup or manual configuration is required.
+                  {language === 'uk' ? 'Ваші моделі безпосередньо підключені та працюють на високопродуктивних безкоштовних кластерах AI. Ручне налаштування ключів API не потрібне.' : 'Your models are directly connected and powered by high-performance free AI clusters. No API key setup or manual configuration is required.'}
                 </p>
                 <div className="pt-2 flex items-center gap-2 text-[11px] font-mono text-zinc-400">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>Status: Ready • Unlimited Free Tier</span>
+                  <span>{language === 'uk' ? 'Статус: Готовий • Необмежений рівень' : 'Status: Ready • Unlimited Free Tier'}</span>
                 </div>
               </div>
 
               {/* Underlying Free Model Architecture Mapping */}
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
-                  Nixima Neural Routing Matrix
+                  {language === 'uk' ? 'Матриця нейронної маршрутизації Nixima' : 'Nixima Neural Routing Matrix'}
                 </label>
                 <div className="rounded-xl border border-zinc-800 overflow-hidden text-xs font-mono">
                   <div className="grid grid-cols-2 p-2.5 bg-zinc-900/90 border-b border-zinc-800 text-zinc-400 text-[11px] font-semibold">
-                    <span>Nixima Model</span>
-                    <span>Active Free AI Engine</span>
+                    <span>{language === 'uk' ? 'Модель Nixima' : 'Nixima Model'}</span>
+                    <span>{language === 'uk' ? 'Активний AI рушій' : 'Active Free AI Engine'}</span>
                   </div>
                   <div className="divide-y divide-zinc-800/60 bg-zinc-950/50">
                     <div className="grid grid-cols-2 p-2.5 items-center">
@@ -654,7 +693,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             onClick={onClose}
             className="px-4 py-1.5 rounded-lg bg-white text-black font-semibold text-xs hover:bg-zinc-200 transition-colors shadow-glow-subtle"
           >
-            Save & Close
+            {t.settings.btnDone}
           </button>
         </div>
       </div>

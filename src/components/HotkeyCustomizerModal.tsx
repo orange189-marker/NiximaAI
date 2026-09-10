@@ -24,6 +24,7 @@ import {
   buildCustomHotkeyFromEvent
 } from '../utils/hotkeys';
 import { playTypingTick, playCompletionChime, playOpticToggle } from '../utils/sound';
+import { useLanguage } from '../context/LanguageContext';
 
 interface HotkeyCustomizerModalProps {
   isOpen: boolean;
@@ -36,6 +37,7 @@ export const HotkeyCustomizerModal: React.FC<HotkeyCustomizerModalProps> = ({
   onClose,
   onHotkeyChange
 }) => {
+  const { language, t } = useLanguage();
   const [activePlatform, setActivePlatform] = useState<PlatformType>(() => detectPlatform());
   const [currentConfig, setCurrentConfig] = useState<HotkeyConfig>(() => getSavedHotkey());
   const [isRecording, setIsRecording] = useState(false);
@@ -135,13 +137,13 @@ export const HotkeyCustomizerModal: React.FC<HotkeyCustomizerModalProps> = ({
             </div>
             <div>
               <h3 className="text-sm font-bold tracking-tight text-white uppercase flex items-center gap-1.5">
-                <span>New Conversation Hotkey</span>
+                <span>{t.hotkeys.title}</span>
                 <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-300 text-[9px] border border-zinc-700">
-                  Customizer
+                  {language === 'uk' ? 'Налаштування' : 'Customizer'}
                 </span>
               </h3>
               <p className="text-[11px] text-zinc-400 font-sans">
-                Tailor keyboard shortcuts and touch badges for Windows, macOS, iPad, and phones.
+                {t.hotkeys.subtitle}
               </p>
             </div>
           </div>
@@ -158,9 +160,9 @@ export const HotkeyCustomizerModal: React.FC<HotkeyCustomizerModalProps> = ({
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-[11px]">
             <span className="text-zinc-400 font-semibold uppercase tracking-wider flex items-center gap-1.5">
-              <span>Platform Profile</span>
+              <span>{t.hotkeys.deviceProfile}</span>
               <span className="px-1.5 py-0.2 rounded-full bg-emerald-950/70 border border-emerald-800 text-emerald-400 text-[9px]">
-                Detected: {getPlatformName(detectPlatform())}
+                {language === 'uk' ? 'Виявлено' : 'Detected'}: {getPlatformName(detectPlatform())}
               </span>
             </span>
           </div>
@@ -193,7 +195,7 @@ export const HotkeyCustomizerModal: React.FC<HotkeyCustomizerModalProps> = ({
         {/* Live Keycap Badge Preview */}
         <div className="p-4 rounded-xl bg-gradient-to-b from-zinc-900/90 to-zinc-950/95 border border-zinc-800 space-y-2">
           <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold block">
-            Live Button Preview in Sidebar
+            {language === 'uk' ? 'Попередній перегляд кнопки у бічній панелі' : 'Live Button Preview in Sidebar'}
           </span>
           <div className="flex items-center justify-between p-3 rounded-xl bg-zinc-950 border border-zinc-800/80 shadow-inner">
             <div className="flex items-center gap-2.5">
@@ -201,7 +203,7 @@ export const HotkeyCustomizerModal: React.FC<HotkeyCustomizerModalProps> = ({
                 <Plus className="w-3.5 h-3.5 stroke-[3]" />
               </div>
               <span className="font-bold text-xs text-white">
-                New conversation
+                {t.sidebar.newChatButton}
               </span>
             </div>
 
@@ -222,7 +224,7 @@ export const HotkeyCustomizerModal: React.FC<HotkeyCustomizerModalProps> = ({
         {/* Presets Grid */}
         <div className="space-y-2">
           <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">
-            Recommended Presets for {getPlatformName(activePlatform)}
+            {t.hotkeys.presetsTitle} ({getPlatformName(activePlatform)})
           </span>
           <div className="grid grid-cols-2 gap-2">
             {(HOTKEY_PRESETS.find(p => p.platform === (activePlatform === 'linux' ? 'windows' : activePlatform))?.presets || []).map((preset) => {
@@ -262,11 +264,11 @@ export const HotkeyCustomizerModal: React.FC<HotkeyCustomizerModalProps> = ({
           <div className="flex items-center justify-between">
             <span className="text-[10.5px] font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
               <Sliders className="w-3 h-3 text-zinc-400" />
-              <span>Interactive Custom Key Record</span>
+              <span>{t.hotkeys.recordTitle}</span>
             </span>
             {isRecording && (
               <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-950 border border-amber-700 text-amber-300 animate-pulse">
-                Listening...
+                {t.hotkeys.recordActive}
               </span>
             )}
           </div>
@@ -275,7 +277,7 @@ export const HotkeyCustomizerModal: React.FC<HotkeyCustomizerModalProps> = ({
             type="button"
             onClick={() => {
               setIsRecording(true);
-              setRecordedKeysMsg('Press any key combo on your keyboard now (e.g. Alt+N, Ctrl+J)...');
+              setRecordedKeysMsg(language === 'uk' ? 'Натисніть комбінацію клавіш на клавіатурі (наприклад, Alt+N, Ctrl+J)...' : 'Press any key combo on your keyboard now (e.g. Alt+N, Ctrl+J)...');
             }}
             className={`w-full py-2 px-3 rounded-lg border text-xs font-mono transition-all flex items-center justify-center gap-2 cursor-pointer ${
               isRecording
@@ -286,8 +288,8 @@ export const HotkeyCustomizerModal: React.FC<HotkeyCustomizerModalProps> = ({
             <Keyboard className="w-3.5 h-3.5" />
             <span>
               {isRecording 
-                ? 'Listening: Press keys on keyboard...' 
-                : 'Click to Record Custom Key Combination'}
+                ? t.hotkeys.recordActive 
+                : t.hotkeys.recordPrompt}
             </span>
           </button>
 
@@ -305,8 +307,8 @@ export const HotkeyCustomizerModal: React.FC<HotkeyCustomizerModalProps> = ({
             onClick={handleReset}
             className="text-[11px] text-zinc-400 hover:text-white flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            <RotateCcw className="w-3 h-3" />
-            <span>Reset to Default</span>
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>{t.hotkeys.btnResetDefault}</span>
           </button>
 
           <div className="flex items-center gap-2">
@@ -315,14 +317,14 @@ export const HotkeyCustomizerModal: React.FC<HotkeyCustomizerModalProps> = ({
               onClick={onClose}
               className="px-3.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer"
             >
-              Cancel
+              {t.hotkeys.btnCancel}
             </button>
             <button
               type="button"
               onClick={handleSaveAndClose}
               className="px-4 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-bold text-xs uppercase tracking-wider transition-all shadow-glow-subtle cursor-pointer"
             >
-              Save & Apply
+              {t.hotkeys.btnSave}
             </button>
           </div>
         </div>

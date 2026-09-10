@@ -194,7 +194,12 @@ export function loginUser(handleOrEmail: string, passphrase: string): NiximaUser
   return matched;
 }
 
-export async function registerUserAsync(name: string, handle: string, passphrase: string): Promise<NiximaUser> {
+export async function registerUserAsync(
+  name: string, 
+  handle: string, 
+  passphrase: string,
+  preferredLanguage?: 'en' | 'uk'
+): Promise<NiximaUser> {
   const cleanName = name.trim();
   const cleanHandle = handle.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '').replace('@nixima.ai', '');
 
@@ -232,6 +237,7 @@ export async function registerUserAsync(name: string, handle: string, passphrase
     role: 'Pioneer Researcher',
     createdAt: Date.now(),
     avatarBg: 'from-zinc-800 to-zinc-950 text-white',
+    preferredLanguage: preferredLanguage || 'en',
   };
 
   const updated = [newUser, ...currentUsers.filter(u => u.handle.toLowerCase() !== cleanHandle)];
@@ -253,7 +259,12 @@ export async function registerUserAsync(name: string, handle: string, passphrase
   return newUser;
 }
 
-export function registerUser(name: string, handle: string, passphrase: string): NiximaUser {
+export function registerUser(
+  name: string, 
+  handle: string, 
+  passphrase: string,
+  preferredLanguage?: 'en' | 'uk'
+): NiximaUser {
   const users = getAllUsers();
   const cleanName = name.trim();
   const cleanHandle = handle.trim().toLowerCase().replace(/[^a-z0-9._-]/g, '').replace('@nixima.ai', '');
@@ -284,6 +295,7 @@ export function registerUser(name: string, handle: string, passphrase: string): 
     role: 'Pioneer Researcher',
     createdAt: Date.now(),
     avatarBg: 'from-zinc-800 to-zinc-950 text-white',
+    preferredLanguage: preferredLanguage || 'en',
   };
 
   const updated = [newUser, ...users];

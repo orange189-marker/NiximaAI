@@ -40,12 +40,14 @@ import { playTypingTick, playCompletionChime, playOpticToggle, playVaultUnlockCh
 import { DynamicWallpaper } from './DynamicWallpaper';
 import { AnimatedEye } from './AnimatedEye';
 import { NiximaIdLogo } from './NiximaIdLogo';
+import { useLanguage } from '../context/LanguageContext';
 
 interface AuthPortalProps {
   onAuthenticated: (user: NiximaUser) => void;
 }
 
 export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
+  const { language, setLanguage, t } = useLanguage();
   // Quick Pass state (1-Click Fast Sign-In)
   const [quickPassUser, setQuickPassUser] = useState<NiximaUser | null>(() => getQuickPassUser());
   const [quickPassEnabled, setQuickPassEnabledState] = useState<boolean>(() => isQuickPassEnabled());
@@ -296,7 +298,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
 
     try {
       playTypingTick();
-      const user = await registerUserAsync(regName, cleanHandle, regPassphrase);
+      const user = await registerUserAsync(regName, cleanHandle, regPassphrase, language);
       if (quickPassEnabled) {
         saveQuickPassUser(user);
       }
@@ -355,10 +357,10 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
             <div className="space-y-1.5">
               <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-800/80 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">
                 <Check className="w-3 h-3 stroke-[3]" />
-                <span>Identity Authorized</span>
+                <span>{t.common.status}: {t.auth.vaultLaunch.stepReady}</span>
               </div>
               <h2 className="text-xl font-bold text-white tracking-tight">
-                Welcome, {launchingUser.name}
+                {t.auth.quickPassTitle}, {launchingUser.name}
               </h2>
               <p className="text-xs text-zinc-400 font-mono">
                 {launchingUser.email}
@@ -372,10 +374,10 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                   <span>
                     {launchProgress < 40
-                      ? 'Decrypting Sovereign Vault...'
+                      ? t.auth.vaultLaunch.stepDecrypt
                       : launchProgress < 85
-                      ? 'Binding Neural Mesh Nodes...'
-                      : 'Workspace Initialized'}
+                      ? t.auth.vaultLaunch.stepNodes
+                      : t.auth.vaultLaunch.stepReady}
                   </span>
                 </span>
                 <span className="font-bold text-white">{launchProgress}%</span>
@@ -395,6 +397,48 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
           /* VIEW B: PORTAL INTERFACES                                      */
           /* ============================================================== */
           <>
+            {/* Top Bar: Sovereign Mesh status & Language Switcher Pill */}
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="truncate max-w-[200px] sm:max-w-none">{t.auth.badgeSovereignMesh}</span>
+              </div>
+
+              {/* Language Switcher Pill */}
+              <div className="flex items-center gap-1 p-0.5 rounded-full bg-zinc-900/90 border border-zinc-800 text-[10px] font-mono select-none flex-shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLanguage('uk');
+                    playTypingTick();
+                  }}
+                  className={`px-2 py-0.5 rounded-full transition-all cursor-pointer ${
+                    language === 'uk'
+                      ? 'bg-white text-black font-bold shadow-sm'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                  title="Перемкнути на українську мову"
+                >
+                  UA
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setLanguage('en');
+                    playTypingTick();
+                  }}
+                  className={`px-2 py-0.5 rounded-full transition-all cursor-pointer ${
+                    language === 'en'
+                      ? 'bg-white text-black font-bold shadow-sm'
+                      : 'text-zinc-400 hover:text-white'
+                  }`}
+                  title="Switch to English"
+                >
+                  EN
+                </button>
+              </div>
+            </div>
+
             {/* Nixima Brand Emblem */}
             <div className="text-center mb-5">
               <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-zinc-950/90 border border-zinc-800 shadow-[0_0_35px_rgba(255,255,255,0.14)] mb-3">
@@ -407,7 +451,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                 </h1>
               </div>
               <p className="text-xs text-zinc-400 font-mono">
-                Frontier Intelligence Mesh • Sovereign Identity Vault
+                {language === 'uk' ? 'Суверенне сховище цифрової ідентичності' : 'Frontier Intelligence Mesh • Sovereign Identity Vault'}
               </p>
             </div>
 
@@ -426,11 +470,11 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                   <div className="flex items-center justify-between">
                     <span className="inline-flex items-center gap-1.5 text-[10px] text-zinc-400 uppercase font-bold tracking-wider">
                       <Zap className="w-3.5 h-3.5 text-white fill-white" />
-                      <span>Ready-Set Fast Sign-In</span>
+                      <span>{t.auth.quickPassTitle}</span>
                     </span>
                     <span className="px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-800 text-emerald-400 text-[9px] font-bold flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      <span>1-Click Ready</span>
+                      <span>{t.auth.quickPassBadge}</span>
                     </span>
                   </div>
 
@@ -443,7 +487,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                       <div className="text-sm font-bold text-white truncate flex items-center gap-2">
                         <span>{quickPassUser.name}</span>
                         <span className="text-[9px] px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-300 border border-zinc-700 font-normal">
-                          {quickPassUser.role || 'Operator'}
+                          {quickPassUser.role || (language === 'uk' ? 'Оператор' : 'Operator')}
                         </span>
                       </div>
                       <div className="text-xs text-zinc-400 font-mono truncate">
@@ -460,7 +504,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                     className="w-full py-3.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs uppercase tracking-wider transition-all duration-150 shadow-[0_0_25px_rgba(255,255,255,0.3)] flex items-center justify-center gap-2 group cursor-pointer"
                   >
                     <Zap className="w-4 h-4 fill-black" />
-                    <span>Fast Sign In as {quickPassUser.name.split(' ')[0]}</span>
+                    <span>{language === 'uk' ? `Увійти як ${quickPassUser.name.split(' ')[0]}` : `Fast Sign In as ${quickPassUser.name.split(' ')[0]}`}</span>
                     <ArrowRight className="w-3.5 h-3.5 stroke-[2.5] group-hover:translate-x-0.5 transition-transform" />
                   </button>
 
@@ -481,15 +525,15 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                         }}
                         className="rounded bg-zinc-900 border-zinc-700 text-white focus:ring-0"
                       />
-                      <span>Enable 1-Click Fast Sign-In</span>
+                      <span>{t.auth.rememberTerminal}</span>
                     </label>
 
                     <button
                       type="button"
                       onClick={() => setShowManualAuth(true)}
-                      className="text-zinc-400 hover:text-white underline transition-colors"
+                      className="text-zinc-400 hover:text-white underline transition-colors cursor-pointer"
                     >
-                      Switch Account
+                      {t.auth.switchIdentity.split('/')[0].trim()}
                     </button>
                   </div>
                 </div>
@@ -503,10 +547,10 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                       setMode('register');
                       setRegisterStep(1);
                     }}
-                    className="text-xs text-zinc-400 hover:text-white flex items-center justify-center gap-1.5 mx-auto transition-colors"
+                    className="text-xs text-zinc-400 hover:text-white flex items-center justify-center gap-1.5 mx-auto transition-colors cursor-pointer"
                   >
                     <NiximaIdLogo size={14} glow={false} />
-                    <span>Create a new / different Nixima ID →</span>
+                    <span>{t.auth.btnSwitchAccount} →</span>
                   </button>
                 </div>
               </div>
@@ -518,10 +562,10 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                   <button
                     type="button"
                     onClick={() => setShowManualAuth(false)}
-                    className="text-xs font-mono text-zinc-400 hover:text-white flex items-center gap-1.5 mb-2 transition-colors"
+                    className="text-xs font-mono text-zinc-400 hover:text-white flex items-center gap-1.5 mb-2 transition-colors cursor-pointer"
                   >
                     <ChevronLeft className="w-3.5 h-3.5" />
-                    <span>Return to 1-Click Sign-In ({quickPassUser.name.split(' ')[0]})</span>
+                    <span>{language === 'uk' ? `Повернутися до швидкого входу (${quickPassUser.name.split(' ')[0]})` : `Return to 1-Click Sign-In (${quickPassUser.name.split(' ')[0]})`}</span>
                   </button>
                 )}
 
@@ -530,26 +574,26 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                   <button
                     type="button"
                     onClick={() => { setMode('register'); setError(null); }}
-                    className={`py-2 px-3 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 ${
+                    className={`py-2 px-3 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                       mode === 'register'
                         ? 'bg-white text-black font-bold shadow-glow-subtle'
                         : 'text-zinc-400 hover:text-white'
                     }`}
                   >
                     <NiximaIdLogo size={14} glow={false} />
-                    <span>Create Nixima ID</span>
+                    <span>{t.auth.registerTab}</span>
                   </button>
                   <button
                     type="button"
                     onClick={() => { setMode('signin'); setError(null); }}
-                    className={`py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 ${
+                    className={`py-2 rounded-lg font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
                       mode === 'signin'
                         ? 'bg-white text-black font-bold shadow-glow-subtle'
                         : 'text-zinc-400 hover:text-white'
                     }`}
                   >
                     <Key className="w-3.5 h-3.5" />
-                    <span>Sign In</span>
+                    <span>{t.auth.signInTab}</span>
                   </button>
                 </div>
 
@@ -569,7 +613,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                         className={`flex items-center gap-2 transition-colors ${
                           registerStep === 1
                             ? 'text-white font-bold'
-                            : 'text-emerald-400 font-medium hover:underline'
+                            : 'text-emerald-400 font-medium hover:underline cursor-pointer'
                         }`}
                       >
                         <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${
@@ -579,7 +623,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                         }`}>
                           {registerStep > 1 ? <Check className="w-3 h-3 stroke-[3]" /> : '1'}
                         </span>
-                        <span>01. Create ID</span>
+                        <span>{language === 'uk' ? '01. Створити ID' : '01. Create ID'}</span>
                       </button>
 
                       {/* Connecting Line */}
@@ -600,7 +644,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                         }`}>
                           2
                         </span>
-                        <span>02. Register Account</span>
+                        <span>{language === 'uk' ? '02. Обліковий запис' : '02. Register Account'}</span>
                       </div>
                     </div>
                   </div>
@@ -609,11 +653,62 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                 {/* STEP 1: CREATE NIXIMA ID */}
                 {mode === 'register' && registerStep === 1 && (
                   <form onSubmit={handleProceedToStep2} className="space-y-4 text-xs font-mono">
+                    {/* Explicit Language Selector while registering */}
+                    <div className="space-y-1.5 p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800/80">
+                      <div className="flex items-center justify-between text-[11px]">
+                        <span className="text-zinc-300 font-medium flex items-center gap-1.5">
+                          <Globe className="w-3.5 h-3.5 text-zinc-400" />
+                          <span>{t.auth.step1LanguageLabel}</span>
+                        </span>
+                        <span className="text-[10px] text-zinc-500 font-mono">
+                          {language === 'uk' ? 'Українська' : 'English'}
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 pt-0.5">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLanguage('uk');
+                            playTypingTick();
+                          }}
+                          className={`py-2 px-3 rounded-lg border flex items-center justify-between text-xs font-medium transition-all cursor-pointer ${
+                            language === 'uk'
+                              ? 'bg-zinc-800 border-white/60 text-white shadow-glow-subtle font-bold'
+                              : 'bg-zinc-950/60 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                          }`}
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <span>🇺🇦</span>
+                            <span>Українська</span>
+                          </span>
+                          {language === 'uk' && <Check className="w-3 h-3 text-emerald-400 stroke-[3]" />}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLanguage('en');
+                            playTypingTick();
+                          }}
+                          className={`py-2 px-3 rounded-lg border flex items-center justify-between text-xs font-medium transition-all cursor-pointer ${
+                            language === 'en'
+                              ? 'bg-zinc-800 border-white/60 text-white shadow-glow-subtle font-bold'
+                              : 'bg-zinc-950/60 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
+                          }`}
+                        >
+                          <span className="flex items-center gap-1.5">
+                            <span>🇺🇸</span>
+                            <span>English</span>
+                          </span>
+                          {language === 'en' && <Check className="w-3 h-3 text-emerald-400 stroke-[3]" />}
+                        </button>
+                      </div>
+                    </div>
+
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
                         <label className="text-zinc-400 uppercase tracking-wider text-[11px] font-semibold flex items-center gap-1.5">
                           <NiximaIdLogo size={13} glow={false} />
-                          <span>Choose Your Nixima Handle</span>
+                          <span>{t.auth.handleLabel}</span>
                         </label>
                         {cleanHandle.length >= 3 && (
                           <span className={`text-[10px] font-mono flex items-center gap-1 ${
@@ -622,12 +717,12 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                             {isCheckingHandle ? (
                               <>
                                 <RefreshCw className="w-2.5 h-2.5 animate-spin" />
-                                <span>Checking mesh...</span>
+                                <span>{t.auth.checkingHandle}</span>
                               </>
                             ) : availability.available ? (
-                              <span>✓ Available</span>
+                              <span>✓ {t.auth.handleAvailable}</span>
                             ) : (
-                              <span>✕ Taken</span>
+                              <span>✕ {t.auth.handleTaken}</span>
                             )}
                           </span>
                         )}
@@ -641,7 +736,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                             setRegHandle(e.target.value);
                             if (error) setError(null);
                           }}
-                          placeholder="e.g. alex or bogdan"
+                          placeholder={t.auth.handlePlaceholder}
                           autoFocus
                           required
                           className="w-full pl-3.5 pr-24 py-2.5 bg-[#09090d]/90 border border-zinc-800/90 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400 focus:ring-1 focus:ring-white/20 focus:bg-[#0d0d12] transition-all duration-200 shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)] font-mono text-xs"
@@ -658,7 +753,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                         <div className="flex items-center gap-2">
                           <NiximaIdLogo size={20} animated glow />
                           <span className="text-[10px] font-mono tracking-wider uppercase text-zinc-400 font-bold">
-                            Nixima ID Protocol
+                            {language === 'uk' ? 'Протокол Nixima ID' : 'Nixima ID Protocol'}
                           </span>
                         </div>
                         <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5 ${
@@ -669,12 +764,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                           <span className={`w-1.5 h-1.5 rounded-full ${
                             cleanHandle.length >= 3 && availability.available ? 'bg-emerald-400 animate-pulse' : 'bg-zinc-500'
                           }`} />
-                          <span>{cleanHandle.length >= 3 && availability.available ? 'Ready to Claim' : 'Pending Handle'}</span>
+                          <span>{cleanHandle.length >= 3 && availability.available ? (language === 'uk' ? 'Готовий до резервування' : 'Ready to Claim') : (language === 'uk' ? 'Очікує нікнейм' : 'Pending Handle')}</span>
                         </span>
                       </div>
 
                       <div className="py-2 border-y border-zinc-800/80">
-                        <div className="text-[10px] text-zinc-500 font-mono uppercase">Assigned Digital Identity</div>
+                        <div className="text-[10px] text-zinc-500 font-mono uppercase">
+                          {language === 'uk' ? 'Призначена цифрова ідентичність' : 'Assigned Digital Identity'}
+                        </div>
                         <div className="text-sm sm:text-base font-bold text-white font-mono tracking-tight flex items-center gap-1 mt-0.5">
                           <span className={cleanHandle ? 'text-white' : 'text-zinc-600'}>
                             {cleanHandle || 'handle'}
@@ -685,24 +782,24 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
 
                       <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
                         <span>SPEC: SOVEREIGN-v0.1</span>
-                        <span>VAULT: LOCAL MESH</span>
+                        <span>{language === 'uk' ? 'СХОВИЩЕ: СУВЕРЕННИЙ МЕШ' : 'VAULT: LOCAL MESH'}</span>
                       </div>
                     </div>
 
                     <button
                       type="submit"
                       disabled={cleanHandle.length < 3 || !availability.available || isVerifyingStep1}
-                      className="w-full mt-2 py-3 rounded-xl bg-white hover:bg-zinc-200 disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed text-black font-bold text-xs uppercase tracking-wider transition-all duration-150 shadow-[0_0_20px_rgba(255,255,255,0.25)] flex items-center justify-center gap-2 group"
+                      className="w-full mt-2 py-3 rounded-xl bg-white hover:bg-zinc-200 disabled:bg-zinc-800 disabled:text-zinc-500 disabled:cursor-not-allowed text-black font-bold text-xs uppercase tracking-wider transition-all duration-150 shadow-[0_0_20px_rgba(255,255,255,0.25)] flex items-center justify-center gap-2 group cursor-pointer"
                     >
                       {isVerifyingStep1 ? (
                         <>
                           <NiximaIdLogo size={16} animated className="animate-spin" />
-                          <span>Locking Sovereign ID...</span>
+                          <span>{t.auth.btnLocking}</span>
                         </>
                       ) : (
                         <>
                           <NiximaIdLogo size={16} glow={false} className="group-hover:scale-110 transition-transform" />
-                          <span>Claim Nixima ID & Proceed to Step 2</span>
+                          <span>{t.auth.btnClaimAndProceed}</span>
                           <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
                         </>
                       )}
@@ -719,7 +816,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                         <NiximaIdLogo size={22} glow />
                         <div>
                           <div className="text-[10px] text-zinc-400 font-mono uppercase flex items-center gap-1">
-                            <span>Claimed Nixima ID</span>
+                            <span>{t.auth.operatorBadge}</span>
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
                           </div>
                           <div className="text-xs font-bold text-white font-mono">
@@ -730,21 +827,21 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                       <button
                         type="button"
                         onClick={() => { setRegisterStep(1); setError(null); }}
-                        className="text-[11px] font-mono text-zinc-400 hover:text-white underline px-2 py-1 rounded hover:bg-zinc-800 transition-colors"
+                        className="text-[11px] font-mono text-zinc-400 hover:text-white underline px-2 py-1 rounded hover:bg-zinc-800 transition-colors cursor-pointer"
                       >
-                        Change ID
+                        {language === 'uk' ? 'Змінити ID' : 'Change ID'}
                       </button>
                     </div>
 
                     <div className="space-y-1.5">
                       <label className="text-zinc-400 uppercase tracking-wider text-[11px] font-semibold">
-                        Full Name / Callsign
+                        {t.auth.nameLabel}
                       </label>
                       <input
                         type="text"
                         value={regName}
                         onChange={(e) => setRegName(e.target.value)}
-                        placeholder="e.g. Alex Rivera or Bogdan"
+                        placeholder={t.auth.namePlaceholder}
                         autoFocus
                         required
                         className="w-full px-3.5 py-2.5 bg-[#09090d]/90 border border-zinc-800/90 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400 focus:ring-1 focus:ring-white/20 focus:bg-[#0d0d12] transition-all duration-200 shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)] font-mono text-xs"
@@ -753,14 +850,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
 
                     <div className="space-y-1.5">
                       <label className="text-zinc-400 uppercase tracking-wider text-[11px] font-semibold">
-                        Create Security Passphrase
+                        {t.auth.passphraseLabel}
                       </label>
                       <div className="relative">
                         <input
                           type={showPassphrase ? "text" : "password"}
                           value={regPassphrase}
                           onChange={(e) => setRegPassphrase(e.target.value)}
-                          placeholder="At least 4 characters..."
+                          placeholder={t.auth.passphrasePlaceholder}
                           required
                           className="w-full pl-3.5 pr-10 py-2.5 bg-[#09090d]/90 border border-zinc-800/90 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400 focus:ring-1 focus:ring-white/20 focus:bg-[#0d0d12] transition-all duration-200 shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)] font-mono text-xs"
                         />
@@ -773,7 +870,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                           }}
                           aria-label={showPassphrase ? "Hide security passphrase" : "Show security passphrase"}
                           title={showPassphrase ? "Hide passphrase" : "Show passphrase"}
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 active:scale-90 transition-all duration-150 focus:outline-none"
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 active:scale-90 transition-all duration-150 focus:outline-none cursor-pointer"
                         >
                           <AnimatedEye isShowing={showPassphrase} size={15} />
                         </button>
@@ -792,17 +889,17 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                         }}
                         className="rounded bg-zinc-900 border-zinc-700 text-white focus:ring-0"
                       />
-                      <span>Enable 1-Click Fast Sign-In on this terminal</span>
+                      <span>{t.auth.rememberTerminal}</span>
                     </label>
 
                     <div className="flex items-center gap-2 pt-2">
                       <button
                         type="button"
                         onClick={() => { setRegisterStep(1); setError(null); }}
-                        className="py-3 px-3.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white font-mono text-xs border border-zinc-800 transition-colors flex items-center justify-center gap-1"
+                        className="py-3 px-3.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white font-mono text-xs border border-zinc-800 transition-colors flex items-center justify-center gap-1 cursor-pointer"
                       >
                         <ChevronLeft className="w-4 h-4" />
-                        <span>Back</span>
+                        <span>{t.common.back}</span>
                       </button>
                       <button
                         type="submit"
@@ -810,7 +907,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                         className="flex-1 py-3 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs uppercase tracking-wider transition-all duration-150 shadow-[0_0_20px_rgba(255,255,255,0.25)] flex items-center justify-center gap-2 group cursor-pointer"
                       >
                         <NiximaIdLogo size={16} glow={false} className="group-hover:scale-110 transition-transform" />
-                        <span>Complete Registration & Enter</span>
+                        <span>{t.auth.btnConfirmAndLaunch}</span>
                         <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
                       </button>
                     </div>
@@ -822,14 +919,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                   <form onSubmit={handleSignIn} className="space-y-4 text-xs font-mono animate-fade-in">
                     <div className="space-y-1.5">
                       <label className="text-zinc-400 uppercase tracking-wider text-[11px] font-semibold">
-                        Nixima Handle or Email
+                        {language === 'uk' ? 'Суверенний нікнейм або Email' : 'Nixima Handle or Email'}
                       </label>
                       <div className="relative">
                         <input
                           type="text"
                           value={loginHandle}
                           onChange={(e) => setLoginHandle(e.target.value)}
-                          placeholder="e.g. bogdan or alex"
+                          placeholder={t.auth.signInHandlePlaceholder}
                           autoFocus
                           required
                           className="w-full pl-3.5 pr-24 py-2.5 bg-[#09090d]/90 border border-zinc-800/90 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400 focus:ring-1 focus:ring-white/20 focus:bg-[#0d0d12] transition-all duration-200 shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)] font-mono text-xs"
@@ -844,14 +941,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
 
                     <div className="space-y-1.5">
                       <label className="text-zinc-400 uppercase tracking-wider text-[11px] font-semibold">
-                        Security Passphrase
+                        {t.auth.passphraseLabel}
                       </label>
                       <div className="relative">
                         <input
                           type={showPassphrase ? "text" : "password"}
                           value={loginPassphrase}
                           onChange={(e) => setLoginPassphrase(e.target.value)}
-                          placeholder="Enter passphrase..."
+                          placeholder={t.auth.signInPassphrasePlaceholder}
                           required
                           className="w-full pl-3.5 pr-10 py-2.5 bg-[#09090d]/90 border border-zinc-800/90 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:border-zinc-400 focus:ring-1 focus:ring-white/20 focus:bg-[#0d0d12] transition-all duration-200 shadow-[inset_0_1px_3px_rgba(0,0,0,0.6)] font-mono text-xs"
                         />
@@ -864,7 +961,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                           }}
                           aria-label={showPassphrase ? "Hide security passphrase" : "Show security passphrase"}
                           title={showPassphrase ? "Hide passphrase" : "Show passphrase"}
-                          className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 active:scale-90 transition-all duration-150 focus:outline-none"
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 active:scale-90 transition-all duration-150 focus:outline-none cursor-pointer"
                         >
                           <AnimatedEye isShowing={showPassphrase} size={15} />
                         </button>
@@ -883,7 +980,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                         }}
                         className="rounded bg-zinc-900 border-zinc-700 text-white focus:ring-0"
                       />
-                      <span>Remember for 1-Click Fast Sign-In</span>
+                      <span>{t.auth.rememberTerminal}</span>
                     </label>
 
                     <button
@@ -892,7 +989,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                       className="w-full mt-2 py-3 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs uppercase tracking-wider transition-all duration-150 shadow-[0_0_20px_rgba(255,255,255,0.25)] flex items-center justify-center gap-2 group cursor-pointer"
                     >
                       <NiximaIdLogo size={16} glow={false} className="group-hover:scale-110 transition-transform" />
-                      <span>Authenticate Nixima ID</span>
+                      <span>{t.auth.btnSignIn}</span>
                       <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
                     </button>
                   </form>
@@ -912,7 +1009,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
               >
                 <Smartphone className="w-3.5 h-3.5 text-zinc-500 group-hover:text-emerald-400 transition-colors" />
                 <span className="underline underline-offset-2 decoration-zinc-700 hover:decoration-white">
-                  Cross-Device Crossover (Laptop ↔ Phone)
+                  {t.auth.crossoverBtn}
                 </span>
               </button>
 
@@ -924,7 +1021,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                 className="inline-flex items-center gap-1 text-[10px] text-zinc-500 hover:text-zinc-300 transition-colors cursor-pointer"
               >
                 <RefreshCw className={`w-3 h-3 ${isSyncing ? 'animate-spin text-amber-400' : ''}`} />
-                <span>{isSyncing ? 'Syncing...' : 'Sync Mesh'}</span>
+                <span>{isSyncing ? t.common.loading : (language === 'uk' ? 'Синхронізувати' : 'Sync Mesh')}</span>
               </button>
             </div>
 
@@ -956,13 +1053,13 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                 </div>
                 <div>
                   <h3 className="text-sm font-bold tracking-tight text-white uppercase flex items-center gap-1.5">
-                    <span>Cross-Device Crossover</span>
+                    <span>{t.auth.crossoverModalTitle}</span>
                     <span className="px-1.5 py-0.5 rounded bg-emerald-950/80 border border-emerald-800 text-emerald-400 text-[9px]">
                       Live
                     </span>
                   </h3>
                   <p className="text-[11px] text-zinc-400 font-sans">
-                    Seamlessly link your accounts between Laptop, Phone, and other terminals.
+                    {t.auth.crossoverModalSubtitle}
                   </p>
                 </div>
               </div>
@@ -996,14 +1093,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
                   <Globe className="w-3.5 h-3.5 text-blue-400" />
-                  <span>Method 1: Cloud Mesh Sync</span>
+                  <span>{t.auth.crossoverMethod1Title}</span>
                 </span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-700 text-zinc-400">
-                  Automatic
+                  {language === 'uk' ? 'Автоматично' : 'Automatic'}
                 </span>
               </div>
               <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
-                Your accounts synchronize automatically with the Nixima mesh cloud whenever you register or sign in across devices.
+                {t.auth.crossoverMethod1Desc}
               </p>
               <button
                 type="button"
@@ -1012,7 +1109,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                 className="w-full py-2.5 px-3 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-white font-mono text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin text-emerald-400' : ''}`} />
-                <span>{isSyncing ? 'Synchronizing with Nixima Cloud...' : 'Force Sync With Nixima Cloud'}</span>
+                <span>{isSyncing ? (language === 'uk' ? 'Синхронізація з хмарою Nixima...' : 'Synchronizing with Nixima Cloud...') : t.auth.btnForceCloudSync}</span>
               </button>
             </div>
 
@@ -1021,14 +1118,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-bold text-zinc-300 uppercase tracking-wider flex items-center gap-1.5">
                   <Key className="w-3.5 h-3.5 text-amber-400" />
-                  <span>Method 2: Sovereign Link Key (Air-Gapped / Universal)</span>
+                  <span>{t.auth.crossoverMethod2Title}</span>
                 </span>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-800 text-emerald-400">
-                  Universal
+                  {language === 'uk' ? 'Універсально' : 'Universal'}
                 </span>
               </div>
               <p className="text-[11px] text-zinc-400 leading-relaxed font-sans">
-                Export an encrypted sovereign link key from your laptop and paste it into your phone to instantly merge all accounts without needing shared Wi-Fi.
+                {t.auth.crossoverMethod2Desc}
               </p>
 
               {/* Copy Key Button */}
@@ -1040,12 +1137,12 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                 {copiedKey ? (
                   <>
                     <Check className="w-3.5 h-3.5 stroke-[3]" />
-                    <span>Key Copied to Clipboard!</span>
+                    <span>{t.auth.syncKeyCopied}</span>
                   </>
                 ) : (
                   <>
                     <Copy className="w-3.5 h-3.5" />
-                    <span>Export & Copy Sovereign Link Key</span>
+                    <span>{t.auth.btnExportSyncKey}</span>
                   </>
                 )}
               </button>
@@ -1053,14 +1150,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
               {/* Paste & Import Form */}
               <form onSubmit={handleImportSovereignKey} className="pt-2 space-y-2">
                 <label className="text-[10px] text-zinc-400 uppercase tracking-wider">
-                  Or Paste Link Key from Other Device:
+                  {language === 'uk' ? 'Або вставте ключ з іншого пристрою:' : 'Or Paste Link Key from Other Device:'}
                 </label>
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={crossoverInputKey}
                     onChange={(e) => setCrossoverInputKey(e.target.value)}
-                    placeholder="NXK-..."
+                    placeholder={t.auth.importKeyPlaceholder}
                     className="flex-1 px-3 py-2 bg-zinc-900 border border-zinc-700 rounded-lg text-white font-mono text-[11px] placeholder-zinc-600 focus:outline-none focus:border-zinc-400"
                   />
                   <button
@@ -1068,7 +1165,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                     disabled={!crossoverInputKey.trim()}
                     className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-800 disabled:text-zinc-600 rounded-lg text-white font-bold text-xs transition-colors cursor-pointer"
                   >
-                    Link & Sync
+                    {t.auth.btnLinkAndSync}
                   </button>
                 </div>
               </form>
@@ -1081,7 +1178,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                 onClick={() => setShowCrossoverModal(false)}
                 className="px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-zinc-300 hover:text-white transition-colors cursor-pointer"
               >
-                Close
+                {t.common.close}
               </button>
             </div>
           </div>

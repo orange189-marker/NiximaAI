@@ -17,6 +17,7 @@ import {
 import { Message } from '../types/chat';
 import { MarkdownTable, TableBlockData } from './MarkdownTable';
 import { NiximaIdLogo } from './NiximaIdLogo';
+import { useLanguage } from '../context/LanguageContext';
 
 interface ChatMessageProps {
   message: Message;
@@ -31,6 +32,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   onEditMessage,
   activeModelName = 'Nixima-0.1'
 }) => {
+  const { t } = useLanguage();
   const isUser = message.role === 'user';
   const [copied, setCopied] = useState(false);
   const [isThinkingOpen, setIsThinkingOpen] = useState(false);
@@ -315,7 +317,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-xs font-semibold text-white tracking-tight">
-                {isUser ? 'You' : (message.model || activeModelName)}
+                {isUser ? t.chatMessage.you : (message.model || activeModelName)}
               </span>
               {!isUser && (
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
@@ -329,7 +331,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                 <button
                   onClick={() => setIsEditing(true)}
                   className="hover:text-zinc-300 transition-colors p-1"
-                  title="Edit prompt"
+                  title={t.chatMessage.editPrompt}
                 >
                   <Edit3 className="w-3 h-3" />
                 </button>
@@ -354,13 +356,13 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                   onClick={() => setIsEditing(false)}
                   className="px-3 py-1 rounded bg-zinc-800 text-zinc-300 text-xs hover:bg-zinc-700 font-mono"
                 >
-                  Cancel
+                  {t.common.cancel}
                 </button>
                 <button
                   onClick={handleSaveEdit}
                   className="px-3 py-1 rounded bg-white text-black text-xs font-semibold hover:bg-zinc-200 font-mono shadow-glow-subtle"
                 >
-                  Save & Resend
+                  {t.chatMessage.saveAndResend}
                 </button>
               </div>
             </div>
@@ -376,16 +378,16 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                     <div className="flex items-center gap-2">
                       <BrainCircuit className="w-3.5 h-3.5 text-zinc-400" />
                       <span className="font-mono text-[11px] font-medium text-zinc-300">
-                        Reasoning Process
+                        {t.chatMessage.reasoningProcess}
                       </span>
                       {message.isStreaming && !message.content && (
                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-800/80 text-[10px] text-emerald-400 font-mono">
                           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-                          <span>Generating trace...</span>
+                          <span>{t.chatMessage.generatingTrace}</span>
                         </span>
                       )}
                       <span className="text-[10px] text-zinc-500 font-mono">
-                        (Chain-of-thought)
+                        {t.chatMessage.chainOfThought}
                       </span>
                     </div>
                     {isThinkingOpen ? (
@@ -418,7 +420,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                       {/* Thinking / Reasoning Label */}
                       <div className="flex items-center gap-2.5 font-mono text-xs">
                         <span className="text-zinc-300 font-medium tracking-tight">
-                          {message.thinking ? 'Nixima is reasoning' : 'Nixima is thinking'}
+                          {message.thinking ? t.chatMessage.reasoning : t.chatMessage.thinking}
                         </span>
 
                         {/* 3 Glowing Bouncing Fluid Dots */}
@@ -462,20 +464,20 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                     <button
                       onClick={handleCopy}
                       className="p-1.5 rounded hover:text-white hover:bg-zinc-800/80 transition-colors flex items-center gap-1 text-[11px]"
-                      title="Copy response"
+                      title={t.chatMessage.copyResponse}
                     >
                       {copied ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span>{copied ? 'Copied' : 'Copy'}</span>
+                      <span>{copied ? t.chatMessage.copied : t.chatMessage.copyResponse}</span>
                     </button>
 
                     {onRegenerate && (
                       <button
                         onClick={onRegenerate}
                         className="p-1.5 rounded hover:text-white hover:bg-zinc-800/80 transition-colors flex items-center gap-1 text-[11px]"
-                        title="Regenerate"
+                        title={t.chatMessage.regenerate}
                       >
                         <RotateCw className="w-3.5 h-3.5" />
-                        <span>Regenerate</span>
+                        <span>{t.chatMessage.regenerate}</span>
                       </button>
                     )}
                   </div>
@@ -484,7 +486,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                   <div className="flex items-center gap-2">
                     <span className="inline-flex items-center gap-1 text-[10px] font-mono text-zinc-500 bg-zinc-900/80 px-2 py-0.5 rounded border border-zinc-800">
                       <Activity className="w-2.5 h-2.5 text-zinc-400" />
-                      {message.telemetry?.tokens || Math.round(message.content.length / 4)} tok
+                      {message.telemetry?.tokens || Math.round(message.content.length / 4)} {t.chatMessage.tokensCount}
                       {message.telemetry?.durationMs && ` • ${(message.telemetry.durationMs / 1000).toFixed(1)}s`}
                     </span>
 
@@ -494,7 +496,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                         className={`p-1.5 rounded hover:text-white hover:bg-zinc-800/80 transition-colors ${
                           feedback === 'up' ? 'text-white bg-zinc-800' : ''
                         }`}
-                        title="Helpful"
+                        title={t.chatMessage.helpful}
                       >
                         <ThumbsUp className="w-3 h-3" />
                       </button>
@@ -503,7 +505,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                         className={`p-1.5 rounded hover:text-white hover:bg-zinc-800/80 transition-colors ${
                           feedback === 'down' ? 'text-white bg-zinc-800' : ''
                         }`}
-                        title="Not helpful"
+                        title={t.chatMessage.notHelpful}
                       >
                         <ThumbsDown className="w-3 h-3" />
                       </button>
@@ -521,6 +523,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
 // Subcomponent: High-contrast Code Block with Copy & Download File
 const CodeBlock: React.FC<{ language: string; code: string }> = ({ language, code }) => {
+  const { t } = useLanguage();
   const [copied, setCopied] = useState(false);
 
   const getExtension = (lang: string) => {
@@ -565,17 +568,17 @@ const CodeBlock: React.FC<{ language: string; code: string }> = ({ language, cod
           <button
             onClick={downloadSnippet}
             className="flex items-center gap-1 hover:text-white transition-colors"
-            title="Download snippet"
+            title={t.chatMessage.downloadCode}
           >
             <Download className="w-3 h-3" />
-            <span>Download</span>
+            <span>{t.chatMessage.downloadCode}</span>
           </button>
           <button
             onClick={copyCode}
             className="flex items-center gap-1 hover:text-white transition-colors"
           >
             {copied ? <Check className="w-3 h-3 text-white" /> : <Copy className="w-3 h-3" />}
-            <span>{copied ? 'Copied' : 'Copy code'}</span>
+            <span>{copied ? t.chatMessage.copied : t.chatMessage.copyCode}</span>
           </button>
         </div>
       </div>
