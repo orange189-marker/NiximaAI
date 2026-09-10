@@ -23,8 +23,6 @@ import { NiximaIdLogo } from './NiximaIdLogo';
 import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotkeys';
 import { HotkeyCustomizerModal } from './HotkeyCustomizerModal';
 import { useLanguage } from '../context/LanguageContext';
-import { CountryFlag } from './CountryFlag';
-import { CreditSidebarBadge } from './AnimatedCredits';
 
 interface SidebarProps {
   conversations: Conversation[];
@@ -377,16 +375,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <NiximaIdLogo size={9} glow={false} /> ID
                   </span>
                 </div>
-                <div className="flex items-center justify-between text-[10px] text-zinc-500 font-mono mt-0.5">
-                  <div className="flex items-center gap-1.5 truncate">
-                    <CountryFlag country={language === 'uk' ? 'ua' : 'us'} size="xs" />
-                    <span className="truncate">{currentUser?.email || 'operator@nixima.ai'}</span>
-                  </div>
-                  <CreditSidebarBadge
-                    credits={currentUser?.credits ?? 1000}
-                    unit="CR"
-                    className="ml-1"
-                  />
+                <div className="flex items-center text-[10px] text-zinc-500 font-mono mt-0.5">
+                  <span className="truncate">{currentUser?.email || 'operator@nixima.ai'}</span>
                 </div>
               </div>
             </div>
@@ -406,14 +396,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {onOpenBenchmarks && (
             <button
               onClick={onOpenBenchmarks}
-              className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg bg-zinc-900/60 hover:bg-zinc-800 text-[11px] text-zinc-300 hover:text-white transition-all border border-zinc-800/80 group cursor-pointer"
+              className="w-full flex items-center justify-between px-2 py-1.5 text-[11px] text-zinc-400 hover:text-white transition-colors cursor-pointer group"
             >
-              <span className="flex items-center gap-2">
-                <BarChart3 className="w-3.5 h-3.5 text-cyan-400 group-hover:scale-110 transition-transform" />
-                <span className="font-semibold">{language === 'uk' ? 'Офіційні бенчмарки' : 'Official Benchmarks'}</span>
+              <span className="flex items-center gap-1.5">
+                <BarChart3 className="w-3 h-3 text-zinc-400 group-hover:text-white transition-colors" />
+                <span>{language === 'uk' ? 'Офіційні бенчмарки' : 'Official Benchmarks'}</span>
               </span>
-              <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                4 MODELS
+              <span className="text-[9px] font-mono text-zinc-500 border border-zinc-800 px-1.5 py-0.5 rounded">
+                4
               </span>
             </button>
           )}

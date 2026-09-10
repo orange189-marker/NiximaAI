@@ -665,7 +665,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <input
                     type="file"
                     ref={fileInputRef}
-                    onChange={handleFileChange}
+                    onChange={handleImportJSON}
                     accept=".json"
                     className="hidden"
                   />

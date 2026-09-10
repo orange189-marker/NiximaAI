@@ -77,17 +77,17 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
   const currentSuite = BENCHMARK_SUITES.find(s => s.id === selectedSuiteId) || BENCHMARK_SUITES[0];
 
   const getModelColor = (id: string) => {
-    if (id.includes('reasoning')) return { text: 'text-purple-400', border: 'border-purple-500/50', bg: 'bg-purple-500/10', glow: 'shadow-[0_0_20px_rgba(168,85,247,0.15)]' };
-    if (id.includes('coder')) return { text: 'text-emerald-400', border: 'border-emerald-500/50', bg: 'bg-emerald-500/10', glow: 'shadow-[0_0_20px_rgba(16,185,129,0.15)]' };
-    if (id.includes('flash')) return { text: 'text-amber-400', border: 'border-amber-500/50', bg: 'bg-amber-500/10', glow: 'shadow-[0_0_20px_rgba(245,158,11,0.15)]' };
-    return { text: 'text-cyan-400', border: 'border-cyan-500/50', bg: 'bg-cyan-500/10', glow: 'shadow-[0_0_20px_rgba(6,182,212,0.15)]' };
+    if (id.includes('reasoning')) return { text: 'text-purple-400', border: 'border-purple-500/40', bg: 'bg-purple-500/10', glow: '' };
+    if (id.includes('coder')) return { text: 'text-emerald-400', border: 'border-emerald-500/40', bg: 'bg-emerald-500/10', glow: '' };
+    if (id.includes('flash')) return { text: 'text-amber-400', border: 'border-amber-500/40', bg: 'bg-amber-500/10', glow: '' };
+    return { text: 'text-zinc-100', border: 'border-zinc-700', bg: 'bg-zinc-800/60', glow: '' };
   };
 
   const getModelIcon = (id: string) => {
     if (id.includes('reasoning')) return <BrainCircuit className="w-4 h-4 text-purple-400" />;
     if (id.includes('coder')) return <Terminal className="w-4 h-4 text-emerald-400" />;
     if (id.includes('flash')) return <Zap className="w-4 h-4 text-amber-400" />;
-    return <Sparkles className="w-4 h-4 text-cyan-400" />;
+    return <Sparkles className="w-4 h-4 text-zinc-200" />;
   };
 
   // Run live arena test
@@ -197,15 +197,15 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
         {/* ================================================================= */}
         <div className="px-4 py-3 sm:px-6 sm:py-3.5 bg-[#111118] border-b border-zinc-800/90 flex flex-wrap items-center justify-between gap-3 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500/20 to-purple-500/30 border border-indigo-500/40 flex items-center justify-center shadow-inner">
-              <Trophy className="w-4 h-4 text-indigo-400" />
+            <div className="w-8 h-8 rounded-xl bg-zinc-900 border border-zinc-700/80 flex items-center justify-center shadow-inner-light">
+              <Trophy className="w-4 h-4 text-zinc-200" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs sm:text-sm font-bold font-mono text-white tracking-tight">
                   {isUk ? 'Офіційні бенчмарки Nixima AI' : 'Nixima AI Official Benchmarks'}
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
+                <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-zinc-800 text-zinc-300 border border-zinc-700">
                   4 MODELS
                 </span>
               </div>
@@ -301,7 +301,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                             {getModelIcon(item.modelId)}
                           </div>
                           <div>
-                            <h3 className="font-bold text-sm text-white group-hover:text-cyan-300 transition-colors">
+                            <h3 className="font-bold text-sm text-white group-hover:text-zinc-200 transition-colors">
                               {modelObj?.name}
                             </h3>
                             <span className="text-[10px] font-mono text-zinc-500">
@@ -327,7 +327,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                             <span className="block text-[10px] font-mono text-zinc-500 uppercase">
                               Elo Rating
                             </span>
-                            <span className="text-base font-black font-mono text-cyan-400">
+                            <span className="text-base font-black font-mono text-zinc-100">
                               {item.eloRating}
                             </span>
                           </div>
@@ -357,7 +357,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-bold text-sm text-white flex items-center gap-2">
-                      <Gauge className="w-4 h-4 text-cyan-400" />
+                      <Gauge className="w-4 h-4 text-zinc-400" />
                       <span>{isUk ? 'Порівняльна матриця спроможностей (0 - 100)' : 'Comparative Capability Matrix (0 - 100)'}</span>
                     </h4>
                     <p className="text-xs text-zinc-400 mt-0.5">
@@ -401,7 +401,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                               </span>
                             </td>
                             <td className="py-3 text-center">
-                              <span className="px-2 py-0.5 rounded bg-zinc-800/80 font-bold text-cyan-300">
+                              <span className="px-2 py-0.5 rounded bg-zinc-800/80 font-bold text-zinc-200">
                                 {item.metrics.systemArchitecture}
                               </span>
                             </td>
@@ -452,7 +452,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                     onClick={() => { setSelectedCategory(cat.id); playTypingTick(); }}
                     className={`px-3 py-1.5 rounded-xl text-xs font-mono transition-all cursor-pointer ${
                       selectedCategory === cat.id
-                        ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 font-bold'
+                        ? 'bg-white text-black font-bold shadow-sm'
                         : 'bg-zinc-900/80 text-zinc-400 hover:text-white border border-zinc-800'
                     }`}
                   >
@@ -486,7 +486,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                       </div>
                       <div className="mt-2.5 pt-2 border-t border-zinc-800 flex items-center justify-between text-[10px] font-mono">
                         <span className="text-zinc-400">{isUk ? 'Лідер:' : 'Winner:'}</span>
-                        <span className="font-bold text-cyan-300 truncate ml-1">{winner?.shortName}</span>
+                        <span className="font-bold text-zinc-200 truncate ml-1">{winner?.shortName}</span>
                       </div>
                     </button>
                   );
@@ -530,7 +530,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                 <div className="p-3.5 rounded-xl bg-black/50 border border-zinc-800 space-y-1.5">
                   <div className="flex items-center justify-between text-xs font-mono text-zinc-400">
                     <span className="flex items-center gap-1.5 font-bold uppercase text-zinc-300">
-                      <FileText className="w-3.5 h-3.5 text-cyan-400" />
+                      <FileText className="w-3.5 h-3.5 text-zinc-400" />
                       <span>{isUk ? 'Офіційний тестовий промпт:' : 'Official Benchmark Prompt:'}</span>
                     </span>
                     <button
@@ -672,7 +672,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                         {/* Judge Verdict Box */}
                         <div className="pt-3 border-t border-zinc-800/80 space-y-1.5 text-[11px]">
                           <div className="flex items-center gap-1 font-mono font-bold text-zinc-400">
-                            <ShieldCheck className="w-3 h-3 text-cyan-400" />
+                            <ShieldCheck className="w-3 h-3 text-zinc-400" />
                             <span>{isUk ? 'Вердикт судді:' : 'Judge Verdict:'}</span>
                           </div>
                           <p className="text-zinc-400 text-[11px] leading-snug">
@@ -810,7 +810,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                         </span>
                       </div>
                       {arenaMetricsA && (
-                        <div className="text-[10px] font-mono text-cyan-300 font-bold flex items-center gap-2">
+                        <div className="text-[10px] font-mono text-zinc-200 font-bold flex items-center gap-2">
                           <span>{arenaMetricsA.tokPerSec} tok/s</span>
                           <span className="text-zinc-500">|</span>
                           <span>{arenaMetricsA.durationMs}ms</span>
@@ -845,7 +845,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                         </span>
                       </div>
                       {arenaMetricsB && (
-                        <div className="text-[10px] font-mono text-amber-300 font-bold flex items-center gap-2">
+                        <div className="text-[10px] font-mono text-zinc-200 font-bold flex items-center gap-2">
                           <span>{arenaMetricsB.tokPerSec} tok/s</span>
                           <span className="text-zinc-500">|</span>
                           <span>{arenaMetricsB.durationMs}ms</span>
@@ -880,7 +880,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
         {/* ================================================================= */}
         <div className="px-4 py-3 sm:px-6 sm:py-3 bg-[#111118] border-t border-zinc-800 flex items-center justify-between text-xs font-mono shrink-0">
           <div className="flex items-center gap-2 text-zinc-500 text-[11px]">
-            <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+            <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
             <span>Nixima Sovereign Telemetry v0.1 • 4 Frontier Models Tested</span>
           </div>
 

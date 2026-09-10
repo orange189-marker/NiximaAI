@@ -737,57 +737,6 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                 {/* STEP 1: CREATE NIXIMA ID */}
                 {mode === 'register' && registerStep === 1 && (
                   <form onSubmit={handleProceedToStep2} className="space-y-4 text-xs font-mono">
-                    {/* Explicit Language Selector while registering */}
-                    <div className="space-y-1.5 p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800/80">
-                      <div className="flex items-center justify-between text-[11px]">
-                        <span className="text-zinc-300 font-medium flex items-center gap-1.5">
-                          <Globe className="w-3.5 h-3.5 text-zinc-400" />
-                          <span>{t.auth.step1LanguageLabel}</span>
-                        </span>
-                        <span className="text-[10px] text-zinc-500 font-mono">
-                          {language === 'uk' ? 'Українська' : 'English'}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 pt-0.5">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setLanguage('uk');
-                            playTypingTick();
-                          }}
-                          className={`py-2 px-2.5 rounded-lg border flex items-center justify-between text-xs font-medium transition-all cursor-pointer ${
-                            language === 'uk'
-                              ? 'bg-zinc-800 border-white/60 text-white shadow-glow-subtle font-bold ring-1 ring-white/20'
-                              : 'bg-zinc-950/60 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
-                          }`}
-                        >
-                          <span className="flex items-center gap-2">
-                            <CountryFlag country="ua" size="sm" glow={language === 'uk'} />
-                            <span>Українська</span>
-                          </span>
-                          {language === 'uk' && <Check className="w-3 h-3 text-emerald-400 stroke-[3]" />}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setLanguage('en');
-                            playTypingTick();
-                          }}
-                          className={`py-2 px-2.5 rounded-lg border flex items-center justify-between text-xs font-medium transition-all cursor-pointer ${
-                            language === 'en'
-                              ? 'bg-zinc-800 border-white/60 text-white shadow-glow-subtle font-bold ring-1 ring-white/20'
-                              : 'bg-zinc-950/60 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
-                          }`}
-                        >
-                          <span className="flex items-center gap-2">
-                            <CountryFlag country="us" size="sm" glow={language === 'en'} />
-                            <span>English</span>
-                          </span>
-                          {language === 'en' && <Check className="w-3 h-3 text-emerald-400 stroke-[3]" />}
-                        </button>
-                      </div>
-                    </div>
-
                     <div className="space-y-1.5">
                       <div className="flex items-center justify-between">
                         <label className="text-zinc-400 uppercase tracking-wider text-[11px] font-semibold flex items-center gap-1.5">

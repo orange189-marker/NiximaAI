@@ -239,9 +239,9 @@ export const Header: React.FC<HeaderProps> = ({
                     setIsModelDropdownOpen(false);
                     onOpenBenchmarks();
                   }}
-                  className="text-[11px] text-cyan-300 hover:underline flex items-center gap-1 cursor-pointer"
+                  className="text-[11px] text-zinc-400 hover:text-white flex items-center gap-1.5 cursor-pointer transition-colors"
                 >
-                  <BarChart3 className="w-3 h-3" />
+                  <BarChart3 className="w-3.5 h-3.5 text-zinc-400" />
                   <span>{language === 'uk' ? 'Офіційні бенчмарки' : 'Official Benchmarks'}</span>
                 </button>
               ) : (
@@ -256,9 +256,9 @@ export const Header: React.FC<HeaderProps> = ({
                   setIsModelDropdownOpen(false);
                   onOpenSettings();
                 }}
-                className="text-[11px] text-white hover:underline flex items-center gap-1 flex-shrink-0 cursor-pointer"
+                className="text-[11px] text-zinc-400 hover:text-white flex items-center gap-1.5 flex-shrink-0 cursor-pointer transition-colors"
               >
-                <Sliders className="w-3 h-3" />
+                <Sliders className="w-3.5 h-3.5 text-zinc-400" />
                 <span>{t.header.tuning}</span>
               </button>
             </div>
@@ -292,22 +292,6 @@ export const Header: React.FC<HeaderProps> = ({
           title={`${t.credits.balance}: ${credits.toLocaleString()} ${t.credits.unit}`}
         />
 
-        {/* Official Benchmarks Button */}
-        {onOpenBenchmarks && (
-          <button
-            type="button"
-            onClick={onOpenBenchmarks}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-all text-xs font-mono select-none cursor-pointer shadow-inner-light"
-            title={language === 'uk' ? 'Офіційні бенчмарки 4 моделей' : 'Official Benchmarks (4 Models Compared)'}
-          >
-            <BarChart3 className="w-3.5 h-3.5 text-cyan-400" />
-            <span className="hidden sm:inline font-semibold">{language === 'uk' ? 'Бенчмарки' : 'Benchmarks'}</span>
-            <span className="hidden md:inline px-1 py-0.2 rounded text-[8px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-              4
-            </span>
-          </button>
-        )}
-
         {/* Quick Language Toggle Button with SVG Flag */}
         <button
           type="button"
@@ -318,6 +302,18 @@ export const Header: React.FC<HeaderProps> = ({
           <CountryFlag country={language === 'uk' ? 'ua' : 'us'} size="xs" glow />
           <span className="text-[10px] font-bold tracking-wider">{language === 'uk' ? 'UA' : 'EN'}</span>
         </button>
+
+        {/* Official Benchmarks Icon Button */}
+        {onOpenBenchmarks && (
+          <button
+            type="button"
+            onClick={onOpenBenchmarks}
+            className="p-1.5 sm:p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors cursor-pointer"
+            title={language === 'uk' ? 'Офіційні бенчмарки 4 моделей' : 'Official Benchmarks (4 Models)'}
+          >
+            <BarChart3 className="w-4 h-4" />
+          </button>
+        )}
 
         <button
           onClick={onOpenCompanyInfo}
