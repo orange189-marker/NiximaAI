@@ -453,7 +453,16 @@ All conversations and model preferences in this workspace are private to your Ni
         settings.deepThinkEnabled
       );
 
-      if (currentUser) {
+      const isCreator = currentUser && (
+        (currentUser.email || '').toLowerCase() === 'orange17@nixima.ai' ||
+        (currentUser.handle || '').toLowerCase() === 'orange17' ||
+        currentUser.isCreator ||
+        currentUser.unlimitedCredits
+      );
+
+      const actualSpent = isCreator ? 0 : costResult.credits;
+
+      if (currentUser && !isCreator) {
         const { updatedUser } = deductUserCredits(currentUser, costResult.credits);
         setCurrentUser(updatedUser);
       }
@@ -463,7 +472,7 @@ All conversations and model preferences in this workspace are private to your Ni
         durationMs,
         tokensPerSec: Math.round((estTokens / (durationMs / 1000 || 1))),
         model: currentModel.name,
-        creditsSpent: costResult.credits,
+        creditsSpent: actualSpent,
       };
 
       setConversations(prev => prev.map(c => {

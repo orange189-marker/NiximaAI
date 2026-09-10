@@ -17,12 +17,40 @@ export interface CreditCostBreakdown {
 }
 
 /**
- * Retrieves the current balance for the given user, defaulting to 1,000 for any new account.
+ * Detects if a user is the Creator account (orange17@nixima.ai) or has sovereign infinite credits.
+ */
+export function isCreatorAccount(user?: NiximaUser | null): boolean {
+  if (!user) {
+    const active = getActiveUser();
+    if (!active) return false;
+    return checkCreator(active);
+  }
+  return checkCreator(user);
+}
+
+function checkCreator(user: NiximaUser): boolean {
+  const email = (user.email || '').toLowerCase().trim();
+  const handle = (user.handle || '').toLowerCase().trim();
+  return (
+    email === 'orange17@nixima.ai' ||
+    handle === 'orange17' ||
+    user.isCreator === true ||
+    user.unlimitedCredits === true ||
+    user.role === 'Creator & Lead Architect'
+  );
+}
+
+/**
+ * Retrieves the current balance for the given user, returning Infinity for the Creator (orange17@nixima.ai).
  */
 export function getUserCredits(user?: NiximaUser | null): number {
+  if (isCreatorAccount(user)) {
+    return Infinity;
+  }
   if (!user) {
     const active = getActiveUser();
     if (!active) return DEFAULT_INITIAL_CREDITS;
+    if (isCreatorAccount(active)) return Infinity;
     return typeof active.credits === 'number' ? active.credits : DEFAULT_INITIAL_CREDITS;
   }
   return typeof user.credits === 'number' ? user.credits : DEFAULT_INITIAL_CREDITS;
@@ -129,6 +157,20 @@ export function deductUserCredits(
   user: NiximaUser,
   amount: number
 ): { updatedUser: NiximaUser; remainingCredits: number; deducted: number } {
+  if (isCreatorAccount(user)) {
+    const creatorUser: NiximaUser = {
+      ...user,
+      credits: Infinity,
+      isCreator: true,
+      unlimitedCredits: true,
+    };
+    return {
+      updatedUser: creatorUser,
+      remainingCredits: Infinity,
+      deducted: 0,
+    };
+  }
+
   const currentCredits = getUserCredits(user);
   const remainingCredits = Math.max(0, currentCredits - amount);
 
@@ -205,6 +247,7 @@ export function grantUserCredits(
  * Checks if the user has sufficient credits to dispatch a prompt with the chosen model.
  */
 export function hasSufficientCredits(user: NiximaUser | null, model: ModelOption): boolean {
+  if (isCreatorAccount(user)) return true;
   const credits = getUserCredits(user);
   const minCost = model.baseCreditCost || 2;
   return credits >= minCost;

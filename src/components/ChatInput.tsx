@@ -268,6 +268,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10.5px] font-mono border transition-all duration-300 select-none cursor-pointer ${
                   !hasCredits
                     ? 'bg-red-950/40 border-red-800 text-red-300 animate-pulse'
+                    : userCredits === Infinity
+                    ? 'bg-amber-500/15 border-amber-400/50 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.2)] hover:border-amber-300'
                     : estimated.isHardPrompt
                     ? 'bg-amber-950/40 border-amber-500/50 text-amber-300 shadow-[0_0_12px_rgba(245,158,11,0.2)] hover:border-amber-400 scale-[1.02]'
                     : 'bg-zinc-900/90 border-zinc-800/80 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
@@ -275,12 +277,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 title={
                   !hasCredits
                     ? t.credits.insufficientTooltip(estimated.minCost, userCredits)
+                    : userCredits === Infinity
+                    ? 'Creator Account (orange17@nixima.ai) • Unlimited Inferences Granted'
                     : `${t.credits.badge}: ${t.credits.estCost(estimated.minCost, estimated.maxCost)} (${currentModel.shortName})`
                 }
               >
-                <Coins className={`w-3 h-3 transition-transform duration-300 ${!hasCredits ? 'text-red-400' : estimated.isHardPrompt ? 'text-amber-400 scale-110' : 'text-zinc-400'}`} />
-                <span className="tabular-nums font-medium">{t.credits.estCost(estimated.minCost, estimated.maxCost)}</span>
-                {estimated.isHardPrompt && (
+                <Coins className={`w-3 h-3 transition-transform duration-300 ${!hasCredits ? 'text-red-400' : userCredits === Infinity || estimated.isHardPrompt ? 'text-amber-400 scale-110' : 'text-zinc-400'}`} />
+                <span className="tabular-nums font-medium">
+                  {userCredits === Infinity ? '0 CR (Creator ∞)' : t.credits.estCost(estimated.minCost, estimated.maxCost)}
+                </span>
+                {userCredits !== Infinity && estimated.isHardPrompt && (
                   <span className="flex items-center gap-0.5 text-[9px] font-bold text-amber-300 px-1 py-0.2 rounded bg-amber-500/20 border border-amber-500/30 animate-pulse">
                     <Flame className="w-2.5 h-2.5 text-amber-400 fill-amber-400" />
                     <span>DIFFICULT</span>

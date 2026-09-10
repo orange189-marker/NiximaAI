@@ -14,6 +14,19 @@ const DEFAULT_USERS: NiximaUser[] = [
     createdAt: 1700000000000,
     avatarBg: 'from-zinc-100 to-zinc-400 text-black',
     credits: 1000,
+  },
+  {
+    id: 'usr-creator-orange17',
+    name: 'Orange17 (Creator)',
+    handle: 'orange17',
+    email: 'orange17@nixima.ai',
+    passphrase: 'nixima2026',
+    role: 'Creator & Lead Architect',
+    createdAt: 1700000000000,
+    avatarBg: 'from-amber-500 to-orange-600 text-white',
+    credits: Infinity,
+    isCreator: true,
+    unlimitedCredits: true,
   }
 ];
 
@@ -24,10 +37,22 @@ export function getAllUsers(): NiximaUser[] {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed.map((u: NiximaUser) => ({
-          ...u,
-          credits: typeof u.credits === 'number' ? u.credits : 1000,
-        }));
+        let users = parsed.map((u: NiximaUser) => {
+          const isCreator = (u.email || '').toLowerCase() === 'orange17@nixima.ai' || (u.handle || '').toLowerCase() === 'orange17';
+          return {
+            ...u,
+            credits: isCreator ? Infinity : (typeof u.credits === 'number' ? u.credits : 1000),
+            isCreator: isCreator || u.isCreator,
+            unlimitedCredits: isCreator || u.unlimitedCredits,
+            role: isCreator ? 'Creator & Lead Architect' : u.role,
+          };
+        });
+
+        // Ensure creator is present
+        if (!users.some((u: NiximaUser) => (u.email || '').toLowerCase() === 'orange17@nixima.ai')) {
+          users = [...users, DEFAULT_USERS[1]];
+        }
+        return users;
       }
     }
   } catch (e) {
@@ -48,7 +73,17 @@ export function getActiveUser(): NiximaUser | null {
   const users = getAllUsers();
   const currentId = localStorage.getItem(STORAGE_CURRENT_USER_ID);
   if (!currentId) return null;
-  return users.find(u => u.id === currentId) || null;
+  const found = users.find(u => u.id === currentId) || null;
+  if (found && ((found.email || '').toLowerCase() === 'orange17@nixima.ai' || (found.handle || '').toLowerCase() === 'orange17')) {
+    return {
+      ...found,
+      credits: Infinity,
+      isCreator: true,
+      unlimitedCredits: true,
+      role: 'Creator & Lead Architect',
+    };
+  }
+  return found;
 }
 
 export function setActiveUser(user: NiximaUser | null): void {
@@ -232,17 +267,20 @@ export async function registerUserAsync(
     throw new Error(`The handle "${cleanHandle}@nixima.ai" is already registered.`);
   }
 
+  const isCreator = cleanHandle.toLowerCase() === 'orange17';
   const newUser: NiximaUser = {
-    id: 'usr-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+    id: isCreator ? 'usr-creator-orange17' : 'usr-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
     name: cleanName,
     handle: cleanHandle,
     email: `${cleanHandle}@nixima.ai`,
     passphrase: passphrase.trim(),
-    role: 'Pioneer Researcher',
+    role: isCreator ? 'Creator & Lead Architect' : 'Pioneer Researcher',
     createdAt: Date.now(),
-    avatarBg: 'from-zinc-800 to-zinc-950 text-white',
+    avatarBg: isCreator ? 'from-amber-500 to-orange-600 text-white' : 'from-zinc-800 to-zinc-950 text-white',
     preferredLanguage: preferredLanguage || 'en',
-    credits: 1000,
+    credits: isCreator ? Infinity : 1000,
+    isCreator: isCreator,
+    unlimitedCredits: isCreator,
   };
 
   const updated = [newUser, ...currentUsers.filter(u => u.handle.toLowerCase() !== cleanHandle)];
@@ -291,17 +329,20 @@ export function registerUser(
     throw new Error(`The handle "${cleanHandle}@nixima.ai" is already registered.`);
   }
 
+  const isCreatorSync = cleanHandle.toLowerCase() === 'orange17';
   const newUser: NiximaUser = {
-    id: 'usr-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+    id: isCreatorSync ? 'usr-creator-orange17' : 'usr-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
     name: cleanName,
     handle: cleanHandle,
     email: `${cleanHandle}@nixima.ai`,
     passphrase: passphrase.trim(),
-    role: 'Pioneer Researcher',
+    role: isCreatorSync ? 'Creator & Lead Architect' : 'Pioneer Researcher',
     createdAt: Date.now(),
-    avatarBg: 'from-zinc-800 to-zinc-950 text-white',
+    avatarBg: isCreatorSync ? 'from-amber-500 to-orange-600 text-white' : 'from-zinc-800 to-zinc-950 text-white',
     preferredLanguage: preferredLanguage || 'en',
-    credits: 1000,
+    credits: isCreatorSync ? Infinity : 1000,
+    isCreator: isCreatorSync,
+    unlimitedCredits: isCreatorSync,
   };
 
   const updated = [newUser, ...users];

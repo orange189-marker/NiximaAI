@@ -9,6 +9,8 @@ export interface NiximaUser {
   avatarBg?: string;
   preferredLanguage?: 'en' | 'uk';
   credits?: number;
+  isCreator?: boolean;
+  unlimitedCredits?: boolean;
 }
 
 export interface AuthSession {

@@ -25,6 +25,13 @@ export function useAnimatedNumber(
   const startValueRef = useRef<number>(targetValue);
 
   useEffect(() => {
+    if (!isFinite(targetValue) || targetValue >= 999999999) {
+      setDisplayValue(Infinity);
+      setDelta(null);
+      prevValueRef.current = Infinity;
+      return;
+    }
+
     const prev = prevValueRef.current;
     if (prev !== targetValue) {
       const diff = targetValue - prev;
@@ -108,7 +115,33 @@ export const CreditBalanceChip: React.FC<CreditBalanceChipProps> = ({
   title,
   className = '',
 }) => {
+  const isInfinite = !isFinite(credits) || credits >= 999999999;
   const { displayValue, delta, animationType } = useAnimatedNumber(credits);
+
+  if (isInfinite) {
+    return (
+      <div className="relative inline-flex items-center">
+        <button
+          onClick={onClick}
+          type="button"
+          className={`relative flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-mono group shadow-[0_0_16px_rgba(245,158,11,0.3)] border border-amber-400/50 bg-gradient-to-r from-amber-500/25 via-zinc-900 to-amber-500/25 text-amber-200 flex-shrink-0 select-none overflow-hidden hover:border-amber-300 transition-all cursor-pointer ${className}`}
+          title="Creator Sovereign Account (orange17@nixima.ai) • Infinite Credits Granted"
+        >
+          <span className="absolute inset-0 w-1/2 bg-gradient-to-r from-transparent via-amber-300/20 to-transparent pointer-events-none animate-sweep-shine" />
+          <Coins className="w-3.5 h-3.5 text-amber-300 group-hover:rotate-12 transition-transform" />
+          <span className="text-base font-black leading-none text-amber-300 drop-shadow-[0_0_8px_rgba(245,158,11,0.8)] font-sans">
+            ∞
+          </span>
+          <span className="text-[10px] text-amber-400 font-bold uppercase">
+            {unit}
+          </span>
+          <span className="ml-1 text-[8px] font-black uppercase px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30">
+            CREATOR
+          </span>
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="relative inline-flex items-center">
@@ -174,7 +207,29 @@ export const CreditHeroCounter: React.FC<CreditHeroCounterProps> = ({
   unit = 'CR',
   className = '',
 }) => {
+  const isInfinite = !isFinite(credits) || credits >= 999999999;
   const { displayValue, delta, animationType } = useAnimatedNumber(credits, { duration: 950 });
+
+  if (isInfinite) {
+    return (
+      <div className={`relative flex flex-col gap-1.5 pt-1 ${className}`}>
+        <div className="flex items-baseline gap-2.5">
+          <span className="text-5xl font-black font-sans tracking-tight text-amber-300 drop-shadow-[0_0_25px_rgba(245,158,11,0.8)] leading-none">
+            ∞
+          </span>
+          <span className="text-base font-bold font-mono text-amber-400">
+            {unit}
+          </span>
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+            SOVEREIGN CREATOR ACCESS
+          </span>
+        </div>
+        <p className="text-[11px] font-mono text-amber-400/80">
+          👑 orange17@nixima.ai • Infinite credits & unlimited reasoning capacity active forever
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className={`relative inline-flex items-baseline gap-2 pt-1 ${className}`}>
@@ -229,7 +284,21 @@ export const CreditSidebarBadge: React.FC<CreditSidebarBadgeProps> = ({
   unit = 'CR',
   className = '',
 }) => {
+  const isInfinite = !isFinite(credits) || credits >= 999999999;
   const { displayValue, animationType } = useAnimatedNumber(credits, { duration: 650, playSound: false });
+
+  if (isInfinite) {
+    return (
+      <span
+        className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold border border-amber-500/40 bg-amber-500/20 text-amber-300 shadow-[0_0_10px_rgba(245,158,11,0.3)] flex-shrink-0 ${className}`}
+        title="Creator Account (orange17@nixima.ai) • Unlimited Inferences"
+      >
+        <Coins className="w-2.5 h-2.5 text-amber-400" />
+        <span className="text-xs leading-none font-black font-sans">∞</span>
+        <span>{unit}</span>
+      </span>
+    );
+  }
 
   return (
     <span
@@ -261,17 +330,30 @@ export const CreditTelemetryPill: React.FC<CreditTelemetryPillProps> = ({
   unit = 'CR',
   className = '',
 }) => {
+  const isZeroOrCreator = creditsSpent === 0;
+
   return (
     <span
-      className={`relative inline-flex items-center gap-1 text-[11px] font-mono text-amber-300 bg-amber-500/10 border border-amber-500/30 px-2 py-0.5 rounded shadow-sm overflow-hidden animate-telemetry-pill group ${className}`}
-      title={`Deducted ${creditsSpent} ${unit} for computational inference`}
+      className={`relative inline-flex items-center gap-1 text-[11px] font-mono ${
+        isZeroOrCreator
+          ? 'text-amber-300 bg-amber-500/20 border-amber-400/40'
+          : 'text-amber-300 bg-amber-500/10 border-amber-500/30'
+      } border px-2 py-0.5 rounded shadow-sm overflow-hidden animate-telemetry-pill group ${className}`}
+      title={isZeroOrCreator ? 'Creator Sovereign Account (orange17@nixima.ai) • Free Unlimited Inference' : `Deducted ${creditsSpent} ${unit} for computational inference`}
     >
       {/* Light shimmer bar that sweeps across */}
       <span className="absolute inset-0 w-1/3 bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none animate-sweep-shine" />
 
       <Coins className="w-3 h-3 text-amber-400 flex-shrink-0 group-hover:scale-110 transition-transform" />
-      <span className="font-bold tracking-tight">-{creditsSpent}</span>
+      <span className="font-bold tracking-tight">
+        {isZeroOrCreator ? '0' : `-${creditsSpent}`}
+      </span>
       <span className="text-[9px] text-amber-400/80 font-semibold">{unit}</span>
+      {isZeroOrCreator && (
+        <span className="text-[8px] font-mono text-amber-300 font-bold px-1 py-0.2 rounded bg-amber-400/20 ml-0.5">
+          ∞
+        </span>
+      )}
     </span>
   );
 };

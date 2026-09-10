@@ -8,7 +8,21 @@ let memoryUsers = [
     passphrase: "nixima2026",
     role: "Founding Operator",
     createdAt: 1700000000000,
-    avatarBg: "from-zinc-100 to-zinc-400 text-black"
+    avatarBg: "from-zinc-100 to-zinc-400 text-black",
+    credits: 1000
+  },
+  {
+    id: "usr-creator-orange17",
+    name: "Orange17 (Creator)",
+    handle: "orange17",
+    email: "orange17@nixima.ai",
+    passphrase: "nixima2026",
+    role: "Creator & Lead Architect",
+    createdAt: 1700000000000,
+    avatarBg: "from-amber-500 to-orange-600 text-white",
+    credits: 999999999,
+    isCreator: true,
+    unlimitedCredits: true
   }
 ];
 
