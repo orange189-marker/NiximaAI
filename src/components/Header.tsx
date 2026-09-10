@@ -12,7 +12,8 @@ import {
   BrainCircuit,
   Sliders,
   Plus,
-  X
+  X,
+  BarChart3
 } from 'lucide-react';
 import { ModelOption } from '../types/chat';
 import { NIXIMA_MODELS } from '../data/models';
@@ -27,6 +28,7 @@ interface HeaderProps {
   onSelectModel: (model: ModelOption) => void;
   onOpenSettings: () => void;
   onOpenCompanyInfo: () => void;
+  onOpenBenchmarks?: () => void;
   isSidebarOpen: boolean;
   onToggleSidebar: () => void;
   onNewChat?: () => void;
@@ -39,6 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectModel,
   onOpenSettings,
   onOpenCompanyInfo,
+  onOpenBenchmarks,
   isSidebarOpen,
   onToggleSidebar,
   onNewChat,
@@ -229,10 +232,24 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
 
             <div className="mt-2 pt-2 border-t border-zinc-800/80 px-2 flex items-center justify-between text-xs text-zinc-400">
-              <span className="flex items-center gap-1.5 text-[11px] font-mono truncate mr-2">
-                <Cpu className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
-                <span className="truncate">{t.header.sovereignEngine}</span>
-              </span>
+              {onOpenBenchmarks ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsModelDropdownOpen(false);
+                    onOpenBenchmarks();
+                  }}
+                  className="text-[11px] text-cyan-300 hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <BarChart3 className="w-3 h-3" />
+                  <span>{language === 'uk' ? 'Офіційні бенчмарки' : 'Official Benchmarks'}</span>
+                </button>
+              ) : (
+                <span className="flex items-center gap-1.5 text-[11px] font-mono truncate mr-2">
+                  <Cpu className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
+                  <span className="truncate">{t.header.sovereignEngine}</span>
+                </span>
+              )}
               <button
                 type="button"
                 onClick={() => {
@@ -274,6 +291,22 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={onOpenCredits || onOpenSettings}
           title={`${t.credits.balance}: ${credits.toLocaleString()} ${t.credits.unit}`}
         />
+
+        {/* Official Benchmarks Button */}
+        {onOpenBenchmarks && (
+          <button
+            type="button"
+            onClick={onOpenBenchmarks}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-all text-xs font-mono select-none cursor-pointer shadow-inner-light"
+            title={language === 'uk' ? 'Офіційні бенчмарки 4 моделей' : 'Official Benchmarks (4 Models Compared)'}
+          >
+            <BarChart3 className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="hidden sm:inline font-semibold">{language === 'uk' ? 'Бенчмарки' : 'Benchmarks'}</span>
+            <span className="hidden md:inline px-1 py-0.2 rounded text-[8px] font-mono font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+              4
+            </span>
+          </button>
+        )}
 
         {/* Quick Language Toggle Button with SVG Flag */}
         <button

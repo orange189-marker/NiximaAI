@@ -7,6 +7,7 @@ import { EmptyChat } from './components/EmptyChat';
 import { SettingsModal, SettingsTab } from './components/SettingsModal';
 import { CompanyModal } from './components/CompanyModal';
 import { VipWelcomeModal } from './components/VipWelcomeModal';
+import { BenchmarksModal } from './components/BenchmarksModal';
 import { AuthPortal } from './components/AuthPortal';
 import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry } from './types/chat';
 import { NiximaUser } from './types/user';
@@ -106,10 +107,16 @@ const AppContent: React.FC = () => {
   const [isVipModalOpen, setIsVipModalOpen] = useState(false);
   const [isVipPreview, setIsVipPreview] = useState(false);
   const [previewTarget, setPreviewTarget] = useState<'warexxq' | 'roman1980'>('warexxq');
+  const [isBenchmarksOpen, setIsBenchmarksOpen] = useState(false);
 
-  // VIP Welcome letter & presentation check
+  // VIP Welcome letter & presentation check, URL parameters
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    const benchParam = params.get('benchmarks') || params.get('benchmark');
+    if (benchParam) {
+      setIsBenchmarksOpen(true);
+    }
+
     const previewParam = params.get('preview_vip') || params.get('vip_preview');
     if (previewParam) {
       if (previewParam.toLowerCase().includes('roman') || previewParam.toLowerCase().includes('dad')) {
@@ -625,6 +632,7 @@ All conversations and model preferences in this workspace are private to your Ni
         onLogout={handleLogout}
         onOpenSettings={() => handleOpenSettings('general')}
         onOpenCompanyInfo={() => setIsCompanyModalOpen(true)}
+        onOpenBenchmarks={() => setIsBenchmarksOpen(true)}
       />
 
       {/* Main Chat Canvas */}
@@ -635,6 +643,7 @@ All conversations and model preferences in this workspace are private to your Ni
           onSelectModel={setCurrentModel}
           onOpenSettings={() => handleOpenSettings('general')}
           onOpenCompanyInfo={() => setIsCompanyModalOpen(true)}
+          onOpenBenchmarks={() => setIsBenchmarksOpen(true)}
           isSidebarOpen={isSidebarOpen}
           onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
           onNewChat={handleNewChat}
@@ -720,6 +729,13 @@ All conversations and model preferences in this workspace are private to your Ni
             : currentUser
         }
         isPreview={isVipPreview}
+      />
+
+      {/* Official Benchmarks & Leaderboard Modal */}
+      <BenchmarksModal
+        isOpen={isBenchmarksOpen}
+        onClose={() => setIsBenchmarksOpen(false)}
+        onSelectModel={(model) => setCurrentModel(model)}
       />
     </div>
   );

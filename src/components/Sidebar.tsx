@@ -14,7 +14,8 @@ import {
   Check,
   Download,
   LogOut,
-  Sliders
+  Sliders,
+  BarChart3
 } from 'lucide-react';
 import { Conversation } from '../types/chat';
 import { NiximaUser } from '../types/user';
@@ -39,6 +40,7 @@ interface SidebarProps {
   onLogout: () => void;
   onOpenSettings: () => void;
   onOpenCompanyInfo: () => void;
+  onOpenBenchmarks?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -55,6 +57,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onLogout,
   onOpenSettings,
   onOpenCompanyInfo,
+  onOpenBenchmarks,
 }) => {
   const { language, t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
@@ -400,9 +403,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </button>
           </div>
 
+          {onOpenBenchmarks && (
+            <button
+              onClick={onOpenBenchmarks}
+              className="w-full flex items-center justify-between px-2 py-1.5 rounded-lg bg-zinc-900/60 hover:bg-zinc-800 text-[11px] text-zinc-300 hover:text-white transition-all border border-zinc-800/80 group cursor-pointer"
+            >
+              <span className="flex items-center gap-2">
+                <BarChart3 className="w-3.5 h-3.5 text-cyan-400 group-hover:scale-110 transition-transform" />
+                <span className="font-semibold">{language === 'uk' ? 'Офіційні бенчмарки' : 'Official Benchmarks'}</span>
+              </span>
+              <span className="text-[9px] font-mono font-bold px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                4 MODELS
+              </span>
+            </button>
+          )}
+
           <button
             onClick={onOpenCompanyInfo}
-            className="w-full flex items-center justify-between px-2 py-1.5 text-[11px] text-zinc-400 hover:text-white transition-colors"
+            className="w-full flex items-center justify-between px-2 py-1.5 text-[11px] text-zinc-400 hover:text-white transition-colors cursor-pointer"
           >
             <span className="flex items-center gap-1.5">
               <Sparkles className="w-3 h-3 text-zinc-400" />
