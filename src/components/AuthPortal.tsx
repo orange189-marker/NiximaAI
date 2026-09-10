@@ -54,6 +54,10 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
   const [quickPassUser, setQuickPassUser] = useState<NiximaUser | null>(() => getQuickPassUser());
   const [quickPassEnabled, setQuickPassEnabledState] = useState<boolean>(() => isQuickPassEnabled());
   const [showManualAuth, setShowManualAuth] = useState<boolean>(false);
+  const [isCreatorSecretMode] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return new URLSearchParams(window.location.search).get('creator') === 'true';
+  });
 
   // Authentication mode and step
   const [mode, setMode] = useState<'register' | 'signin'>('register');
@@ -1038,69 +1042,71 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                       <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
                     </button>
 
-                    {/* 1-Click VIP Instant Access Buttons */}
-                    <div className="pt-2 space-y-2">
-                      {/* Button for Dad: roman1980 */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setError(null);
-                          setIsSubmitting(true);
-                          try {
-                            setLanguage('uk');
-                            localStorage.removeItem('nixima_vip_welcome_seen_usr-vip-roman1980');
-                            sessionStorage.setItem('nixima_force_vip_welcome', 'true');
-                            const vipUser = quickLoginVip('roman1980');
-                            triggerCinematicLaunch(vipUser);
-                          } catch (err: any) {
-                            setError(err.message || 'Вхід не вдався');
-                            setIsSubmitting(false);
-                          }
-                        }}
-                        disabled={isSubmitting}
-                        className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-blue-950/40 via-indigo-950/40 to-cyan-950/40 border border-blue-500/30 hover:border-blue-400 text-blue-200 hover:text-white text-xs font-mono transition-all flex items-center justify-between group cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(59,130,246,0.25)]"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Zap className="w-3.5 h-3.5 text-blue-400 fill-blue-400 group-hover:scale-110 transition-transform" />
-                          <span className="font-semibold">
-                            {language === 'uk' ? '⚡ Швидкий вхід: roman1980 (Тато)' : '⚡ Fast Access: roman1980 (Dad)'}
+                    {/* 1-Click VIP Instant Access Buttons (Only visible to Creator in ?creator=true mode) */}
+                    {isCreatorSecretMode && (
+                      <div className="pt-2 space-y-2 animate-in fade-in duration-150">
+                        {/* Button for Dad: roman1980 */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setError(null);
+                            setIsSubmitting(true);
+                            try {
+                              setLanguage('uk');
+                              localStorage.removeItem('nixima_vip_welcome_seen_usr-vip-roman1980');
+                              sessionStorage.setItem('nixima_force_vip_welcome', 'true');
+                              const vipUser = quickLoginVip('roman1980');
+                              triggerCinematicLaunch(vipUser);
+                            } catch (err: any) {
+                              setError(err.message || 'Вхід не вдався');
+                              setIsSubmitting(false);
+                            }
+                          }}
+                          disabled={isSubmitting}
+                          className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-blue-950/40 via-indigo-950/40 to-cyan-950/40 border border-blue-500/30 hover:border-blue-400 text-blue-200 hover:text-white text-xs font-mono transition-all flex items-center justify-between group cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(59,130,246,0.25)]"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Zap className="w-3.5 h-3.5 text-blue-400 fill-blue-400 group-hover:scale-110 transition-transform" />
+                            <span className="font-semibold">
+                              {language === 'uk' ? '⚡ Швидкий вхід: roman1980 (Тато)' : '⚡ Fast Access: roman1980 (Dad)'}
+                            </span>
+                          </div>
+                          <span className="text-[9px] uppercase font-bold text-blue-400 px-1.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/20">
+                            FAMILY VIP
                           </span>
-                        </div>
-                        <span className="text-[9px] uppercase font-bold text-blue-400 px-1.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/20">
-                          FAMILY VIP
-                        </span>
-                      </button>
+                        </button>
 
-                      {/* Button for warexxq */}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setError(null);
-                          setIsSubmitting(true);
-                          try {
-                            localStorage.removeItem('nixima_vip_welcome_seen_usr-vip-warexxq');
-                            sessionStorage.setItem('nixima_force_vip_welcome', 'true');
-                            const vipUser = quickLoginVip('warexxq');
-                            triggerCinematicLaunch(vipUser);
-                          } catch (err: any) {
-                            setError(err.message || 'VIP Access failed');
-                            setIsSubmitting(false);
-                          }
-                        }}
-                        disabled={isSubmitting}
-                        className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-cyan-950/30 via-indigo-950/30 to-purple-950/30 border border-cyan-500/20 hover:border-cyan-400 text-cyan-200 hover:text-white text-xs font-mono transition-all flex items-center justify-between group cursor-pointer"
-                      >
-                        <div className="flex items-center gap-2">
-                          <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400 group-hover:scale-110 transition-transform" />
-                          <span className="font-semibold">
-                            {language === 'uk' ? '⚡ Швидкий VIP-вхід: warexxq' : '⚡ VIP Fast Access: warexxq'}
+                        {/* Button for warexxq */}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setError(null);
+                            setIsSubmitting(true);
+                            try {
+                              localStorage.removeItem('nixima_vip_welcome_seen_usr-vip-warexxq');
+                              sessionStorage.setItem('nixima_force_vip_welcome', 'true');
+                              const vipUser = quickLoginVip('warexxq');
+                              triggerCinematicLaunch(vipUser);
+                            } catch (err: any) {
+                              setError(err.message || 'VIP Access failed');
+                              setIsSubmitting(false);
+                            }
+                          }}
+                          disabled={isSubmitting}
+                          className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-cyan-950/30 via-indigo-950/30 to-purple-950/30 border border-cyan-500/20 hover:border-cyan-400 text-cyan-200 hover:text-white text-xs font-mono transition-all flex items-center justify-between group cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2">
+                            <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400 group-hover:scale-110 transition-transform" />
+                            <span className="font-semibold">
+                              {language === 'uk' ? '⚡ Швидкий VIP-вхід: warexxq' : '⚡ VIP Fast Access: warexxq'}
+                            </span>
+                          </div>
+                          <span className="text-[9px] uppercase font-bold text-cyan-400 px-1.5 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20">
+                            FRIEND VIP
                           </span>
-                        </div>
-                        <span className="text-[9px] uppercase font-bold text-cyan-400 px-1.5 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20">
-                          FRIEND VIP
-                        </span>
-                      </button>
-                    </div>
+                        </button>
+                      </div>
+                    )}
                   </form>
                 )}
               </div>
