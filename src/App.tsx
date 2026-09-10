@@ -17,6 +17,7 @@ import { streamOpenRouterChat } from './utils/openrouter';
 import { playTypingTick, playCompletionChime } from './utils/sound';
 import { getActiveUser, logoutUser, syncAccountsWithServer, isDadAccount } from './utils/auth';
 import { getSavedHotkey, matchesHotkey } from './utils/hotkeys';
+import { buildNiximaSystemPrompt } from './utils/promptContext';
 import { 
   getUserCredits, 
   calculateActualCost, 
@@ -455,10 +456,18 @@ All conversations and model preferences in this workspace are private to your Ni
         { role: 'user', content: userText }
       ];
 
+      const dynamicSystemPrompt = buildNiximaSystemPrompt({
+        user: currentUser,
+        credits: getUserCredits(currentUser),
+        language: language,
+        model: currentModel,
+        customSystemPrompt: settings.systemPrompt,
+      });
+
       const { fullContent, fullThinking } = await streamOpenRouterChat({
         model: currentModel,
         messages: historyForApi,
-        systemPrompt: settings.systemPrompt,
+        systemPrompt: dynamicSystemPrompt,
         temperature: settings.temperature,
         topP: settings.topP,
         maxTokens: settings.maxTokens,
