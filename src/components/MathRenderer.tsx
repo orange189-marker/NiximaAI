@@ -92,13 +92,18 @@ export const MathRenderer: React.FC<MathRendererProps> = ({
         <button
           type="button"
           onClick={handleCopy}
-          className="flex items-center gap-1.5 px-2 py-0.5 rounded-md hover:bg-zinc-800/90 text-zinc-400 hover:text-white transition-all cursor-pointer text-[10px]"
+          className={`relative flex items-center gap-1.5 px-2 py-0.5 rounded-md transition-all duration-300 cursor-pointer text-[10px] select-none ${
+            copied
+              ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
+              : 'hover:bg-zinc-800/90 text-zinc-400 hover:text-white border border-transparent active:scale-95'
+          }`}
           title={copied ? t.chatMessage.copiedLatex : t.chatMessage.copyLatex}
         >
           {copied ? (
             <>
-              <Check className="w-3 h-3 text-emerald-400 stroke-[2.5]" />
-              <span className="text-emerald-400 font-semibold">{t.chatMessage.copiedLatex}</span>
+              <span className="absolute inset-0 rounded-md border border-emerald-400/50 animate-copy-shockwave pointer-events-none" />
+              <Check className="w-3 h-3 text-emerald-400 animate-check-pop stroke-[2.5]" />
+              <span className="animate-text-reveal text-emerald-300 font-semibold">{t.chatMessage.copiedLatex}</span>
             </>
           ) : (
             <>

@@ -28,6 +28,7 @@ import { NiximaIdLogo } from './NiximaIdLogo';
 import { useLanguage } from '../context/LanguageContext';
 import { MathRenderer } from './MathRenderer';
 import { CreditTelemetryPill } from './AnimatedCredits';
+import { playCompletionChime } from '../utils/sound';
 
 interface ChatMessageProps {
   message: Message;
@@ -67,6 +68,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   const handleCopy = () => {
     navigator.clipboard.writeText(message.content);
     setCopied(true);
+    playCompletionChime();
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -663,15 +665,38 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                 <div className="pt-2 flex flex-wrap items-center justify-between gap-2 text-zinc-500 text-xs border-t border-zinc-900/60 mt-3">
                   {/* Action buttons (Clean icon-only toolbar) */}
                   <div className="flex items-center flex-wrap gap-1">
-                    {/* Copy Button */}
-                    <button
-                      onClick={handleCopy}
-                      className="p-1.5 rounded-lg hover:text-white hover:bg-zinc-800/80 transition-colors flex items-center justify-center text-zinc-400"
-                      title={copied ? t.chatMessage.copied : t.chatMessage.copyResponse}
-                      aria-label={copied ? t.chatMessage.copied : t.chatMessage.copyResponse}
-                    >
-                      {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-                    </button>
+                    {/* Cool Animated Copy Button */}
+                    <div className="relative inline-flex items-center">
+                      <button
+                        onClick={handleCopy}
+                        className={`relative h-7 rounded-lg transition-all duration-300 flex items-center justify-center select-none overflow-visible ${
+                          copied
+                            ? 'px-2.5 bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 shadow-[0_0_16px_rgba(16,185,129,0.35),inset_0_1px_0_rgba(255,255,255,0.1)]'
+                            : 'w-7 px-0 text-zinc-400 hover:text-white hover:bg-zinc-800/80 border border-transparent active:scale-95'
+                        }`}
+                        title={copied ? t.chatMessage.copied : t.chatMessage.copyResponse}
+                        aria-label={copied ? t.chatMessage.copied : t.chatMessage.copyResponse}
+                      >
+                        {copied ? (
+                          <>
+                            {/* Expanding Shockwave Ring */}
+                            <span className="absolute inset-0 rounded-lg border border-emerald-400/60 animate-copy-shockwave pointer-events-none" />
+                            {/* Luminous Particle Sparks */}
+                            <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-spark-1 shadow-[0_0_8px_rgba(52,211,153,1)] pointer-events-none" />
+                            <span className="absolute -bottom-0.5 -left-0.5 w-1.5 h-1.5 rounded-full bg-cyan-400 animate-spark-2 shadow-[0_0_8px_rgba(34,211,238,1)] pointer-events-none" />
+
+                            <span className="flex items-center gap-1.5 font-mono text-[11px] font-medium tracking-tight">
+                              <Check className="w-3.5 h-3.5 text-emerald-400 animate-check-pop stroke-[2.5]" />
+                              <span className="animate-text-reveal text-emerald-300 whitespace-nowrap">
+                                {t.chatMessage.copied}
+                              </span>
+                            </span>
+                          </>
+                        ) : (
+                          <Copy className="w-3.5 h-3.5 transition-transform duration-150 group-hover:scale-105" />
+                        )}
+                      </button>
+                    </div>
 
                     {/* Regenerate Button */}
                     {onRegenerate && (
@@ -861,6 +886,7 @@ const CodeBlock: React.FC<{ language: string; code: string }> = ({ language, cod
   const copyCode = () => {
     navigator.clipboard.writeText(code);
     setCopied(true);
+    playCompletionChime();
     setTimeout(() => setCopied(false), 2000);
   };
 
@@ -891,10 +917,25 @@ const CodeBlock: React.FC<{ language: string; code: string }> = ({ language, cod
           </button>
           <button
             onClick={copyCode}
-            className="flex items-center gap-1 hover:text-white transition-colors"
+            className={`relative rounded-md transition-all duration-300 flex items-center justify-center gap-1.5 px-2 py-0.5 select-none ${
+              copied
+                ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
+                : 'hover:text-white hover:bg-zinc-800/80 text-zinc-400 border border-transparent active:scale-95'
+            }`}
+            title={copied ? t.chatMessage.copied : t.chatMessage.copyCode}
           >
-            {copied ? <Check className="w-3 h-3 text-white" /> : <Copy className="w-3 h-3" />}
-            <span>{copied ? t.chatMessage.copied : t.chatMessage.copyCode}</span>
+            {copied ? (
+              <>
+                <span className="absolute inset-0 rounded-md border border-emerald-400/50 animate-copy-shockwave pointer-events-none" />
+                <Check className="w-3 h-3 text-emerald-400 animate-check-pop stroke-[2.5]" />
+                <span className="animate-text-reveal text-emerald-300 font-medium">{t.chatMessage.copied}</span>
+              </>
+            ) : (
+              <>
+                <Copy className="w-3 h-3" />
+                <span>{t.chatMessage.copyCode}</span>
+              </>
+            )}
           </button>
         </div>
       </div>
