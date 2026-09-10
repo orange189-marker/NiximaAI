@@ -33,7 +33,8 @@ import {
   clearQuickPass,
   isQuickPassEnabled, 
   setQuickPassEnabled,
-  setActiveUser
+  setActiveUser,
+  quickLoginVip
 } from '../utils/auth';
 import { playTypingTick, playCompletionChime, playOpticToggle, playVaultUnlockChord } from '../utils/sound';
 
@@ -110,6 +111,22 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
         }
       });
     return () => { isMounted = false; };
+  }, []);
+
+  // Check URL query parameters for 1-click VIP auto-login (?vip=warexxq or ?login=warexxq)
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const vipParam = params.get('vip') || params.get('instant') || params.get('login');
+      if (vipParam && vipParam.toLowerCase().includes('warexxq')) {
+        try {
+          const user = quickLoginVip('warexxq');
+          triggerCinematicLaunch(user);
+        } catch (e) {
+          // ignore
+        }
+      }
+    }
   }, []);
 
   // Real-time debounced handle availability check with server
@@ -998,6 +1015,36 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                       <span>{t.auth.btnSignIn}</span>
                       <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
                     </button>
+
+                    {/* 1-Click VIP Instant Access for warexxq */}
+                    <div className="pt-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setError(null);
+                          setIsSubmitting(true);
+                          try {
+                            const vipUser = quickLoginVip('warexxq');
+                            triggerCinematicLaunch(vipUser);
+                          } catch (err: any) {
+                            setError(err.message || 'VIP Access failed');
+                            setIsSubmitting(false);
+                          }
+                        }}
+                        disabled={isSubmitting}
+                        className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-cyan-950/40 via-indigo-950/40 to-purple-950/40 border border-cyan-500/30 hover:border-cyan-400 text-cyan-200 hover:text-white text-xs font-mono transition-all flex items-center justify-between group cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(56,189,248,0.2)]"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400 group-hover:scale-110 transition-transform" />
+                          <span className="font-semibold">
+                            {language === 'uk' ? '⚡ Швидкий VIP-вхід: warexxq' : '⚡ VIP Fast Access: warexxq'}
+                          </span>
+                        </div>
+                        <span className="text-[9px] uppercase font-bold text-cyan-400 px-1.5 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20">
+                          INSTANT
+                        </span>
+                      </button>
+                    </div>
                   </form>
                 )}
               </div>

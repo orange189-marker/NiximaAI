@@ -20,7 +20,8 @@ import {
   Zap,
   Keyboard,
   Globe,
-  Gift
+  Gift,
+  Eye
 } from 'lucide-react';
 import { UserSettings, Conversation } from '../types/chat';
 import { NiximaUser } from '../types/user';
@@ -50,6 +51,7 @@ interface SettingsModalProps {
   onLogout: () => void;
   initialTab?: SettingsTab;
   onUserUpdated?: (user: NiximaUser) => void;
+  onPreviewVipWelcome?: () => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -64,6 +66,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onLogout,
   initialTab = 'general',
   onUserUpdated,
+  onPreviewVipWelcome,
 }) => {
   const { language, setLanguage, t } = useLanguage();
   const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
@@ -893,6 +896,40 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     ? 'Система Nixima автоматично аналізує довжину тексту, наявність коду, формул LaTeX та активований режим DeepThink. Прості короткі запити коштують мінімально, тоді як масивні технічні обчислення списують кредити пропорційно навантаженню AI кластера.'
                     : 'The Nixima runtime automatically analyzes prompt length, presence of code blocks, LaTeX formulas, and active DeepThink reasoning depth. Simple queries consume minimal credits, whereas intensive technical computations dynamically scale credit deductions to reflect neural cluster workload.'}
                 </p>
+              </div>
+
+              {/* VIP Welcome Presentation Preview (Creator / VIP Preview) */}
+              <div className="p-4 rounded-xl bg-gradient-to-r from-zinc-900/90 via-zinc-800/40 to-zinc-900/90 border border-zinc-700/80 shadow-inner-light space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-zinc-300" />
+                      <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                        {language === 'uk' ? 'VIP Презентаційний Лист & Анімація' : 'VIP Presentation Letter & Animation'}
+                      </h4>
+                      <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-white/10 text-zinc-300 border border-white/20">
+                        PREVIEW
+                      </span>
+                    </div>
+                    <p className="text-xs text-zinc-400">
+                      {language === 'uk'
+                        ? 'Перегляньте спеціальне вітальне звернення з анімацією вибуху кредитів у нескінченність (як для warexxq та VIP друзів).'
+                        : 'Preview the personalized welcome presentation with rising credits counter & supernova infinity animation (as seen by warexxq and VIP friends).'}
+                    </p>
+                  </div>
+                  {onPreviewVipWelcome && (
+                    <button
+                      onClick={() => {
+                        onClose();
+                        onPreviewVipWelcome();
+                      }}
+                      className="px-3.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-white font-medium text-xs font-mono transition-all flex items-center gap-1.5 shadow-md flex-shrink-0 cursor-pointer"
+                    >
+                      <Eye className="w-3.5 h-3.5 text-zinc-300" />
+                      <span>{language === 'uk' ? 'Переглянути' : 'Preview Live'}</span>
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           )}

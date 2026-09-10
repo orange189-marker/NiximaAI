@@ -212,5 +212,96 @@ export function playCreditGrantSound(): void {
   }
 }
 
+/**
+ * Play progressive pitch-rising tick as credit counter ramps up
+ */
+export function playCreditRamp(progress: number): void {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    const clamped = Math.max(0, Math.min(1, progress));
+    const freq = 420 + Math.pow(clamped, 2) * 1400;
+
+    osc.type = clamped > 0.8 ? 'triangle' : 'sine';
+    osc.frequency.setValueAtTime(freq, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(freq * 1.08, ctx.currentTime + 0.025);
+
+    const volume = 0.02 + clamped * 0.035;
+    gain.gain.setValueAtTime(volume, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.025);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.025);
+  } catch (e) {
+    // Ignore
+  }
+}
+
+/**
+ * Play powerful synthesized supernova explosion impact with celestial harmonic resonance
+ */
+export function playSupernovaBang(): void {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+
+    const now = ctx.currentTime;
+
+    // 1. Heavy sub-bass impact drop
+    const subOsc = ctx.createOscillator();
+    const subGain = ctx.createGain();
+    subOsc.type = 'sine';
+    subOsc.frequency.setValueAtTime(160, now);
+    subOsc.frequency.exponentialRampToValueAtTime(32, now + 0.6);
+    subGain.gain.setValueAtTime(0.22, now);
+    subGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.75);
+    subOsc.connect(subGain);
+    subGain.connect(ctx.destination);
+    subOsc.start(now);
+    subOsc.stop(now + 0.75);
+
+    // 2. Punchy noise-like burst
+    const burstOsc = ctx.createOscillator();
+    const burstGain = ctx.createGain();
+    burstOsc.type = 'sawtooth';
+    burstOsc.frequency.setValueAtTime(450, now);
+    burstOsc.frequency.exponentialRampToValueAtTime(60, now + 0.2);
+    burstGain.gain.setValueAtTime(0.12, now);
+    burstGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+    burstOsc.connect(burstGain);
+    burstGain.connect(ctx.destination);
+    burstOsc.start(now);
+    burstOsc.stop(now + 0.22);
+
+    // 3. Ethereal ascending celestial chime chord (C5, E5, G5, C6)
+    const chord = [523.25, 659.25, 783.99, 1046.5];
+    chord.forEach((freq, idx) => {
+      const chimeOsc = ctx.createOscillator();
+      const chimeGain = ctx.createGain();
+      chimeOsc.type = 'sine';
+      chimeOsc.frequency.setValueAtTime(freq, now + 0.06 + idx * 0.02);
+
+      chimeGain.gain.setValueAtTime(0.0001, now);
+      chimeGain.gain.setValueAtTime(0.06, now + 0.06 + idx * 0.02);
+      chimeGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.6);
+
+      chimeOsc.connect(chimeGain);
+      chimeGain.connect(ctx.destination);
+
+      chimeOsc.start(now + 0.06 + idx * 0.02);
+      chimeOsc.stop(now + 1.6);
+    });
+  } catch (e) {
+    // Ignore
+  }
+}
+
 
 

@@ -27,6 +27,19 @@ const DEFAULT_USERS: NiximaUser[] = [
     credits: Infinity,
     isCreator: true,
     unlimitedCredits: true,
+  },
+  {
+    id: 'usr-vip-warexxq',
+    name: 'warexxq',
+    handle: 'warexxq',
+    email: 'warexxq@nixima.ai',
+    passphrase: 'warexxq2026',
+    role: 'VIP Friend & Pioneer Architect',
+    createdAt: 1700000000000,
+    avatarBg: 'from-cyan-500 via-indigo-500 to-purple-600 text-white',
+    credits: Infinity,
+    isVip: true,
+    unlimitedCredits: true,
   }
 ];
 
@@ -38,19 +51,28 @@ export function getAllUsers(): NiximaUser[] {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
         let users = parsed.map((u: NiximaUser) => {
-          const isCreator = (u.email || '').toLowerCase() === 'orange17@nixima.ai' || (u.handle || '').toLowerCase() === 'orange17';
+          const email = (u.email || '').toLowerCase();
+          const handle = (u.handle || '').toLowerCase();
+          const isCreator = email === 'orange17@nixima.ai' || handle === 'orange17' || u.isCreator === true;
+          const isVip = email === 'warexxq@nixima.ai' || handle === 'warexxq' || u.isVip === true;
+          const hasInfinite = isCreator || isVip || u.unlimitedCredits === true;
           return {
             ...u,
-            credits: isCreator ? Infinity : (typeof u.credits === 'number' ? u.credits : 1000),
-            isCreator: isCreator || u.isCreator,
-            unlimitedCredits: isCreator || u.unlimitedCredits,
-            role: isCreator ? 'Creator & Lead Architect' : u.role,
+            credits: hasInfinite ? Infinity : (typeof u.credits === 'number' ? u.credits : 1000),
+            isCreator: isCreator,
+            isVip: isVip,
+            unlimitedCredits: hasInfinite,
+            role: isCreator ? 'Creator & Lead Architect' : isVip ? (u.role || 'VIP Friend & Pioneer Architect') : u.role,
           };
         });
 
         // Ensure creator is present
         if (!users.some((u: NiximaUser) => (u.email || '').toLowerCase() === 'orange17@nixima.ai')) {
           users = [...users, DEFAULT_USERS[1]];
+        }
+        // Ensure warexxq VIP is present
+        if (!users.some((u: NiximaUser) => (u.email || '').toLowerCase() === 'warexxq@nixima.ai')) {
+          users = [...users, DEFAULT_USERS[2]];
         }
         return users;
       }
@@ -268,19 +290,22 @@ export async function registerUserAsync(
   }
 
   const isCreator = cleanHandle.toLowerCase() === 'orange17';
+  const isVip = cleanHandle.toLowerCase() === 'warexxq';
+  const hasInfinite = isCreator || isVip;
   const newUser: NiximaUser = {
-    id: isCreator ? 'usr-creator-orange17' : 'usr-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+    id: isCreator ? 'usr-creator-orange17' : isVip ? 'usr-vip-warexxq' : 'usr-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
     name: cleanName,
     handle: cleanHandle,
     email: `${cleanHandle}@nixima.ai`,
     passphrase: passphrase.trim(),
-    role: isCreator ? 'Creator & Lead Architect' : 'Pioneer Researcher',
+    role: isCreator ? 'Creator & Lead Architect' : isVip ? 'VIP Friend & Pioneer Architect' : 'Pioneer Researcher',
     createdAt: Date.now(),
-    avatarBg: isCreator ? 'from-amber-500 to-orange-600 text-white' : 'from-zinc-800 to-zinc-950 text-white',
+    avatarBg: isCreator ? 'from-amber-500 to-orange-600 text-white' : isVip ? 'from-cyan-500 via-indigo-500 to-purple-600 text-white' : 'from-zinc-800 to-zinc-950 text-white',
     preferredLanguage: preferredLanguage || 'en',
-    credits: isCreator ? Infinity : 1000,
+    credits: hasInfinite ? Infinity : 1000,
     isCreator: isCreator,
-    unlimitedCredits: isCreator,
+    isVip: isVip,
+    unlimitedCredits: hasInfinite,
   };
 
   const updated = [newUser, ...currentUsers.filter(u => u.handle.toLowerCase() !== cleanHandle)];
@@ -330,19 +355,22 @@ export function registerUser(
   }
 
   const isCreatorSync = cleanHandle.toLowerCase() === 'orange17';
+  const isVipSync = cleanHandle.toLowerCase() === 'warexxq';
+  const hasInfiniteSync = isCreatorSync || isVipSync;
   const newUser: NiximaUser = {
-    id: isCreatorSync ? 'usr-creator-orange17' : 'usr-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+    id: isCreatorSync ? 'usr-creator-orange17' : isVipSync ? 'usr-vip-warexxq' : 'usr-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
     name: cleanName,
     handle: cleanHandle,
     email: `${cleanHandle}@nixima.ai`,
     passphrase: passphrase.trim(),
-    role: isCreatorSync ? 'Creator & Lead Architect' : 'Pioneer Researcher',
+    role: isCreatorSync ? 'Creator & Lead Architect' : isVipSync ? 'VIP Friend & Pioneer Architect' : 'Pioneer Researcher',
     createdAt: Date.now(),
-    avatarBg: isCreatorSync ? 'from-amber-500 to-orange-600 text-white' : 'from-zinc-800 to-zinc-950 text-white',
+    avatarBg: isCreatorSync ? 'from-amber-500 to-orange-600 text-white' : isVipSync ? 'from-cyan-500 via-indigo-500 to-purple-600 text-white' : 'from-zinc-800 to-zinc-950 text-white',
     preferredLanguage: preferredLanguage || 'en',
-    credits: isCreatorSync ? Infinity : 1000,
+    credits: hasInfiniteSync ? Infinity : 1000,
     isCreator: isCreatorSync,
-    unlimitedCredits: isCreatorSync,
+    isVip: isVipSync,
+    unlimitedCredits: hasInfiniteSync,
   };
 
   const updated = [newUser, ...users];
@@ -360,6 +388,25 @@ export function registerUser(
   }
 
   return newUser;
+}
+
+/**
+ * 1-Click Instant VIP Access for creator's friends (e.g. warexxq)
+ */
+export function quickLoginVip(handleOrEmail = 'warexxq'): NiximaUser {
+  const users = getAllUsers();
+  const clean = handleOrEmail.trim().toLowerCase().replace('@nixima.ai', '');
+  let matched = users.find(u => u.handle.toLowerCase() === clean || u.email.toLowerCase() === `${clean}@nixima.ai`);
+  if (!matched) {
+    if (clean === 'warexxq') {
+      matched = DEFAULT_USERS[2];
+    } else {
+      throw new Error(`VIP user "${handleOrEmail}" not found.`);
+    }
+  }
+  setActiveUser(matched);
+  saveQuickPassUser(matched);
+  return matched;
 }
 
 export function logoutUser(): void {

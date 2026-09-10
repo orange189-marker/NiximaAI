@@ -6,6 +6,7 @@ import { ChatInput } from './components/ChatInput';
 import { EmptyChat } from './components/EmptyChat';
 import { SettingsModal, SettingsTab } from './components/SettingsModal';
 import { CompanyModal } from './components/CompanyModal';
+import { VipWelcomeModal } from './components/VipWelcomeModal';
 import { AuthPortal } from './components/AuthPortal';
 import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry } from './types/chat';
 import { NiximaUser } from './types/user';
@@ -20,7 +21,8 @@ import {
   calculateActualCost, 
   deductUserCredits, 
   hasSufficientCredits, 
-  NIXIMA_CREDITS_EVENT 
+  NIXIMA_CREDITS_EVENT,
+  isVipAccount
 } from './utils/credits';
 
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
@@ -101,6 +103,27 @@ const AppContent: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('general');
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
+  const [isVipModalOpen, setIsVipModalOpen] = useState(false);
+  const [isVipPreview, setIsVipPreview] = useState(false);
+
+  // VIP Welcome letter & presentation check
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('preview_vip') === 'true' || params.get('vip_preview') === 'true') {
+      setIsVipPreview(true);
+      setIsVipModalOpen(true);
+      return;
+    }
+
+    if (currentUser && isVipAccount(currentUser)) {
+      const seenKey = `nixima_vip_welcome_seen_${currentUser.id}`;
+      const hasSeen = localStorage.getItem(seenKey);
+      if (!hasSeen) {
+        setIsVipPreview(false);
+        setIsVipModalOpen(true);
+      }
+    }
+  }, [currentUser]);
 
   // Sync user credits on event
   useEffect(() => {
@@ -649,12 +672,24 @@ All conversations and model preferences in this workspace are private to your Ni
         onLogout={handleLogout}
         initialTab={settingsTab}
         onUserUpdated={(updated) => setCurrentUser(updated)}
+        onPreviewVipWelcome={() => {
+          setIsVipPreview(true);
+          setIsVipModalOpen(true);
+        }}
       />
 
       {/* Company Overview Modal */}
       <CompanyModal
         isOpen={isCompanyModalOpen}
         onClose={() => setIsCompanyModalOpen(false)}
+      />
+
+      {/* VIP Welcome Presentation Modal */}
+      <VipWelcomeModal
+        isOpen={isVipModalOpen}
+        onClose={() => setIsVipModalOpen(false)}
+        user={isVipPreview ? (currentUser || { id: 'usr-vip-warexxq', name: 'warexxq', handle: 'warexxq', email: 'warexxq@nixima.ai', isVip: true, credits: 999999999, unlimitedCredits: true } as NiximaUser) : currentUser}
+        isPreview={isVipPreview}
       />
     </div>
   );

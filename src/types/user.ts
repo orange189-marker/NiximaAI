@@ -11,6 +11,8 @@ export interface NiximaUser {
   credits?: number;
   isCreator?: boolean;
   unlimitedCredits?: boolean;
+  isVip?: boolean;
+  hasSeenVipWelcome?: boolean;
   lastDailyGrantClaimed?: number;
 }
 

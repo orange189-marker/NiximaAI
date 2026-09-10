@@ -22,5 +22,18 @@
     "credits": 999999999,
     "isCreator": true,
     "unlimitedCredits": true
+  },
+  {
+    "id": "usr-vip-warexxq",
+    "name": "warexxq",
+    "handle": "warexxq",
+    "email": "warexxq@nixima.ai",
+    "passphrase": "warexxq2026",
+    "role": "VIP Friend & Pioneer Architect",
+    "createdAt": 1700000000000,
+    "avatarBg": "from-cyan-500 via-indigo-500 to-purple-600 text-white",
+    "credits": 999999999,
+    "isVip": true,
+    "unlimitedCredits": true
   }
 ]
