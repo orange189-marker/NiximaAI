@@ -91,95 +91,11 @@
   font-size: 0.85em;
 }
 
-/* Nixima Credits Smooth Dynamic Animations */
-@keyframes creditFloatUp {
-  0% {
-    opacity: 0;
-    transform: translate(-50%, 8px) scale(0.75);
-    filter: drop-shadow(0 0 0px rgba(245, 158, 11, 0));
-  }
-  20% {
-    opacity: 1;
-    transform: translate(-50%, -2px) scale(1.08);
-    filter: drop-shadow(0 0 10px rgba(245, 158, 11, 0.7));
-  }
-  65% {
-    opacity: 1;
-    transform: translate(-50%, -18px) scale(1.0);
-    filter: drop-shadow(0 0 5px rgba(245, 158, 11, 0.4));
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -32px) scale(0.9);
-    filter: drop-shadow(0 0 0px rgba(245, 158, 11, 0));
-  }
-}
-
-@keyframes creditDeductPulse {
-  0% {
-    transform: scale(1);
-    border-color: rgba(245, 158, 11, 0.3);
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
-  }
-  25% {
-    transform: scale(0.94);
-    border-color: rgba(239, 68, 68, 0.85);
-    background-color: rgba(239, 68, 68, 0.18);
-    box-shadow: 0 0 16px 2px rgba(239, 68, 68, 0.5);
-  }
-  60% {
-    transform: scale(1.04);
-    border-color: rgba(245, 158, 11, 0.7);
-    background-color: rgba(245, 158, 11, 0.15);
-    box-shadow: 0 0 12px 1px rgba(245, 158, 11, 0.35);
-  }
-  100% {
-    transform: scale(1);
-    border-color: rgba(245, 158, 11, 0.3);
-    box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
-  }
-}
-
-@keyframes creditGrantPulse {
-  0% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.8);
-  }
-  30% {
-    transform: scale(1.06);
-    border-color: rgba(16, 185, 129, 0.9);
-    background-color: rgba(16, 185, 129, 0.2);
-    box-shadow: 0 0 24px 3px rgba(16, 185, 129, 0.55);
-  }
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-  }
-}
-
-@keyframes coinSpinBurst {
-  0% {
-    transform: rotate(0deg) scale(1);
-  }
-  35% {
-    transform: rotate(-35deg) scale(1.25);
-  }
-  70% {
-    transform: rotate(15deg) scale(0.95);
-  }
-  100% {
-    transform: rotate(0deg) scale(1);
-  }
-}
-
+/* Nixima Credits Smooth Minimalist Telemetry */
 @keyframes telemetryPillEntry {
   0% {
     opacity: 0;
-    transform: scale(0.7) translateY(5px);
-  }
-  60% {
-    opacity: 1;
-    transform: scale(1.08) translateY(-1px);
+    transform: scale(0.95) translateY(2px);
   }
   100% {
     opacity: 1;
@@ -187,37 +103,8 @@
   }
 }
 
-@keyframes sweepShine {
-  0% {
-    transform: translateX(-150%) skewX(-20deg);
-  }
-  100% {
-    transform: translateX(250%) skewX(-20deg);
-  }
-}
-
-.animate-credit-float {
-  animation: creditFloatUp 1.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-credit-deduct {
-  animation: creditDeductPulse 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-credit-grant {
-  animation: creditGrantPulse 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-coin-spin {
-  animation: coinSpinBurst 0.65s ease-out forwards;
-}
-
 .animate-telemetry-pill {
-  animation: telemetryPillEntry 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-sweep-shine {
-  animation: sweepShine 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  animation: telemetryPillEntry 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 

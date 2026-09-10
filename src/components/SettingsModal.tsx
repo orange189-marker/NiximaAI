@@ -20,7 +20,6 @@ import {
   Zap,
   Keyboard,
   Globe,
-  Coins,
   Gift
 } from 'lucide-react';
 import { UserSettings, Conversation } from '../types/chat';
@@ -31,9 +30,10 @@ import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotk
 import { HotkeyCustomizerModal } from './HotkeyCustomizerModal';
 import { useLanguage } from '../context/LanguageContext';
 import { CountryFlag } from './CountryFlag';
-import { grantUserCredits, getUserCredits } from '../utils/credits';
+import { claimDailyGrant, getDailyGrantStatus, getUserCredits } from '../utils/credits';
 import { MODELS } from '../data/models';
 import { CreditHeroCounter } from './AnimatedCredits';
+import { NiximaCreditLogo } from './NiximaCreditLogo';
 
 export type SettingsTab = 'general' | 'inference' | 'persona' | 'data' | 'api' | 'credits';
 
@@ -67,11 +67,32 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const { language, setLanguage, t } = useLanguage();
   const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
   const [dailyClaimSuccess, setDailyClaimSuccess] = useState(false);
+  const [dailyGrantStatus, setDailyGrantStatus] = useState(() => getDailyGrantStatus(currentUser));
   const [apiKeyCopied, setApiKeyCopied] = useState(false);
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [hotkeyConfig, setHotkeyConfig] = useState<HotkeyConfig>(() => getSavedHotkey());
   const [isHotkeyModalOpen, setIsHotkeyModalOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setDailyGrantStatus(getDailyGrantStatus(currentUser));
+    }
+  }, [isOpen, currentUser]);
+
+  const handleClaimDailyGrant = () => {
+    if (!currentUser) return;
+    const res = claimDailyGrant(currentUser);
+    if (res.success) {
+      onUserUpdated?.(res.updatedUser);
+      setDailyGrantStatus(getDailyGrantStatus(res.updatedUser));
+      playTypingTick();
+      setDailyClaimSuccess(true);
+      setTimeout(() => setDailyClaimSuccess(false), 3000);
+    } else {
+      setDailyGrantStatus(getDailyGrantStatus(currentUser));
+    }
+  };
 
   React.useEffect(() => {
     const handleUpdate = (e: any) => {
@@ -197,10 +218,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           <button
             onClick={() => setActiveTab('credits')}
             className={`px-3.5 py-2.5 border-b-2 font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap ${
-              activeTab === 'credits' ? 'border-amber-400 text-amber-300' : 'border-transparent text-zinc-400 hover:text-zinc-200'
+              activeTab === 'credits' ? 'border-white text-white' : 'border-transparent text-zinc-400 hover:text-zinc-200'
             }`}
           >
-            <Coins className="w-3.5 h-3.5 text-amber-400" />
+            <NiximaCreditLogo size={13} />
             {t.settings.tabs.credits}
           </button>
           <button
@@ -737,14 +758,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {activeTab === 'credits' && (
             <div className="space-y-5">
               {/* Balance Hero Card */}
-              <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-950/30 via-zinc-900/90 to-zinc-950 border border-amber-500/30 shadow-lg shadow-amber-950/20 space-y-3">
+              <div className="p-5 rounded-2xl bg-zinc-900/90 border border-zinc-700/80 shadow-inner-light space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
-                      <Coins className="w-4 h-4 text-amber-400" />
+                    <span className="w-8 h-8 rounded-xl bg-zinc-800 border border-zinc-700 flex items-center justify-center">
+                      <NiximaCreditLogo size={18} />
                     </span>
                     <div>
-                      <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-amber-400">
+                      <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-200">
                         {t.credits.badge}
                       </h3>
                       <p className="text-[11px] text-zinc-400 font-mono">
@@ -772,7 +793,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <Gift className="w-4 h-4 text-emerald-400" />
+                      <Gift className="w-4 h-4 text-zinc-300" />
                       <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
                         {t.credits.dailyGrantTitle}
                       </h4>
@@ -781,23 +802,31 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       {t.credits.dailyGrantDesc}
                     </p>
                   </div>
-                  <button
-                    onClick={() => {
-                      const { updatedUser } = grantUserCredits(currentUser, 500);
-                      onUserUpdated?.(updatedUser);
-                      playTypingTick();
-                      setDailyClaimSuccess(true);
-                      setTimeout(() => setDailyClaimSuccess(false), 3000);
-                    }}
-                    className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs font-mono transition-all flex items-center gap-1.5 shadow-md flex-shrink-0"
-                  >
-                    <Zap className="w-3.5 h-3.5 fill-black" />
-                    <span>{dailyClaimSuccess ? t.credits.dailyGrantClaimed : t.credits.claimDailyGrant}</span>
-                  </button>
+                  {dailyGrantStatus.canClaim ? (
+                    <button
+                      onClick={handleClaimDailyGrant}
+                      className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs font-mono transition-all flex items-center gap-1.5 shadow-md flex-shrink-0 cursor-pointer"
+                    >
+                      <Zap className="w-3.5 h-3.5 fill-black text-black" />
+                      <span>{dailyClaimSuccess ? t.credits.dailyGrantClaimed : t.credits.claimDailyGrant}</span>
+                    </button>
+                  ) : (
+                    <div
+                      className="px-3 py-1.5 rounded-lg bg-zinc-800/90 border border-zinc-700/80 text-zinc-400 text-xs font-mono flex items-center gap-1.5 select-none flex-shrink-0"
+                      title={language === 'uk' ? 'Доступно раз на добу' : 'Available once every 24 hours'}
+                    >
+                      <Check className="w-3.5 h-3.5 text-zinc-400" />
+                      <span>
+                        {language === 'uk'
+                          ? `Отримано • ${dailyGrantStatus.formattedCountdown}`
+                          : `Claimed • In ${dailyGrantStatus.formattedCountdown}`}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 {dailyClaimSuccess && (
-                  <div className="p-2 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono flex items-center gap-1.5 animate-in fade-in duration-200">
-                    <Check className="w-3.5 h-3.5" />
+                  <div className="p-2 rounded bg-zinc-800/80 border border-zinc-700 text-zinc-200 text-xs font-mono flex items-center gap-1.5 animate-in fade-in duration-200">
+                    <Check className="w-3.5 h-3.5 text-white" />
                     <span>{language === 'uk' ? 'Успішно нараховано +500 Nixima Credits на ваш баланс!' : 'Successfully claimed +500 Nixima Credits to your balance!'}</span>
                   </div>
                 )}
@@ -824,10 +853,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     {MODELS.map((m) => (
                       <div key={m.id} className="grid grid-cols-4 p-2.5 items-center">
                         <div className="flex items-center gap-1.5">
-                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                          <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
                           <span className="text-white font-medium truncate">{m.name}</span>
                         </div>
-                        <span className="text-amber-300 font-bold">{m.baseCreditCost ?? 5} CR</span>
+                        <span className="text-zinc-100 font-bold">{m.baseCreditCost ?? 5} CR</span>
                         <span className="text-zinc-300">{(m.creditMultiplier ?? 1.0).toFixed(1)}x</span>
                         <span className="text-zinc-400 text-[11px] truncate">
                           {m.id.includes('flash')
@@ -846,7 +875,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
               {/* Dynamic Difficulty Regulation Notice */}
               <div className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-1.5 text-xs text-zinc-400">
-                <div className="flex items-center gap-1.5 text-amber-400 font-mono font-semibold text-[11px] uppercase tracking-wider">
+                <div className="flex items-center gap-1.5 text-zinc-300 font-mono font-semibold text-[11px] uppercase tracking-wider">
                   <Flame className="w-3.5 h-3.5" />
                   <span>{t.credits.hardPromptNotice}</span>
                 </div>

@@ -12,8 +12,7 @@ import {
   BrainCircuit,
   Sliders,
   Plus,
-  X,
-  Coins
+  X
 } from 'lucide-react';
 import { ModelOption } from '../types/chat';
 import { NIXIMA_MODELS } from '../data/models';

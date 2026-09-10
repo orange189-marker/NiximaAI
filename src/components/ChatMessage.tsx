@@ -12,8 +12,7 @@ import {
   Download, 
   Cpu, 
   Activity, 
-  Edit3,
-  Coins
+  Edit3
 } from 'lucide-react';
 import { Message } from '../types/chat';
 import { MarkdownTable, TableBlockData } from './MarkdownTable';

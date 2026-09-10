@@ -14,8 +14,7 @@ import {
   Check,
   Download,
   LogOut,
-  Sliders,
-  Coins
+  Sliders
 } from 'lucide-react';
 import { Conversation } from '../types/chat';
 import { NiximaUser } from '../types/user';

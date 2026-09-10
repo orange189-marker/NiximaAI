@@ -11,6 +11,7 @@ export interface NiximaUser {
   credits?: number;
   isCreator?: boolean;
   unlimitedCredits?: boolean;
+  lastDailyGrantClaimed?: number;
 }
 
 export interface AuthSession {

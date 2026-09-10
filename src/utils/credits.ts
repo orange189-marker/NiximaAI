@@ -205,8 +205,120 @@ export function deductUserCredits(
   };
 }
 
+export const DAILY_GRANT_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+export interface DailyGrantStatus {
+  canClaim: boolean;
+  timeRemainingMs: number;
+  formattedCountdown: string;
+  lastClaimedAt?: number;
+}
+
 /**
- * Grants credits to a user (e.g. daily reload, developer top-up, bonus).
+ * Checks if the user is eligible for the once-a-day daily grant (24h cooldown).
+ */
+export function getDailyGrantStatus(user?: NiximaUser | null): DailyGrantStatus {
+  if (!user) {
+    user = getActiveUser();
+  }
+  if (!user) {
+    return { canClaim: false, timeRemainingMs: DAILY_GRANT_COOLDOWN_MS, formattedCountdown: '24h 00m' };
+  }
+
+  if (isCreatorAccount(user)) {
+    return { canClaim: false, timeRemainingMs: 0, formattedCountdown: '∞ (Creator)' };
+  }
+
+  const storageKey = `nixima_daily_grant_ts_${user.id}`;
+  let lastClaimed = user.lastDailyGrantClaimed;
+  if (typeof window !== 'undefined' && (!lastClaimed || isNaN(lastClaimed))) {
+    const raw = localStorage.getItem(storageKey);
+    if (raw) {
+      lastClaimed = parseInt(raw, 10);
+    }
+  }
+
+  if (!lastClaimed || isNaN(lastClaimed)) {
+    return { canClaim: true, timeRemainingMs: 0, formattedCountdown: '0m' };
+  }
+
+  const now = Date.now();
+  const elapsed = now - lastClaimed;
+
+  if (elapsed >= DAILY_GRANT_COOLDOWN_MS) {
+    return { canClaim: true, timeRemainingMs: 0, formattedCountdown: '0m', lastClaimedAt: lastClaimed };
+  }
+
+  const remainingMs = DAILY_GRANT_COOLDOWN_MS - elapsed;
+  const hours = Math.floor(remainingMs / (1000 * 60 * 60));
+  const minutes = Math.floor((remainingMs % (1000 * 60 * 60)) / (1000 * 60));
+  const formattedCountdown = `${hours}h ${minutes}m`;
+
+  return {
+    canClaim: false,
+    timeRemainingMs: remainingMs,
+    formattedCountdown,
+    lastClaimedAt: lastClaimed,
+  };
+}
+
+/**
+ * Claims the once-per-day grant (+500 CR). Enforces strict 24-hour cooldown to prevent duplication.
+ */
+export function claimDailyGrant(user: NiximaUser): {
+  success: boolean;
+  updatedUser: NiximaUser;
+  newBalance: number;
+  message?: string;
+} {
+  const status = getDailyGrantStatus(user);
+
+  if (!status.canClaim) {
+    return {
+      success: false,
+      updatedUser: user,
+      newBalance: getUserCredits(user),
+      message: `Daily grant already claimed today. Resets in ${status.formattedCountdown}.`,
+    };
+  }
+
+  const now = Date.now();
+  const currentCredits = getUserCredits(user);
+  const newBalance = currentCredits + DAILY_GRANT_AMOUNT;
+
+  const updatedUser: NiximaUser = {
+    ...user,
+    credits: newBalance,
+    lastDailyGrantClaimed: now,
+  };
+
+  const allUsers = getAllUsers();
+  const updatedAll = allUsers.map(u => (u.id === user.id ? updatedUser : u));
+  saveUsers(updatedAll);
+  setActiveUser(updatedUser);
+
+  if (typeof window !== 'undefined') {
+    localStorage.setItem(`nixima_daily_grant_ts_${user.id}`, String(now));
+    window.dispatchEvent(
+      new CustomEvent(NIXIMA_CREDITS_EVENT, {
+        detail: {
+          userId: user.id,
+          credits: newBalance,
+          granted: DAILY_GRANT_AMOUNT,
+        },
+      })
+    );
+  }
+
+  return {
+    success: true,
+    updatedUser,
+    newBalance,
+  };
+}
+
+/**
+ * Grants credits to a user (admin / bonus manual grant).
  */
 export function grantUserCredits(
   user: NiximaUser,
