@@ -105,24 +105,37 @@ const AppContent: React.FC = () => {
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
   const [isVipModalOpen, setIsVipModalOpen] = useState(false);
   const [isVipPreview, setIsVipPreview] = useState(false);
+  const [previewTarget, setPreviewTarget] = useState<'warexxq' | 'roman1980'>('warexxq');
 
   // VIP Welcome letter & presentation check
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('preview_vip') === 'true' || params.get('vip_preview') === 'true') {
+    const previewParam = params.get('preview_vip') || params.get('vip_preview');
+    if (previewParam) {
+      if (previewParam.toLowerCase().includes('roman') || previewParam.toLowerCase().includes('dad')) {
+        setPreviewTarget('roman1980');
+      } else {
+        setPreviewTarget('warexxq');
+      }
       setIsVipPreview(true);
       setIsVipModalOpen(true);
       return;
     }
 
-    if (currentUser && isVipAccount(currentUser)) {
-      const seenKey = `nixima_vip_welcome_seen_${currentUser.id}`;
-      const hasSeen = localStorage.getItem(seenKey);
-      const forceOpen = sessionStorage.getItem('nixima_force_vip_welcome') === 'true';
-      if (!hasSeen || forceOpen) {
-        sessionStorage.removeItem('nixima_force_vip_welcome');
-        setIsVipPreview(false);
-        setIsVipModalOpen(true);
+    if (currentUser) {
+      if ((currentUser.handle || '').toLowerCase() === 'roman1980' || (currentUser.email || '').toLowerCase() === 'roman1980@nixima.ai') {
+        setLanguage('uk');
+      }
+
+      if (isVipAccount(currentUser)) {
+        const seenKey = `nixima_vip_welcome_seen_${currentUser.id}`;
+        const hasSeen = localStorage.getItem(seenKey);
+        const forceOpen = sessionStorage.getItem('nixima_force_vip_welcome') === 'true';
+        if (!hasSeen || forceOpen) {
+          sessionStorage.removeItem('nixima_force_vip_welcome');
+          setIsVipPreview(false);
+          setIsVipModalOpen(true);
+        }
       }
     }
   }, [currentUser]);
@@ -156,7 +169,9 @@ const AppContent: React.FC = () => {
   // Load user data on authentication change
   const handleAuthenticated = (user: NiximaUser) => {
     setCurrentUser(user);
-    if (user.preferredLanguage) {
+    if ((user.handle || '').toLowerCase() === 'roman1980' || (user.email || '').toLowerCase() === 'roman1980@nixima.ai') {
+      setLanguage('uk');
+    } else if (user.preferredLanguage) {
       setLanguage(user.preferredLanguage);
     }
 
@@ -680,7 +695,8 @@ All conversations and model preferences in this workspace are private to your Ni
         onLogout={handleLogout}
         initialTab={settingsTab}
         onUserUpdated={(updated) => setCurrentUser(updated)}
-        onPreviewVipWelcome={() => {
+        onPreviewVipWelcome={(target = 'warexxq') => {
+          setPreviewTarget(target);
           setIsVipPreview(true);
           setIsVipModalOpen(true);
         }}
@@ -696,7 +712,13 @@ All conversations and model preferences in this workspace are private to your Ni
       <VipWelcomeModal
         isOpen={isVipModalOpen}
         onClose={() => setIsVipModalOpen(false)}
-        user={isVipPreview ? (currentUser || { id: 'usr-vip-warexxq', name: 'warexxq', handle: 'warexxq', email: 'warexxq@nixima.ai', isVip: true, credits: 999999999, unlimitedCredits: true } as NiximaUser) : currentUser}
+        user={
+          isVipPreview
+            ? (previewTarget === 'roman1980'
+                ? ({ id: 'usr-vip-roman1980', name: 'roman1980', handle: 'roman1980', email: 'roman1980@nixima.ai', isVip: true, credits: 999999999, unlimitedCredits: true, preferredLanguage: 'uk' } as NiximaUser)
+                : ({ id: 'usr-vip-warexxq', name: 'warexxq', handle: 'warexxq', email: 'warexxq@nixima.ai', isVip: true, credits: 999999999, unlimitedCredits: true } as NiximaUser))
+            : currentUser
+        }
         isPreview={isVipPreview}
       />
     </div>

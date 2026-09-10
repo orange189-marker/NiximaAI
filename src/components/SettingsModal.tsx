@@ -51,7 +51,7 @@ interface SettingsModalProps {
   onLogout: () => void;
   initialTab?: SettingsTab;
   onUserUpdated?: (user: NiximaUser) => void;
-  onPreviewVipWelcome?: () => void;
+  onPreviewVipWelcome?: (target?: 'warexxq' | 'roman1980') => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -918,16 +918,31 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </p>
                   </div>
                   {onPreviewVipWelcome && (
-                    <button
-                      onClick={() => {
-                        onClose();
-                        onPreviewVipWelcome();
-                      }}
-                      className="px-3.5 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-white font-medium text-xs font-mono transition-all flex items-center gap-1.5 shadow-md flex-shrink-0 cursor-pointer"
-                    >
-                      <Eye className="w-3.5 h-3.5 text-zinc-300" />
-                      <span>{language === 'uk' ? 'Переглянути' : 'Preview Live'}</span>
-                    </button>
+                    <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+                      <button
+                        onClick={() => {
+                          onClose();
+                          onPreviewVipWelcome('roman1980');
+                        }}
+                        className="px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/40 text-blue-200 hover:text-white font-medium text-xs font-mono transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                        title="Переглянути лист для тата (українською)"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-blue-300" />
+                        <span>{language === 'uk' ? 'Тато (roman1980)' : 'Dad (roman1980)'}</span>
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          onClose();
+                          onPreviewVipWelcome('warexxq');
+                        }}
+                        className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-white font-medium text-xs font-mono transition-all flex items-center gap-1.5 shadow-md cursor-pointer"
+                        title="Переглянути лист для друга (warexxq)"
+                      >
+                        <Eye className="w-3.5 h-3.5 text-zinc-300" />
+                        <span>{language === 'uk' ? 'Друг (warexxq)' : 'Friend (warexxq)'}</span>
+                      </button>
+                    </div>
                   )}
                 </div>
               </div>

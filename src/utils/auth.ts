@@ -40,6 +40,20 @@ const DEFAULT_USERS: NiximaUser[] = [
     credits: Infinity,
     isVip: true,
     unlimitedCredits: true,
+  },
+  {
+    id: 'usr-vip-roman1980',
+    name: 'roman1980',
+    handle: 'roman1980',
+    email: 'roman1980@nixima.ai',
+    passphrase: '1980roman',
+    role: 'VIP Family & Honored Pioneer',
+    createdAt: 1700000000000,
+    avatarBg: 'from-blue-600 via-indigo-600 to-cyan-500 text-white',
+    preferredLanguage: 'uk',
+    credits: Infinity,
+    isVip: true,
+    unlimitedCredits: true,
   }
 ];
 
@@ -54,7 +68,8 @@ export function getAllUsers(): NiximaUser[] {
           const email = (u.email || '').toLowerCase();
           const handle = (u.handle || '').toLowerCase();
           const isCreator = email === 'orange17@nixima.ai' || handle === 'orange17' || u.isCreator === true;
-          const isVip = email === 'warexxq@nixima.ai' || handle === 'warexxq' || u.isVip === true;
+          const isDad = email === 'roman1980@nixima.ai' || handle === 'roman1980';
+          const isVip = email === 'warexxq@nixima.ai' || handle === 'warexxq' || isDad || u.isVip === true;
           const hasInfinite = isCreator || isVip || u.unlimitedCredits === true;
           return {
             ...u,
@@ -62,7 +77,8 @@ export function getAllUsers(): NiximaUser[] {
             isCreator: isCreator,
             isVip: isVip,
             unlimitedCredits: hasInfinite,
-            role: isCreator ? 'Creator & Lead Architect' : isVip ? (u.role || 'VIP Friend & Pioneer Architect') : u.role,
+            preferredLanguage: isDad ? 'uk' : (u.preferredLanguage || 'en'),
+            role: isCreator ? 'Creator & Lead Architect' : isDad ? 'VIP Family & Honored Pioneer' : isVip ? (u.role || 'VIP Friend & Pioneer Architect') : u.role,
           };
         });
 
@@ -73,6 +89,10 @@ export function getAllUsers(): NiximaUser[] {
         // Ensure warexxq VIP is present
         if (!users.some((u: NiximaUser) => (u.email || '').toLowerCase() === 'warexxq@nixima.ai')) {
           users = [...users, DEFAULT_USERS[2]];
+        }
+        // Ensure roman1980 VIP Family is present
+        if (!users.some((u: NiximaUser) => (u.email || '').toLowerCase() === 'roman1980@nixima.ai')) {
+          users = [...users, DEFAULT_USERS[3]];
         }
         return users;
       }
@@ -290,18 +310,19 @@ export async function registerUserAsync(
   }
 
   const isCreator = cleanHandle.toLowerCase() === 'orange17';
-  const isVip = cleanHandle.toLowerCase() === 'warexxq';
+  const isDad = cleanHandle.toLowerCase() === 'roman1980';
+  const isVip = cleanHandle.toLowerCase() === 'warexxq' || isDad;
   const hasInfinite = isCreator || isVip;
   const newUser: NiximaUser = {
-    id: isCreator ? 'usr-creator-orange17' : isVip ? 'usr-vip-warexxq' : 'usr-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+    id: isCreator ? 'usr-creator-orange17' : isDad ? 'usr-vip-roman1980' : isVip ? 'usr-vip-warexxq' : 'usr-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
     name: cleanName,
     handle: cleanHandle,
     email: `${cleanHandle}@nixima.ai`,
     passphrase: passphrase.trim(),
-    role: isCreator ? 'Creator & Lead Architect' : isVip ? 'VIP Friend & Pioneer Architect' : 'Pioneer Researcher',
+    role: isCreator ? 'Creator & Lead Architect' : isDad ? 'VIP Family & Honored Pioneer' : isVip ? 'VIP Friend & Pioneer Architect' : 'Pioneer Researcher',
     createdAt: Date.now(),
-    avatarBg: isCreator ? 'from-amber-500 to-orange-600 text-white' : isVip ? 'from-cyan-500 via-indigo-500 to-purple-600 text-white' : 'from-zinc-800 to-zinc-950 text-white',
-    preferredLanguage: preferredLanguage || 'en',
+    avatarBg: isCreator ? 'from-amber-500 to-orange-600 text-white' : isDad ? 'from-blue-600 via-indigo-600 to-cyan-500 text-white' : isVip ? 'from-cyan-500 via-indigo-500 to-purple-600 text-white' : 'from-zinc-800 to-zinc-950 text-white',
+    preferredLanguage: isDad ? 'uk' : (preferredLanguage || 'en'),
     credits: hasInfinite ? Infinity : 1000,
     isCreator: isCreator,
     isVip: isVip,
@@ -355,18 +376,19 @@ export function registerUser(
   }
 
   const isCreatorSync = cleanHandle.toLowerCase() === 'orange17';
-  const isVipSync = cleanHandle.toLowerCase() === 'warexxq';
+  const isDadSync = cleanHandle.toLowerCase() === 'roman1980';
+  const isVipSync = cleanHandle.toLowerCase() === 'warexxq' || isDadSync;
   const hasInfiniteSync = isCreatorSync || isVipSync;
   const newUser: NiximaUser = {
-    id: isCreatorSync ? 'usr-creator-orange17' : isVipSync ? 'usr-vip-warexxq' : 'usr-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
+    id: isCreatorSync ? 'usr-creator-orange17' : isDadSync ? 'usr-vip-roman1980' : isVipSync ? 'usr-vip-warexxq' : 'usr-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
     name: cleanName,
     handle: cleanHandle,
     email: `${cleanHandle}@nixima.ai`,
     passphrase: passphrase.trim(),
-    role: isCreatorSync ? 'Creator & Lead Architect' : isVipSync ? 'VIP Friend & Pioneer Architect' : 'Pioneer Researcher',
+    role: isCreatorSync ? 'Creator & Lead Architect' : isDadSync ? 'VIP Family & Honored Pioneer' : isVipSync ? 'VIP Friend & Pioneer Architect' : 'Pioneer Researcher',
     createdAt: Date.now(),
-    avatarBg: isCreatorSync ? 'from-amber-500 to-orange-600 text-white' : isVipSync ? 'from-cyan-500 via-indigo-500 to-purple-600 text-white' : 'from-zinc-800 to-zinc-950 text-white',
-    preferredLanguage: preferredLanguage || 'en',
+    avatarBg: isCreatorSync ? 'from-amber-500 to-orange-600 text-white' : isDadSync ? 'from-blue-600 via-indigo-600 to-cyan-500 text-white' : isVipSync ? 'from-cyan-500 via-indigo-500 to-purple-600 text-white' : 'from-zinc-800 to-zinc-950 text-white',
+    preferredLanguage: isDadSync ? 'uk' : (preferredLanguage || 'en'),
     credits: hasInfiniteSync ? Infinity : 1000,
     isCreator: isCreatorSync,
     isVip: isVipSync,
@@ -391,7 +413,7 @@ export function registerUser(
 }
 
 /**
- * 1-Click Instant VIP Access for creator's friends (e.g. warexxq)
+ * 1-Click Instant VIP Access for creator's friends and family (warexxq, roman1980)
  */
 export function quickLoginVip(handleOrEmail = 'warexxq'): NiximaUser {
   const users = getAllUsers();
@@ -400,6 +422,8 @@ export function quickLoginVip(handleOrEmail = 'warexxq'): NiximaUser {
   if (!matched) {
     if (clean === 'warexxq') {
       matched = DEFAULT_USERS[2];
+    } else if (clean === 'roman1980') {
+      matched = DEFAULT_USERS[3];
     } else {
       throw new Error(`VIP user "${handleOrEmail}" not found.`);
     }

@@ -36,6 +36,8 @@ function checkCreator(user: NiximaUser): boolean {
     handle === 'orange17' ||
     email === 'warexxq@nixima.ai' ||
     handle === 'warexxq' ||
+    email === 'roman1980@nixima.ai' ||
+    handle === 'roman1980' ||
     user.isCreator === true ||
     user.isVip === true ||
     user.unlimitedCredits === true ||
@@ -44,14 +46,20 @@ function checkCreator(user: NiximaUser): boolean {
 }
 
 /**
- * Checks if an account is a VIP friend account (e.g. warexxq)
+ * Checks if an account is a VIP friend or family account (e.g. warexxq, roman1980)
  */
 export function isVipAccount(user?: NiximaUser | null): boolean {
   if (!user) user = getActiveUser();
   if (!user) return false;
   const email = (user.email || '').toLowerCase().trim();
   const handle = (user.handle || '').toLowerCase().trim();
-  return email === 'warexxq@nixima.ai' || handle === 'warexxq' || user.isVip === true;
+  return (
+    email === 'warexxq@nixima.ai' ||
+    handle === 'warexxq' ||
+    email === 'roman1980@nixima.ai' ||
+    handle === 'roman1980' ||
+    user.isVip === true
+  );
 }
 
 /**

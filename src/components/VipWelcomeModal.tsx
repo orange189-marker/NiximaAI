@@ -7,11 +7,12 @@ import {
   ShieldCheck,
   Cpu,
   Zap,
-  Globe
+  Heart
 } from 'lucide-react';
 import { NiximaUser } from '../types/user';
 import { NiximaCreditLogo } from './NiximaCreditLogo';
 import { InfinitySymbol } from './InfinitySymbol';
+import { CountryFlag } from './CountryFlag';
 import { playCreditRamp, playSupernovaBang, playVaultUnlockChord, playTypingTick } from '../utils/sound';
 
 export interface VipWelcomeModalProps {
@@ -29,8 +30,18 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
   user,
   isPreview = false,
 }) => {
-  // Language selector for the letter (default is Russian as requested)
-  const [lang, setLang] = useState<PresentationLang>('ru');
+  const isDad = 
+    (user?.handle || '').toLowerCase() === 'roman1980' || 
+    (user?.email || '').toLowerCase() === 'roman1980@nixima.ai';
+
+  // Language selector: strictly 'uk' for dad, 'ru' by default for others
+  const [lang, setLang] = useState<PresentationLang>(() => isDad ? 'uk' : 'ru');
+
+  useEffect(() => {
+    if (isDad) {
+      setLang('uk');
+    }
+  }, [isDad, user]);
 
   // Automatic Credit Ramp & Infinity Reveal States
   const [phase, setPhase] = useState<'starting' | 'counting' | 'burst' | 'infinite'>('starting');
@@ -104,7 +115,7 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
 
   if (!isOpen) return null;
 
-  const recipientName = user?.name || user?.handle || 'warexxq';
+  const recipientName = user?.name || user?.handle || (isDad ? 'roman1980' : 'warexxq');
 
   const handleFinish = () => {
     playTypingTick();
@@ -125,7 +136,9 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
       <div 
         className="relative w-full max-w-2xl bg-[#0b0b0f] border border-zinc-700/80 rounded-2xl sm:rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col max-h-[92vh] border-zinc-700/70"
         style={{
-          boxShadow: '0 0 50px rgba(56, 189, 248, 0.12), 0 0 80px rgba(129, 140, 248, 0.08)'
+          boxShadow: isDad 
+            ? '0 0 50px rgba(59, 130, 246, 0.16), 0 0 80px rgba(99, 102, 241, 0.1)'
+            : '0 0 50px rgba(56, 189, 248, 0.12), 0 0 80px rgba(129, 140, 248, 0.08)'
         }}
       >
         {/* ================================================================= */}
@@ -138,7 +151,7 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
             </span>
             <div className="flex items-center gap-2">
               <span className="text-xs font-mono font-bold tracking-wider uppercase text-zinc-200">
-                Nixima VIP Sovereign Access
+                {isDad ? 'Nixima Family Sovereign Clearance' : 'Nixima VIP Sovereign Access'}
               </span>
               {isPreview && (
                 <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
@@ -149,51 +162,58 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2.5">
-            {/* Language Selector Pills */}
-            <div className="flex items-center p-0.5 rounded-lg bg-zinc-900 border border-zinc-800 text-[11px] font-mono">
-              <button
-                type="button"
-                onClick={() => { setLang('ru'); playTypingTick(); }}
-                className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
-                  lang === 'ru'
-                    ? 'bg-zinc-700 text-white font-bold shadow-sm'
-                    : 'text-zinc-400 hover:text-zinc-200'
-                }`}
-                title="Читать на русском"
-              >
-                RU
-              </button>
-              <button
-                type="button"
-                onClick={() => { setLang('uk'); playTypingTick(); }}
-                className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
-                  lang === 'uk'
-                    ? 'bg-zinc-700 text-white font-bold shadow-sm'
-                    : 'text-zinc-400 hover:text-zinc-200'
-                }`}
-                title="Читати українською"
-              >
-                UA
-              </button>
-              <button
-                type="button"
-                onClick={() => { setLang('en'); playTypingTick(); }}
-                className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
-                  lang === 'en'
-                    ? 'bg-zinc-700 text-white font-bold shadow-sm'
-                    : 'text-zinc-400 hover:text-zinc-200'
-                }`}
-                title="Read in English"
-              >
-                EN
-              </button>
-            </div>
+            {/* For dad: strictly Ukrainian badge. For others: RU/UA/EN switcher */}
+            {isDad ? (
+              <div className="px-2.5 py-1 rounded-lg bg-zinc-900 border border-zinc-800 text-[11px] font-mono font-semibold text-zinc-200 flex items-center gap-1.5 select-none shadow-sm">
+                <CountryFlag country="ua" size="xs" />
+                <span>UA • УКРАЇНСЬКА</span>
+              </div>
+            ) : (
+              <div className="flex items-center p-0.5 rounded-lg bg-zinc-900 border border-zinc-800 text-[11px] font-mono">
+                <button
+                  type="button"
+                  onClick={() => { setLang('ru'); playTypingTick(); }}
+                  className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
+                    lang === 'ru'
+                      ? 'bg-zinc-700 text-white font-bold shadow-sm'
+                      : 'text-zinc-400 hover:text-zinc-200'
+                  }`}
+                  title="Читать на русском"
+                >
+                  RU
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setLang('uk'); playTypingTick(); }}
+                  className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
+                    lang === 'uk'
+                      ? 'bg-zinc-700 text-white font-bold shadow-sm'
+                      : 'text-zinc-400 hover:text-zinc-200'
+                  }`}
+                  title="Читати українською"
+                >
+                  UA
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setLang('en'); playTypingTick(); }}
+                  className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
+                    lang === 'en'
+                      ? 'bg-zinc-700 text-white font-bold shadow-sm'
+                      : 'text-zinc-400 hover:text-zinc-200'
+                  }`}
+                  title="Read in English"
+                >
+                  EN
+                </button>
+              </div>
+            )}
 
             {/* Close Modal Button */}
             <button
               onClick={handleFinish}
               className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition-colors cursor-pointer"
-              title="Закрыть"
+              title={isDad ? 'Закрити' : 'Закрыть'}
             >
               <X className="w-4 h-4" />
             </button>
@@ -227,14 +247,12 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
                 <div className="flex items-center justify-center sm:justify-start gap-1.5 text-[11px] font-mono text-zinc-400">
                   <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
                   <span className="uppercase tracking-wider font-semibold text-zinc-300">
-                    {lang === 'ru' && 'Статус баланса аккаунта:'}
-                    {lang === 'uk' && 'Статус балансу акаунта:'}
-                    {lang === 'en' && 'Account Balance Status:'}
+                    {isDad || lang === 'uk' ? 'Статус балансу акаунта:' : lang === 'ru' ? 'Статус баланса аккаунта:' : 'Account Balance Status:'}
                   </span>
                 </div>
 
                 <div className="text-sm font-semibold text-white">
-                  {recipientName} • VIP Pioneer
+                  {isDad ? 'roman1980 • Почесний гість & Сім\'я Творця' : `${recipientName} • VIP Pioneer`}
                 </div>
               </div>
             </div>
@@ -257,12 +275,10 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
                   </div>
                   <div className="text-left">
                     <span className="block text-xs font-mono font-bold text-cyan-300 uppercase tracking-wide">
-                      {lang === 'ru' && 'Бесконечно'}
-                      {lang === 'uk' && 'Безліміт'}
-                      {lang === 'en' && 'Infinite'}
+                      {isDad || lang === 'uk' ? 'Безліміт' : lang === 'ru' ? 'Бесконечно' : 'Infinite'}
                     </span>
                     <span className="block text-[10px] font-mono text-zinc-400">
-                      0 CR {lang === 'ru' ? 'списание' : lang === 'uk' ? 'списання' : 'deduction'}
+                      0 CR {isDad || lang === 'uk' ? 'списання' : lang === 'ru' ? 'списание' : 'deduction'}
                     </span>
                   </div>
                 </div>
@@ -273,7 +289,7 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
                 type="button"
                 onClick={runAnimationSequence}
                 className="absolute -right-2 -top-2 p-1.5 rounded-full bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-zinc-400 hover:text-white transition-all shadow-md cursor-pointer"
-                title={lang === 'ru' ? 'Повторить анимацию' : lang === 'uk' ? 'Повторити анімацію' : 'Replay animation'}
+                title={isDad || lang === 'uk' ? 'Повторити анімацію' : lang === 'ru' ? 'Повторить анимацию' : 'Replay animation'}
               >
                 <RotateCcw className="w-3 h-3" />
               </button>
@@ -282,150 +298,205 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
         </div>
 
         {/* ================================================================= */}
-        {/* 3. PRESENTATION LETTER BODY (Primary Russian / UA / EN)          */}
+        {/* 3. PRESENTATION LETTER BODY                                        */}
         {/* ================================================================= */}
         <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-sm leading-relaxed text-zinc-300 font-sans">
           {/* Greeting Header */}
           <div className="space-y-1">
             <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight flex items-center gap-2">
               <span>
-                {lang === 'ru' && `Привет, ${recipientName}! Добро пожаловать в Nixima AI`}
-                {lang === 'uk' && `Привіт, ${recipientName}! Ласкаво просимо до Nixima AI`}
-                {lang === 'en' && `Hey ${recipientName}! Welcome to Nixima AI`}
+                {isDad 
+                  ? 'Привіт, тату! Ласкаво просимо до Nixima AI'
+                  : lang === 'ru'
+                  ? `Привет, ${recipientName}! Добро пожаловать в Nixima AI`
+                  : lang === 'uk'
+                  ? `Привіт, ${recipientName}! Ласкаво просимо до Nixima AI`
+                  : `Hey ${recipientName}! Welcome to Nixima AI`}
               </span>
               <Sparkles className="w-4 h-4 text-cyan-400 inline" />
             </h2>
             <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
               <span>
-                {lang === 'ru' && 'Личное обращение создателя проекта (orange17)'}
-                {lang === 'uk' && 'Особисте звернення творця проєкту (orange17)'}
-                {lang === 'en' && 'Personal note from the creator (orange17)'}
+                {isDad
+                  ? 'Особистий лист від твого сина Богдана (orange17)'
+                  : lang === 'ru'
+                  ? 'Личное обращение создателя проекта (orange17)'
+                  : lang === 'uk'
+                  ? 'Особисте звернення творця проєкту (orange17)'
+                  : 'Personal note from the creator (orange17)'}
               </span>
             </div>
           </div>
 
-          {/* Letter Body - Russian Default */}
-          {lang === 'ru' && (
+          {/* DAD SPECIAL VIEW - STRICTLY UKRAINIAN ONLY */}
+          {isDad ? (
             <div className="space-y-3.5 text-zinc-300 text-[13px] sm:text-sm">
               <p>
-                Спасибо огромное, что зашел оценить мой проект и посмотреть на искусственный интеллект, над которым я сейчас упорно работаю! Для меня действительно важно и ценно, чтобы ты протестировал платформу лично.
+                Привіт, тату! Щиро дякую тобі за підтримку та за те, що зайшов подивитися на мій штучний інтелект, над створенням якого я зараз працюю! Для мене надзвичайно важливо і приємно показати тобі цей результат.
               </p>
 
               <div className="p-3.5 rounded-xl bg-zinc-900/70 border border-zinc-800/80 space-y-2">
                 <div className="flex items-center gap-2 text-xs font-mono font-bold text-white uppercase tracking-wider">
                   <Cpu className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>Что умеет Nixima AI:</span>
+                  <span>Що вміє Nixima AI:</span>
                 </div>
                 <ul className="text-xs space-y-1.5 text-zinc-300 list-disc list-inside">
-                  <li><strong className="text-white">Кластер нейросетей:</strong> переключение между быстрыми, программными и глубоко мыслящими моделями.</li>
-                  <li><strong className="text-white">Режим DeepThink:</strong> пошаговое аналитическое мышление для решения математических и логических задач.</li>
-                  <li><strong className="text-white">Поддержка LaTeX:</strong> чистый и красивый рендеринг любых формул и вычислений.</li>
-                  <li><strong className="text-white">Веб-поиск в реальном времени:</strong> доступ к актуальной информации из интернета прямо во время генерации.</li>
+                  <li><strong className="text-white">Відповіді на будь-які питання:</strong> життєві, практичні, технічні чи робочі теми простою і зрозумілою мовою.</li>
+                  <li><strong className="text-white">Пошук в інтернеті в реальному часі:</strong> отримання актуальних даних, фактів та інформації.</li>
+                  <li><strong className="text-white">Глибоке мислення (DeepThink):</strong> покроковий аналітичний розбір найскладніших тем та розрахунків.</li>
+                  <li><strong className="text-white">Математичні формули LaTeX:</strong> чітке і красиве відображення обчислень, таблиць і даних.</li>
                 </ul>
               </div>
 
               <p>
-                Специально для тебя я создал этот готовый аккаунт. У тебя активирован <strong className="text-white">полный суверенный безлимит: бесконечные кредиты (∞ CR)</strong>. Кредиты никогда не списываются, поэтому ты можешь свободно слать любые, даже самые тяжелые и длинные запросы, без ограничений.
+                Спеціально для тебе я створив цей готовий почесний акаунт із <strong className="text-white">повним сімейним безлімітом: нескінченні кредити (∞ CR)</strong>. Баланс ніколи не списується (0 CR списання) і не закінчиться, тому ти можеш писати будь-які запити та вільно користуватися всіма можливостями штучного інтелекту без обмежень.
               </p>
 
               <p className="text-zinc-400">
-                Пробуй всё, что угодно, тестируй в реальных задачах и обязательно делись своими впечатлениями или критикой — твой честный фидбек поможет мне сделать Nixima еще сильнее!
+                Заходь у будь-який зручний час, став будь-які питання і обов'язково кажи мені свої враження або що ще хотілося б покращити — твоя підтримка для мене найдорожча!
               </p>
 
               {/* Signature */}
               <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono">
                 <div>
-                  <div className="font-bold text-white">Богдан (orange17)</div>
-                  <div className="text-zinc-500">Создатель & Архитектор Nixima AI</div>
-                </div>
-                <div className="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
-                  warexxq@nixima.ai
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Letter Body - Ukrainian Translation */}
-          {lang === 'uk' && (
-            <div className="space-y-3.5 text-zinc-300 text-[13px] sm:text-sm">
-              <p>
-                Щиро дякую, що завітав оцінити мій проєкт та поглянути на штучний інтелект, над яким я зараз працюю! Для мене дуже важливо і приємно, що ти вирішив протестувати платформу наживо.
-              </p>
-
-              <div className="p-3.5 rounded-xl bg-zinc-900/70 border border-zinc-800/80 space-y-2">
-                <div className="flex items-center gap-2 text-xs font-mono font-bold text-white uppercase tracking-wider">
-                  <Cpu className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>Можливості платформи Nixima AI:</span>
-                </div>
-                <ul className="text-xs space-y-1.5 text-zinc-300 list-disc list-inside">
-                  <li><strong className="text-white">Кластер моделей:</strong> швидкі, спеціалізовані кодерські та глибокі моделі мислення.</li>
-                  <li><strong className="text-white">Режим DeepThink:</strong> покроковий аналітичний розбір найскладніших технічних завдань.</li>
-                  <li><strong className="text-white">Рендеринг LaTeX:</strong> бездоганне відображення математичних виразів і фізичних формул.</li>
-                  <li><strong className="text-white">Веб-пошук у реальному часі:</strong> отримання свіжих даних з мережі безпосередньо у відповіді.</li>
-                </ul>
-              </div>
-
-              <p>
-                Спеціально для тебе я підготував цей готовий обліковий запис. Тут діє <strong className="text-white">повний суверенний безліміт: нескінченні кредити (∞ CR)</strong>. Баланс ніколи не зменшується (0 CR списування), тому ти можеш відправляти будь-які об'ємні запити та експериментувати без обмежень.
-              </p>
-
-              <p className="text-zinc-400">
-                Користуйся із задоволенням, перевіряй у роботі та неодмінно ділися своїми думками чи порадами — твій зворотний зв'язок для мене безцінний!
-              </p>
-
-              {/* Signature */}
-              <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono">
-                <div>
-                  <div className="font-bold text-white">Богдан (orange17)</div>
+                  <div className="font-bold text-white flex items-center gap-1.5">
+                    <span>Твій син Богдан (orange17)</span>
+                    <Heart className="w-3.5 h-3.5 text-red-400 fill-red-400 inline" />
+                  </div>
                   <div className="text-zinc-500">Творець & Архітектор Nixima AI</div>
                 </div>
                 <div className="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
-                  warexxq@nixima.ai
+                  roman1980@nixima.ai
                 </div>
               </div>
             </div>
-          )}
+          ) : (
+            /* WAREXXQ / GENERAL VIP VIEW */
+            <>
+              {/* Letter Body - Russian Default */}
+              {lang === 'ru' && (
+                <div className="space-y-3.5 text-zinc-300 text-[13px] sm:text-sm">
+                  <p>
+                    Спасибо огромное, что зашел оценить мой проект и посмотреть на искусственный интеллект, над которым я сейчас упорно работаю! Для меня действительно важно и ценно, чтобы ты протестировал платформу лично.
+                  </p>
 
-          {/* Letter Body - English Translation */}
-          {lang === 'en' && (
-            <div className="space-y-3.5 text-zinc-300 text-[13px] sm:text-sm">
-              <p>
-                Thank you so much for dropping by to check out my project and explore the AI platform I've been actively building! It means a great deal to me that you took the time to test it out firsthand.
-              </p>
+                  <div className="p-3.5 rounded-xl bg-zinc-900/70 border border-zinc-800/80 space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-mono font-bold text-white uppercase tracking-wider">
+                      <Cpu className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Что умеет Nixima AI:</span>
+                    </div>
+                    <ul className="text-xs space-y-1.5 text-zinc-300 list-disc list-inside">
+                      <li><strong className="text-white">Кластер нейросетей:</strong> переключение между быстрыми, программными и глубоко мыслящими моделями.</li>
+                      <li><strong className="text-white">Режим DeepThink:</strong> пошаговое аналитическое мышление для решения математических и логических задач.</li>
+                      <li><strong className="text-white">Поддержка LaTeX:</strong> чистый и красивый рендеринг любых формул и вычислений.</li>
+                      <li><strong className="text-white">Веб-поиск в реальном времени:</strong> доступ к актуальной информации из интернета прямо во время генерации.</li>
+                    </ul>
+                  </div>
 
-              <div className="p-3.5 rounded-xl bg-zinc-900/70 border border-zinc-800/80 space-y-2">
-                <div className="flex items-center gap-2 text-xs font-mono font-bold text-white uppercase tracking-wider">
-                  <Cpu className="w-3.5 h-3.5 text-indigo-400" />
-                  <span>Key Nixima AI Capabilities:</span>
+                  <p>
+                    Специально для тебя я создал этот готовый аккаунт. У тебя активирован <strong className="text-white">полный суверенный безлимит: бесконечные кредиты (∞ CR)</strong>. Кредиты никогда не списываются, поэтому ты можешь свободно слать любые, даже самые тяжелые и длинные запросы, без ограничений.
+                  </p>
+
+                  <p className="text-zinc-400">
+                    Пробуй всё, что угодно, тестируй в реальных задачах и обязательно делись своими впечатлениями или критикой — твой честный фидбек поможет мне сделать Nixima еще сильнее!
+                  </p>
+
+                  {/* Signature */}
+                  <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono">
+                    <div>
+                      <div className="font-bold text-white">Богдан (orange17)</div>
+                      <div className="text-zinc-500">Создатель & Архитектор Nixima AI</div>
+                    </div>
+                    <div className="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
+                      warexxq@nixima.ai
+                    </div>
+                  </div>
                 </div>
-                <ul className="text-xs space-y-1.5 text-zinc-300 list-disc list-inside">
-                  <li><strong className="text-white">Neural Cluster:</strong> Switch seamlessly between lightning-fast, coder, and frontier reasoning models.</li>
-                  <li><strong className="text-white">DeepThink Mode:</strong> Multi-step analytical chain-of-thought for mathematical and structural problems.</li>
-                  <li><strong className="text-white">Native LaTeX Rendering:</strong> Crisp, publication-grade math formatting.</li>
-                  <li><strong className="text-white">Live Web Exploration:</strong> Real-time internet search integrated into reasoning loops.</li>
-                </ul>
-              </div>
+              )}
 
-              <p>
-                I set up this ready account for you with <strong className="text-white">permanent sovereign clearance: infinite credits (∞ CR)</strong>. Credits never deduct (0 CR cost), allowing you to freely explore and run heavy computational queries forever.
-              </p>
+              {/* Letter Body - Ukrainian Translation */}
+              {lang === 'uk' && (
+                <div className="space-y-3.5 text-zinc-300 text-[13px] sm:text-sm">
+                  <p>
+                    Щиро дякую, що завітав оцінити мій проєкт та поглянути на штучний інтелект, над яким я зараз працюю! Для мене дуже важливо і приємно, що ти вирішив протестувати платформу наживо.
+                  </p>
 
-              <p className="text-zinc-400">
-                Explore as much as you like, test any real-world tasks, and let me know your thoughts — your honest feedback is super valuable to me!
-              </p>
+                  <div className="p-3.5 rounded-xl bg-zinc-900/70 border border-zinc-800/80 space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-mono font-bold text-white uppercase tracking-wider">
+                      <Cpu className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Можливості платформи Nixima AI:</span>
+                    </div>
+                    <ul className="text-xs space-y-1.5 text-zinc-300 list-disc list-inside">
+                      <li><strong className="text-white">Кластер моделей:</strong> швидкі, спеціалізовані кодерські та глибокі моделі мислення.</li>
+                      <li><strong className="text-white">Режим DeepThink:</strong> покроковий аналітичний розбір найскладніших технічних завдань.</li>
+                      <li><strong className="text-white">Рендеринг LaTeX:</strong> бездоганне відображення математичних виразів і фізичних формул.</li>
+                      <li><strong className="text-white">Веб-пошук у реальному часі:</strong> отримання свіжих даних з мережі безпосередньо у відповіді.</li>
+                    </ul>
+                  </div>
 
-              {/* Signature */}
-              <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono">
-                <div>
-                  <div className="font-bold text-white">Bogdan (orange17)</div>
-                  <div className="text-zinc-500">Creator & Lead Architect of Nixima AI</div>
+                  <p>
+                    Спеціально для тебе я підготував цей готовий обліковий запис. Тут діє <strong className="text-white">повний суверенний безліміт: нескінченні кредити (∞ CR)</strong>. Баланс ніколи не зменшується (0 CR списування), тому ти можеш відправляти будь-які об'ємні запити та експериментувати без обмежень.
+                  </p>
+
+                  <p className="text-zinc-400">
+                    Користуйся із задоволенням, перевіряй у роботі та неодмінно ділися своїми думками чи порадами — твій зворотний зв'язок для мене безцінний!
+                  </p>
+
+                  {/* Signature */}
+                  <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono">
+                    <div>
+                      <div className="font-bold text-white">Богдан (orange17)</div>
+                      <div className="text-zinc-500">Творець & Архітектор Nixima AI</div>
+                    </div>
+                    <div className="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
+                      warexxq@nixima.ai
+                    </div>
+                  </div>
                 </div>
-                <div className="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
-                  warexxq@nixima.ai
+              )}
+
+              {/* Letter Body - English Translation */}
+              {lang === 'en' && (
+                <div className="space-y-3.5 text-zinc-300 text-[13px] sm:text-sm">
+                  <p>
+                    Thank you so much for dropping by to check out my project and explore the AI platform I've been actively building! It means a great deal to me that you took the time to test it out firsthand.
+                  </p>
+
+                  <div className="p-3.5 rounded-xl bg-zinc-900/70 border border-zinc-800/80 space-y-2">
+                    <div className="flex items-center gap-2 text-xs font-mono font-bold text-white uppercase tracking-wider">
+                      <Cpu className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Key Nixima AI Capabilities:</span>
+                    </div>
+                    <ul className="text-xs space-y-1.5 text-zinc-300 list-disc list-inside">
+                      <li><strong className="text-white">Neural Cluster:</strong> Switch seamlessly between lightning-fast, coder, and frontier reasoning models.</li>
+                      <li><strong className="text-white">DeepThink Mode:</strong> Multi-step analytical chain-of-thought for mathematical and structural problems.</li>
+                      <li><strong className="text-white">Native LaTeX Rendering:</strong> Crisp, publication-grade math formatting.</li>
+                      <li><strong className="text-white">Live Web Exploration:</strong> Real-time internet search integrated into reasoning loops.</li>
+                    </ul>
+                  </div>
+
+                  <p>
+                    I set up this ready account for you with <strong className="text-white">permanent sovereign clearance: infinite credits (∞ CR)</strong>. Credits never deduct (0 CR cost), allowing you to freely explore and run heavy computational queries forever.
+                  </p>
+
+                  <p className="text-zinc-400">
+                    Explore as much as you like, test any real-world tasks, and let me know your thoughts — your honest feedback is super valuable to me!
+                  </p>
+
+                  {/* Signature */}
+                  <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono">
+                    <div>
+                      <div className="font-bold text-white">Bogdan (orange17)</div>
+                      <div className="text-zinc-500">Creator & Lead Architect of Nixima AI</div>
+                    </div>
+                    <div className="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
+                      warexxq@nixima.ai
+                    </div>
+                  </div>
                 </div>
-              </div>
-            </div>
+              )}
+            </>
           )}
         </div>
 
@@ -443,9 +514,11 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
             className="px-5 py-2 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs font-mono transition-all flex items-center gap-2 shadow-glow-subtle cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
           >
             <span>
-              {lang === 'ru' && 'Перейти к Nixima AI'}
-              {lang === 'uk' && 'Увійти до студії Nixima AI'}
-              {lang === 'en' && 'Enter Nixima AI Studio'}
+              {isDad || lang === 'uk' 
+                ? 'Увійти до студії Nixima AI' 
+                : lang === 'ru' 
+                ? 'Перейти к Nixima AI' 
+                : 'Enter Nixima AI Studio'}
             </span>
             <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
           </button>

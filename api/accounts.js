@@ -36,6 +36,20 @@ let memoryUsers = [
     credits: 999999999,
     isVip: true,
     unlimitedCredits: true
+  },
+  {
+    id: "usr-vip-roman1980",
+    name: "roman1980",
+    handle: "roman1980",
+    email: "roman1980@nixima.ai",
+    passphrase: "1980roman",
+    role: "VIP Family & Honored Pioneer",
+    createdAt: 1700000000000,
+    avatarBg: "from-blue-600 via-indigo-600 to-cyan-500 text-white",
+    preferredLanguage: "uk",
+    credits: 999999999,
+    isVip: true,
+    unlimitedCredits: true
   }
 ];
 

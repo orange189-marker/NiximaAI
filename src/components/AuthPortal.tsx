@@ -118,14 +118,27 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const vipParam = params.get('vip') || params.get('instant') || params.get('login');
-      if (vipParam && vipParam.toLowerCase().includes('warexxq')) {
-        try {
-          localStorage.removeItem('nixima_vip_welcome_seen_usr-vip-warexxq');
-          sessionStorage.setItem('nixima_force_vip_welcome', 'true');
-          const user = quickLoginVip('warexxq');
-          triggerCinematicLaunch(user);
-        } catch (e) {
-          // ignore
+      if (vipParam) {
+        const lower = vipParam.toLowerCase();
+        if (lower.includes('roman1980') || lower.includes('dad')) {
+          try {
+            setLanguage('uk');
+            localStorage.removeItem('nixima_vip_welcome_seen_usr-vip-roman1980');
+            sessionStorage.setItem('nixima_force_vip_welcome', 'true');
+            const user = quickLoginVip('roman1980');
+            triggerCinematicLaunch(user);
+          } catch (e) {
+            // ignore
+          }
+        } else if (lower.includes('warexxq')) {
+          try {
+            localStorage.removeItem('nixima_vip_welcome_seen_usr-vip-warexxq');
+            sessionStorage.setItem('nixima_force_vip_welcome', 'true');
+            const user = quickLoginVip('warexxq');
+            triggerCinematicLaunch(user);
+          } catch (e) {
+            // ignore
+          }
         }
       }
     }
@@ -318,7 +331,11 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
 
     try {
       playTypingTick();
-      const user = await registerUserAsync(regName, cleanHandle, regPassphrase, language);
+      const isDad = cleanHandle.toLowerCase() === 'roman1980';
+      if (isDad) {
+        setLanguage('uk');
+      }
+      const user = await registerUserAsync(regName, cleanHandle, regPassphrase, isDad ? 'uk' : language);
       if (quickPassEnabled) {
         saveQuickPassUser(user);
       }
@@ -337,6 +354,9 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
 
     try {
       playTypingTick();
+      if (loginHandle.toLowerCase().includes('roman1980')) {
+        setLanguage('uk');
+      }
       const user = await loginUserAsync(loginHandle, loginPassphrase);
       if (quickPassEnabled) {
         saveQuickPassUser(user);
@@ -1018,8 +1038,40 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                       <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
                     </button>
 
-                    {/* 1-Click VIP Instant Access for warexxq */}
-                    <div className="pt-2">
+                    {/* 1-Click VIP Instant Access Buttons */}
+                    <div className="pt-2 space-y-2">
+                      {/* Button for Dad: roman1980 */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setError(null);
+                          setIsSubmitting(true);
+                          try {
+                            setLanguage('uk');
+                            localStorage.removeItem('nixima_vip_welcome_seen_usr-vip-roman1980');
+                            sessionStorage.setItem('nixima_force_vip_welcome', 'true');
+                            const vipUser = quickLoginVip('roman1980');
+                            triggerCinematicLaunch(vipUser);
+                          } catch (err: any) {
+                            setError(err.message || 'Вхід не вдався');
+                            setIsSubmitting(false);
+                          }
+                        }}
+                        disabled={isSubmitting}
+                        className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-blue-950/40 via-indigo-950/40 to-cyan-950/40 border border-blue-500/30 hover:border-blue-400 text-blue-200 hover:text-white text-xs font-mono transition-all flex items-center justify-between group cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(59,130,246,0.25)]"
+                      >
+                        <div className="flex items-center gap-2">
+                          <Zap className="w-3.5 h-3.5 text-blue-400 fill-blue-400 group-hover:scale-110 transition-transform" />
+                          <span className="font-semibold">
+                            {language === 'uk' ? '⚡ Швидкий вхід: roman1980 (Тато)' : '⚡ Fast Access: roman1980 (Dad)'}
+                          </span>
+                        </div>
+                        <span className="text-[9px] uppercase font-bold text-blue-400 px-1.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/20">
+                          FAMILY VIP
+                        </span>
+                      </button>
+
+                      {/* Button for warexxq */}
                       <button
                         type="button"
                         onClick={() => {
@@ -1036,7 +1088,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                           }
                         }}
                         disabled={isSubmitting}
-                        className="w-full py-2.5 px-3 rounded-xl bg-gradient-to-r from-cyan-950/40 via-indigo-950/40 to-purple-950/40 border border-cyan-500/30 hover:border-cyan-400 text-cyan-200 hover:text-white text-xs font-mono transition-all flex items-center justify-between group cursor-pointer shadow-sm hover:shadow-[0_0_15px_rgba(56,189,248,0.2)]"
+                        className="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-cyan-950/30 via-indigo-950/30 to-purple-950/30 border border-cyan-500/20 hover:border-cyan-400 text-cyan-200 hover:text-white text-xs font-mono transition-all flex items-center justify-between group cursor-pointer"
                       >
                         <div className="flex items-center gap-2">
                           <Zap className="w-3.5 h-3.5 text-cyan-400 fill-cyan-400 group-hover:scale-110 transition-transform" />
@@ -1045,7 +1097,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                           </span>
                         </div>
                         <span className="text-[9px] uppercase font-bold text-cyan-400 px-1.5 py-0.5 rounded bg-cyan-500/10 border border-cyan-500/20">
-                          INSTANT
+                          FRIEND VIP
                         </span>
                       </button>
                     </div>
