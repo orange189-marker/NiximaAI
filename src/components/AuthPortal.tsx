@@ -120,6 +120,8 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
       const vipParam = params.get('vip') || params.get('instant') || params.get('login');
       if (vipParam && vipParam.toLowerCase().includes('warexxq')) {
         try {
+          localStorage.removeItem('nixima_vip_welcome_seen_usr-vip-warexxq');
+          sessionStorage.setItem('nixima_force_vip_welcome', 'true');
           const user = quickLoginVip('warexxq');
           triggerCinematicLaunch(user);
         } catch (e) {
@@ -1024,6 +1026,8 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                           setError(null);
                           setIsSubmitting(true);
                           try {
+                            localStorage.removeItem('nixima_vip_welcome_seen_usr-vip-warexxq');
+                            sessionStorage.setItem('nixima_force_vip_welcome', 'true');
                             const vipUser = quickLoginVip('warexxq');
                             triggerCinematicLaunch(vipUser);
                           } catch (err: any) {

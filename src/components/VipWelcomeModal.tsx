@@ -2,21 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import { 
   X, 
   Sparkles, 
-  Check, 
-  ArrowRight, 
-  ShieldCheck, 
-  Cpu, 
-  Zap, 
-  Flame, 
   RotateCcw,
-  Star,
-  Award
+  ArrowRight,
+  ShieldCheck,
+  Cpu,
+  Zap,
+  Globe
 } from 'lucide-react';
 import { NiximaUser } from '../types/user';
 import { NiximaCreditLogo } from './NiximaCreditLogo';
 import { InfinitySymbol } from './InfinitySymbol';
 import { playCreditRamp, playSupernovaBang, playVaultUnlockChord, playTypingTick } from '../utils/sound';
-import { useLanguage } from '../context/LanguageContext';
 
 export interface VipWelcomeModalProps {
   isOpen: boolean;
@@ -25,16 +21,7 @@ export interface VipWelcomeModalProps {
   isPreview?: boolean;
 }
 
-interface Particle {
-  id: number;
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  color: string;
-  size: number;
-  opacity: number;
-}
+type PresentationLang = 'ru' | 'uk' | 'en';
 
 export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
   isOpen,
@@ -42,131 +29,82 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
   user,
   isPreview = false,
 }) => {
-  const { language } = useLanguage();
-  const [slide, setSlide] = useState<1 | 2>(1);
+  // Language selector for the letter (default is Russian as requested)
+  const [lang, setLang] = useState<PresentationLang>('ru');
 
-  // Big Reveal Animation States
-  const [revealPhase, setRevealPhase] = useState<'idle' | 'rising' | 'bang' | 'unlocked'>('idle');
-  const [risingCredits, setRisingCredits] = useState(1000);
-  const [screenShake, setScreenShake] = useState(false);
-  const [flashBang, setFlashBang] = useState(false);
-  const [particles, setParticles] = useState<Particle[]>([]);
+  // Automatic Credit Ramp & Infinity Reveal States
+  const [phase, setPhase] = useState<'starting' | 'counting' | 'burst' | 'infinite'>('starting');
+  const [displayCredits, setDisplayCredits] = useState(1000);
+  const [isPulsing, setIsPulsing] = useState(false);
+  const animTimeoutRef = useRef<number | null>(null);
   const animIntervalRef = useRef<number | null>(null);
 
-  // Initialize or reset when modal opens
+  // Auto-run the animation sequence whenever modal opens
   useEffect(() => {
     if (isOpen) {
-      setSlide(1);
-      setRevealPhase('idle');
-      setRisingCredits(1000);
-      setScreenShake(false);
-      setFlashBang(false);
-      setParticles([]);
       playVaultUnlockChord();
+      runAnimationSequence();
+    } else {
+      clearAnimationTimers();
     }
   }, [isOpen]);
 
-  // Clean up animations on unmount
+  const clearAnimationTimers = () => {
+    if (animTimeoutRef.current) clearTimeout(animTimeoutRef.current);
+    if (animIntervalRef.current) clearInterval(animIntervalRef.current);
+  };
+
+  const runAnimationSequence = () => {
+    clearAnimationTimers();
+    setPhase('starting');
+    setDisplayCredits(1000);
+    setIsPulsing(false);
+
+    // Automatic start after a brief 400ms pause so the user sees the starter 1,000 CR
+    animTimeoutRef.current = window.setTimeout(() => {
+      setPhase('counting');
+      const startTime = performance.now();
+      const duration = 2100; // 2.1s smooth acceleration
+      let tickCounter = 0;
+
+      animIntervalRef.current = window.setInterval(() => {
+        const elapsed = performance.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // Exponential cubic interpolation: 1,000 -> 999,999
+        const currentVal = Math.round(1000 + Math.pow(progress, 3) * 998999);
+        setDisplayCredits(currentVal);
+
+        tickCounter++;
+        if (tickCounter % 2 === 0) {
+          playCreditRamp(progress);
+        }
+
+        if (progress >= 1) {
+          if (animIntervalRef.current) clearInterval(animIntervalRef.current);
+          // Transition directly to burst and infinite reveal
+          setPhase('burst');
+          setIsPulsing(true);
+          playSupernovaBang();
+
+          // Smoothly reveal the Iridescent Infinity symbol
+          setTimeout(() => {
+            setPhase('infinite');
+            setTimeout(() => setIsPulsing(false), 800);
+          }, 250);
+        }
+      }, 40);
+    }, 450);
+  };
+
+  // Clean up on unmount
   useEffect(() => {
-    return () => {
-      if (animIntervalRef.current) {
-        clearInterval(animIntervalRef.current);
-      }
-    };
+    return () => clearAnimationTimers();
   }, []);
 
   if (!isOpen) return null;
 
   const recipientName = user?.name || user?.handle || 'warexxq';
-
-  // Trigger the Rising Credits -> Supernova Bang -> Infinity Animation
-  const startSupernovaReveal = () => {
-    if (revealPhase !== 'idle') return;
-    setRevealPhase('rising');
-
-    const duration = 2800; // 2.8s ramp
-    const startTime = performance.now();
-    let tickCounter = 0;
-
-    const interval = window.setInterval(() => {
-      const elapsed = performance.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-
-      // Exponential credit count-up
-      const currentNumber = Math.round(1000 + Math.pow(progress, 3) * 998999);
-      setRisingCredits(currentNumber);
-
-      tickCounter++;
-      if (tickCounter % 2 === 0) {
-        playCreditRamp(progress);
-      }
-
-      // Shaking starts in the final 30% of the countdown
-      if (progress > 0.65) {
-        setScreenShake(true);
-      }
-
-      if (progress >= 1) {
-        clearInterval(interval);
-        triggerBangExplosion();
-      }
-    }, 45);
-
-    animIntervalRef.current = interval;
-  };
-
-  // The Explosive Supernova Bang
-  const triggerBangExplosion = () => {
-    setScreenShake(false);
-    setFlashBang(true);
-    setRevealPhase('bang');
-    playSupernovaBang();
-
-    // Spawn 50 iridescent explosion particles
-    const colors = ['#38BDF8', '#818CF8', '#C084FC', '#F472B6', '#FBBF24', '#34D399', '#FFFFFF'];
-    const newParticles: Particle[] = [];
-    for (let i = 0; i < 48; i++) {
-      const angle = (i / 48) * Math.PI * 2 + (Math.random() - 0.5) * 0.3;
-      const speed = 4 + Math.random() * 9;
-      newParticles.push({
-        id: i,
-        x: 0,
-        y: 0,
-        vx: Math.cos(angle) * speed,
-        vy: Math.sin(angle) * speed,
-        color: colors[Math.floor(Math.random() * colors.length)],
-        size: 3 + Math.random() * 5,
-        opacity: 1,
-      });
-    }
-    setParticles(newParticles);
-
-    // Flash fades out quickly
-    setTimeout(() => {
-      setFlashBang(false);
-      setRevealPhase('unlocked');
-    }, 280);
-
-    // Animate particles outward
-    const pStart = performance.now();
-    const pInterval = window.setInterval(() => {
-      const elapsed = performance.now() - pStart;
-      if (elapsed > 1600) {
-        clearInterval(pInterval);
-        setParticles([]);
-        return;
-      }
-      setParticles(prev =>
-        prev.map(p => ({
-          ...p,
-          x: p.x + p.vx,
-          y: p.y + p.vy,
-          vy: p.vy + 0.15, // slight gravity
-          opacity: Math.max(0, 1 - elapsed / 1600),
-        }))
-      );
-    }, 25);
-  };
 
   const handleFinish = () => {
     playTypingTick();
@@ -176,347 +114,341 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
     onClose();
   };
 
-  const isUk = language === 'uk';
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/85 backdrop-blur-xl animate-in fade-in duration-300">
-      {/* Supernova White Flashbang Overlay */}
-      {flashBang && (
-        <div className="fixed inset-0 z-50 bg-white/90 pointer-events-none transition-opacity duration-300 animate-in fade-in" />
-      )}
-
-      {/* Main Presentation Container with Screen Shake */}
-      <div
-        className={`relative w-full max-w-2xl bg-[#09090c] border border-zinc-700/80 rounded-3xl shadow-[0_0_80px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col max-h-[90vh] transition-transform ${
-          screenShake ? 'animate-bounce' : ''
-        }`}
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) handleFinish();
+      }}
+    >
+      {/* Sleek, solid, non-bouncing dialog window matching Nixima's titanium design */}
+      <div 
+        className="relative w-full max-w-2xl bg-[#0b0b0f] border border-zinc-700/80 rounded-2xl sm:rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col max-h-[92vh] border-zinc-700/70"
         style={{
-          boxShadow: '0 0 50px rgba(56, 189, 248, 0.12), 0 0 100px rgba(192, 132, 252, 0.08)',
+          boxShadow: '0 0 50px rgba(56, 189, 248, 0.12), 0 0 80px rgba(129, 140, 248, 0.08)'
         }}
       >
-        {/* ============================================================== */}
-        {/* 1. UPPER VISUAL BANNER WITH EMBEDDED ARTWORK & VIP BADGE      */}
-        {/* ============================================================== */}
-        <div className="relative h-44 sm:h-52 w-full bg-gradient-to-b from-[#14141e] via-[#0d0d14] to-[#09090c] border-b border-zinc-800/80 flex items-center justify-center overflow-hidden">
-          {/* Ambient Cosmic Shimmer Background */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/30 via-zinc-950/20 to-transparent pointer-events-none" />
-          
-          {/* Subtle Geometric Prism Mesh Lines */}
-          <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <pattern id="vipGrid" width="28" height="28" patternUnits="userSpaceOnUse">
-                <path d="M 28 0 L 0 0 0 28" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="0.75" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#vipGrid)" />
-          </svg>
-
-          {/* Close / Dismiss Button (Top Right) */}
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 z-20 p-1.5 rounded-xl bg-zinc-900/80 border border-zinc-700/60 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
-            title={isUk ? 'Закрити' : 'Close'}
-          >
-            <X className="w-4 h-4" />
-          </button>
-
-          {/* Preview Badge Indicator */}
-          {isPreview && (
-            <div className="absolute top-4 left-4 z-20 px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[10px] font-mono font-bold flex items-center gap-1.5">
-              <Sparkles className="w-3 h-3" />
-              <span>{isUk ? 'РЕЖИМ ПЕРЕГЛЯДУ (ТВОРЕЦЬ)' : 'CREATOR PREVIEW MODE'}</span>
+        {/* ================================================================= */}
+        {/* 1. TOP HEADER WITH CONTROLS & LANGUAGE SWITCHER                   */}
+        {/* ================================================================= */}
+        <div className="px-5 py-3.5 bg-[#101017] border-b border-zinc-800/90 flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <span className="w-6 h-6 rounded-lg bg-zinc-800 border border-zinc-700/80 flex items-center justify-center shadow-inner">
+              <NiximaCreditLogo size={14} />
+            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono font-bold tracking-wider uppercase text-zinc-200">
+                Nixima VIP Sovereign Access
+              </span>
+              {isPreview && (
+                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                  PREVIEW
+                </span>
+              )}
             </div>
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            {/* Language Selector Pills */}
+            <div className="flex items-center p-0.5 rounded-lg bg-zinc-900 border border-zinc-800 text-[11px] font-mono">
+              <button
+                type="button"
+                onClick={() => { setLang('ru'); playTypingTick(); }}
+                className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
+                  lang === 'ru'
+                    ? 'bg-zinc-700 text-white font-bold shadow-sm'
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+                title="Читать на русском"
+              >
+                RU
+              </button>
+              <button
+                type="button"
+                onClick={() => { setLang('uk'); playTypingTick(); }}
+                className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
+                  lang === 'uk'
+                    ? 'bg-zinc-700 text-white font-bold shadow-sm'
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+                title="Читати українською"
+              >
+                UA
+              </button>
+              <button
+                type="button"
+                onClick={() => { setLang('en'); playTypingTick(); }}
+                className={`px-2 py-0.5 rounded transition-all cursor-pointer ${
+                  lang === 'en'
+                    ? 'bg-zinc-700 text-white font-bold shadow-sm'
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+                title="Read in English"
+              >
+                EN
+              </button>
+            </div>
+
+            {/* Close Modal Button */}
+            <button
+              onClick={handleFinish}
+              className="p-1 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition-colors cursor-pointer"
+              title="Закрыть"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+
+        {/* ================================================================= */}
+        {/* 2. AUTOMATIC UPPER CREDIT TRANSFORMATION CARD                     */}
+        {/* ================================================================= */}
+        <div className="relative px-5 py-5 bg-gradient-to-b from-[#13131d] via-[#0d0d14] to-[#0b0b0f] border-b border-zinc-800/80 overflow-hidden">
+          {/* Subtle Ambient Radial Energy Mesh */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-transparent to-transparent pointer-events-none" />
+
+          {/* Smooth vector energy pulse upon reaching infinity */}
+          {isPulsing && (
+            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/15 via-purple-500/20 to-cyan-500/15 animate-pulse pointer-events-none" />
           )}
 
-          {/* Centered Futuristic Emblem Art */}
-          <div className="relative z-10 flex flex-col items-center text-center space-y-3 px-4">
-            <div className="relative">
-              {/* Outer Pulsing Halo */}
-              <div className="absolute -inset-2.5 rounded-2xl bg-gradient-to-r from-cyan-500/25 via-indigo-500/30 to-purple-500/25 blur-lg animate-pulse" />
-              
-              {/* Central Shield Token */}
-              <div className="relative w-16 h-16 rounded-2xl bg-gradient-to-br from-zinc-800 via-zinc-900 to-[#0c0c10] border border-zinc-600 flex items-center justify-center shadow-xl">
-                <NiximaCreditLogo size={32} glow />
+          <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3.5 text-center sm:text-left">
+              <div className="relative flex-shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-zinc-900 border border-zinc-700/80 flex items-center justify-center shadow-lg">
+                  <NiximaCreditLogo size={24} glow={phase === 'infinite'} />
+                </div>
+                {phase === 'infinite' && (
+                  <span className="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-cyan-400 animate-ping opacity-75" />
+                )}
+              </div>
+
+              <div>
+                <div className="flex items-center justify-center sm:justify-start gap-1.5 text-[11px] font-mono text-zinc-400">
+                  <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" />
+                  <span className="uppercase tracking-wider font-semibold text-zinc-300">
+                    {lang === 'ru' && 'Статус баланса аккаунта:'}
+                    {lang === 'uk' && 'Статус балансу акаунта:'}
+                    {lang === 'en' && 'Account Balance Status:'}
+                  </span>
+                </div>
+
+                <div className="text-sm font-semibold text-white">
+                  {recipientName} • VIP Pioneer
+                </div>
               </div>
             </div>
 
-            {/* VIP Invitation Header Ribbon */}
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/5 border border-white/15 backdrop-blur-md">
-              <Award className="w-3.5 h-3.5 text-cyan-400" />
-              <span className="text-[11px] font-mono font-bold uppercase tracking-widest text-zinc-200">
-                {isUk ? 'Особисте запрошення VIP-першопрохідця' : 'VIP Pioneer Sovereign Pass'}
+            {/* The Automatic Number Acceleration & Infinity Transform */}
+            <div className="flex items-center gap-3 bg-zinc-900/90 border border-zinc-700/90 px-4 py-2.5 rounded-2xl shadow-inner min-w-[210px] justify-center relative">
+              {phase !== 'infinite' ? (
+                /* Dynamic Counting State */
+                <div className="flex items-baseline gap-2 font-mono">
+                  <span className="text-xl sm:text-2xl font-black tracking-tight text-white transition-all">
+                    {displayCredits.toLocaleString()}
+                  </span>
+                  <span className="text-xs font-bold text-zinc-400">CR</span>
+                </div>
+              ) : (
+                /* Revealed Sovereign Iridescent Infinity Symbol */
+                <div className="flex items-center gap-2.5 animate-in fade-in zoom-in-90 duration-300">
+                  <div className="transform scale-110 py-1">
+                    <InfinitySymbol size={32} glow animated />
+                  </div>
+                  <div className="text-left">
+                    <span className="block text-xs font-mono font-bold text-cyan-300 uppercase tracking-wide">
+                      {lang === 'ru' && 'Бесконечно'}
+                      {lang === 'uk' && 'Безліміт'}
+                      {lang === 'en' && 'Infinite'}
+                    </span>
+                    <span className="block text-[10px] font-mono text-zinc-400">
+                      0 CR {lang === 'ru' ? 'списание' : lang === 'uk' ? 'списання' : 'deduction'}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Replay Button for the animation */}
+              <button
+                type="button"
+                onClick={runAnimationSequence}
+                className="absolute -right-2 -top-2 p-1.5 rounded-full bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-zinc-400 hover:text-white transition-all shadow-md cursor-pointer"
+                title={lang === 'ru' ? 'Повторить анимацию' : lang === 'uk' ? 'Повторити анімацію' : 'Replay animation'}
+              >
+                <RotateCcw className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ================================================================= */}
+        {/* 3. PRESENTATION LETTER BODY (Primary Russian / UA / EN)          */}
+        {/* ================================================================= */}
+        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-sm leading-relaxed text-zinc-300 font-sans">
+          {/* Greeting Header */}
+          <div className="space-y-1">
+            <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight flex items-center gap-2">
+              <span>
+                {lang === 'ru' && `Привет, ${recipientName}! Добро пожаловать в Nixima AI`}
+                {lang === 'uk' && `Привіт, ${recipientName}! Ласкаво просимо до Nixima AI`}
+                {lang === 'en' && `Hey ${recipientName}! Welcome to Nixima AI`}
+              </span>
+              <Sparkles className="w-4 h-4 text-cyan-400 inline" />
+            </h2>
+            <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
+              <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <span>
+                {lang === 'ru' && 'Личное обращение создателя проекта (orange17)'}
+                {lang === 'uk' && 'Особисте звернення творця проєкту (orange17)'}
+                {lang === 'en' && 'Personal note from the creator (orange17)'}
               </span>
             </div>
           </div>
+
+          {/* Letter Body - Russian Default */}
+          {lang === 'ru' && (
+            <div className="space-y-3.5 text-zinc-300 text-[13px] sm:text-sm">
+              <p>
+                Спасибо огромное, что зашел оценить мой проект и посмотреть на искусственный интеллект, над которым я сейчас упорно работаю! Для меня действительно важно и ценно, чтобы ты протестировал платформу лично.
+              </p>
+
+              <div className="p-3.5 rounded-xl bg-zinc-900/70 border border-zinc-800/80 space-y-2">
+                <div className="flex items-center gap-2 text-xs font-mono font-bold text-white uppercase tracking-wider">
+                  <Cpu className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Что умеет Nixima AI:</span>
+                </div>
+                <ul className="text-xs space-y-1.5 text-zinc-300 list-disc list-inside">
+                  <li><strong className="text-white">Кластер нейросетей:</strong> переключение между быстрыми, программными и глубоко мыслящими моделями.</li>
+                  <li><strong className="text-white">Режим DeepThink:</strong> пошаговое аналитическое мышление для решения математических и логических задач.</li>
+                  <li><strong className="text-white">Поддержка LaTeX:</strong> чистый и красивый рендеринг любых формул и вычислений.</li>
+                  <li><strong className="text-white">Веб-поиск в реальном времени:</strong> доступ к актуальной информации из интернета прямо во время генерации.</li>
+                </ul>
+              </div>
+
+              <p>
+                Специально для тебя я создал этот готовый аккаунт. У тебя активирован <strong className="text-white">полный суверенный безлимит: бесконечные кредиты (∞ CR)</strong>. Кредиты никогда не списываются, поэтому ты можешь свободно слать любые, даже самые тяжелые и длинные запросы, без ограничений.
+              </p>
+
+              <p className="text-zinc-400">
+                Пробуй всё, что угодно, тестируй в реальных задачах и обязательно делись своими впечатлениями или критикой — твой честный фидбек поможет мне сделать Nixima еще сильнее!
+              </p>
+
+              {/* Signature */}
+              <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono">
+                <div>
+                  <div className="font-bold text-white">Богдан (orange17)</div>
+                  <div className="text-zinc-500">Создатель & Архитектор Nixima AI</div>
+                </div>
+                <div className="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
+                  warexxq@nixima.ai
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Letter Body - Ukrainian Translation */}
+          {lang === 'uk' && (
+            <div className="space-y-3.5 text-zinc-300 text-[13px] sm:text-sm">
+              <p>
+                Щиро дякую, що завітав оцінити мій проєкт та поглянути на штучний інтелект, над яким я зараз працюю! Для мене дуже важливо і приємно, що ти вирішив протестувати платформу наживо.
+              </p>
+
+              <div className="p-3.5 rounded-xl bg-zinc-900/70 border border-zinc-800/80 space-y-2">
+                <div className="flex items-center gap-2 text-xs font-mono font-bold text-white uppercase tracking-wider">
+                  <Cpu className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Можливості платформи Nixima AI:</span>
+                </div>
+                <ul className="text-xs space-y-1.5 text-zinc-300 list-disc list-inside">
+                  <li><strong className="text-white">Кластер моделей:</strong> швидкі, спеціалізовані кодерські та глибокі моделі мислення.</li>
+                  <li><strong className="text-white">Режим DeepThink:</strong> покроковий аналітичний розбір найскладніших технічних завдань.</li>
+                  <li><strong className="text-white">Рендеринг LaTeX:</strong> бездоганне відображення математичних виразів і фізичних формул.</li>
+                  <li><strong className="text-white">Веб-пошук у реальному часі:</strong> отримання свіжих даних з мережі безпосередньо у відповіді.</li>
+                </ul>
+              </div>
+
+              <p>
+                Спеціально для тебе я підготував цей готовий обліковий запис. Тут діє <strong className="text-white">повний суверенний безліміт: нескінченні кредити (∞ CR)</strong>. Баланс ніколи не зменшується (0 CR списування), тому ти можеш відправляти будь-які об'ємні запити та експериментувати без обмежень.
+              </p>
+
+              <p className="text-zinc-400">
+                Користуйся із задоволенням, перевіряй у роботі та неодмінно ділися своїми думками чи порадами — твій зворотний зв'язок для мене безцінний!
+              </p>
+
+              {/* Signature */}
+              <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono">
+                <div>
+                  <div className="font-bold text-white">Богдан (orange17)</div>
+                  <div className="text-zinc-500">Творець & Архітектор Nixima AI</div>
+                </div>
+                <div className="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
+                  warexxq@nixima.ai
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Letter Body - English Translation */}
+          {lang === 'en' && (
+            <div className="space-y-3.5 text-zinc-300 text-[13px] sm:text-sm">
+              <p>
+                Thank you so much for dropping by to check out my project and explore the AI platform I've been actively building! It means a great deal to me that you took the time to test it out firsthand.
+              </p>
+
+              <div className="p-3.5 rounded-xl bg-zinc-900/70 border border-zinc-800/80 space-y-2">
+                <div className="flex items-center gap-2 text-xs font-mono font-bold text-white uppercase tracking-wider">
+                  <Cpu className="w-3.5 h-3.5 text-indigo-400" />
+                  <span>Key Nixima AI Capabilities:</span>
+                </div>
+                <ul className="text-xs space-y-1.5 text-zinc-300 list-disc list-inside">
+                  <li><strong className="text-white">Neural Cluster:</strong> Switch seamlessly between lightning-fast, coder, and frontier reasoning models.</li>
+                  <li><strong className="text-white">DeepThink Mode:</strong> Multi-step analytical chain-of-thought for mathematical and structural problems.</li>
+                  <li><strong className="text-white">Native LaTeX Rendering:</strong> Crisp, publication-grade math formatting.</li>
+                  <li><strong className="text-white">Live Web Exploration:</strong> Real-time internet search integrated into reasoning loops.</li>
+                </ul>
+              </div>
+
+              <p>
+                I set up this ready account for you with <strong className="text-white">permanent sovereign clearance: infinite credits (∞ CR)</strong>. Credits never deduct (0 CR cost), allowing you to freely explore and run heavy computational queries forever.
+              </p>
+
+              <p className="text-zinc-400">
+                Explore as much as you like, test any real-world tasks, and let me know your thoughts — your honest feedback is super valuable to me!
+              </p>
+
+              {/* Signature */}
+              <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between text-xs font-mono">
+                <div>
+                  <div className="font-bold text-white">Bogdan (orange17)</div>
+                  <div className="text-zinc-500">Creator & Lead Architect of Nixima AI</div>
+                </div>
+                <div className="px-2.5 py-1 rounded bg-zinc-900 border border-zinc-800 text-zinc-400">
+                  warexxq@nixima.ai
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Slide Tracker Navigation */}
-        <div className="flex items-center justify-between px-6 py-2.5 bg-[#0b0b0f] border-b border-zinc-800/80 text-xs font-mono text-zinc-400">
-          <div className="flex items-center gap-2">
-            <span
-              className={`w-2 h-2 rounded-full transition-colors ${
-                slide === 1 ? 'bg-white' : 'bg-zinc-700'
-              }`}
-            />
-            <span
-              className={`w-2 h-2 rounded-full transition-colors ${
-                slide === 2 ? 'bg-white' : 'bg-zinc-700'
-              }`}
-            />
-            <span className="text-[11px] text-zinc-400 ml-1">
-              {isUk ? `Розділ ${slide} з 2` : `Section ${slide} of 2`}
-            </span>
+        {/* ================================================================= */}
+        {/* 4. FOOTER WITH CLEAN ACTION BUTTON                                */}
+        {/* ================================================================= */}
+        <div className="px-5 py-3.5 bg-[#101017] border-t border-zinc-800 flex items-center justify-between">
+          <div className="text-[11px] font-mono text-zinc-500 flex items-center gap-1.5">
+            <Zap className="w-3 h-3 text-cyan-400" />
+            <span>Nixima Sovereign Mesh v0.1</span>
           </div>
 
-          {isPreview && slide === 2 && (
-            <button
-              onClick={() => {
-                setRevealPhase('idle');
-                setRisingCredits(1000);
-                setScreenShake(false);
-                setFlashBang(false);
-                setParticles([]);
-              }}
-              className="text-[11px] font-mono text-zinc-300 hover:text-white flex items-center gap-1 cursor-pointer"
-            >
-              <RotateCcw className="w-3 h-3" />
-              <span>{isUk ? 'Скинути анімацію' : 'Replay Animation'}</span>
-            </button>
-          )}
-        </div>
-
-        {/* Modal Scrollable Body */}
-        <div className="p-6 overflow-y-auto space-y-6 text-zinc-200">
-          {/* ============================================================== */}
-          {/* SLIDE 1: PERSONAL WELCOME LETTER FROM THE CREATOR              */}
-          {/* ============================================================== */}
-          {slide === 1 && (
-            <div className="space-y-5 animate-in fade-in duration-200">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 text-cyan-400 fill-cyan-400" />
-                  <h3 className="text-lg font-bold text-white tracking-wide">
-                    {isUk
-                      ? `Ласкаво просимо до Nixima AI, ${recipientName}!`
-                      : `Welcome to Nixima AI, ${recipientName}!`}
-                  </h3>
-                </div>
-                <p className="text-xs font-mono text-zinc-400">
-                  {isUk
-                    ? `Nixima ID: ${user?.email || 'warexxq@nixima.ai'} • Особистий доступ від автора`
-                    : `Nixima ID: ${user?.email || 'warexxq@nixima.ai'} • Creator Personal Invitation`}
-                </p>
-              </div>
-
-              {/* Letter Parchment Container */}
-              <div className="p-5 rounded-2xl bg-zinc-900/70 border border-zinc-800 text-sm leading-relaxed space-y-3.5 shadow-inner">
-                <p className="text-zinc-200">
-                  {isUk ? (
-                    <>
-                      Привіт, <strong className="text-white font-mono">{recipientName}</strong>! Дуже дякую, що приєднався та вирішив завітати і спробувати мій новий проєкт <strong>Nixima AI</strong>. Для мене велика радість бачити тебе тут серед найперших, хто випробовує цю систему.
-                    </>
-                  ) : (
-                    <>
-                      Hey <strong className="text-white font-mono">{recipientName}</strong>! Thank you for joining and taking the time to check out and explore my new AI project, <strong>Nixima AI</strong>. It means a lot to have you here among the very first people exploring what I've built.
-                    </>
-                  )}
-                </p>
-
-                <p className="text-zinc-300 text-xs sm:text-sm">
-                  {isUk ? (
-                    <>
-                      Я створив цей асистент для глибокого мислення, швидкого програмування та складних технічних задач із підтримкою LaTeX формул і високої швидкості. Спеціально для тебе, як для близького друга, я налаштував постійний VIP-кліренс.
-                    </>
-                  ) : (
-                    <>
-                      I designed this neural studio for deep reasoning, rapid code synthesis, and advanced technical research with native LaTeX math rendering and zero latency. Specifically for you as a valued friend, I have configured permanent VIP clearance.
-                    </>
-                  )}
-                </p>
-
-                {/* Feature Highlights Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-2">
-                  <div className="p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80 space-y-1">
-                    <div className="flex items-center gap-1.5 text-cyan-400 font-mono text-[11px] font-bold">
-                      <Cpu className="w-3.5 h-3.5" />
-                      <span>{isUk ? 'Фронтирні моделі' : 'Frontier Models'}</span>
-                    </div>
-                    <p className="text-[11px] text-zinc-400 leading-snug">
-                      {isUk ? 'Flash, Coder та DeepThink' : 'Flash, Coder & DeepThink Reasoning'}
-                    </p>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80 space-y-1">
-                    <div className="flex items-center gap-1.5 text-indigo-400 font-mono text-[11px] font-bold">
-                      <Zap className="w-3.5 h-3.5" />
-                      <span>{isUk ? 'Швидкість стрімінгу' : 'Pure Throughput'}</span>
-                    </div>
-                    <p className="text-[11px] text-zinc-400 leading-snug">
-                      {isUk ? 'Миттєва відповідь без затримок' : 'Immediate real-time streaming'}
-                    </p>
-                  </div>
-
-                  <div className="p-3 rounded-xl bg-zinc-950/70 border border-zinc-800/80 space-y-1">
-                    <div className="flex items-center gap-1.5 text-purple-400 font-mono text-[11px] font-bold">
-                      <ShieldCheck className="w-3.5 h-3.5" />
-                      <span>{isUk ? 'Суверенний доступ' : 'Sovereign VIP'}</span>
-                    </div>
-                    <p className="text-[11px] text-zinc-400 leading-snug">
-                      {isUk ? 'Нульові обмеження назавжди' : 'Zero token constraints forever'}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Button: Proceed to Section 2 */}
-              <div className="pt-2 flex justify-end">
-                <button
-                  onClick={() => {
-                    playTypingTick();
-                    setSlide(2);
-                  }}
-                  className="px-5 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-semibold text-xs font-mono transition-all flex items-center gap-2 shadow-lg cursor-pointer"
-                >
-                  <span>{isUk ? 'Далі: Отримати VIP Кліренс' : 'Next: Claim Your VIP Clearance'}</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ============================================================== */}
-          {/* SLIDE 2: THE REVEAL (RISING COUNTER -> BANG -> INFINITY)       */}
-          {/* ============================================================== */}
-          {slide === 2 && (
-            <div className="space-y-6 animate-in fade-in duration-200">
-              <div className="text-center space-y-1.5">
-                <h3 className="text-base font-bold text-white uppercase tracking-wider font-mono">
-                  {isUk ? 'Активація суверенного балансу' : 'Sovereign Compute Allocation'}
-                </h3>
-                <p className="text-xs text-zinc-400 max-w-md mx-auto">
-                  {isUk
-                    ? 'Твій обліковий запис отримує особливий статус у нейромережевому кластері Nixima.'
-                    : 'Your account is being granted exclusive unlimited status across the Nixima neural cluster.'}
-                </p>
-              </div>
-
-              {/* The Interactive Supernova Reveal Card */}
-              <div className="relative p-6 rounded-2xl bg-zinc-900/90 border border-zinc-700/80 shadow-2xl flex flex-col items-center justify-center min-h-[220px] overflow-hidden text-center">
-                {/* Explosion Particles Flying Outward */}
-                {particles.map(p => (
-                  <div
-                    key={p.id}
-                    className="absolute rounded-full pointer-events-none z-30"
-                    style={{
-                      transform: `translate(${p.x}px, ${p.y}px)`,
-                      width: `${p.size}px`,
-                      height: `${p.size}px`,
-                      backgroundColor: p.color,
-                      opacity: p.opacity,
-                      boxShadow: `0 0 6px ${p.color}`,
-                    }}
-                  />
-                ))}
-
-                {/* PHASE 1: IDLE */}
-                {revealPhase === 'idle' && (
-                  <div className="space-y-4 py-2 animate-in fade-in">
-                    <div className="flex items-center justify-center gap-2 text-zinc-400 font-mono text-xs">
-                      <NiximaCreditLogo size={16} />
-                      <span>{isUk ? 'Стандартний стартовий баланс:' : 'Default Starter Balance:'}</span>
-                    </div>
-
-                    <div className="text-3xl font-extrabold font-mono text-zinc-300">
-                      1,000 <span className="text-xs text-zinc-400">CR</span>
-                    </div>
-
-                    <button
-                      onClick={startSupernovaReveal}
-                      className="px-6 py-3 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs font-mono transition-all flex items-center gap-2 shadow-[0_0_25px_rgba(255,255,255,0.4)] hover:scale-105 active:scale-95 cursor-pointer mx-auto"
-                    >
-                      <Zap className="w-4 h-4 fill-black" />
-                      <span>{isUk ? '⚡ Активувати VIP-безліміт' : '⚡ Activate VIP Unlimited Access'}</span>
-                    </button>
-                  </div>
-                )}
-
-                {/* PHASE 2: RISING COUNTER */}
-                {revealPhase === 'rising' && (
-                  <div className="space-y-3 py-2 animate-in zoom-in-95">
-                    <div className="flex items-center justify-center gap-2 text-cyan-400 font-mono text-xs uppercase tracking-wider animate-pulse">
-                      <Flame className="w-4 h-4 text-cyan-400" />
-                      <span>{isUk ? 'Синхронізація ліміту...' : 'Ramping Neural Compute...'}</span>
-                    </div>
-
-                    <div className="text-5xl font-black font-mono tracking-tight text-white tabular-nums drop-shadow-[0_0_15px_rgba(56,189,248,0.6)]">
-                      {risingCredits.toLocaleString()}
-                      <span className="text-sm text-zinc-400 ml-2">CR</span>
-                    </div>
-
-                    <div className="w-48 h-1.5 bg-zinc-800 rounded-full mx-auto overflow-hidden">
-                      <div className="h-full bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400 animate-pulse w-full" />
-                    </div>
-                  </div>
-                )}
-
-                {/* PHASE 3 & 4: SUPERNOVA EXPLODED & INFINITY UNLOCKED */}
-                {(revealPhase === 'bang' || revealPhase === 'unlocked') && (
-                  <div className="space-y-4 py-2 animate-in zoom-in-90 duration-500 flex flex-col items-center">
-                    <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[11px] font-mono font-bold">
-                      <Check className="w-3.5 h-3.5" />
-                      <span>{isUk ? 'БЕЗЛІМІТНИЙ КЛІРЕНС АКТИВОВАНО' : 'SOVEREIGN INFINITY GRANTED'}</span>
-                    </div>
-
-                    {/* Prominent Iridescent Infinity Symbol with Dual Glow */}
-                    <div className="flex items-baseline justify-center gap-3 pt-1">
-                      <NiximaCreditLogo size={28} className="self-center" />
-                      <div className="transform scale-125 py-2">
-                        <InfinitySymbol size={44} glow animated />
-                      </div>
-                      <span className="text-lg font-bold font-mono text-zinc-300 self-center">
-                        CR
-                      </span>
-                    </div>
-
-                    <p className="text-xs text-zinc-300 max-w-sm leading-relaxed">
-                      {isUk
-                        ? 'Тобі надано повний суверенний доступ: баланс ніколи не зменшується, а будь-які найскладніші запити завжди безкоштовні.'
-                        : 'Your account has sovereign infinite clearance. Credits never deduct, and all intense reasoning queries remain 100% free forever.'}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Action Buttons: Enter Studio */}
-              <div className="pt-2 flex items-center justify-between">
-                <button
-                  onClick={() => {
-                    playTypingTick();
-                    setSlide(1);
-                  }}
-                  className="px-4 py-2 rounded-xl text-xs font-mono text-zinc-400 hover:text-white transition-colors cursor-pointer"
-                >
-                  {isUk ? '← Назад до листа' : '← Back to Letter'}
-                </button>
-
-                <button
-                  onClick={handleFinish}
-                  className="px-6 py-2.5 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs font-mono transition-all flex items-center gap-2 shadow-glow-subtle cursor-pointer hover:scale-105 active:scale-95"
-                >
-                  <Sparkles className="w-4 h-4 text-black" />
-                  <span>
-                    {isUk
-                      ? isPreview
-                        ? 'Закрити попередній перегляд'
-                        : 'Увійти до студії Nixima AI'
-                      : isPreview
-                      ? 'Close Preview'
-                      : 'Enter Nixima AI Studio'}
-                  </span>
-                </button>
-              </div>
-            </div>
-          )}
+          <button
+            onClick={handleFinish}
+            className="px-5 py-2 rounded-xl bg-white hover:bg-zinc-200 text-black font-bold text-xs font-mono transition-all flex items-center gap-2 shadow-glow-subtle cursor-pointer hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <span>
+              {lang === 'ru' && 'Перейти к Nixima AI'}
+              {lang === 'uk' && 'Увійти до студії Nixima AI'}
+              {lang === 'en' && 'Enter Nixima AI Studio'}
+            </span>
+            <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
+          </button>
         </div>
       </div>
     </div>

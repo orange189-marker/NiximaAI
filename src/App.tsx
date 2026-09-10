@@ -118,7 +118,9 @@ const AppContent: React.FC = () => {
     if (currentUser && isVipAccount(currentUser)) {
       const seenKey = `nixima_vip_welcome_seen_${currentUser.id}`;
       const hasSeen = localStorage.getItem(seenKey);
-      if (!hasSeen) {
+      const forceOpen = sessionStorage.getItem('nixima_force_vip_welcome') === 'true';
+      if (!hasSeen || forceOpen) {
+        sessionStorage.removeItem('nixima_force_vip_welcome');
         setIsVipPreview(false);
         setIsVipModalOpen(true);
       }
@@ -156,6 +158,12 @@ const AppContent: React.FC = () => {
     setCurrentUser(user);
     if (user.preferredLanguage) {
       setLanguage(user.preferredLanguage);
+    }
+
+    // Explicitly trigger VIP welcome presentation when logging into a VIP account
+    if (isVipAccount(user)) {
+      setIsVipPreview(false);
+      setIsVipModalOpen(true);
     }
 
     const isUk = (user.preferredLanguage || language) === 'uk';
