@@ -189,6 +189,14 @@ export interface Translations {
     copyLatex: string;
     copiedLatex: string;
     formulaBadge: string;
+    readAloud: string;
+    stopReading: string;
+    explainSimpler: string;
+    elaborate: string;
+    translate: string;
+    critique: string;
+    branchChat: string;
+    downloadMessage: string;
   };
 
   table: {
@@ -519,6 +527,14 @@ export const translations: Record<Language, Translations> = {
       copyLatex: 'Copy LaTeX',
       copiedLatex: 'Copied LaTeX!',
       formulaBadge: 'LaTeX Formula',
+      readAloud: 'Read aloud',
+      stopReading: 'Stop reading',
+      explainSimpler: 'Explain simpler',
+      elaborate: 'Elaborate further',
+      translate: 'Translate response',
+      critique: 'Fact-check & verify',
+      branchChat: 'Branch chat from here',
+      downloadMessage: 'Download response (.md)',
     },
 
     table: {
@@ -893,6 +909,14 @@ export const translations: Record<Language, Translations> = {
       copyLatex: 'Скопіювати LaTeX',
       copiedLatex: 'LaTeX скопійовано!',
       formulaBadge: 'LaTeX Формула',
+      readAloud: 'Озвучити відповідь',
+      stopReading: 'Зупинити озвучення',
+      explainSimpler: 'Пояснити простіше',
+      elaborate: 'Розкрити детальніше',
+      translate: 'Перекласти відповідь',
+      critique: 'Перевірити точність',
+      branchChat: 'Створити гілку звідси',
+      downloadMessage: 'Завантажити відповідь (.md)',
     },
 
     table: {

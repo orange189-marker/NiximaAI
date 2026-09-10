@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Copy, 
   Check, 
@@ -12,7 +12,15 @@ import {
   Download, 
   Cpu, 
   Activity, 
-  Edit3
+  Edit3,
+  Volume2,
+  VolumeX,
+  Square,
+  BookOpen,
+  Sparkles,
+  Languages,
+  ShieldAlert,
+  GitBranch
 } from 'lucide-react';
 import { Message } from '../types/chat';
 import { MarkdownTable, TableBlockData } from './MarkdownTable';
@@ -25,6 +33,8 @@ interface ChatMessageProps {
   message: Message;
   onRegenerate?: () => void;
   onEditMessage?: (newContent: string) => void;
+  onActionPrompt?: (prompt: string) => void;
+  onBranchMessage?: (messageId: string) => void;
   activeModelName?: string;
 }
 
@@ -32,20 +42,77 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   message,
   onRegenerate,
   onEditMessage,
+  onActionPrompt,
+  onBranchMessage,
   activeModelName = 'Nixima-0.1'
 }) => {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const isUser = message.role === 'user';
   const [copied, setCopied] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [isThinkingOpen, setIsThinkingOpen] = useState(false);
   const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(message.content);
 
+  // Cancel speech on unmount
+  useEffect(() => {
+    return () => {
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
   const handleCopy = () => {
     navigator.clipboard.writeText(message.content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleToggleSpeech = () => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+
+    if (isSpeaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    // Clean text for speech synthesis (strip code blocks, latex formulas, markdown links/symbols)
+    const cleanText = message.content
+      .replace(/```[\s\S]*?```/g, '')
+      .replace(/\$\$[\s\S]*?\$\$/g, '')
+      .replace(/\$[^\$]*?\$/g, '')
+      .replace(/[#*_`~\[\]\(\)>]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (!cleanText) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    const hasCyrillic = /[а-яА-ЯєЄіІїЇґҐ]/.test(cleanText);
+    utterance.lang = hasCyrillic ? 'uk-UA' : (language === 'uk' ? 'uk-UA' : 'en-US');
+    utterance.rate = 1.0;
+
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    setIsSpeaking(true);
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const handleDownloadMessage = () => {
+    const blob = new Blob([message.content], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `nixima-response-${Date.now()}.md`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handleSaveEdit = () => {
@@ -594,26 +661,133 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               {/* Telemetry metrics bar for AI responses */}
               {!isUser && !message.isStreaming && (
                 <div className="pt-2 flex flex-wrap items-center justify-between gap-2 text-zinc-500 text-xs border-t border-zinc-900/60 mt-3">
-                  {/* Action buttons */}
-                  <div className="flex items-center gap-1">
+                  {/* Action buttons (Clean icon-only toolbar) */}
+                  <div className="flex items-center flex-wrap gap-1">
+                    {/* Copy Button */}
                     <button
                       onClick={handleCopy}
-                      className="p-1.5 rounded hover:text-white hover:bg-zinc-800/80 transition-colors flex items-center gap-1 text-[11px]"
-                      title={t.chatMessage.copyResponse}
+                      className="p-1.5 rounded-lg hover:text-white hover:bg-zinc-800/80 transition-colors flex items-center justify-center text-zinc-400"
+                      title={copied ? t.chatMessage.copied : t.chatMessage.copyResponse}
+                      aria-label={copied ? t.chatMessage.copied : t.chatMessage.copyResponse}
                     >
-                      {copied ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5" />}
-                      <span>{copied ? t.chatMessage.copied : t.chatMessage.copyResponse}</span>
+                      {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                     </button>
 
+                    {/* Regenerate Button */}
                     {onRegenerate && (
                       <button
                         onClick={onRegenerate}
-                        className="p-1.5 rounded hover:text-white hover:bg-zinc-800/80 transition-colors flex items-center gap-1 text-[11px]"
+                        className="p-1.5 rounded-lg hover:text-white hover:bg-zinc-800/80 transition-colors flex items-center justify-center text-zinc-400"
                         title={t.chatMessage.regenerate}
+                        aria-label={t.chatMessage.regenerate}
                       >
                         <RotateCw className="w-3.5 h-3.5" />
-                        <span>{t.chatMessage.regenerate}</span>
                       </button>
+                    )}
+
+                    {/* Text-to-Speech (Read aloud) */}
+                    <button
+                      onClick={handleToggleSpeech}
+                      className={`p-1.5 rounded-lg hover:text-white hover:bg-zinc-800/80 transition-colors flex items-center justify-center ${
+                        isSpeaking ? 'text-rose-400 bg-rose-500/10' : 'text-zinc-400'
+                      }`}
+                      title={isSpeaking ? t.chatMessage.stopReading : t.chatMessage.readAloud}
+                      aria-label={isSpeaking ? t.chatMessage.stopReading : t.chatMessage.readAloud}
+                    >
+                      {isSpeaking ? <Square className="w-3.5 h-3.5 fill-current" /> : <Volume2 className="w-3.5 h-3.5" />}
+                    </button>
+
+                    {/* Download Message as Markdown */}
+                    <button
+                      onClick={handleDownloadMessage}
+                      className="p-1.5 rounded-lg hover:text-white hover:bg-zinc-800/80 transition-colors flex items-center justify-center text-zinc-400"
+                      title={t.chatMessage.downloadMessage}
+                      aria-label={t.chatMessage.downloadMessage}
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                    </button>
+
+                    {/* Branch Chat From Message */}
+                    {onBranchMessage && (
+                      <button
+                        onClick={() => onBranchMessage(message.id)}
+                        className="p-1.5 rounded-lg hover:text-white hover:bg-zinc-800/80 transition-colors flex items-center justify-center text-zinc-400"
+                        title={t.chatMessage.branchChat}
+                        aria-label={t.chatMessage.branchChat}
+                      >
+                        <GitBranch className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+
+                    {/* Cognitive Action Prompts (AI Response Idea Interactions) */}
+                    {onActionPrompt && (
+                      <>
+                        <span className="w-px h-3.5 bg-zinc-800/80 mx-0.5" />
+
+                        {/* Explain simpler (ELI5) */}
+                        <button
+                          onClick={() =>
+                            onActionPrompt(
+                              language === 'uk'
+                                ? 'Поясни свою попередню відповідь простішими словами та короткими зрозумілими пунктами.'
+                                : 'Explain your previous response in simpler terms with clear, concise bullet points.'
+                            )
+                          }
+                          className="p-1.5 rounded-lg hover:text-white hover:bg-zinc-800/80 transition-colors flex items-center justify-center text-zinc-400"
+                          title={t.chatMessage.explainSimpler}
+                          aria-label={t.chatMessage.explainSimpler}
+                        >
+                          <BookOpen className="w-3.5 h-3.5" />
+                        </button>
+
+                        {/* Elaborate deeper */}
+                        <button
+                          onClick={() =>
+                            onActionPrompt(
+                              language === 'uk'
+                                ? 'Розкрий попередню відповідь значно детальніше з практичними прикладами та технічними нюансами.'
+                                : 'Elaborate on the previous response in greater depth, with concrete real-world examples and technical nuances.'
+                            )
+                          }
+                          className="p-1.5 rounded-lg hover:text-white hover:bg-zinc-800/80 transition-colors flex items-center justify-center text-zinc-400"
+                          title={t.chatMessage.elaborate}
+                          aria-label={t.chatMessage.elaborate}
+                        >
+                          <Sparkles className="w-3.5 h-3.5" />
+                        </button>
+
+                        {/* Translate */}
+                        <button
+                          onClick={() =>
+                            onActionPrompt(
+                              language === 'uk'
+                                ? 'Переклади свою попередню відповідь (якщо була англійською — українською, або навпаки).'
+                                : 'Translate your previous response to Ukrainian (or English if it was in Ukrainian).'
+                            )
+                          }
+                          className="p-1.5 rounded-lg hover:text-white hover:bg-zinc-800/80 transition-colors flex items-center justify-center text-zinc-400"
+                          title={t.chatMessage.translate}
+                          aria-label={t.chatMessage.translate}
+                        >
+                          <Languages className="w-3.5 h-3.5" />
+                        </button>
+
+                        {/* Critique & Fact-Check */}
+                        <button
+                          onClick={() =>
+                            onActionPrompt(
+                              language === 'uk'
+                                ? 'Проаналізуй і критично перевір свою попередню відповідь: вкажи всі припущення, можливі крайні випадки та потенційні неточності чи застереження.'
+                                : 'Fact-check and critically review your previous response: point out any underlying assumptions, potential edge cases, limitations, and caveats.'
+                            )
+                          }
+                          className="p-1.5 rounded-lg hover:text-white hover:bg-zinc-800/80 transition-colors flex items-center justify-center text-zinc-400"
+                          title={t.chatMessage.critique}
+                          aria-label={t.chatMessage.critique}
+                        >
+                          <ShieldAlert className="w-3.5 h-3.5" />
+                        </button>
+                      </>
                     )}
                   </div>
 

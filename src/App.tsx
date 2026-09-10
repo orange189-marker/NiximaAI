@@ -358,6 +358,33 @@ All conversations and model preferences in this workspace are private to your Ni
     ));
   };
 
+  // Handler: Branch Conversation from specific message
+  const handleBranchConversation = (fromMessageId: string) => {
+    if (!activeConversation) return;
+    const msgIndex = activeConversation.messages.findIndex(m => m.id === fromMessageId);
+    if (msgIndex === -1) return;
+
+    const branchedMessages = activeConversation.messages.slice(0, msgIndex + 1).map(m => ({
+      ...m,
+      id: 'msg-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7)
+    }));
+
+    const newId = 'chat-branch-' + Date.now();
+    const branchTitle = `${activeConversation.title} (${language === 'uk' ? 'Гілка' : 'Branch'})`;
+    const newConv: Conversation = {
+      id: newId,
+      title: branchTitle,
+      messages: branchedMessages,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      modelId: activeConversation.modelId || currentModel.id,
+      pinned: false,
+    };
+
+    setConversations(prev => [newConv, ...prev]);
+    setActiveId(newId);
+  };
+
   // Handler: Import
   const handleImportConversations = (imported: Conversation[]) => {
     if (imported.length > 0) {
@@ -675,6 +702,8 @@ All conversations and model preferences in this workspace are private to your Ni
                   message={msg}
                   onRegenerate={msg.role === 'assistant' ? handleRegenerate : undefined}
                   onEditMessage={msg.role === 'user' ? (newContent) => handleEditUserMessage(msg.id, newContent) : undefined}
+                  onActionPrompt={handleSendMessage}
+                  onBranchMessage={handleBranchConversation}
                   activeModelName={currentModel.name}
                 />
               ))}
