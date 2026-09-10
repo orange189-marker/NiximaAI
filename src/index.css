@@ -107,4 +107,48 @@
   animation: telemetryPillEntry 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Nixima Creator Iridescent Infinity Animations */
+@keyframes infinityLoopFlow {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -82;
+  }
+}
+
+@keyframes iridescentHueRotate {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(360deg);
+  }
+}
+
+@keyframes iridescentGlowBreath {
+  0%, 100% {
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 0.95;
+  }
+}
+
+.animate-infinity-flow {
+  animation: infinityLoopFlow 3.2s linear infinite;
+}
+
+.animate-infinity-fast {
+  animation: infinityLoopFlow 2.2s linear infinite;
+}
+
+.animate-infinity-hue {
+  animation: iridescentHueRotate 5s linear infinite;
+}
+
+.animate-infinity-breath {
+  animation: iridescentGlowBreath 2.8s ease-in-out infinite;
+}
+
 
