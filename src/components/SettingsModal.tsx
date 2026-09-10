@@ -32,6 +32,7 @@ import { HotkeyCustomizerModal } from './HotkeyCustomizerModal';
 import { useLanguage } from '../context/LanguageContext';
 import { CountryFlag } from './CountryFlag';
 import { claimDailyGrant, getDailyGrantStatus, getUserCredits, isCreatorAccount } from '../utils/credits';
+import { isStrictCreator } from '../utils/auth';
 import { MODELS } from '../data/models';
 import { CreditHeroCounter } from './AnimatedCredits';
 import { NiximaCreditLogo } from './NiximaCreditLogo';
@@ -898,36 +899,36 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </p>
               </div>
 
-              {/* VIP Welcome Presentation Preview (Creator / VIP Preview) */}
-              <div className="p-4 rounded-xl bg-gradient-to-r from-zinc-900/90 via-zinc-800/40 to-zinc-900/90 border border-zinc-700/80 shadow-inner-light space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <Sparkles className="w-4 h-4 text-zinc-300" />
-                      <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
-                        {language === 'uk' ? 'VIP Презентаційний Лист & Анімація' : 'VIP Presentation Letter & Animation'}
-                      </h4>
-                      <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-white/10 text-zinc-300 border border-white/20">
-                        PREVIEW
-                      </span>
+              {/* VIP Welcome Presentation Preview (Creator Only: Strictly hidden from all regular, friend, and public users) */}
+              {isStrictCreator(currentUser) && onPreviewVipWelcome && (
+                <div className="p-4 rounded-xl bg-gradient-to-r from-zinc-900/90 via-zinc-800/40 to-zinc-900/90 border border-zinc-700/80 shadow-inner-light space-y-3 animate-in fade-in duration-150">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-zinc-300" />
+                        <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                          {language === 'uk' ? 'VIP Презентаційний Лист & Анімація' : 'VIP Presentation Letter & Animation'}
+                        </h4>
+                        <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-white/10 text-zinc-300 border border-white/20">
+                          CREATOR ONLY
+                        </span>
+                      </div>
+                      <p className="text-xs text-zinc-400">
+                        {language === 'uk'
+                          ? 'Перегляньте спеціальне вітальне звернення з анімацією вибуху кредитів у нескінченність (як для warexxq та VIP друзів).'
+                          : 'Preview the personalized welcome presentation with rising credits counter & supernova infinity animation (as seen by warexxq and VIP friends).'}
+                      </p>
                     </div>
-                    <p className="text-xs text-zinc-400">
-                      {language === 'uk'
-                        ? 'Перегляньте спеціальне вітальне звернення з анімацією вибуху кредитів у нескінченність (як для warexxq та VIP друзів).'
-                        : 'Preview the personalized welcome presentation with rising credits counter & supernova infinity animation (as seen by warexxq and VIP friends).'}
-                    </p>
-                  </div>
-                  {onPreviewVipWelcome && (
                     <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
                       <button
                         onClick={() => {
                           onClose();
                           onPreviewVipWelcome('roman1980');
                         }}
-                        className="px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 border border-blue-500/40 text-blue-200 hover:text-white font-medium text-xs font-mono transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
+                        className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 hover:text-white font-medium text-xs font-mono transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
                         title="Переглянути лист для тата (українською)"
                       >
-                        <Eye className="w-3.5 h-3.5 text-blue-300" />
+                        <Eye className="w-3.5 h-3.5 text-zinc-400" />
                         <span>{language === 'uk' ? 'Тато (roman1980)' : 'Dad (roman1980)'}</span>
                       </button>
 
@@ -936,16 +937,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           onClose();
                           onPreviewVipWelcome('warexxq');
                         }}
-                        className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 text-white font-medium text-xs font-mono transition-all flex items-center gap-1.5 shadow-md cursor-pointer"
+                        className="px-3 py-1.5 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 text-zinc-200 hover:text-white font-medium text-xs font-mono transition-all flex items-center gap-1.5 shadow-sm cursor-pointer"
                         title="Переглянути лист для друга (warexxq)"
                       >
-                        <Eye className="w-3.5 h-3.5 text-zinc-300" />
+                        <Eye className="w-3.5 h-3.5 text-zinc-400" />
                         <span>{language === 'uk' ? 'Друг (warexxq)' : 'Friend (warexxq)'}</span>
                       </button>
                     </div>
-                  )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>

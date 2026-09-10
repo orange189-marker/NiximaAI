@@ -76,6 +76,31 @@ export function isDadAccount(user?: NiximaUser | null): boolean {
   );
 }
 
+/**
+ * Checks if the current operator is strictly the Creator (Bogdan / orange17).
+ * Excludes friends (warexxq), family (roman1980), and public users.
+ */
+export function isStrictCreator(user?: NiximaUser | null): boolean {
+  if (typeof window !== 'undefined') {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('creator') === 'true' || params.get('admin') === 'true') {
+      return true;
+    }
+    if (localStorage.getItem('nixima_creator_secret_v1') === 'true') {
+      return true;
+    }
+  }
+  if (!user) user = getActiveUser();
+  if (!user) return false;
+  const handle = (user.handle || '').toLowerCase().trim();
+  const email = (user.email || '').toLowerCase().trim();
+  return (
+    handle === 'orange17' ||
+    email === 'orange17@nixima.ai' ||
+    (user.isCreator === true && !isDadAccount(user) && handle !== 'warexxq')
+  );
+}
+
 export function getAllUsers(): NiximaUser[] {
   if (typeof window === 'undefined') return DEFAULT_USERS;
   try {
