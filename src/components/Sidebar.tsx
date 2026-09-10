@@ -22,6 +22,7 @@ import { NiximaIdLogo } from './NiximaIdLogo';
 import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotkeys';
 import { HotkeyCustomizerModal } from './HotkeyCustomizerModal';
 import { useLanguage } from '../context/LanguageContext';
+import { CountryFlag } from './CountryFlag';
 
 interface SidebarProps {
   conversations: Conversation[];
@@ -372,9 +373,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <NiximaIdLogo size={9} glow={false} /> ID
                   </span>
                 </div>
-                <span className="text-[10px] text-zinc-500 font-mono truncate">
-                  {currentUser?.email || 'operator@nixima.ai'}
-                </span>
+                <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-mono truncate">
+                  <CountryFlag country={language === 'uk' ? 'ua' : 'us'} size="xs" />
+                  <span className="truncate">{currentUser?.email || 'operator@nixima.ai'}</span>
+                </div>
               </div>
             </div>
             <button

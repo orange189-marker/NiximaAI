@@ -28,6 +28,7 @@ import { NiximaIdLogo } from './NiximaIdLogo';
 import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotkeys';
 import { HotkeyCustomizerModal } from './HotkeyCustomizerModal';
 import { useLanguage } from '../context/LanguageContext';
+import { CountryFlag } from './CountryFlag';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -223,8 +224,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     }`}
                   >
                     <div className="text-xs font-bold font-mono flex items-center justify-between">
-                      <span className="flex items-center gap-1.5">
-                        <span className="text-base">🇺🇦</span>
+                      <span className="flex items-center gap-2">
+                        <CountryFlag country="ua" size="sm" glow={language === 'uk'} />
                         <span>{t.settings.languageUkTitle}</span>
                       </span>
                       {language === 'uk' && <Check className="w-3.5 h-3.5 text-white" />}
@@ -242,8 +243,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     }`}
                   >
                     <div className="text-xs font-bold font-mono flex items-center justify-between">
-                      <span className="flex items-center gap-1.5">
-                        <span className="text-base">🇺🇸</span>
+                      <span className="flex items-center gap-2">
+                        <CountryFlag country="us" size="sm" glow={language === 'en'} />
                         <span>{t.settings.languageEnTitle}</span>
                       </span>
                       {language === 'en' && <Check className="w-3.5 h-3.5 text-white" />}

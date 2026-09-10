@@ -41,6 +41,7 @@ import { DynamicWallpaper } from './DynamicWallpaper';
 import { AnimatedEye } from './AnimatedEye';
 import { NiximaIdLogo } from './NiximaIdLogo';
 import { useLanguage } from '../context/LanguageContext';
+import { CountryFlag } from './CountryFlag';
 
 interface AuthPortalProps {
   onAuthenticated: (user: NiximaUser) => void;
@@ -404,7 +405,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                 <span className="truncate max-w-[200px] sm:max-w-none">{t.auth.badgeSovereignMesh}</span>
               </div>
 
-              {/* Language Switcher Pill */}
+              {/* Language Switcher Pill with SVG Flags */}
               <div className="flex items-center gap-1 p-0.5 rounded-full bg-zinc-900/90 border border-zinc-800 text-[10px] font-mono select-none flex-shrink-0">
                 <button
                   type="button"
@@ -412,14 +413,15 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                     setLanguage('uk');
                     playTypingTick();
                   }}
-                  className={`px-2 py-0.5 rounded-full transition-all cursor-pointer ${
+                  className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-all cursor-pointer ${
                     language === 'uk'
-                      ? 'bg-white text-black font-bold shadow-sm'
-                      : 'text-zinc-400 hover:text-white'
+                      ? 'bg-zinc-800 text-white font-bold shadow-glow-subtle border border-zinc-600'
+                      : 'text-zinc-400 hover:text-white opacity-70 hover:opacity-100'
                   }`}
-                  title="Перемкнути на українську мову"
+                  title="Українська мова"
                 >
-                  UA
+                  <CountryFlag country="ua" size="xs" glow={language === 'uk'} />
+                  <span>UA</span>
                 </button>
                 <button
                   type="button"
@@ -427,14 +429,15 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                     setLanguage('en');
                     playTypingTick();
                   }}
-                  className={`px-2 py-0.5 rounded-full transition-all cursor-pointer ${
+                  className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full transition-all cursor-pointer ${
                     language === 'en'
-                      ? 'bg-white text-black font-bold shadow-sm'
-                      : 'text-zinc-400 hover:text-white'
+                      ? 'bg-zinc-800 text-white font-bold shadow-glow-subtle border border-zinc-600'
+                      : 'text-zinc-400 hover:text-white opacity-70 hover:opacity-100'
                   }`}
-                  title="Switch to English"
+                  title="English"
                 >
-                  EN
+                  <CountryFlag country="us" size="xs" glow={language === 'en'} />
+                  <span>EN</span>
                 </button>
               </div>
             </div>
@@ -671,14 +674,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                             setLanguage('uk');
                             playTypingTick();
                           }}
-                          className={`py-2 px-3 rounded-lg border flex items-center justify-between text-xs font-medium transition-all cursor-pointer ${
+                          className={`py-2 px-2.5 rounded-lg border flex items-center justify-between text-xs font-medium transition-all cursor-pointer ${
                             language === 'uk'
-                              ? 'bg-zinc-800 border-white/60 text-white shadow-glow-subtle font-bold'
+                              ? 'bg-zinc-800 border-white/60 text-white shadow-glow-subtle font-bold ring-1 ring-white/20'
                               : 'bg-zinc-950/60 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
                           }`}
                         >
-                          <span className="flex items-center gap-1.5">
-                            <span>🇺🇦</span>
+                          <span className="flex items-center gap-2">
+                            <CountryFlag country="ua" size="sm" glow={language === 'uk'} />
                             <span>Українська</span>
                           </span>
                           {language === 'uk' && <Check className="w-3 h-3 text-emerald-400 stroke-[3]" />}
@@ -689,14 +692,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                             setLanguage('en');
                             playTypingTick();
                           }}
-                          className={`py-2 px-3 rounded-lg border flex items-center justify-between text-xs font-medium transition-all cursor-pointer ${
+                          className={`py-2 px-2.5 rounded-lg border flex items-center justify-between text-xs font-medium transition-all cursor-pointer ${
                             language === 'en'
-                              ? 'bg-zinc-800 border-white/60 text-white shadow-glow-subtle font-bold'
+                              ? 'bg-zinc-800 border-white/60 text-white shadow-glow-subtle font-bold ring-1 ring-white/20'
                               : 'bg-zinc-950/60 border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-zinc-200'
                           }`}
                         >
-                          <span className="flex items-center gap-1.5">
-                            <span>🇺🇸</span>
+                          <span className="flex items-center gap-2">
+                            <CountryFlag country="us" size="sm" glow={language === 'en'} />
                             <span>English</span>
                           </span>
                           {language === 'en' && <Check className="w-3 h-3 text-emerald-400 stroke-[3]" />}
@@ -781,7 +784,10 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
                       </div>
 
                       <div className="flex items-center justify-between text-[10px] font-mono text-zinc-500">
-                        <span>SPEC: SOVEREIGN-v0.1</span>
+                        <div className="flex items-center gap-1.5">
+                          <CountryFlag country={language === 'uk' ? 'ua' : 'us'} size="xs" />
+                          <span>LANG: {language === 'uk' ? 'UA / UKR' : 'US / ENG'}</span>
+                        </div>
                         <span>{language === 'uk' ? 'СХОВИЩЕ: СУВЕРЕННИЙ МЕШ' : 'VAULT: LOCAL MESH'}</span>
                       </div>
                     </div>

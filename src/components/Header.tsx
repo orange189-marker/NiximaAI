@@ -19,6 +19,7 @@ import { NIXIMA_MODELS } from '../data/models';
 import { NiximaIdLogo } from './NiximaIdLogo';
 import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotkeys';
 import { useLanguage } from '../context/LanguageContext';
+import { CountryFlag } from './CountryFlag';
 
 interface HeaderProps {
   currentModel: ModelOption;
@@ -39,7 +40,7 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleSidebar,
   onNewChat
 }) => {
-  const { language, t } = useLanguage();
+  const { language, toggleLanguage, t } = useLanguage();
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   const [hotkeyConfig, setHotkeyConfig] = useState<HotkeyConfig>(() => getSavedHotkey());
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -260,6 +261,17 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span>{t.header.meshActive}</span>
         </div>
+
+        {/* Quick Language Toggle Button with SVG Flag */}
+        <button
+          type="button"
+          onClick={toggleLanguage}
+          className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-all text-xs font-mono select-none cursor-pointer shadow-inner-light"
+          title={language === 'uk' ? 'Мова: Українська (Натисніть щоб змінити на English)' : 'Language: English (Click to switch to Ukrainian)'}
+        >
+          <CountryFlag country={language === 'uk' ? 'ua' : 'us'} size="xs" glow />
+          <span className="text-[10px] font-bold tracking-wider">{language === 'uk' ? 'UA' : 'EN'}</span>
+        </button>
 
         <button
           onClick={onOpenCompanyInfo}
