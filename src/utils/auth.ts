@@ -57,6 +57,25 @@ const DEFAULT_USERS: NiximaUser[] = [
   }
 ];
 
+export function isDadAccount(user?: NiximaUser | null): boolean {
+  if (!user) {
+    user = getActiveUser();
+  }
+  if (!user) return false;
+  const handle = (user.handle || '').toLowerCase().trim();
+  const email = (user.email || '').toLowerCase().trim();
+  const name = (user.name || '').toLowerCase().trim();
+  return (
+    user.id === 'usr-vip-roman1980' ||
+    handle === 'roman1980' ||
+    email === 'roman1980@nixima.ai' ||
+    handle.includes('roman') ||
+    handle.includes('tato') ||
+    name.includes('роман') ||
+    name.includes('тато')
+  );
+}
+
 export function getAllUsers(): NiximaUser[] {
   if (typeof window === 'undefined') return DEFAULT_USERS;
   try {
@@ -68,7 +87,7 @@ export function getAllUsers(): NiximaUser[] {
           const email = (u.email || '').toLowerCase();
           const handle = (u.handle || '').toLowerCase();
           const isCreator = email === 'orange17@nixima.ai' || handle === 'orange17' || u.isCreator === true;
-          const isDad = email === 'roman1980@nixima.ai' || handle === 'roman1980';
+          const isDad = isDadAccount(u);
           const isVip = email === 'warexxq@nixima.ai' || handle === 'warexxq' || isDad || u.isVip === true;
           const hasInfinite = isCreator || isVip || u.unlimitedCredits === true;
           return {
@@ -248,6 +267,23 @@ export async function loginUserAsync(handleOrEmail: string, passphrase: string):
     throw new Error('Incorrect passphrase. Please verify your credentials.');
   }
 
+  if (isDadAccount(matched)) {
+    matched = {
+      ...matched,
+      preferredLanguage: 'uk',
+      credits: Infinity,
+      isVip: true,
+      unlimitedCredits: true,
+      role: 'VIP Family & Honored Pioneer',
+    };
+    if (typeof window !== 'undefined') {
+      const seenKey = `nixima_vip_welcome_seen_${matched.id}`;
+      if (!localStorage.getItem(seenKey)) {
+        sessionStorage.setItem('nixima_force_vip_welcome', 'true');
+      }
+    }
+  }
+
   setActiveUser(matched);
   saveQuickPassUser(matched);
   return matched;
@@ -257,7 +293,7 @@ export function loginUser(handleOrEmail: string, passphrase: string): NiximaUser
   const users = getAllUsers();
   const normalized = handleOrEmail.trim().toLowerCase().replace('@nixima.ai', '');
 
-  const matched = users.find(u => 
+  let matched = users.find(u => 
     u.handle.toLowerCase() === normalized || 
     u.email.toLowerCase() === `${normalized}@nixima.ai`
   );
@@ -268,6 +304,23 @@ export function loginUser(handleOrEmail: string, passphrase: string): NiximaUser
 
   if (matched.passphrase !== passphrase.trim()) {
     throw new Error('Incorrect passphrase. Please verify your credentials.');
+  }
+
+  if (isDadAccount(matched)) {
+    matched = {
+      ...matched,
+      preferredLanguage: 'uk',
+      credits: Infinity,
+      isVip: true,
+      unlimitedCredits: true,
+      role: 'VIP Family & Honored Pioneer',
+    };
+    if (typeof window !== 'undefined') {
+      const seenKey = `nixima_vip_welcome_seen_${matched.id}`;
+      if (!localStorage.getItem(seenKey)) {
+        sessionStorage.setItem('nixima_force_vip_welcome', 'true');
+      }
+    }
   }
 
   setActiveUser(matched);
@@ -304,15 +357,17 @@ export async function registerUserAsync(
     // continue with local check
   }
 
+  // Allow reserved VIP handles (roman1980, warexxq) to be claimed/registered by dad/friends
+  const isCreator = cleanHandle.toLowerCase() === 'orange17';
+  const isDad = cleanHandle.toLowerCase() === 'roman1980' || cleanHandle.toLowerCase().includes('roman') || cleanName.toLowerCase().includes('роман');
+  const isVip = cleanHandle.toLowerCase() === 'warexxq' || isDad;
+  const hasInfinite = isCreator || isVip;
+
   const exists = currentUsers.some(u => u.handle.toLowerCase() === cleanHandle);
-  if (exists) {
+  if (exists && !isVip) {
     throw new Error(`The handle "${cleanHandle}@nixima.ai" is already registered.`);
   }
 
-  const isCreator = cleanHandle.toLowerCase() === 'orange17';
-  const isDad = cleanHandle.toLowerCase() === 'roman1980';
-  const isVip = cleanHandle.toLowerCase() === 'warexxq' || isDad;
-  const hasInfinite = isCreator || isVip;
   const newUser: NiximaUser = {
     id: isCreator ? 'usr-creator-orange17' : isDad ? 'usr-vip-roman1980' : isVip ? 'usr-vip-warexxq' : 'usr-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
     name: cleanName,
@@ -328,6 +383,15 @@ export async function registerUserAsync(
     isVip: isVip,
     unlimitedCredits: hasInfinite,
   };
+
+  // If dad, always clear previous seen flag so he is guaranteed to see the letter!
+  if (isDad) {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(`nixima_vip_welcome_seen_${newUser.id}`);
+      localStorage.removeItem('nixima_vip_welcome_seen_usr-vip-roman1980');
+      sessionStorage.setItem('nixima_force_vip_welcome', 'true');
+    }
+  }
 
   const updated = [newUser, ...currentUsers.filter(u => u.handle.toLowerCase() !== cleanHandle)];
   saveUsers(updated);
@@ -370,15 +434,16 @@ export function registerUser(
     throw new Error('Passphrase must be at least 4 characters.');
   }
 
+  const isCreatorSync = cleanHandle.toLowerCase() === 'orange17';
+  const isDadSync = cleanHandle.toLowerCase() === 'roman1980' || cleanHandle.toLowerCase().includes('roman') || cleanName.toLowerCase().includes('роман');
+  const isVipSync = cleanHandle.toLowerCase() === 'warexxq' || isDadSync;
+  const hasInfiniteSync = isCreatorSync || isVipSync;
+
   const exists = users.some(u => u.handle.toLowerCase() === cleanHandle);
-  if (exists) {
+  if (exists && !isVipSync) {
     throw new Error(`The handle "${cleanHandle}@nixima.ai" is already registered.`);
   }
 
-  const isCreatorSync = cleanHandle.toLowerCase() === 'orange17';
-  const isDadSync = cleanHandle.toLowerCase() === 'roman1980';
-  const isVipSync = cleanHandle.toLowerCase() === 'warexxq' || isDadSync;
-  const hasInfiniteSync = isCreatorSync || isVipSync;
   const newUser: NiximaUser = {
     id: isCreatorSync ? 'usr-creator-orange17' : isDadSync ? 'usr-vip-roman1980' : isVipSync ? 'usr-vip-warexxq' : 'usr-' + Date.now() + '-' + Math.random().toString(36).substring(2, 7),
     name: cleanName,
@@ -395,7 +460,13 @@ export function registerUser(
     unlimitedCredits: hasInfiniteSync,
   };
 
-  const updated = [newUser, ...users];
+  if (isDadSync && typeof window !== 'undefined') {
+    localStorage.removeItem(`nixima_vip_welcome_seen_${newUser.id}`);
+    localStorage.removeItem('nixima_vip_welcome_seen_usr-vip-roman1980');
+    sessionStorage.setItem('nixima_force_vip_welcome', 'true');
+  }
+
+  const updated = [newUser, ...users.filter(u => u.handle.toLowerCase() !== cleanHandle)];
   saveUsers(updated);
   setActiveUser(newUser);
   saveQuickPassUser(newUser);
@@ -492,6 +563,16 @@ export async function checkHandleAvailabilityAsync(handle: string): Promise<{ av
     return { available: false, reason: 'At least 3 characters needed' };
   }
 
+  // Reserved VIP handles (roman1980, warexxq, roman, tato) are always available for registration
+  if (
+    cleanHandle === 'roman1980' || 
+    cleanHandle === 'warexxq' || 
+    cleanHandle.includes('roman') || 
+    cleanHandle.includes('tato')
+  ) {
+    return { available: true };
+  }
+
   // 1. Fast local check
   const localUsers = getAllUsers();
   if (localUsers.some(u => u.handle.toLowerCase() === cleanHandle)) {
@@ -522,6 +603,17 @@ export function checkHandleAvailability(handle: string): { available: boolean; r
   if (cleanHandle.length < 3) {
     return { available: false, reason: 'At least 3 characters needed' };
   }
+
+  // Reserved VIP handles are always available to claim
+  if (
+    cleanHandle === 'roman1980' || 
+    cleanHandle === 'warexxq' || 
+    cleanHandle.includes('roman') || 
+    cleanHandle.includes('tato')
+  ) {
+    return { available: true };
+  }
+
   const users = getAllUsers();
   const exists = users.some(u => u.handle.toLowerCase() === cleanHandle);
   if (exists) {

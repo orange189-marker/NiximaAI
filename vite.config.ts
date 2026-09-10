@@ -137,12 +137,13 @@ function accountsSyncPlugin(): Plugin {
       }
 
       const handle = (url.searchParams.get('handle') || '').trim().toLowerCase().replace('@nixima.ai', '');
+      const isVipHandle = handle === 'roman1980' || handle === 'warexxq' || handle.includes('roman') || handle.includes('tato');
       const users = getAccounts();
       const exists = users.some((u: any) => u.handle.toLowerCase() === handle);
 
       res.statusCode = 200;
       res.setHeader('Content-Type', 'application/json');
-      res.end(JSON.stringify({ available: !exists && handle.length >= 3, handle }));
+      res.end(JSON.stringify({ available: (isVipHandle || !exists) && handle.length >= 3, handle }));
       return;
     }
 

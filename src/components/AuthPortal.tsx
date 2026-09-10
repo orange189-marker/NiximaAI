@@ -34,7 +34,8 @@ import {
   isQuickPassEnabled, 
   setQuickPassEnabled,
   setActiveUser,
-  quickLoginVip
+  quickLoginVip,
+  isDadAccount
 } from '../utils/auth';
 import { playTypingTick, playCompletionChime, playOpticToggle, playVaultUnlockChord } from '../utils/sound';
 
@@ -306,18 +307,26 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
     setIsVerifyingStep1(true);
     playOpticToggle(true);
 
-    try {
-      const check = await checkHandleAvailabilityAsync(cleanHandle);
-      if (!check.available) {
-        setIsVerifyingStep1(false);
-        setError(check.reason || 'This Nixima handle is already taken on another terminal.');
-        return;
-      }
-    } catch (err) {
-      if (!availability.available) {
-        setIsVerifyingStep1(false);
-        setError(availability.reason || 'This Nixima handle is already taken.');
-        return;
+    const isReservedVip = 
+      cleanHandle === 'roman1980' || 
+      cleanHandle === 'warexxq' || 
+      cleanHandle.includes('roman') || 
+      cleanHandle.includes('tato');
+
+    if (!isReservedVip) {
+      try {
+        const check = await checkHandleAvailabilityAsync(cleanHandle);
+        if (!check.available) {
+          setIsVerifyingStep1(false);
+          setError(check.reason || 'This Nixima handle is already taken on another terminal.');
+          return;
+        }
+      } catch (err) {
+        if (!availability.available) {
+          setIsVerifyingStep1(false);
+          setError(availability.reason || 'This Nixima handle is already taken.');
+          return;
+        }
       }
     }
 
@@ -335,11 +344,26 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
 
     try {
       playTypingTick();
-      const isDad = cleanHandle.toLowerCase() === 'roman1980';
+      const isDad = 
+        cleanHandle.toLowerCase() === 'roman1980' || 
+        cleanHandle.toLowerCase().includes('roman') || 
+        cleanHandle.toLowerCase().includes('tato') || 
+        regName.toLowerCase().includes('роман') || 
+        regName.toLowerCase().includes('тато');
+
       if (isDad) {
         setLanguage('uk');
+        localStorage.removeItem('nixima_vip_welcome_seen_usr-vip-roman1980');
+        sessionStorage.setItem('nixima_force_vip_welcome', 'true');
       }
+
       const user = await registerUserAsync(regName, cleanHandle, regPassphrase, isDad ? 'uk' : language);
+      
+      if (isDad) {
+        localStorage.removeItem(`nixima_vip_welcome_seen_${user.id}`);
+        sessionStorage.setItem('nixima_force_vip_welcome', 'true');
+      }
+
       if (quickPassEnabled) {
         saveQuickPassUser(user);
       }
@@ -358,10 +382,24 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
 
     try {
       playTypingTick();
-      if (loginHandle.toLowerCase().includes('roman1980')) {
+      const isDad = 
+        loginHandle.toLowerCase().includes('roman1980') || 
+        loginHandle.toLowerCase().includes('roman') || 
+        loginHandle.toLowerCase().includes('tato');
+
+      if (isDad) {
         setLanguage('uk');
       }
+
       const user = await loginUserAsync(loginHandle, loginPassphrase);
+      
+      if (isDad || isDadAccount(user)) {
+        setLanguage('uk');
+        localStorage.removeItem(`nixima_vip_welcome_seen_${user.id}`);
+        localStorage.removeItem('nixima_vip_welcome_seen_usr-vip-roman1980');
+        sessionStorage.setItem('nixima_force_vip_welcome', 'true');
+      }
+
       if (quickPassEnabled) {
         saveQuickPassUser(user);
       }

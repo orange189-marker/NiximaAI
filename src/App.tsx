@@ -14,7 +14,7 @@ import { NIXIMA_MODELS, DEFAULT_MODEL } from './data/models';
 import { INITIAL_CONVERSATIONS } from './data/initialChats';
 import { streamOpenRouterChat } from './utils/openrouter';
 import { playTypingTick, playCompletionChime } from './utils/sound';
-import { getActiveUser, logoutUser, syncAccountsWithServer } from './utils/auth';
+import { getActiveUser, logoutUser, syncAccountsWithServer, isDadAccount } from './utils/auth';
 import { getSavedHotkey, matchesHotkey } from './utils/hotkeys';
 import { 
   getUserCredits, 
@@ -123,11 +123,11 @@ const AppContent: React.FC = () => {
     }
 
     if (currentUser) {
-      if ((currentUser.handle || '').toLowerCase() === 'roman1980' || (currentUser.email || '').toLowerCase() === 'roman1980@nixima.ai') {
+      if (isDadAccount(currentUser)) {
         setLanguage('uk');
       }
 
-      if (isVipAccount(currentUser)) {
+      if (isVipAccount(currentUser) || isDadAccount(currentUser)) {
         const seenKey = `nixima_vip_welcome_seen_${currentUser.id}`;
         const hasSeen = localStorage.getItem(seenKey);
         const forceOpen = sessionStorage.getItem('nixima_force_vip_welcome') === 'true';
@@ -169,14 +169,14 @@ const AppContent: React.FC = () => {
   // Load user data on authentication change
   const handleAuthenticated = (user: NiximaUser) => {
     setCurrentUser(user);
-    if ((user.handle || '').toLowerCase() === 'roman1980' || (user.email || '').toLowerCase() === 'roman1980@nixima.ai') {
+    if (isDadAccount(user)) {
       setLanguage('uk');
     } else if (user.preferredLanguage) {
       setLanguage(user.preferredLanguage);
     }
 
     // Explicitly trigger VIP welcome presentation when logging into a VIP account
-    if (isVipAccount(user)) {
+    if (isVipAccount(user) || isDadAccount(user)) {
       setIsVipPreview(false);
       setIsVipModalOpen(true);
     }

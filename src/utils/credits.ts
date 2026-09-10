@@ -1,6 +1,6 @@
 import { NiximaUser } from '../types/user';
 import { ModelOption } from '../types/chat';
-import { getAllUsers, saveUsers, setActiveUser, getActiveUser } from './auth';
+import { getAllUsers, saveUsers, setActiveUser, getActiveUser, isDadAccount } from './auth';
 
 export const DEFAULT_INITIAL_CREDITS = 1000;
 export const DAILY_GRANT_AMOUNT = 500;
@@ -38,6 +38,7 @@ function checkCreator(user: NiximaUser): boolean {
     handle === 'warexxq' ||
     email === 'roman1980@nixima.ai' ||
     handle === 'roman1980' ||
+    isDadAccount(user) ||
     user.isCreator === true ||
     user.isVip === true ||
     user.unlimitedCredits === true ||
@@ -58,6 +59,7 @@ export function isVipAccount(user?: NiximaUser | null): boolean {
     handle === 'warexxq' ||
     email === 'roman1980@nixima.ai' ||
     handle === 'roman1980' ||
+    isDadAccount(user) ||
     user.isVip === true
   );
 }

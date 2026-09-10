@@ -66,8 +66,9 @@ export default async function handler(req, res) {
     const handle = req.query?.handle;
     if (handle) {
       const clean = handle.trim().toLowerCase().replace('@nixima.ai', '');
+      const isVipHandle = clean === 'roman1980' || clean === 'warexxq' || clean.includes('roman') || clean.includes('tato');
       const exists = memoryUsers.some(u => u.handle.toLowerCase() === clean);
-      return res.status(200).json({ available: !exists && clean.length >= 3, handle: clean });
+      return res.status(200).json({ available: (isVipHandle || !exists) && clean.length >= 3, handle: clean });
     }
     return res.status(200).json({ success: true, users: memoryUsers });
   }
