@@ -18,6 +18,7 @@ import { Message } from '../types/chat';
 import { MarkdownTable, TableBlockData } from './MarkdownTable';
 import { NiximaIdLogo } from './NiximaIdLogo';
 import { useLanguage } from '../context/LanguageContext';
+import { MathRenderer } from './MathRenderer';
 
 interface ChatMessageProps {
   message: Message;
@@ -155,7 +156,47 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     return blocks;
   };
 
-  // Helper function to render text with code blocks, tables, and basic markdown
+  // Helper to extract display math blocks ($$...$$ and \[...\])
+  const parseDisplayMath = (text: string): Array<
+    | { type: 'text'; content: string }
+    | { type: 'math-block'; math: string }
+  > => {
+    const displayMathRegex = /\$\$([\s\S]+?)\$\$|\\\[([\s\S]+?)\\\]/g;
+    const segments: Array<
+      | { type: 'text'; content: string }
+      | { type: 'math-block'; math: string }
+    > = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = displayMathRegex.exec(text)) !== null) {
+      const textBefore = text.substring(lastIndex, match.index);
+      if (textBefore) {
+        segments.push({ type: 'text', content: textBefore });
+      }
+
+      const mathContent = match[1] || match[2] || '';
+      segments.push({
+        type: 'math-block',
+        math: mathContent.trim(),
+      });
+
+      lastIndex = match.index + match[0].length;
+    }
+
+    const textAfter = text.substring(lastIndex);
+    if (textAfter) {
+      segments.push({ type: 'text', content: textAfter });
+    }
+
+    if (segments.length === 0) {
+      segments.push({ type: 'text', content: text });
+    }
+
+    return segments;
+  };
+
+  // Helper function to render text with code blocks, tables, math blocks, and basic markdown
   const renderFormattedContent = (content: string) => {
     const codeBlockRegex = /```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g;
     const parts = [];
@@ -170,7 +211,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
       parts.push({
         type: 'code',
-        language: match[1] || 'plaintext',
+        language: (match[1] || 'plaintext').toLowerCase(),
         code: match[2].trimEnd(),
       });
 
@@ -188,6 +229,17 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
     return parts.map((part, idx) => {
       if (part.type === 'code') {
+        const isLatex = part.language === 'latex' || part.language === 'tex' || part.language === 'math';
+        if (isLatex) {
+          return (
+            <MathRenderer
+              key={idx}
+              math={part.code!}
+              displayMode={true}
+            />
+          );
+        }
+
         return (
           <CodeBlock 
             key={idx} 
@@ -197,25 +249,41 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         );
       }
 
-      const textBlocks = parseTablesFromText(part.content);
+      // Step 1: Extract display math blocks ($$...$$ and \[...\])
+      const mathSegments = parseDisplayMath(part.content);
 
-      return textBlocks.map((block, bIdx) => {
-        if (block.type === 'table') {
+      return mathSegments.map((segment, mIdx) => {
+        if (segment.type === 'math-block') {
           return (
-            <MarkdownTable
-              key={`${idx}-${bIdx}`}
-              data={block.data}
+            <MathRenderer
+              key={`${idx}-m-${mIdx}`}
+              math={segment.math}
+              displayMode={true}
             />
           );
         }
 
-        if (!block.content.trim()) return null;
+        // Step 2: Extract tables from remaining normal text
+        const textBlocks = parseTablesFromText(segment.content);
 
-        return (
-          <div key={`${idx}-${bIdx}`} className="space-y-2.5 text-[14px] leading-relaxed text-zinc-200">
-            {renderTextWithMarkdown(block.content)}
-          </div>
-        );
+        return textBlocks.map((block, bIdx) => {
+          if (block.type === 'table') {
+            return (
+              <MarkdownTable
+                key={`${idx}-${mIdx}-t-${bIdx}`}
+                data={block.data}
+              />
+            );
+          }
+
+          if (!block.content.trim()) return null;
+
+          return (
+            <div key={`${idx}-${mIdx}-b-${bIdx}`} className="space-y-2.5 text-[14px] leading-relaxed text-zinc-200">
+              {renderTextWithMarkdown(block.content)}
+            </div>
+          );
+        });
       });
     });
   };
@@ -273,23 +341,89 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     });
   };
 
+  // Helper to distinguish valid inline LaTeX math from currency or plain text
+  const isValidInlineMath = (inner: string): boolean => {
+    const trimmed = inner.trim();
+    if (!trimmed) return false;
+    // Pure numbers/currency like "50", "100.00", "1,000"
+    if (/^\d+(?:,\d{3})*(?:\.\d+)?$/.test(trimmed)) return false;
+    // Conjunctions between numbers like "50 and $20" or "50 to 100"
+    if (/^\d+.*?\b(and|or|to|for|with)\b.*?\d+$/i.test(trimmed)) return false;
+    return true;
+  };
+
   const formatInline = (str: string) => {
-    const tokens = str.split(/(\*\*[^*]+\*\*|`[^`]+`|\*[^*]+\*)/g);
-    return tokens.map((t, i) => {
-      if (t.startsWith('**') && t.endsWith('**')) {
-        return <strong key={i} className="font-semibold text-white">{t.slice(2, -2)}</strong>;
+    // Regex matching:
+    // 1. \( ... \) explicit LaTeX inline math
+    // 2. $ ... $ standard inline math
+    // 3. ** ... ** bold text
+    // 4. ` ... ` inline code
+    // 5. * ... * italic text
+    const inlineRegex = /(\\\([^\n]+?\\\)|\$(?!\s)[^$\n]+?(?<!\s)\$|\*\*[^*]+?\*\*|`[^`]+?`|\*[^*]+?\*)/g;
+
+    const parts: Array<
+      | string
+      | { type: 'math' | 'bold' | 'code' | 'italic'; content: string }
+    > = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = inlineRegex.exec(str)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(str.substring(lastIndex, match.index));
       }
-      if (t.startsWith('`') && t.endsWith('`')) {
+
+      const token = match[0];
+
+      if (token.startsWith('\\(') && token.endsWith('\\)')) {
+        parts.push({ type: 'math', content: token.slice(2, -2) });
+      } else if (token.startsWith('$') && token.endsWith('$') && token.length > 2) {
+        const inner = token.slice(1, -1);
+        if (isValidInlineMath(inner)) {
+          parts.push({ type: 'math', content: inner });
+        } else {
+          parts.push(token);
+        }
+      } else if (token.startsWith('**') && token.endsWith('**')) {
+        parts.push({ type: 'bold', content: token.slice(2, -2) });
+      } else if (token.startsWith('`') && token.endsWith('`')) {
+        parts.push({ type: 'code', content: token.slice(1, -1) });
+      } else if (token.startsWith('*') && token.endsWith('*')) {
+        parts.push({ type: 'italic', content: token.slice(1, -1) });
+      } else {
+        parts.push(token);
+      }
+
+      lastIndex = match.index + match[0].length;
+    }
+
+    if (lastIndex < str.length) {
+      parts.push(str.substring(lastIndex));
+    }
+
+    if (parts.length === 0) {
+      return [str];
+    }
+
+    return parts.map((part, i) => {
+      if (typeof part === 'string') return part;
+      if (part.type === 'math') {
+        return <MathRenderer key={i} math={part.content} displayMode={false} />;
+      }
+      if (part.type === 'bold') {
+        return <strong key={i} className="font-semibold text-white">{part.content}</strong>;
+      }
+      if (part.type === 'code') {
         return (
           <code key={i} className="font-mono text-[12.5px] bg-zinc-800 text-zinc-100 px-1.5 py-0.5 rounded border border-zinc-700/60">
-            {t.slice(1, -1)}
+            {part.content}
           </code>
         );
       }
-      if (t.startsWith('*') && t.endsWith('*')) {
-        return <em key={i} className="text-zinc-300 italic">{t.slice(1, -1)}</em>;
+      if (part.type === 'italic') {
+        return <em key={i} className="text-zinc-300 italic">{part.content}</em>;
       }
-      return t;
+      return null;
     });
   };
 

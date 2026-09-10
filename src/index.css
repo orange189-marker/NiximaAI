@@ -65,3 +65,29 @@
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
+
+/* KaTeX Dark Theme & High-Precision Typesetting */
+.katex {
+  font-size: 1.05em;
+  color: #f4f4f5;
+  text-rendering: geometricPrecision;
+}
+
+.katex-display {
+  margin: 0.5em 0 !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.25em 0;
+}
+
+.katex-display > .katex {
+  text-align: center;
+  white-space: normal;
+}
+
+.katex-error {
+  color: #f87171 !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: 0.85em;
+}
+

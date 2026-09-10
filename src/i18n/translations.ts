@@ -186,6 +186,9 @@ export interface Translations {
     notHelpful: string;
     copyCode: string;
     downloadCode: string;
+    copyLatex: string;
+    copiedLatex: string;
+    formulaBadge: string;
   };
 
   table: {
@@ -493,6 +496,9 @@ export const translations: Record<Language, Translations> = {
       notHelpful: 'Not helpful',
       copyCode: 'Copy code',
       downloadCode: 'Download',
+      copyLatex: 'Copy LaTeX',
+      copiedLatex: 'Copied LaTeX!',
+      formulaBadge: 'LaTeX Formula',
     },
 
     table: {
@@ -843,6 +849,9 @@ export const translations: Record<Language, Translations> = {
       notHelpful: 'Не корисно',
       copyCode: 'Копіювати код',
       downloadCode: 'Завантажити',
+      copyLatex: 'Скопіювати LaTeX',
+      copiedLatex: 'LaTeX скопійовано!',
+      formulaBadge: 'LaTeX Формула',
     },
 
     table: {

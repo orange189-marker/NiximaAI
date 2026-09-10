@@ -11,6 +11,7 @@ import {
   FileSpreadsheet
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { MathRenderer } from './MathRenderer';
 
 export interface TableBlockData {
   headers: string[];
@@ -144,26 +145,83 @@ export const MarkdownTable: React.FC<MarkdownTableProps> = ({ data }) => {
     link.remove();
   };
 
-  // Format inline bold, code, and italics
+  // Helper to distinguish valid inline LaTeX math from currency or plain text
+  const isValidInlineMath = (inner: string): boolean => {
+    const trimmed = inner.trim();
+    if (!trimmed) return false;
+    if (/^\d+(?:,\d{3})*(?:\.\d+)?$/.test(trimmed)) return false;
+    if (/^\d+.*?\b(and|or|to|for|with)\b.*?\d+$/i.test(trimmed)) return false;
+    return true;
+  };
+
+  // Format inline bold, code, math, and italics
   const renderCellContent = (cellStr: string) => {
     if (!cellStr) return <span className="text-zinc-600">—</span>;
 
-    const tokens = cellStr.split(/(\*\*[^*]+\*\*|`[^`]+`|\*[^*]+\*)/g);
-    return tokens.map((token, i) => {
-      if (token.startsWith('**') && token.endsWith('**')) {
-        return <strong key={i} className="font-semibold text-white">{token.slice(2, -2)}</strong>;
+    const inlineRegex = /(\\\([^\n]+?\\\)|\$(?!\s)[^$\n]+?(?<!\s)\$|\*\*[^*]+?\*\*|`[^`]+?`|\*[^*]+?\*)/g;
+    const parts: Array<
+      | string
+      | { type: 'math' | 'bold' | 'code' | 'italic'; content: string }
+    > = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = inlineRegex.exec(cellStr)) !== null) {
+      if (match.index > lastIndex) {
+        parts.push(cellStr.substring(lastIndex, match.index));
       }
-      if (token.startsWith('`') && token.endsWith('`')) {
+
+      const token = match[0];
+
+      if (token.startsWith('\\(') && token.endsWith('\\)')) {
+        parts.push({ type: 'math', content: token.slice(2, -2) });
+      } else if (token.startsWith('$') && token.endsWith('$') && token.length > 2) {
+        const inner = token.slice(1, -1);
+        if (isValidInlineMath(inner)) {
+          parts.push({ type: 'math', content: inner });
+        } else {
+          parts.push(token);
+        }
+      } else if (token.startsWith('**') && token.endsWith('**')) {
+        parts.push({ type: 'bold', content: token.slice(2, -2) });
+      } else if (token.startsWith('`') && token.endsWith('`')) {
+        parts.push({ type: 'code', content: token.slice(1, -1) });
+      } else if (token.startsWith('*') && token.endsWith('*')) {
+        parts.push({ type: 'italic', content: token.slice(1, -1) });
+      } else {
+        parts.push(token);
+      }
+
+      lastIndex = match.index + match[0].length;
+    }
+
+    if (lastIndex < cellStr.length) {
+      parts.push(cellStr.substring(lastIndex));
+    }
+
+    if (parts.length === 0) {
+      return cellStr;
+    }
+
+    return parts.map((part, i) => {
+      if (typeof part === 'string') return part;
+      if (part.type === 'math') {
+        return <MathRenderer key={i} math={part.content} displayMode={false} />;
+      }
+      if (part.type === 'bold') {
+        return <strong key={i} className="font-semibold text-white">{part.content}</strong>;
+      }
+      if (part.type === 'code') {
         return (
           <code key={i} className="font-mono text-[11px] bg-zinc-800/90 text-zinc-200 px-1.5 py-0.5 rounded border border-zinc-700/60">
-            {token.slice(1, -1)}
+            {part.content}
           </code>
         );
       }
-      if (token.startsWith('*') && token.endsWith('*')) {
-        return <em key={i} className="text-zinc-300 italic">{token.slice(1, -1)}</em>;
+      if (part.type === 'italic') {
+        return <em key={i} className="text-zinc-300 italic">{part.content}</em>;
       }
-      return token;
+      return null;
     });
   };
 

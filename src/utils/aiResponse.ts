@@ -115,6 +115,62 @@ Would you like me to tailor this for a specific runtime or add distributed worke
     };
   }
 
+  if (lower.includes('math') || lower.includes('latex') || lower.includes('formula') || lower.includes('equation') || lower.includes('integral') || lower.includes('calculus') || lower.includes('euler') || lower.includes('bayes') || lower.includes('формул') || lower.includes('математ')) {
+    return {
+      thinking: `1. Parsing mathematical syntax and symbolic ontology.
+2. Formulating closed-form expressions across classical analysis, quantum mechanics, and neural information theory.
+3. Verifying LaTeX typesetting compliance with KaTeX standards.
+4. Synthesizing step-by-step mathematical rationale with dual display ($$...$$) and inline ($...$) notation.`,
+      response: `Here are foundational mathematical formulations rendered with high-precision **LaTeX** typesetting:
+
+### 1. Euler's Identity (The Most Beautiful Equation)
+Euler's identity connects five of the most fundamental constants in mathematics ($e$, $i$, $\pi$, $1$, and $0$):
+
+$$e^{i\pi} + 1 = 0$$
+
+Derived from Euler's general formula for any angle $\theta \in \mathbb{R}$:
+
+$$e^{i\theta} = \cos \theta + i \sin \theta$$
+
+---
+
+### 2. Gaussian Probability Integral
+In probability theory and statistical physics, the continuous normalization integral across the entire real line is:
+
+$$\int_{-\infty}^{\infty} e^{-x^2} \, dx = \sqrt{\pi}$$
+
+For a general normal distribution $\mathcal{N}(\mu, \sigma^2)$ with probability density function $f(x)$:
+
+$$f(x) = \frac{1}{\sigma \sqrt{2\pi}} \exp\left( -\frac{(x - \mu)^2}{2\sigma^2} \right)$$
+
+---
+
+### 3. Time-Dependent Schrödinger Equation
+In quantum mechanics, the dynamical evolution of a quantum state wavefunction $\Psi(\mathbf{r}, t)$ governed by the Hamiltonian operator $\hat{H}$ is:
+
+$$i\hbar \frac{\partial}{\partial t} \Psi(\mathbf{r}, t) = \left[ -\frac{\hbar^2}{2m} \nabla^2 + V(\mathbf{r}, t) \right] \Psi(\mathbf{r}, t)$$
+
+---
+
+### 4. Machine Learning: Cross-Entropy Loss & Softmax
+In deep neural networks, given true label distributions $y \in \{0, 1\}^K$ and logit activations $z \in \mathbb{R}^K$:
+
+$$\hat{y}_k = \frac{e^{z_k}}{\sum_{j=1}^K e^{z_j}}, \quad \mathcal{L}_{\text{CE}} = -\sum_{k=1}^K y_k \ln \hat{y}_k$$
+
+---
+
+### Mathematical Specifications Matrix
+| Domain | Theorem / Law | Governing Equation | Convergence / Bound |
+| :--- | :--- | :--- | :---: |
+| **Complex Analysis** | Euler's Formula | $e^{i\theta} = \cos\theta + i\sin\theta$ | Exact |
+| **Probability** | Bayes' Rule | $P(A \mid B) = \frac{P(B \mid A)P(A)}{P(B)}$ | $P(B) > 0$ |
+| **Electrodynamics** | Gauss's Law | $\nabla \cdot \mathbf{E} = \frac{\rho}{\varepsilon_0}$ | Continuous |
+| **Information** | Shannon Entropy | $H(X) = -\sum_{x} P(x) \log_2 P(x)$ | $H(X) \ge 0$ |
+
+> **Tip:** You can click the **Copy LaTeX** button on the top right of any formula card above to copy the raw LaTeX source directly to your clipboard!`
+    };
+  }
+
   if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
     return {
       thinking,

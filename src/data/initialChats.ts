@@ -113,5 +113,60 @@ You can sort any column by clicking its header, filter by keyword, or export the
         model: 'Nixima-0.1',
       }
     ]
+  },
+  {
+    id: 'chat-4',
+    title: 'Quantum Mechanics & Wave Equations',
+    createdAt: Date.now() - 3600 * 1000 * 1,
+    updatedAt: Date.now() - 3600 * 1000 * 1,
+    modelId: 'nixima-0.1-reasoning',
+    messages: [
+      {
+        id: 'm-7',
+        role: 'user',
+        content: 'Explain the mathematical formulation of quantum superposition and the time-dependent Schrödinger equation.',
+        timestamp: Date.now() - 3600 * 1000 * 1,
+      },
+      {
+        id: 'm-8',
+        role: 'assistant',
+        content: `In quantum mechanics, a physical system is represented by a state vector $|\psi\rangle$ residing in a complex Hilbert space $\\mathcal{H}$.
+
+### 1. The Principle of Superposition
+For any two orthonormal basis eigenstates $|0\\rangle$ and $|1\\rangle$, the general quantum state $|\psi\\rangle$ is given by:
+
+$$|\\psi\\rangle = \\alpha |0\\rangle + \\beta |1\\rangle, \\quad \\alpha, \\beta \\in \\mathbb{C}$$
+
+By Born's statistical rule, the total probability across all measurable outcomes must equal unity:
+
+$$|\\alpha|^2 + |\\beta|^2 = 1$$
+
+---
+
+### 2. Time-Dependent Schrödinger Equation
+The continuous time evolution of the spatial wavefunction $\\Psi(\\mathbf{r}, t)$ in a potential field $V(\\mathbf{r}, t)$ is governed by:
+
+$$i\\hbar \\frac{\\partial}{\\partial t} \\Psi(\\mathbf{r}, t) = \\left[ -\\frac{\\hbar^2}{2m} \\nabla^2 + V(\\mathbf{r}, t) \\right] \\Psi(\\mathbf{r}, t)$$
+
+Where:
+- $\\hbar = \\frac{h}{2\\pi}$ is the reduced Planck constant.
+- $m$ is the particle mass.
+- $\\nabla^2 = \\frac{\\partial^2}{\\partial x^2} + \\frac{\\partial^2}{\\partial y^2} + \\frac{\\partial^2}{\\partial z^2}$ is the spatial Laplacian operator.
+
+---
+
+### 3. Conservation of Probability
+The probability density $\\rho(\\mathbf{r}, t) = |\\Psi(\\mathbf{r}, t)|^2$ satisfies the global normalization constraint:
+
+$$\\int_{\\mathbb{R}^3} |\\Psi(\\mathbf{r}, t)|^2 \\, d^3\\mathbf{r} = 1$$
+
+This ensures that the particle exists somewhere in space with certainty ($P = 1$).`,
+        thinking: `1. Formulated Hilbert space representation and bra-ket state vectors.
+2. Verified normalization constraints and Born rule probability interpretation.
+3. Typeset 3D differential Schrödinger wave equation and Laplacian operator with KaTeX.`,
+        timestamp: Date.now() - 3600 * 1000 * 1 + 1400,
+        model: 'Nixima-0.1 Reasoning',
+      }
+    ]
   }
 ];
