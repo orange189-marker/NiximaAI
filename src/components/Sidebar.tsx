@@ -94,7 +94,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const handleExportMarkdown = (conv: Conversation) => {
     let md = `# ${conv.title}\n\n*Exported from Nixima AI (Model: ${conv.modelId}) on ${new Date().toLocaleString()}*\n\n---\n\n`;
     conv.messages.forEach(m => {
-      const speaker = m.role === 'user' ? '### User' : `### Nixima AI (${m.model || 'Nixima-0.1'})`;
+      const speaker = m.role === 'user' ? '### User' : `### Nixima AI (${m.model || 'Nixima-0.2'})`;
       md += `${speaker}\n\n${m.content}\n\n---\n\n`;
     });
 

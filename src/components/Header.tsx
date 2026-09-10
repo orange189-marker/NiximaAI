@@ -29,6 +29,7 @@ interface HeaderProps {
   onOpenSettings: () => void;
   onOpenCompanyInfo: () => void;
   onOpenBenchmarks?: () => void;
+  onOpenReleaseModal?: () => void;
   isSidebarOpen: boolean;
   onToggleSidebar: () => void;
   onNewChat?: () => void;
@@ -42,6 +43,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSettings,
   onOpenCompanyInfo,
   onOpenBenchmarks,
+  onOpenReleaseModal,
   isSidebarOpen,
   onToggleSidebar,
   onNewChat,
@@ -77,9 +79,9 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   const getModelIcon = (id: string) => {
-    if (id.includes('reasoning')) return <BrainCircuit className="w-4 h-4 text-white" />;
-    if (id.includes('coder')) return <Terminal className="w-4 h-4 text-zinc-300" />;
-    if (id.includes('flash')) return <Zap className="w-4 h-4 text-zinc-300" />;
+    if (id.includes('pro') || id.includes('reasoning')) return <BrainCircuit className="w-4 h-4 text-purple-400" />;
+    if (id.includes('coder')) return <Terminal className="w-4 h-4 text-emerald-400" />;
+    if (id.includes('flash')) return <Zap className="w-4 h-4 text-amber-400" />;
     return <Sparkles className="w-4 h-4 text-white" />;
   };
 
@@ -119,9 +121,18 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="font-bold text-sm sm:text-base tracking-tight text-white font-mono">
               NIXIMA<span className="text-zinc-500 ml-0.5 font-normal">AI</span>
             </span>
-            <span className="hidden md:inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-zinc-800 text-zinc-300 border border-zinc-700/50">
-              v0.1
-            </span>
+            <button
+              type="button"
+              onClick={onOpenReleaseModal}
+              className="hidden md:inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700/80 transition-all cursor-pointer shadow-sm group"
+              title={t.releaseAnnouncement.detailsBtn}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>v0.2</span>
+              <span className="text-[9px] px-1 rounded bg-white text-black font-bold uppercase ml-0.5">
+                NEW
+              </span>
+            </button>
           </div>
         </div>
       </div>

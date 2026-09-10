@@ -58,8 +58,8 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
 
   // Arena state (Live interactive prompt testing across models)
   const [arenaPrompt, setArenaPrompt] = useState<string>('Solve: If 5 machines make 5 widgets in 5 minutes, how long do 100 machines take to make 100 widgets? Explain why.');
-  const [arenaModelA, setArenaModelA] = useState<string>('nixima-0.1-reasoning');
-  const [arenaModelB, setArenaModelB] = useState<string>('nixima-0.1-flash');
+  const [arenaModelA, setArenaModelA] = useState<string>('nixima-0.2-pro');
+  const [arenaModelB, setArenaModelB] = useState<string>('nixima-0.2-flash');
   const [isRunningArena, setIsRunningArena] = useState<boolean>(false);
   const [arenaOutputA, setArenaOutputA] = useState<string>('');
   const [arenaOutputB, setArenaOutputB] = useState<string>('');
@@ -77,14 +77,14 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
   const currentSuite = BENCHMARK_SUITES.find(s => s.id === selectedSuiteId) || BENCHMARK_SUITES[0];
 
   const getModelColor = (id: string) => {
-    if (id.includes('reasoning')) return { text: 'text-purple-400', border: 'border-purple-500/40', bg: 'bg-purple-500/10', glow: '' };
+    if (id.includes('pro') || id.includes('reasoning')) return { text: 'text-purple-400', border: 'border-purple-500/40', bg: 'bg-purple-500/10', glow: '' };
     if (id.includes('coder')) return { text: 'text-emerald-400', border: 'border-emerald-500/40', bg: 'bg-emerald-500/10', glow: '' };
     if (id.includes('flash')) return { text: 'text-amber-400', border: 'border-amber-500/40', bg: 'bg-amber-500/10', glow: '' };
     return { text: 'text-zinc-100', border: 'border-zinc-700', bg: 'bg-zinc-800/60', glow: '' };
   };
 
   const getModelIcon = (id: string) => {
-    if (id.includes('reasoning')) return <BrainCircuit className="w-4 h-4 text-purple-400" />;
+    if (id.includes('pro') || id.includes('reasoning')) return <BrainCircuit className="w-4 h-4 text-purple-400" />;
     if (id.includes('coder')) return <Terminal className="w-4 h-4 text-emerald-400" />;
     if (id.includes('flash')) return <Zap className="w-4 h-4 text-amber-400" />;
     return <Sparkles className="w-4 h-4 text-zinc-200" />;

@@ -8,6 +8,7 @@ import { SettingsModal, SettingsTab } from './components/SettingsModal';
 import { CompanyModal } from './components/CompanyModal';
 import { VipWelcomeModal } from './components/VipWelcomeModal';
 import { BenchmarksModal } from './components/BenchmarksModal';
+import { ReleaseAnnouncementModal } from './components/ReleaseAnnouncementModal';
 import { AuthPortal } from './components/AuthPortal';
 import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry } from './types/chat';
 import { NiximaUser } from './types/user';
@@ -109,6 +110,7 @@ const AppContent: React.FC = () => {
   const [isVipPreview, setIsVipPreview] = useState(false);
   const [previewTarget, setPreviewTarget] = useState<'warexxq' | 'roman1980'>('warexxq');
   const [isBenchmarksOpen, setIsBenchmarksOpen] = useState(false);
+  const [isReleaseModalOpen, setIsReleaseModalOpen] = useState(false);
 
   // VIP Welcome letter & presentation check, URL parameters
   useEffect(() => {
@@ -116,6 +118,11 @@ const AppContent: React.FC = () => {
     const benchParam = params.get('benchmarks') || params.get('benchmark');
     if (benchParam) {
       setIsBenchmarksOpen(true);
+    }
+
+    const releaseParam = params.get('release') || params.get('announcement');
+    if (releaseParam) {
+      setIsReleaseModalOpen(true);
     }
 
     const previewParam = params.get('preview_vip') || params.get('vip_preview');
@@ -210,7 +217,7 @@ const AppContent: React.FC = () => {
         title: isUk ? `Вітаємо в Nixima, ${user.name}` : `Welcome to Nixima, ${user.name}`,
         createdAt: Date.now(),
         updatedAt: Date.now(),
-        modelId: 'nixima-0.1',
+        modelId: 'nixima-0.2',
         pinned: true,
         messages: [
           {
@@ -221,18 +228,18 @@ const AppContent: React.FC = () => {
 Вашу суверенну ідентичність Nixima успішно активовано:
 - **Nixima Email**: \`${user.email}\`
 - **Роль**: \`${user.role}\`
-- **Нейрорушій**: \`Nixima-0.1\` Активний
+- **Нейрорушій**: \`Nixima-0.2\` Активний (Нове покоління 0.2)
 
 Усі діалоги та налаштування моделі в цьому робочому просторі є приватними та захищеними для вашого Nixima ID. Задайте питання нижче або оберіть підказку для дослідження.` : `### Welcome to Nixima AI, **${user.name}**!
 
 Your Sovereign Nixima Identity has been provisioned:
 - **Nixima Email**: \`${user.email}\`
 - **Role**: \`${user.role}\`
-- **Inference Engine**: \`Nixima-0.1\` Active
+- **Inference Engine**: \`Nixima-0.2\` Active (0.2 Generation)
 
 All conversations and model preferences in this workspace are private to your Nixima ID. Ask a question below or pick a research prompt to begin.`,
             timestamp: Date.now(),
-            model: 'Nixima-0.1',
+            model: 'Nixima-0.2',
           }
         ]
       };
@@ -680,6 +687,7 @@ All conversations and model preferences in this workspace are private to your Ni
           onOpenSettings={() => handleOpenSettings('general')}
           onOpenCompanyInfo={() => setIsCompanyModalOpen(true)}
           onOpenBenchmarks={() => setIsBenchmarksOpen(true)}
+          onOpenReleaseModal={() => setIsReleaseModalOpen(true)}
           isSidebarOpen={isSidebarOpen}
           onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
           onNewChat={handleNewChat}
@@ -693,6 +701,8 @@ All conversations and model preferences in this workspace are private to your Ni
             <EmptyChat
               currentModel={currentModel}
               onSelectPrompt={handleSendMessage}
+              onSelectModel={setCurrentModel}
+              onOpenReleaseModal={() => setIsReleaseModalOpen(true)}
             />
           ) : (
             <div className="pb-8">
@@ -774,6 +784,15 @@ All conversations and model preferences in this workspace are private to your Ni
         isOpen={isBenchmarksOpen}
         onClose={() => setIsBenchmarksOpen(false)}
         onSelectModel={(model) => setCurrentModel(model)}
+      />
+
+      {/* Nixima 0.2 Generation Release Briefing Modal */}
+      <ReleaseAnnouncementModal
+        isOpen={isReleaseModalOpen}
+        onClose={() => setIsReleaseModalOpen(false)}
+        currentModel={currentModel}
+        onSelectModel={(model) => setCurrentModel(model)}
+        onOpenBenchmarks={() => setIsBenchmarksOpen(true)}
       />
     </div>
   );

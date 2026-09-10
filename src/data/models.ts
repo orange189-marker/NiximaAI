@@ -2,15 +2,15 @@ import { ModelOption } from '../types/chat';
 
 export const NIXIMA_MODELS: ModelOption[] = [
   {
-    id: 'nixima-0.1',
-    name: 'Nixima-0.1',
-    shortName: '0.1 Default',
+    id: 'nixima-0.2',
+    name: 'Nixima-0.2',
+    shortName: '0.2 Default',
     badge: 'FLAGSHIP',
-    description: 'Frontier reasoning and general synthetic intelligence, dynamically routed to top-tier free intelligence clusters.',
-    contextWindow: '200,000 tokens',
-    latency: '~35 ms / token',
-    strengths: ['General Intelligence', 'High-Order Logic', 'Multi-turn Memory', 'Agentic Workflows'],
-    parameters: 'Auto-Routing Ensemble',
+    description: 'Next-generation frontier general synthetic intelligence with adaptive Sparse Rotary Attention v2 and multi-turn autonomous synthesis.',
+    contextWindow: '500,000 tokens',
+    latency: '~25 ms / token',
+    strengths: ['Frontier General Intelligence', 'Adaptive SRA v2 Architecture', 'Autonomous Synthesis', 'Multi-turn Long Context'],
+    parameters: 'Frontier 0.2 Ensemble',
     isFlagship: true,
     openRouterModel: 'openrouter/free',
     fallbackModels: [
@@ -21,15 +21,15 @@ export const NIXIMA_MODELS: ModelOption[] = [
     baseCreditCost: 5,
   },
   {
-    id: 'nixima-0.1-reasoning',
-    name: 'Nixima-0.1 Reasoning',
-    shortName: '0.1 Reason',
-    badge: 'CHAIN-OF-THOUGHT',
-    description: 'Extended step-by-step chain-of-thought problem solver, powered by NVIDIA Nemotron Nano Omni Reasoning.',
-    contextWindow: '256,000 tokens',
-    latency: '~45 ms / token',
-    strengths: ['Math & Physics', 'Formal Logic', 'Deep Deduction', 'Verification'],
-    parameters: '30B Omni Reasoning',
+    id: 'nixima-0.2-pro',
+    name: 'Nixima-0.2 Pro',
+    shortName: '0.2 Pro',
+    badge: 'REASONING PRO',
+    description: 'Autonomous high-order reasoning powerhouse with deep chain-of-thought, epistemic deduction, and mathematical verification.',
+    contextWindow: '500,000 tokens',
+    latency: '~35 ms / token',
+    strengths: ['Deep Chain-of-Thought', 'Epistemic Logic & Proofs', 'Scientific Deduction', 'Complex System Theory'],
+    parameters: 'High-Capacity Reasoning Core',
     openRouterModel: 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
     fallbackModels: [
       'openrouter/free',
@@ -39,15 +39,15 @@ export const NIXIMA_MODELS: ModelOption[] = [
     baseCreditCost: 12,
   },
   {
-    id: 'nixima-0.1-coder',
-    name: 'Nixima-0.1 Coder',
-    shortName: '0.1 Coder',
-    badge: 'DEV',
-    description: 'Specialized code generation, debugging, and systems engineering powered by Cohere North Mini Code.',
-    contextWindow: '256,000 tokens',
-    latency: '~30 ms / token',
-    strengths: ['Full-stack App Gen', 'Refactoring', 'Bug Hunting', 'CLI & DevOps'],
-    parameters: 'Specialized Code Engine',
+    id: 'nixima-0.2-coder',
+    name: 'Nixima-0.2 Coder',
+    shortName: '0.2 Coder',
+    badge: 'SYSTEMS DEV',
+    description: 'Specialized production software architect. Unrivaled in full-stack systems engineering, zero-defect algorithms, async concurrency, and deep refactoring.',
+    contextWindow: '500,000 tokens',
+    latency: '~28 ms / token',
+    strengths: ['Production Architecture', 'Zero-defect TypeScript/Rust/Python', 'Concurrent Systems', 'Full-stack Engineering'],
+    parameters: 'Specialized 0.2 Code Engine',
     openRouterModel: 'cohere/north-mini-code:free',
     fallbackModels: [
       'openrouter/free',
@@ -57,15 +57,15 @@ export const NIXIMA_MODELS: ModelOption[] = [
     baseCreditCost: 8,
   },
   {
-    id: 'nixima-0.1-flash',
-    name: 'Nixima-0.1 Flash',
-    shortName: '0.1 Flash',
-    badge: 'FAST',
-    description: 'Sub-millisecond latency for ultra-fast conversation and document parsing, powered by NVIDIA Nemotron Lightning.',
-    contextWindow: '1,000,000 tokens',
-    latency: '~15 ms / token',
-    strengths: ['Instant Responses', 'Document Scanning', 'Rapid Brainstorming'],
-    parameters: 'Lightning High-Throughput',
+    id: 'nixima-0.2-flash',
+    name: 'Nixima-0.2 Flash',
+    shortName: '0.2 Flash',
+    badge: 'HYPER SPEED',
+    description: 'Ultra-high throughput sub-millisecond response engine with massive 2,000,000 token context window for instantaneous analysis and streaming.',
+    contextWindow: '2,000,000 tokens',
+    latency: '~10 ms / token',
+    strengths: ['Sub-millisecond Latency', 'Massive 2M Context', 'High-speed Document Processing', 'Real-time Streaming'],
+    parameters: 'Hyper-Throughput Engine',
     openRouterModel: 'nvidia/nemotron-3.5-lightning:free',
     fallbackModels: [
       'openrouter/free',
@@ -78,3 +78,25 @@ export const NIXIMA_MODELS: ModelOption[] = [
 
 export const DEFAULT_MODEL = NIXIMA_MODELS[0];
 export const MODELS = NIXIMA_MODELS;
+
+// Helper to look up a model by id, with backwards-compatibility aliases for 0.1 IDs
+export function getModelById(id: string): ModelOption {
+  const directMatch = NIXIMA_MODELS.find(m => m.id === id);
+  if (directMatch) return directMatch;
+
+  // Legacy 0.1 mappings
+  const legacyMap: Record<string, string> = {
+    'nixima-0.1': 'nixima-0.2',
+    'nixima-0.1-reasoning': 'nixima-0.2-pro',
+    'nixima-0.1-coder': 'nixima-0.2-coder',
+    'nixima-0.1-flash': 'nixima-0.2-flash',
+  };
+
+  const mappedId = legacyMap[id];
+  if (mappedId) {
+    const mapped = NIXIMA_MODELS.find(m => m.id === mappedId);
+    if (mapped) return mapped;
+  }
+
+  return DEFAULT_MODEL;
+}

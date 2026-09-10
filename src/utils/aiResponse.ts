@@ -65,7 +65,7 @@ How can I assist your engineering, research, or creative tasks today?`
 | **Inference Host** | \`nixima.ai / Cloud Mesh\` |
 | **Safety Alignment** | Nixima Constitutional Layer v4 |
 
-> **Tip:** You can switch between **Nixima-0.1**, **Nixima-0.1 Reasoning**, **Nixima-0.1 Coder**, and **Nixima-0.1 Flash** anytime using the model selector in the top navigation bar.`
+> **Tip:** You can switch between **Nixima-0.2**, **Nixima-0.2 Pro**, **Nixima-0.2 Coder**, and **Nixima-0.2 Flash** anytime using the model selector in the top navigation bar.`
     };
   }
 

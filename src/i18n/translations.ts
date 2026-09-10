@@ -329,6 +329,27 @@ export interface Translations {
     btnCancel: string;
   };
 
+  releaseAnnouncement: {
+    badge: string;
+    headline: string;
+    subheadline: string;
+    exploreBtn: string;
+    detailsBtn: string;
+    dismiss: string;
+    modalTitle: string;
+    modalSubtitle: string;
+    keyHighlightsTitle: string;
+    highlight1Title: string;
+    highlight1Desc: string;
+    highlight2Title: string;
+    highlight2Desc: string;
+    highlight3Title: string;
+    highlight3Desc: string;
+    activateModel: string;
+    activeNow: string;
+    close: string;
+  };
+
   models: Record<string, {
     name: string;
     badge: string;
@@ -692,30 +713,76 @@ export const translations: Record<Language, Translations> = {
       btnCancel: 'Cancel',
     },
 
+    releaseAnnouncement: {
+      badge: 'NIXIMA 0.2 GENERATION RELEASE',
+      headline: 'Introducing the Nixima-0.2 Generation',
+      subheadline: 'Four next-gen sovereign neural engines engineered for frontier reasoning, production systems code, and 2M token hyper-speed intelligence.',
+      exploreBtn: 'Try Nixima-0.2 Flagship',
+      detailsBtn: 'Explore 0.2 Architecture',
+      dismiss: 'Dismiss release card',
+      modalTitle: 'Nixima 0.2 Generation Architecture & Release Briefing',
+      modalSubtitle: 'Official release briefing and benchmark specifications engineered by Bogdan.',
+      keyHighlightsTitle: 'Architectural Breakthroughs in 0.2',
+      highlight1Title: 'Sparse Rotary Attention (SRA v2)',
+      highlight1Desc: 'Enables dynamic multi-head token routing with zero performance degradation across 500,000+ context lengths.',
+      highlight2Title: 'Hyper-Throughput 2M Context Window',
+      highlight2Desc: 'Nixima-0.2 Flash processes 2,000,000 tokens with sub-10ms latency for real-time document analysis and streaming.',
+      highlight3Title: 'Autonomous Epistemic Chain-of-Thought',
+      highlight3Desc: 'Nixima-0.2 Pro incorporates self-correcting logic verification, rigorous math proofs, and transparent <think> traces.',
+      activateModel: 'Activate Model',
+      activeNow: 'Active Engine',
+      close: 'Close Briefing',
+    },
+
     models: {
+      'nixima-0.2': {
+        name: 'Nixima-0.2',
+        badge: 'FLAGSHIP',
+        description: 'Next-generation frontier general synthetic intelligence with adaptive Sparse Rotary Attention v2 and multi-turn autonomous synthesis.',
+        strengths: ['Frontier General Intelligence', 'Adaptive SRA v2 Architecture', 'Autonomous Synthesis', 'Multi-turn Long Context'],
+      },
+      'nixima-0.2-pro': {
+        name: 'Nixima-0.2 Pro',
+        badge: 'REASONING PRO',
+        description: 'Autonomous high-order reasoning powerhouse with deep chain-of-thought, epistemic deduction, and mathematical verification.',
+        strengths: ['Deep Chain-of-Thought', 'Epistemic Logic & Proofs', 'Scientific Deduction', 'Complex System Theory'],
+      },
+      'nixima-0.2-coder': {
+        name: 'Nixima-0.2 Coder',
+        badge: 'SYSTEMS DEV',
+        description: 'Specialized production software architect. Unrivaled in full-stack systems engineering, zero-defect algorithms, async concurrency, and deep refactoring.',
+        strengths: ['Production Architecture', 'Zero-defect TypeScript/Rust/Python', 'Concurrent Systems', 'Full-stack Engineering'],
+      },
+      'nixima-0.2-flash': {
+        name: 'Nixima-0.2 Flash',
+        badge: 'HYPER SPEED',
+        description: 'Ultra-high throughput sub-millisecond response engine with massive 2,000,000 token context window for instantaneous analysis and streaming.',
+        strengths: ['Sub-millisecond Latency', 'Massive 2M Context', 'High-speed Document Processing', 'Real-time Streaming'],
+      },
+      // Legacy 0.1 compatibility
       'nixima-0.1': {
         name: 'Nixima-0.1',
-        badge: 'FLAGSHIP',
-        description: 'Frontier reasoning and general synthetic intelligence, dynamically routed to top-tier free intelligence clusters.',
-        strengths: ['General Intelligence', 'High-Order Logic', 'Multi-turn Memory', 'Agentic Workflows'],
+        badge: 'LEGACY',
+        description: 'First generation frontier reasoning and synthetic intelligence.',
+        strengths: ['General Intelligence', 'High-Order Logic', 'Multi-turn Memory'],
       },
       'nixima-0.1-reasoning': {
         name: 'Nixima-0.1 Reasoning',
-        badge: 'CHAIN-OF-THOUGHT',
-        description: 'Extended step-by-step chain-of-thought problem solver, powered by NVIDIA Nemotron Nano Omni Reasoning.',
-        strengths: ['Math & Physics', 'Formal Logic', 'Deep Deduction', 'Verification'],
+        badge: 'LEGACY',
+        description: 'Extended step-by-step chain-of-thought problem solver.',
+        strengths: ['Math & Physics', 'Formal Logic', 'Deep Deduction'],
       },
       'nixima-0.1-coder': {
         name: 'Nixima-0.1 Coder',
-        badge: 'DEV',
-        description: 'Specialized code generation, debugging, and systems engineering powered by Cohere North Mini Code.',
-        strengths: ['Full-stack App Gen', 'Refactoring', 'Bug Hunting', 'CLI & DevOps'],
+        badge: 'LEGACY',
+        description: 'Specialized code generation and debugging engine.',
+        strengths: ['Full-stack App Gen', 'Refactoring', 'Bug Hunting'],
       },
       'nixima-0.1-flash': {
         name: 'Nixima-0.1 Flash',
-        badge: 'FAST',
-        description: 'Sub-millisecond latency for ultra-fast conversation and document parsing, powered by NVIDIA Nemotron Lightning.',
-        strengths: ['Instant Responses', 'Document Scanning', 'Rapid Brainstorming'],
+        badge: 'LEGACY',
+        description: 'Sub-millisecond latency for ultra-fast conversation.',
+        strengths: ['Instant Responses', 'Document Scanning'],
       },
     },
   },
@@ -1074,30 +1141,76 @@ export const translations: Record<Language, Translations> = {
       btnCancel: 'Скасувати',
     },
 
+    releaseAnnouncement: {
+      badge: 'РЕЛІЗ ПОКОЛІННЯ NIXIMA 0.2',
+      headline: 'Представляємо покоління Nixima-0.2',
+      subheadline: 'Чотири суверенні нейрорушії нового покоління: проривні міркування, системне програмування та надшвидкісний контекст у 2 000 000 токенів.',
+      exploreBtn: 'Спробувати флагман Nixima-0.2',
+      detailsBtn: 'Архітектура 0.2 та бенчмарки',
+      dismiss: 'Приховати картку релізу',
+      modalTitle: 'Архітектурний бриф релізу Nixima 0.2',
+      modalSubtitle: 'Офіційна презентація та специфікації моделей, розроблені Богданом.',
+      keyHighlightsTitle: 'Ключові архітектурні досягнення 0.2',
+      highlight1Title: 'Sparse Rotary Attention (SRA v2)',
+      highlight1Desc: 'Динамічна маршрутизація токенів без деградації якості при довжині контексту понад 500 000 токенів.',
+      highlight2Title: 'Надшвидкий контекст 2 000 000 токенів',
+      highlight2Desc: 'Nixima-0.2 Flash обробляє до 2 мільйонів токенів із затримкою до 10 мс для миттєвого аналізу великих масивів коду та документів.',
+      highlight3Title: 'Автономний епістемічний ланцюг думок',
+      highlight3Desc: 'Nixima-0.2 Pro виконує глибоку самоверифікацію логіки, точні математичні доведення та прозорі роздуми у блоках <think>.',
+      activateModel: 'Активувати модель',
+      activeNow: 'Поточний рушій',
+      close: 'Закрити бриф',
+    },
+
     models: {
+      'nixima-0.2': {
+        name: 'Nixima-0.2',
+        badge: 'ФЛАГМАН',
+        description: 'Передовий синтетичний інтелект нового покоління з адаптивною увагою SRA v2 та автономним багатокроковим синтезом.',
+        strengths: ['Передовий інтелект', 'Архітектура SRA v2', 'Автономний синтез', 'Довгий контекст'],
+      },
+      'nixima-0.2-pro': {
+        name: 'Nixima-0.2 Pro',
+        badge: 'МІРКУВАННЯ PRO',
+        description: 'Автономний рушій поглибленого мислення з багатокроковим ланцюгом думок, епістемічною дедукцією та математичною верифікацією.',
+        strengths: ['Глибокий ланцюг думок', 'Епістемічна логіка та докази', 'Наукова дедукція', 'Теорія складних систем'],
+      },
+      'nixima-0.2-coder': {
+        name: 'Nixima-0.2 Coder',
+        badge: 'СИСТЕМНИЙ DEV',
+        description: 'Спеціалізований архітектор промислового ПЗ. Неперевершений у full-stack системах, безпомилкових алгоритмах та асинхронності.',
+        strengths: ['Промислова архітектура', 'Безпомилковий код TS/Rust/Python', 'Паралельні системи', 'Full-stack розробка'],
+      },
+      'nixima-0.2-flash': {
+        name: 'Nixima-0.2 Flash',
+        badge: 'НАДШВИДКИЙ',
+        description: 'Субмілісекундний рушій із гігантським контекстом у 2 000 000 токенів для миттєвої генерації та потокового аналізу.',
+        strengths: ['Субмілісекундна швидкість', 'Контекст 2M токенів', 'Миттєвий аналіз документів', 'Потокова генерація'],
+      },
+      // Legacy 0.1 compatibility
       'nixima-0.1': {
         name: 'Nixima-0.1',
-        badge: 'ФЛАГМАН',
-        description: 'Передовий інтелект та загальні міркування, динамічно маршрутизовані до найшвидших вільних обчислювальних кластерів.',
-        strengths: ['Загальний інтелект', 'Вища логіка', 'Багатокрокова пам’ять', 'Агентні робочі процеси'],
+        badge: 'LEGACY',
+        description: 'Передовий інтелект та загальні міркування першого покоління.',
+        strengths: ['Загальний інтелект', 'Вища логіка', 'Багатокрокова пам’ять'],
       },
       'nixima-0.1-reasoning': {
         name: 'Nixima-0.1 Reasoning',
-        badge: 'ЛАНЦЮЖОК ДУМОК',
-        description: 'Покрокове розв’язання складних завдань на базі NVIDIA Nemotron Nano Omni Reasoning.',
-        strengths: ['Математика та фізика', 'Формальна логіка', 'Глибинна дедукція', 'Верифікація'],
+        badge: 'LEGACY',
+        description: 'Покрокове розв’язання складних завдань першого покоління.',
+        strengths: ['Математика та фізика', 'Формальна логіка', 'Глибинна дедукція'],
       },
       'nixima-0.1-coder': {
         name: 'Nixima-0.1 Coder',
-        badge: 'РОЗРОБКА',
-        description: 'Спеціалізована генерація коду, налагодження та системна інженерія на базі Cohere North Mini Code.',
-        strengths: ['Full-stack розробка', 'Рефакторинг', 'Пошук багів', 'CLI та DevOps'],
+        badge: 'LEGACY',
+        description: 'Спеціалізована генерація коду та налагодження першого покоління.',
+        strengths: ['Full-stack розробка', 'Рефакторинг', 'Пошук багів'],
       },
       'nixima-0.1-flash': {
         name: 'Nixima-0.1 Flash',
-        badge: 'ШВИДКИЙ',
-        description: 'Субмілісекундна швидкість для миттєвих діалогів та парсингу документів на базі NVIDIA Nemotron Lightning.',
-        strengths: ['Миттєві відповіді', 'Сканування документів', 'Швидкий брейнштормінг'],
+        badge: 'LEGACY',
+        description: 'Субмілісекундна швидкість для швидкого спілкування першого покоління.',
+        strengths: ['Миттєві відповіді', 'Сканування документів'],
       },
     },
   },

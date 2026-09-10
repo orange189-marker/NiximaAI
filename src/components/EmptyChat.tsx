@@ -11,15 +11,20 @@ import {
 } from 'lucide-react';
 import { ModelOption } from '../types/chat';
 import { useLanguage } from '../context/LanguageContext';
+import { ReleaseAnnouncementCard } from './ReleaseAnnouncementCard';
 
 interface EmptyChatProps {
   currentModel: ModelOption;
   onSelectPrompt: (prompt: string) => void;
+  onSelectModel?: (model: ModelOption) => void;
+  onOpenReleaseModal?: () => void;
 }
 
 export const EmptyChat: React.FC<EmptyChatProps> = ({
   currentModel,
-  onSelectPrompt
+  onSelectPrompt,
+  onSelectModel,
+  onOpenReleaseModal
 }) => {
   const { t } = useLanguage();
 
@@ -38,7 +43,16 @@ export const EmptyChat: React.FC<EmptyChatProps> = ({
   }));
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-6 max-w-3xl mx-auto w-full text-center select-none animate-fade-in">
+    <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 max-w-4xl mx-auto w-full text-center select-none animate-fade-in">
+      {/* Nixima 0.2 Generation Release Announcement Card */}
+      {onSelectModel && onOpenReleaseModal && (
+        <ReleaseAnnouncementCard
+          currentModel={currentModel}
+          onSelectModel={onSelectModel}
+          onOpenReleaseModal={onOpenReleaseModal}
+        />
+      )}
+
       {/* Brand Badge */}
       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-700/60 mb-6 shadow-inner-light">
         <span className="w-2 h-2 rounded-full bg-white"></span>

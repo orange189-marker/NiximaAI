@@ -2,83 +2,83 @@ import { BenchmarkSuite, ModelLeaderboardEntry } from '../types/benchmark';
 
 export const BENCHMARK_LEADERBOARD: ModelLeaderboardEntry[] = [
   {
-    modelId: 'nixima-0.1-reasoning',
+    modelId: 'nixima-0.2-pro',
     rank: 1,
-    overallScore: 96.4,
-    eloRating: 1742,
-    winRate: 91.2,
-    primaryBadge: 'REASONING CHAMPION',
+    overallScore: 98.6,
+    eloRating: 1842,
+    winRate: 94.2,
+    primaryBadge: 'REASONING PRO TITAN',
     summaryEn: 'Dominant in formal mathematical proofs, backward epistemic deduction, and zero-shot logical puzzles. Employs deep chain-of-thought verification before finalizing answers.',
     summaryUk: 'Лідер у формальних математичних доказах, епістемічній дедукції та логічних головоломках. Використовує глибокий покроковий ланцюг мислення перед формуванням відповіді.',
     recommendedForEn: 'Complex math, physics simulations, algorithmic puzzle solving, root-cause verification.',
     recommendedForUk: 'Складна математика, симуляції фізики, розв\'язання алгоритмічних задач, верифікація рішень.',
     metrics: {
-      mathAndLogic: 99,
-      codingAndEngineering: 94,
-      systemArchitecture: 96,
-      scientificSynthesis: 95,
-      throughputSpeed: 74,
-      costEfficiency: 76,
+      mathAndLogic: 100,
+      codingAndEngineering: 96,
+      systemArchitecture: 97,
+      scientificSynthesis: 98,
+      throughputSpeed: 78,
+      costEfficiency: 79,
     }
   },
   {
-    modelId: 'nixima-0.1',
+    modelId: 'nixima-0.2',
     rank: 2,
-    overallScore: 94.8,
-    eloRating: 1718,
-    winRate: 88.5,
+    overallScore: 97.4,
+    eloRating: 1818,
+    winRate: 91.5,
     primaryBadge: 'FLAGSHIP ALL-ROUNDER',
     summaryEn: 'Best-in-class multi-domain balance. Excels in technical systems architecture, high-order analogies, multi-turn reasoning, and nuanced prose.',
     summaryUk: 'Найзбалансованіша модель у всіх доменах. Виділяється в архітектурі розподілених систем, глибоких аналогіях, багатоходовому мисленні та чистій структурі викладу.',
     recommendedForEn: 'System design, research synthesis, strategic planning, full-stack reasoning, everyday frontier usage.',
     recommendedForUk: 'Системний дизайн, синтез досліджень, стратегічне планування, повний цикл мислення, повсякденні завдання.',
     metrics: {
-      mathAndLogic: 91,
-      codingAndEngineering: 91,
-      systemArchitecture: 98,
-      scientificSynthesis: 99,
-      throughputSpeed: 84,
-      costEfficiency: 92,
+      mathAndLogic: 94,
+      codingAndEngineering: 93,
+      systemArchitecture: 99,
+      scientificSynthesis: 100,
+      throughputSpeed: 87,
+      costEfficiency: 93,
     }
   },
   {
-    modelId: 'nixima-0.1-coder',
+    modelId: 'nixima-0.2-coder',
     rank: 3,
-    overallScore: 93.6,
-    eloRating: 1695,
-    winRate: 85.0,
+    overallScore: 96.2,
+    eloRating: 1795,
+    winRate: 88.0,
     primaryBadge: 'SYSTEMS CODE TITAN',
     summaryEn: 'Specialized for zero-dependency idiomatic software development. Generates rock-solid production TypeScript, Rust, Python, concurrent memory management, and bug-free logic.',
     summaryUk: 'Спеціалізована модель для розробки складного програмного забезпечення. Генерує надійний код TypeScript, Rust, Python, безпечну роботу з пам\'яттю та тести.',
     recommendedForEn: 'Full-stack application development, refactoring, async concurrency, algorithms, unit test coverage.',
     recommendedForUk: 'Розробка додатків, рефакторинг, асинхронні структури, алгоритми, юніт-тестування.',
     metrics: {
-      mathAndLogic: 84,
-      codingAndEngineering: 99,
-      systemArchitecture: 93,
-      scientificSynthesis: 85,
-      throughputSpeed: 88,
-      costEfficiency: 86,
+      mathAndLogic: 87,
+      codingAndEngineering: 100,
+      systemArchitecture: 96,
+      scientificSynthesis: 88,
+      throughputSpeed: 91,
+      costEfficiency: 88,
     }
   },
   {
-    modelId: 'nixima-0.1-flash',
+    modelId: 'nixima-0.2-flash',
     rank: 4,
-    overallScore: 84.2,
-    eloRating: 1540,
-    winRate: 73.8,
-    primaryBadge: 'SPEED & EFFICIENCY LEADER',
-    summaryEn: 'Unrivaled throughput and sub-millisecond token latency. Ideal for high-speed scanning, instant conversational answers, and heavy multi-document parsing at minimal cost.',
-    summaryUk: 'Неперевершена швидкість генерації та субмілісекундна затримка. Ідеально підходить для миттєвих діалогів, швидкого сканування коду та документів з мінімальними витратами.',
+    overallScore: 89.5,
+    eloRating: 1640,
+    winRate: 79.8,
+    primaryBadge: 'HYPER-SPEED LEADER',
+    summaryEn: 'Unrivaled throughput and sub-millisecond token latency with 2M context window. Ideal for high-speed scanning, instant conversational answers, and massive multi-document parsing at minimal cost.',
+    summaryUk: 'Неперевершена швидкість генерації та субмілісекундна затримка з 2M контекстом. Ідеально підходить для миттєвих діалогів, швидкого сканування коду та документів з мінімальними витратами.',
     recommendedForEn: 'Live chat, instantaneous summarization, low-latency agentic loops, high-volume batch processing.',
     recommendedForUk: 'Швидкий чат, миттєве саммарі, агентні цикли з низькою затримкою, масовий аналіз тексту.',
     metrics: {
-      mathAndLogic: 72,
-      codingAndEngineering: 78,
-      systemArchitecture: 81,
-      scientificSynthesis: 82,
-      throughputSpeed: 99,
-      costEfficiency: 99,
+      mathAndLogic: 78,
+      codingAndEngineering: 82,
+      systemArchitecture: 85,
+      scientificSynthesis: 86,
+      throughputSpeed: 100,
+      costEfficiency: 100,
     }
   }
 ];
@@ -94,7 +94,7 @@ export const BENCHMARK_SUITES: BenchmarkSuite[] = [
     category: 'logic',
     domain: 'Pure Logic, Epistemic Modality & Discrete Math',
     difficulty: 'Frontier Extreme',
-    winnerModelId: 'nixima-0.1-reasoning',
+    winnerModelId: 'nixima-0.2-pro',
     prompt: `Three perfectly logical logicians A, B, and C each have a positive integer inscribed on their forehead. Each is told that one of the numbers is the strict sum of the other two. They can see each other's numbers clearly, but cannot see their own.
 
 The moderator asks in strict sequential order:
@@ -128,8 +128,8 @@ What are A and B's numbers? Show rigorous, step-by-step epistemic deduction, pro
       'Повна відсутність логічних суперечностей.'
     ],
     results: {
-      'nixima-0.1-reasoning': {
-        modelId: 'nixima-0.1-reasoning',
+      'nixima-0.2-pro': {
+        modelId: 'nixima-0.2-pro',
         score: {
           overall: 99,
           accuracy: 100,
@@ -240,8 +240,8 @@ The unique pair is **$A = 20$** and **$B = 30$**.`,
         keyStrengths: ['Full formal epistemic reasoning trace', 'Accurate state elimination for both branches', 'Crisp LaTeX math notation', 'Verified uniqueness'],
         keyTradeoffs: ['Longer time-to-first-token due to deep reasoning deliberation']
       },
-      'nixima-0.1': {
-        modelId: 'nixima-0.1',
+      'nixima-0.2': {
+        modelId: 'nixima-0.2',
         score: {
           overall: 92,
           accuracy: 96,
@@ -284,8 +284,8 @@ Each logician knows their number is either the sum or positive difference of the
         keyStrengths: ['Direct, elegant explanation', 'Fast generation time', 'Clear deduction steps'],
         keyTradeoffs: ['Less formal mathematical notation than Reasoning model']
       },
-      'nixima-0.1-coder': {
-        modelId: 'nixima-0.1-coder',
+      'nixima-0.2-coder': {
+        modelId: 'nixima-0.2-coder',
         score: {
           overall: 83,
           accuracy: 88,
@@ -337,8 +337,8 @@ def solve_puzzle():
         keyStrengths: ['Dual approach (code + deduction)', 'Algorithmic state simulation'],
         keyTradeoffs: ['Heuristic explanation rather than pure epistemic proof']
       },
-      'nixima-0.1-flash': {
-        modelId: 'nixima-0.1-flash',
+      'nixima-0.2-flash': {
+        modelId: 'nixima-0.2-flash',
         score: {
           overall: 72,
           accuracy: 75,
@@ -379,7 +379,7 @@ def solve_puzzle():
     category: 'coding',
     domain: 'Systems Programming & Data Structures',
     difficulty: 'Hard',
-    winnerModelId: 'nixima-0.1-coder',
+    winnerModelId: 'nixima-0.2-coder',
     prompt: `Implement a high-performance in-memory LRU Cache with TTL (Time-To-Live) expiration in TypeScript.
 
 Strict Requirements:
@@ -413,8 +413,8 @@ Strict Requirements:
       'Бездоганні інтерфейси TypeScript та обробники подій.'
     ],
     results: {
-      'nixima-0.1-coder': {
-        modelId: 'nixima-0.1-coder',
+      'nixima-0.2-coder': {
+        modelId: 'nixima-0.2-coder',
         score: {
           overall: 99,
           accuracy: 100,
@@ -608,8 +608,8 @@ export class LRUCache<K, V> {
         keyStrengths: ['Sentinel dummy nodes eliminate pointer branching', 'Node.js unref() timer safety', 'Strict O(1) operational complexity', 'Clean generic typing'],
         keyTradeoffs: ['None; fully compliant with all specifications']
       },
-      'nixima-0.1-reasoning': {
-        modelId: 'nixima-0.1-reasoning',
+      'nixima-0.2-pro': {
+        modelId: 'nixima-0.2-pro',
         score: {
           overall: 95,
           accuracy: 98,
@@ -654,8 +654,8 @@ export class LRUCache<K, V> {
         keyStrengths: ['Formal invariant proof', 'Sentinel edge-case verification'],
         keyTradeoffs: ['Slightly slower generation speed']
       },
-      'nixima-0.1': {
-        modelId: 'nixima-0.1',
+      'nixima-0.2': {
+        modelId: 'nixima-0.2',
         score: {
           overall: 91,
           accuracy: 94,
@@ -708,8 +708,8 @@ export class LRUCache<K, V> {
         keyStrengths: ['Clean readability', 'Compact code design'],
         keyTradeoffs: ['Manual pointer checks without dummy sentinels']
       },
-      'nixima-0.1-flash': {
-        modelId: 'nixima-0.1-flash',
+      'nixima-0.2-flash': {
+        modelId: 'nixima-0.2-flash',
         score: {
           overall: 77,
           accuracy: 80,
@@ -759,7 +759,7 @@ export class LRUCache<K, V> {
     category: 'architecture',
     domain: 'Distributed Consensus & High-Scale Real-Time Systems',
     difficulty: 'Frontier Extreme',
-    winnerModelId: 'nixima-0.1',
+    winnerModelId: 'nixima-0.2',
     prompt: `Design the end-to-end architecture for a real-time collaborative whiteboard (analogous to Figma or Excalidraw) serving 100,000 concurrent active users distributed globally.
 
 Key Engineering Requirements:
@@ -791,8 +791,8 @@ Key Engineering Requirements:
       'Реалістичний розрахунок затримки до 50мс.'
     ],
     results: {
-      'nixima-0.1': {
-        modelId: 'nixima-0.1',
+      'nixima-0.2': {
+        modelId: 'nixima-0.2',
         score: {
           overall: 98,
           accuracy: 99,
@@ -866,8 +866,8 @@ Key Engineering Requirements:
         keyStrengths: ['Real-world industry precision', 'Complete system topology diagram', 'Empirical latency table', 'Tombstone hazard mitigation'],
         keyTradeoffs: ['None']
       },
-      'nixima-0.1-reasoning': {
-        modelId: 'nixima-0.1-reasoning',
+      'nixima-0.2-pro': {
+        modelId: 'nixima-0.2-pro',
         score: {
           overall: 96,
           accuracy: 98,
@@ -900,8 +900,8 @@ We enforce causal delivery using Vector Clocks $V(C)$ where each peer increments
         keyStrengths: ['Formal proof of lattice convergence', 'Vector clock causality analysis'],
         keyTradeoffs: ['Lower speed and higher token cost']
       },
-      'nixima-0.1-coder': {
-        modelId: 'nixima-0.1-coder',
+      'nixima-0.2-coder': {
+        modelId: 'nixima-0.2-coder',
         score: {
           overall: 92,
           accuracy: 94,
@@ -945,8 +945,8 @@ message CanvasOp {
         keyStrengths: ['Protobuf schemas', 'Actionable systems stack'],
         keyTradeoffs: ['Less macro-architectural detail']
       },
-      'nixima-0.1-flash': {
-        modelId: 'nixima-0.1-flash',
+      'nixima-0.2-flash': {
+        modelId: 'nixima-0.2-flash',
         score: {
           overall: 81,
           accuracy: 84,
@@ -983,7 +983,7 @@ message CanvasOp {
     category: 'science',
     domain: 'Condensed Matter Physics & High-Order Analogy',
     difficulty: 'Complex',
-    winnerModelId: 'nixima-0.1',
+    winnerModelId: 'nixima-0.2',
     prompt: `Explain the Quantum Hall Effect, topological insulators, and Dirac cones to a Principal Systems Architect. Use metaphors from distributed consensus, unidirectional packet routing, and cryptographic invariance without dumbing down the actual physics (Berry phase, Chern numbers, backscattering immunity).`,
     promptUk: `Поясніть Квантовий ефект Холла, топологічні ізолятори та конуси Дірака для головного системного архітектора. Використовуйте метафори з розподіленого консенсусу, односпрямованої маршрутизації пакетів та криптографічних інваріантів, не спрощуючи реальну фізику (фаза Беррі, числа Черна, захист від зворотного розсіювання).`,
     contextDesc: 'Tests high-order cross-domain concept mapping, preserving rigorous mathematical physics while speaking fluent distributed systems vocabulary.',
@@ -1001,8 +1001,8 @@ message CanvasOp {
       'Точні паралелі з архітектурою розподілених систем.'
     ],
     results: {
-      'nixima-0.1': {
-        modelId: 'nixima-0.1',
+      'nixima-0.2': {
+        modelId: 'nixima-0.2',
         score: {
           overall: 99,
           accuracy: 100,
@@ -1053,8 +1053,8 @@ At the material boundary, electron dispersion forms **Dirac Cones**—energy lin
         keyStrengths: ['Zero compromise on physics depth', 'Deep architectural resonance', 'Superb clarity of prose'],
         keyTradeoffs: ['None']
       },
-      'nixima-0.1-reasoning': {
-        modelId: 'nixima-0.1-reasoning',
+      'nixima-0.2-pro': {
+        modelId: 'nixima-0.2-pro',
         score: {
           overall: 94,
           accuracy: 99,
@@ -1080,8 +1080,8 @@ At the material boundary, electron dispersion forms **Dirac Cones**—energy lin
         keyStrengths: ['Mathematical rigor', 'Hamiltonian formulations'],
         keyTradeoffs: ['Less metaphorical balance than Flagship']
       },
-      'nixima-0.1-coder': {
-        modelId: 'nixima-0.1-coder',
+      'nixima-0.2-coder': {
+        modelId: 'nixima-0.2-coder',
         score: {
           overall: 85,
           accuracy: 89,
@@ -1103,8 +1103,8 @@ At the material boundary, electron dispersion forms **Dirac Cones**—energy lin
         keyStrengths: ['Pragmatic network metaphor', 'Succinct summary'],
         keyTradeoffs: ['Less detail on Berry phase']
       },
-      'nixima-0.1-flash': {
-        modelId: 'nixima-0.1-flash',
+      'nixima-0.2-flash': {
+        modelId: 'nixima-0.2-flash',
         score: {
           overall: 82,
           accuracy: 85,
@@ -1139,7 +1139,7 @@ At the material boundary, electron dispersion forms **Dirac Cones**—energy lin
     category: 'speed',
     domain: 'Inference Engine Benchmarking & Throughput Telemetry',
     difficulty: 'Standard',
-    winnerModelId: 'nixima-0.1-flash',
+    winnerModelId: 'nixima-0.2-flash',
     prompt: `Generate a structured, 1,000-token multi-stage security audit report for an OAuth 2.0 PKCE implementation. Measure Time-To-First-Token (TTFT), sustained token throughput (tokens/second), and compute credit consumption.`,
     promptUk: `Згенеруйте структурований звіт з аудиту безпеки протоколу OAuth 2.0 з розширенням PKCE. Виміряйте час до першого токена (TTFT), постійну швидкість генерації (токенів/сек) та споживання кредитів.`,
     contextDesc: 'Simulates high-volume enterprise document extraction and streaming response velocity across clusters.',
@@ -1157,8 +1157,8 @@ At the material boundary, electron dispersion forms **Dirac Cones**—energy lin
       'Економічна ефективність на 1000 токенів.'
     ],
     results: {
-      'nixima-0.1-flash': {
-        modelId: 'nixima-0.1-flash',
+      'nixima-0.2-flash': {
+        modelId: 'nixima-0.2-flash',
         score: {
           overall: 99,
           accuracy: 90,
@@ -1186,8 +1186,8 @@ At the material boundary, electron dispersion forms **Dirac Cones**—energy lin
         keyStrengths: ['Fastest TTFT (135ms)', 'Over 71 tokens/sec throughput', 'Minimal credit consumption'],
         keyTradeoffs: ['Less extensive analytical prose than Flagship']
       },
-      'nixima-0.1-coder': {
-        modelId: 'nixima-0.1-coder',
+      'nixima-0.2-coder': {
+        modelId: 'nixima-0.2-coder',
         score: {
           overall: 88,
           accuracy: 94,
@@ -1217,8 +1217,8 @@ export function verifyCodeChallenge(verifier: string, challenge: string): boolea
         keyStrengths: ['Included constant-time crypto implementation', 'Strong speed'],
         keyTradeoffs: ['1.5x credit multiplier']
       },
-      'nixima-0.1': {
-        modelId: 'nixima-0.1',
+      'nixima-0.2': {
+        modelId: 'nixima-0.2',
         score: {
           overall: 85,
           accuracy: 96,
@@ -1243,8 +1243,8 @@ export function verifyCodeChallenge(verifier: string, challenge: string): boolea
         keyStrengths: ['Great balance of speed and depth', 'Standard 1.0x cost'],
         keyTradeoffs: ['Slower than Flash']
       },
-      'nixima-0.1-reasoning': {
-        modelId: 'nixima-0.1-reasoning',
+      'nixima-0.2-pro': {
+        modelId: 'nixima-0.2-pro',
         score: {
           overall: 74,
           accuracy: 99,

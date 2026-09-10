@@ -738,19 +738,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </div>
                   <div className="divide-y divide-zinc-800/60 bg-zinc-950/50">
                     <div className="grid grid-cols-2 p-2.5 items-center">
-                      <span className="text-white font-medium">Nixima-0.1 (Flagship)</span>
-                      <span className="text-zinc-400 text-[11px]">openrouter/free (Auto-Router)</span>
+                      <span className="text-white font-medium">Nixima-0.2 (Flagship)</span>
+                      <span className="text-zinc-400 text-[11px]">openrouter/free (SRA v2 Router)</span>
                     </div>
                     <div className="grid grid-cols-2 p-2.5 items-center">
-                      <span className="text-white font-medium">Nixima-0.1 Reasoning</span>
+                      <span className="text-white font-medium">Nixima-0.2 Pro</span>
                       <span className="text-zinc-400 text-[11px]">nvidia/nemotron-nano-reasoning</span>
                     </div>
                     <div className="grid grid-cols-2 p-2.5 items-center">
-                      <span className="text-white font-medium">Nixima-0.1 Coder</span>
+                      <span className="text-white font-medium">Nixima-0.2 Coder</span>
                       <span className="text-zinc-400 text-[11px]">cohere/north-mini-code</span>
                     </div>
                     <div className="grid grid-cols-2 p-2.5 items-center">
-                      <span className="text-white font-medium">Nixima-0.1 Flash</span>
+                      <span className="text-white font-medium">Nixima-0.2 Flash</span>
                       <span className="text-zinc-400 text-[11px]">nvidia/nemotron-3.5-lightning</span>
                     </div>
                   </div>
