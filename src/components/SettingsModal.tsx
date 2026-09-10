@@ -19,7 +19,9 @@ import {
   ShieldAlert,
   Zap,
   Keyboard,
-  Globe
+  Globe,
+  Coins,
+  Gift
 } from 'lucide-react';
 import { UserSettings, Conversation } from '../types/chat';
 import { NiximaUser } from '../types/user';
@@ -29,6 +31,10 @@ import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotk
 import { HotkeyCustomizerModal } from './HotkeyCustomizerModal';
 import { useLanguage } from '../context/LanguageContext';
 import { CountryFlag } from './CountryFlag';
+import { grantUserCredits, getUserCredits } from '../utils/credits';
+import { MODELS } from '../data/models';
+
+export type SettingsTab = 'general' | 'inference' | 'persona' | 'data' | 'api' | 'credits';
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -40,9 +46,9 @@ interface SettingsModalProps {
   onImportConversations: (imported: Conversation[]) => void;
   currentUser: NiximaUser | null;
   onLogout: () => void;
+  initialTab?: SettingsTab;
+  onUserUpdated?: (user: NiximaUser) => void;
 }
-
-type SettingsTab = 'general' | 'inference' | 'persona' | 'data' | 'api';
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
   isOpen,
@@ -54,9 +60,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onImportConversations,
   currentUser,
   onLogout,
+  initialTab = 'general',
+  onUserUpdated,
 }) => {
   const { language, setLanguage, t } = useLanguage();
-  const [activeTab, setActiveTab] = useState<SettingsTab>('general');
+  const [activeTab, setActiveTab] = useState<SettingsTab>(initialTab);
+  const [dailyClaimSuccess, setDailyClaimSuccess] = useState(false);
   const [apiKeyCopied, setApiKeyCopied] = useState(false);
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [hotkeyConfig, setHotkeyConfig] = useState<HotkeyConfig>(() => getSavedHotkey());
@@ -75,6 +84,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     return () => window.removeEventListener(HOTKEY_CHANGE_EVENT, handleUpdate);
   }, []);
 
+  React.useEffect(() => {
+    if (isOpen && initialTab) {
+      setActiveTab(initialTab);
+    }
+  }, [isOpen, initialTab]);
+
   if (!isOpen) return null;
 
   const mockApiKey = 'nxm-frontier-99a4e21b88e1467df83c921';
@@ -90,48 +105,72 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(conversations, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", `nixima_ai_backup_${new Date().toISOString().slice(0, 10)}.json`);
+    downloadAnchor.setAttribute("download", `nixima_export_${new Date().toISOString().slice(0,10)}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
   };
 
-  // Import conversations from JSON
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Export all conversations to Markdown
+  const handleExportMarkdown = () => {
+    let md = `# Nixima AI Conversation Archive\n\n*Exported on ${new Date().toLocaleString()}*\n\n---\n\n`;
+    conversations.forEach((conv, idx) => {
+      md += `## ${idx + 1}. ${conv.title}\n`;
+      md += `*Model: ${conv.model} | Created: ${new Date(conv.createdAt).toLocaleString()}*\n\n`;
+      conv.messages.forEach((msg) => {
+        const role = msg.sender === 'user' ? 'Operator' : 'Nixima AI';
+        md += `### [${role}] - ${new Date(msg.timestamp).toLocaleTimeString()}\n\n${msg.content}\n\n`;
+      });
+      md += `---\n\n`;
+    });
+
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute("href", url);
+    downloadAnchor.setAttribute("download", `nixima_archive_${new Date().toISOString().slice(0,10)}.md`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  // Import JSON file
+  const handleImportJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = (event) => {
       try {
-        const json = JSON.parse(event.target?.result as string);
-        if (Array.isArray(json)) {
-          onImportConversations(json);
-          setImportStatus(`Successfully imported ${json.length} conversations!`);
-          setTimeout(() => setImportStatus(null), 3500);
+        const parsed = JSON.parse(event.target?.result as string);
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].id && parsed[0].messages) {
+          onImportConversations(parsed);
+          setImportStatus('success');
+          setTimeout(() => setImportStatus(null), 3000);
         } else {
-          setImportStatus('Error: Invalid JSON format.');
+          setImportStatus('error');
+          setTimeout(() => setImportStatus(null), 3000);
         }
       } catch (err) {
-        setImportStatus('Error: Could not parse JSON file.');
+        setImportStatus('error');
+        setTimeout(() => setImportStatus(null), 3000);
       }
     };
     reader.readAsText(file);
-    e.target.value = '';
+    if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
   const tones = t.settings.tones;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div className="w-full max-w-2xl rounded-2xl bg-[#121216] border border-zinc-700/80 shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="w-full max-w-2xl bg-[#09090b] border border-[#27272a] rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-200">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-zinc-800 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded bg-white text-black font-black text-xs flex items-center justify-center font-mono">
-              N
-            </div>
-            <h2 className="text-sm font-bold text-white uppercase tracking-wider font-mono">
+        <div className="px-6 py-4 border-b border-zinc-800 flex items-center justify-between bg-[#0e0e11]">
+          <div className="flex items-center gap-2">
+            <Sliders className="w-5 h-5 text-white" />
+            <h2 className="text-base font-semibold text-white tracking-wide">
               {t.settings.title}
             </h2>
           </div>
@@ -153,6 +192,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           >
             <User className="w-3.5 h-3.5" />
             {t.settings.tabs.general}
+          </button>
+          <button
+            onClick={() => setActiveTab('credits')}
+            className={`px-3.5 py-2.5 border-b-2 font-medium transition-colors flex items-center gap-1.5 whitespace-nowrap ${
+              activeTab === 'credits' ? 'border-amber-400 text-amber-300' : 'border-transparent text-zinc-400 hover:text-zinc-200'
+            }`}
+          >
+            <Coins className="w-3.5 h-3.5 text-amber-400" />
+            {t.settings.tabs.credits}
           </button>
           <button
             onClick={() => setActiveTab('inference')}
@@ -680,6 +728,136 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 6: NIXIMA CREDITS */}
+          {activeTab === 'credits' && (
+            <div className="space-y-5">
+              {/* Balance Hero Card */}
+              <div className="p-5 rounded-2xl bg-gradient-to-br from-amber-950/30 via-zinc-900/90 to-zinc-950 border border-amber-500/30 shadow-lg shadow-amber-950/20 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="w-8 h-8 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center">
+                      <Coins className="w-4 h-4 text-amber-400" />
+                    </span>
+                    <div>
+                      <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-amber-400">
+                        {t.credits.badge}
+                      </h3>
+                      <p className="text-[11px] text-zinc-400 font-mono">
+                        {t.credits.balance}
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono font-medium">
+                    {language === 'uk' ? 'Активний статус' : 'Active Status'}
+                  </span>
+                </div>
+
+                <div className="flex items-baseline gap-2 pt-1">
+                  <span className="text-4xl font-extrabold font-mono tracking-tight text-white drop-shadow-[0_0_15px_rgba(245,158,11,0.3)]">
+                    {getUserCredits(currentUser).toLocaleString()}
+                  </span>
+                  <span className="text-sm font-bold font-mono text-amber-400">
+                    {t.credits.unit}
+                  </span>
+                </div>
+
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  {t.credits.initialBonusNotice}
+                </p>
+              </div>
+
+              {/* Daily Grant Recharge Card */}
+              <div className="p-4 rounded-xl bg-zinc-900/80 border border-zinc-700/70 shadow-inner-light space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <Gift className="w-4 h-4 text-emerald-400" />
+                      <h4 className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                        {t.credits.dailyGrantTitle}
+                      </h4>
+                    </div>
+                    <p className="text-xs text-zinc-400">
+                      {t.credits.dailyGrantDesc}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      const { updatedUser } = grantUserCredits(currentUser, 500);
+                      onUserUpdated?.(updatedUser);
+                      playTypingTick();
+                      setDailyClaimSuccess(true);
+                      setTimeout(() => setDailyClaimSuccess(false), 3000);
+                    }}
+                    className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-semibold text-xs font-mono transition-all flex items-center gap-1.5 shadow-md flex-shrink-0"
+                  >
+                    <Zap className="w-3.5 h-3.5 fill-black" />
+                    <span>{dailyClaimSuccess ? t.credits.dailyGrantClaimed : t.credits.claimDailyGrant}</span>
+                  </button>
+                </div>
+                {dailyClaimSuccess && (
+                  <div className="p-2 rounded bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-mono flex items-center gap-1.5 animate-in fade-in duration-200">
+                    <Check className="w-3.5 h-3.5" />
+                    <span>{language === 'uk' ? 'Успішно нараховано +500 Nixima Credits на ваш баланс!' : 'Successfully claimed +500 Nixima Credits to your balance!'}</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Model Pricing Rates Table */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
+                    {t.credits.ratesTitle}
+                  </label>
+                  <span className="text-[10px] text-zinc-500 font-mono">
+                    {t.credits.ratesDesc}
+                  </span>
+                </div>
+                <div className="rounded-xl border border-zinc-800 overflow-hidden text-xs font-mono">
+                  <div className="grid grid-cols-4 p-2.5 bg-zinc-900/90 border-b border-zinc-800 text-zinc-400 text-[11px] font-semibold">
+                    <span>{language === 'uk' ? 'Модель' : 'Model'}</span>
+                    <span>{language === 'uk' ? 'База' : 'Base Cost'}</span>
+                    <span>{language === 'uk' ? 'Множник' : 'Multiplier'}</span>
+                    <span>{language === 'uk' ? 'Призначення' : 'Target Use'}</span>
+                  </div>
+                  <div className="divide-y divide-zinc-800/60 bg-zinc-950/50">
+                    {MODELS.map((m) => (
+                      <div key={m.id} className="grid grid-cols-4 p-2.5 items-center">
+                        <div className="flex items-center gap-1.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                          <span className="text-white font-medium truncate">{m.name}</span>
+                        </div>
+                        <span className="text-amber-300 font-bold">{m.baseCreditCost ?? 5} CR</span>
+                        <span className="text-zinc-300">{(m.creditMultiplier ?? 1.0).toFixed(1)}x</span>
+                        <span className="text-zinc-400 text-[11px] truncate">
+                          {m.id.includes('flash')
+                            ? (language === 'uk' ? 'Швидкі запити' : 'Fast & Efficient')
+                            : m.id.includes('reasoning')
+                            ? (language === 'uk' ? 'Глибоке мислення' : 'Deep Reasoning')
+                            : m.id.includes('coder')
+                            ? (language === 'uk' ? 'Програмування' : 'Code Synthesizing')
+                            : (language === 'uk' ? 'Універсальний' : 'General Tasks')}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Dynamic Difficulty Regulation Notice */}
+              <div className="p-3.5 rounded-xl bg-zinc-900/60 border border-zinc-800/80 space-y-1.5 text-xs text-zinc-400">
+                <div className="flex items-center gap-1.5 text-amber-400 font-mono font-semibold text-[11px] uppercase tracking-wider">
+                  <Flame className="w-3.5 h-3.5" />
+                  <span>{t.credits.hardPromptNotice}</span>
+                </div>
+                <p className="text-[11px] leading-relaxed">
+                  {language === 'uk'
+                    ? 'Система Nixima автоматично аналізує довжину тексту, наявність коду, формул LaTeX та активований режим DeepThink. Прості короткі запити коштують мінімально, тоді як масивні технічні обчислення списують кредити пропорційно навантаженню AI кластера.'
+                    : 'The Nixima runtime automatically analyzes prompt length, presence of code blocks, LaTeX formulas, and active DeepThink reasoning depth. Simple queries consume minimal credits, whereas intensive technical computations dynamically scale credit deductions to reflect neural cluster workload.'}
+                </p>
               </div>
             </div>
           )}

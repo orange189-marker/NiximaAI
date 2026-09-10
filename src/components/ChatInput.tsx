@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { 
   ArrowUp, 
   BrainCircuit, 
@@ -12,11 +12,13 @@ import {
   Table,
   Sparkles,
   CornerDownLeft,
-  X
+  X,
+  Coins
 } from 'lucide-react';
 import { ModelOption } from '../types/chat';
 import { NiximaIdLogo } from './NiximaIdLogo';
 import { useLanguage } from '../context/LanguageContext';
+import { calculateEstimatedCost } from '../utils/credits';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -29,6 +31,8 @@ interface ChatInputProps {
   onToggleWebSearch: () => void;
   soundEnabled: boolean;
   onToggleSound: () => void;
+  userCredits?: number;
+  onOpenCredits?: () => void;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -42,6 +46,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onToggleWebSearch,
   soundEnabled,
   onToggleSound,
+  userCredits = 1000,
+  onOpenCredits,
 }) => {
   const { t } = useLanguage();
   const [input, setInput] = useState('');
@@ -111,7 +117,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     { label: t.chatInput.modifiers.table.label, icon: <Table className="w-3 h-3 text-violet-400" />, prompt: t.chatInput.modifiers.table.prompt },
   ];
 
-  const canSubmit = (input.trim().length > 0 || attachedFiles.length > 0) && !isLoading;
+  const estimated = useMemo(() => {
+    return calculateEstimatedCost(input, currentModel, deepThink);
+  }, [input, currentModel, deepThink]);
+
+  const hasCredits = (userCredits ?? 1000) >= (currentModel.baseCreditCost || 2);
+  const canSubmit = (input.trim().length > 0 || attachedFiles.length > 0) && !isLoading && hasCredits;
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4 pb-4 pt-1">
@@ -248,7 +259,31 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             </div>
 
             {/* Right Controls: Telemetry & Send/Stop Beacon */}
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-2">
+              {/* Live Credit Estimate Badge */}
+              <button
+                type="button"
+                onClick={onOpenCredits}
+                className={`hidden min-[360px]:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-mono border transition-all select-none cursor-pointer ${
+                  !hasCredits
+                    ? 'bg-red-950/60 border-red-800 text-red-300'
+                    : estimated.isHardPrompt
+                    ? 'bg-amber-950/40 border-amber-800/60 text-amber-300 hover:border-amber-600'
+                    : 'bg-zinc-900 border-zinc-800 text-zinc-400 hover:text-zinc-200'
+                }`}
+                title={
+                  !hasCredits
+                    ? t.credits.insufficientTooltip(estimated.minCost, userCredits)
+                    : `${t.credits.badge}: ${t.credits.estCost(estimated.minCost, estimated.maxCost)} (${currentModel.shortName})`
+                }
+              >
+                <Coins className={`w-3 h-3 ${!hasCredits ? 'text-red-400' : 'text-amber-400'}`} />
+                <span>{t.credits.estCost(estimated.minCost, estimated.maxCost)}</span>
+                {estimated.isHardPrompt && (
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                )}
+              </button>
+
               {input.length > 0 && (
                 <span className="hidden md:inline text-[10.5px] font-mono text-zinc-500 select-none">
                   {input.length} {t.chatInput.chars}

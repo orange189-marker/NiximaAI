@@ -11,6 +11,8 @@ export interface ModelOption {
   isFlagship?: boolean;
   openRouterModel?: string;
   fallbackModels?: string[];
+  creditMultiplier?: number;
+  baseCreditCost?: number;
 }
 
 export interface MessageTelemetry {
@@ -18,6 +20,7 @@ export interface MessageTelemetry {
   durationMs: number;
   tokensPerSec: number;
   model: string;
+  creditsSpent?: number;
 }
 
 export interface Message {

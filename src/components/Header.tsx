@@ -12,7 +12,8 @@ import {
   BrainCircuit,
   Sliders,
   Plus,
-  X
+  X,
+  Coins
 } from 'lucide-react';
 import { ModelOption } from '../types/chat';
 import { NIXIMA_MODELS } from '../data/models';
@@ -29,6 +30,8 @@ interface HeaderProps {
   isSidebarOpen: boolean;
   onToggleSidebar: () => void;
   onNewChat?: () => void;
+  credits?: number;
+  onOpenCredits?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -38,7 +41,9 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenCompanyInfo,
   isSidebarOpen,
   onToggleSidebar,
-  onNewChat
+  onNewChat,
+  credits = 1000,
+  onOpenCredits
 }) => {
   const { language, toggleLanguage, t } = useLanguage();
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
@@ -261,6 +266,22 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span>{t.header.meshActive}</span>
         </div>
+
+        {/* Nixima Credits Balance Chip */}
+        <button
+          type="button"
+          onClick={onOpenCredits || onOpenSettings}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r from-amber-500/10 via-zinc-900 to-amber-500/5 border border-amber-500/30 hover:border-amber-500/60 text-amber-300 hover:text-amber-200 transition-all text-xs font-mono select-none cursor-pointer shadow-[0_0_12px_rgba(245,158,11,0.12)] group"
+          title={`${t.credits.balance}: ${credits.toLocaleString()} ${t.credits.unit}`}
+        >
+          <Coins className="w-3.5 h-3.5 text-amber-400 group-hover:scale-110 transition-transform" />
+          <span className="font-bold tracking-tight text-white">
+            {credits.toLocaleString()}
+          </span>
+          <span className="text-[10px] text-amber-400 font-semibold hidden min-[480px]:inline">
+            CR
+          </span>
+        </button>
 
         {/* Quick Language Toggle Button with SVG Flag */}
         <button

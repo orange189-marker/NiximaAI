@@ -1,0 +1,211 @@
+import { NiximaUser } from '../types/user';
+import { ModelOption } from '../types/chat';
+import { getAllUsers, saveUsers, setActiveUser, getActiveUser } from './auth';
+
+export const DEFAULT_INITIAL_CREDITS = 1000;
+export const DAILY_GRANT_AMOUNT = 500;
+export const DEVELOPER_TOPUP_AMOUNT = 1000;
+export const NIXIMA_CREDITS_EVENT = 'nixima_credits_changed';
+
+export interface CreditCostBreakdown {
+  credits: number;
+  inputCost: number;
+  outputCost: number;
+  thinkingCost: number;
+  modelMultiplier: number;
+  isHardPrompt: boolean;
+}
+
+/**
+ * Retrieves the current balance for the given user, defaulting to 1,000 for any new account.
+ */
+export function getUserCredits(user?: NiximaUser | null): number {
+  if (!user) {
+    const active = getActiveUser();
+    if (!active) return DEFAULT_INITIAL_CREDITS;
+    return typeof active.credits === 'number' ? active.credits : DEFAULT_INITIAL_CREDITS;
+  }
+  return typeof user.credits === 'number' ? user.credits : DEFAULT_INITIAL_CREDITS;
+}
+
+/**
+ * Calculates a live real-time estimated credit cost for the chat input dock based on:
+ * - Current prompt length
+ * - Model architecture tier (Flash 0.5x, Default 1.0x, Coder 1.5x, Reasoning 2.5x)
+ * - Deep Think flag (additional compute power)
+ * - Prompt complexity heuristics (code snippets, mathematical proofs, multiline datasets)
+ */
+export function calculateEstimatedCost(
+  prompt: string,
+  model: ModelOption,
+  deepThink: boolean
+): { minCost: number; maxCost: number; isHardPrompt: boolean } {
+  const modelMult = model.creditMultiplier || 1.0;
+  const baseMin = model.baseCreditCost || 5;
+
+  const cleanPrompt = prompt.trim();
+  const inputLen = cleanPrompt.length;
+
+  // Detect if the prompt is computationally "hard"
+  const hasCode = /```|function|def\s+|class\s+|SELECT\s+|import\s+/i.test(cleanPrompt);
+  const hasMath = /\\frac|\\int|\\sum|\\partial|\$|equation|proof|theorem/i.test(cleanPrompt);
+  const isLong = inputLen > 350;
+  const isHardPrompt = hasCode || hasMath || isLong || deepThink || model.id.includes('reasoning');
+
+  // Input weight
+  const inputWeight = Math.max(1, Math.ceil(inputLen / 50));
+
+  // Base estimate
+  let estimatedMin = Math.round(baseMin + inputWeight * 0.8 * modelMult);
+  let estimatedMax = Math.round(estimatedMin + (isHardPrompt ? 15 : 6) * modelMult);
+
+  if (deepThink) {
+    estimatedMin = Math.round(estimatedMin * 1.5);
+    estimatedMax = Math.round(estimatedMax * 1.8);
+  }
+
+  return {
+    minCost: Math.max(baseMin, estimatedMin),
+    maxCost: Math.max(baseMin + 3, estimatedMax),
+    isHardPrompt,
+  };
+}
+
+/**
+ * Calculates the exact final credit cost upon response completion based on:
+ * - Input tokens
+ * - Output response tokens
+ * - Extended reasoning / thinking trace tokens
+ * - Model multiplier
+ */
+export function calculateActualCost(
+  prompt: string,
+  response: string,
+  thinking: string | undefined,
+  model: ModelOption,
+  deepThink: boolean
+): CreditCostBreakdown {
+  const modelMult = model.creditMultiplier || 1.0;
+  const baseMin = model.baseCreditCost || 5;
+
+  // Approximate token counts (1 token ≈ 4 characters)
+  const inputTokens = Math.max(1, Math.round(prompt.length / 4));
+  const outputTokens = Math.max(1, Math.round(response.length / 4));
+  const thinkingTokens = thinking ? Math.round(thinking.length / 4) : 0;
+
+  // Complexity indicator
+  const isHardPrompt =
+    inputTokens > 100 ||
+    thinkingTokens > 60 ||
+    deepThink ||
+    model.id.includes('reasoning') ||
+    /```|\$|\\int|\\sum/i.test(prompt);
+
+  // Compute components
+  const inputCost = Math.ceil((inputTokens / 25) * modelMult);
+  const outputCost = Math.ceil((outputTokens / 20) * modelMult);
+  // Thinking tokens have a higher compute intensity multiplier
+  const thinkingCost = thinkingTokens > 0 ? Math.ceil((thinkingTokens / 15) * modelMult * 1.3) : 0;
+
+  const rawSum = inputCost + outputCost + thinkingCost;
+  const difficultySurge = isHardPrompt ? 1.15 : 1.0;
+
+  const finalCredits = Math.max(baseMin, Math.round(rawSum * difficultySurge));
+
+  return {
+    credits: finalCredits,
+    inputCost,
+    outputCost,
+    thinkingCost,
+    modelMultiplier: modelMult,
+    isHardPrompt,
+  };
+}
+
+/**
+ * Deducts credits from a user, updates all local/session storage records, and notifies active listeners.
+ */
+export function deductUserCredits(
+  user: NiximaUser,
+  amount: number
+): { updatedUser: NiximaUser; remainingCredits: number; deducted: number } {
+  const currentCredits = getUserCredits(user);
+  const remainingCredits = Math.max(0, currentCredits - amount);
+
+  const updatedUser: NiximaUser = {
+    ...user,
+    credits: remainingCredits,
+  };
+
+  // Persist updated user
+  const allUsers = getAllUsers();
+  const updatedAll = allUsers.map(u => (u.id === user.id ? updatedUser : u));
+  saveUsers(updatedAll);
+  setActiveUser(updatedUser);
+
+  // Broadcast event across UI
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent(NIXIMA_CREDITS_EVENT, {
+        detail: {
+          userId: user.id,
+          credits: remainingCredits,
+          deducted: amount,
+        },
+      })
+    );
+  }
+
+  return {
+    updatedUser,
+    remainingCredits,
+    deducted: amount,
+  };
+}
+
+/**
+ * Grants credits to a user (e.g. daily reload, developer top-up, bonus).
+ */
+export function grantUserCredits(
+  user: NiximaUser,
+  amount: number
+): { updatedUser: NiximaUser; newBalance: number } {
+  const currentCredits = getUserCredits(user);
+  const newBalance = currentCredits + amount;
+
+  const updatedUser: NiximaUser = {
+    ...user,
+    credits: newBalance,
+  };
+
+  const allUsers = getAllUsers();
+  const updatedAll = allUsers.map(u => (u.id === user.id ? updatedUser : u));
+  saveUsers(updatedAll);
+  setActiveUser(updatedUser);
+
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(
+      new CustomEvent(NIXIMA_CREDITS_EVENT, {
+        detail: {
+          userId: user.id,
+          credits: newBalance,
+          granted: amount,
+        },
+      })
+    );
+  }
+
+  return {
+    updatedUser,
+    newBalance,
+  };
+}
+
+/**
+ * Checks if the user has sufficient credits to dispatch a prompt with the chosen model.
+ */
+export function hasSufficientCredits(user: NiximaUser | null, model: ModelOption): boolean {
+  const credits = getUserCredits(user);
+  const minCost = model.baseCreditCost || 2;
+  return credits >= minCost;
+}

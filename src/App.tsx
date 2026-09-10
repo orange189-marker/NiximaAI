@@ -4,7 +4,7 @@ import { Sidebar } from './components/Sidebar';
 import { ChatMessage } from './components/ChatMessage';
 import { ChatInput } from './components/ChatInput';
 import { EmptyChat } from './components/EmptyChat';
-import { SettingsModal } from './components/SettingsModal';
+import { SettingsModal, SettingsTab } from './components/SettingsModal';
 import { CompanyModal } from './components/CompanyModal';
 import { AuthPortal } from './components/AuthPortal';
 import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry } from './types/chat';
@@ -15,6 +15,13 @@ import { streamOpenRouterChat } from './utils/openrouter';
 import { playTypingTick, playCompletionChime } from './utils/sound';
 import { getActiveUser, logoutUser, syncAccountsWithServer } from './utils/auth';
 import { getSavedHotkey, matchesHotkey } from './utils/hotkeys';
+import { 
+  getUserCredits, 
+  calculateActualCost, 
+  deductUserCredits, 
+  hasSufficientCredits, 
+  NIXIMA_CREDITS_EVENT 
+} from './utils/credits';
 
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 
@@ -92,7 +99,29 @@ const AppContent: React.FC = () => {
   // 6. UI & Modals
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<SettingsTab>('general');
   const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
+
+  // Sync user credits on event
+  useEffect(() => {
+    const handleCreditsChange = (e: any) => {
+      if (e.detail && e.detail.credits !== undefined) {
+        setCurrentUser(prev => prev ? { ...prev, credits: e.detail.credits } : prev);
+      }
+    };
+    window.addEventListener(NIXIMA_CREDITS_EVENT, handleCreditsChange);
+    return () => window.removeEventListener(NIXIMA_CREDITS_EVENT, handleCreditsChange);
+  }, []);
+
+  const handleOpenCredits = () => {
+    setSettingsTab('credits');
+    setIsSettingsOpen(true);
+  };
+
+  const handleOpenSettings = (tab: SettingsTab = 'general') => {
+    setSettingsTab(tab);
+    setIsSettingsOpen(true);
+  };
 
   // 7. Streaming & generation state
   const [isLoading, setIsLoading] = useState(false);
@@ -303,6 +332,11 @@ All conversations and model preferences in this workspace are private to your Ni
   const handleSendMessage = async (userText: string) => {
     if (!userText.trim() || isLoading) return;
 
+    if (!hasSufficientCredits(currentUser, currentModel)) {
+      handleOpenCredits();
+      return;
+    }
+
     let targetConvId = activeId;
     let currentConv = conversations.find(c => c.id === targetConvId);
 
@@ -409,11 +443,27 @@ All conversations and model preferences in this workspace are private to your Ni
 
       const durationMs = Math.round(performance.now() - startTime);
       const estTokens = Math.round(fullContent.length / 4);
+
+      // Deduct credits based on prompt difficulty, response tokens, and reasoning trace
+      const costResult = calculateActualCost(
+        userText,
+        fullContent,
+        fullThinking,
+        currentModel,
+        settings.deepThinkEnabled
+      );
+
+      if (currentUser) {
+        const { updatedUser } = deductUserCredits(currentUser, costResult.credits);
+        setCurrentUser(updatedUser);
+      }
+
       const telemetry: MessageTelemetry = {
         tokens: estTokens,
         durationMs,
         tokensPerSec: Math.round((estTokens / (durationMs / 1000 || 1))),
         model: currentModel.name,
+        creditsSpent: costResult.credits,
       };
 
       setConversations(prev => prev.map(c => {
@@ -518,7 +568,7 @@ All conversations and model preferences in this workspace are private to your Ni
         onClose={() => setIsSidebarOpen(false)}
         currentUser={currentUser}
         onLogout={handleLogout}
-        onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenSettings={() => handleOpenSettings('general')}
         onOpenCompanyInfo={() => setIsCompanyModalOpen(true)}
       />
 
@@ -528,11 +578,13 @@ All conversations and model preferences in this workspace are private to your Ni
         <Header
           currentModel={currentModel}
           onSelectModel={setCurrentModel}
-          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenSettings={() => handleOpenSettings('general')}
           onOpenCompanyInfo={() => setIsCompanyModalOpen(true)}
           isSidebarOpen={isSidebarOpen}
           onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
           onNewChat={handleNewChat}
+          credits={getUserCredits(currentUser)}
+          onOpenCredits={handleOpenCredits}
         />
 
         {/* Chat Messages Container */}
@@ -570,6 +622,8 @@ All conversations and model preferences in this workspace are private to your Ni
           onToggleWebSearch={() => setSettings(s => ({ ...s, webSearchEnabled: !s.webSearchEnabled }))}
           soundEnabled={settings.soundEnabled}
           onToggleSound={() => setSettings(s => ({ ...s, soundEnabled: !s.soundEnabled }))}
+          userCredits={getUserCredits(currentUser)}
+          onOpenCredits={handleOpenCredits}
         />
       </div>
 
@@ -584,6 +638,8 @@ All conversations and model preferences in this workspace are private to your Ni
         onImportConversations={handleImportConversations}
         currentUser={currentUser}
         onLogout={handleLogout}
+        initialTab={settingsTab}
+        onUserUpdated={(updated) => setCurrentUser(updated)}
       />
 
       {/* Company Overview Modal */}

@@ -201,6 +201,25 @@ export interface Translations {
     copiedMarkdown: string;
   };
 
+  credits: {
+    badge: string;
+    unit: string;
+    balance: string;
+    estCost: (min: number, max: number) => string;
+    insufficientCredits: string;
+    insufficientTooltip: (cost: number, balance: number) => string;
+    spent: (amount: number) => string;
+    dailyGrantTitle: string;
+    dailyGrantDesc: string;
+    claimDailyGrant: string;
+    dailyGrantClaimed: string;
+    ratesTitle: string;
+    ratesDesc: string;
+    hardPromptNotice: string;
+    rechargeModalTitle: string;
+    initialBonusNotice: string;
+  };
+
   emptyChat: {
     brandBadge: (model: string) => string;
     heroTitle: string;
@@ -223,6 +242,7 @@ export interface Translations {
       persona: string;
       data: string;
       api: string;
+      credits: string;
     };
     languageSectionTitle: string;
     languageSectionDesc: string;
@@ -511,6 +531,26 @@ export const translations: Record<Language, Translations> = {
       copiedMarkdown: 'Copied MD!',
     },
 
+    credits: {
+      badge: 'Nixima Credits',
+      unit: 'CR',
+      balance: 'Credits Balance',
+      estCost: (min: number, max: number) => `~${min}-${max} CR`,
+      insufficientCredits: 'Insufficient Credits',
+      insufficientTooltip: (cost: number, balance: number) =>
+        `This prompt requires ~${cost} CR, but your balance is ${balance} CR. Claim daily recharge in Settings to continue.`,
+      spent: (amount: number) => `-${amount} CR`,
+      dailyGrantTitle: 'Daily Mesh Credit Grant',
+      dailyGrantDesc: 'Claim +500 Nixima Credits every 24 hours to recharge your frontier intelligence pool.',
+      claimDailyGrant: 'Claim +500 Credits',
+      dailyGrantClaimed: '500 Credits Claimed!',
+      ratesTitle: 'Model Consumption Rates & Multipliers',
+      ratesDesc: 'Credit consumption scales dynamically with model tier, reasoning depth, and prompt difficulty.',
+      hardPromptNotice: 'High-complexity prompts (code synthesis, mathematical proofs, long context, and Deep Think) consume compute power proportionally.',
+      rechargeModalTitle: 'Nixima Credits Ledger & Top-Up',
+      initialBonusNotice: 'Every new operator is automatically provisioned with 1,000 complimentary Nixima Credits.',
+    },
+
     emptyChat: {
       brandBadge: (model: string) => `Nixima Neural Engine • Model: ${model}`,
       heroTitle: 'Where intelligence meets precision.',
@@ -551,6 +591,7 @@ export const translations: Record<Language, Translations> = {
         persona: 'Persona',
         data: 'Data & Backup',
         api: 'Mesh API',
+        credits: 'Credits',
       },
       languageSectionTitle: 'Language / Мова',
       languageSectionDesc: 'Select your preferred interface language. Changes apply immediately.',
@@ -864,6 +905,26 @@ export const translations: Record<Language, Translations> = {
       copiedMarkdown: 'MD скопійовано!',
     },
 
+    credits: {
+      badge: 'Кредити Nixima',
+      unit: 'CR',
+      balance: 'Баланс кредитів',
+      estCost: (min: number, max: number) => `~${min}-${max} CR`,
+      insufficientCredits: 'Недостатньо кредитів',
+      insufficientTooltip: (cost: number, balance: number) =>
+        `Для цього запиту потрібно ~${cost} CR, але ваш баланс становить ${balance} CR. Отримайте щоденне поповнення в Налаштуваннях, щоб продовжити.`,
+      spent: (amount: number) => `-${amount} CR`,
+      dailyGrantTitle: 'Щоденний грант мережі Nixima',
+      dailyGrantDesc: 'Отримуйте +500 кредитів Nixima кожні 24 години для поповнення вашого пулу обчислень.',
+      claimDailyGrant: 'Отримати +500 кредитів',
+      dailyGrantClaimed: '500 кредитів нараховано!',
+      ratesTitle: 'Тарифи та коефіцієнти споживання моделей',
+      ratesDesc: 'Витрати кредитів динамічно масштабуються залежно від класу моделі, глибини міркувань та складності запиту.',
+      hardPromptNotice: 'Складні запити (синтез коду, математичні доведення, великий контекст та режим Deep Think) споживають обчислювальні ресурси пропорційно.',
+      rechargeModalTitle: 'Реєстр кредитів Nixima та поповнення',
+      initialBonusNotice: 'Кожен новий оператор автоматично отримує 1 000 вітальних кредитів Nixima.',
+    },
+
     emptyChat: {
       brandBadge: (model: string) => `Нейрорушій Nixima • Модель: ${model}`,
       heroTitle: 'Там, де інтелект зустрічається з точністю.',
@@ -904,6 +965,7 @@ export const translations: Record<Language, Translations> = {
         persona: 'Персона',
         data: 'Дані та бекап',
         api: 'Mesh API',
+        credits: 'Кредити',
       },
       languageSectionTitle: 'Мова інтерфейсу / Language',
       languageSectionDesc: 'Оберіть бажану мову інтерфейсу. Зміни застосовуються миттєво.',

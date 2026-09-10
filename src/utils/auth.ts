@@ -13,6 +13,7 @@ const DEFAULT_USERS: NiximaUser[] = [
     role: 'Founding Operator',
     createdAt: 1700000000000,
     avatarBg: 'from-zinc-100 to-zinc-400 text-black',
+    credits: 1000,
   }
 ];
 
@@ -23,7 +24,10 @@ export function getAllUsers(): NiximaUser[] {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+        return parsed.map((u: NiximaUser) => ({
+          ...u,
+          credits: typeof u.credits === 'number' ? u.credits : 1000,
+        }));
       }
     }
   } catch (e) {
@@ -238,6 +242,7 @@ export async function registerUserAsync(
     createdAt: Date.now(),
     avatarBg: 'from-zinc-800 to-zinc-950 text-white',
     preferredLanguage: preferredLanguage || 'en',
+    credits: 1000,
   };
 
   const updated = [newUser, ...currentUsers.filter(u => u.handle.toLowerCase() !== cleanHandle)];
@@ -296,6 +301,7 @@ export function registerUser(
     createdAt: Date.now(),
     avatarBg: 'from-zinc-800 to-zinc-950 text-white',
     preferredLanguage: preferredLanguage || 'en',
+    credits: 1000,
   };
 
   const updated = [newUser, ...users];

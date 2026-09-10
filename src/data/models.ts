@@ -16,7 +16,9 @@ export const NIXIMA_MODELS: ModelOption[] = [
     fallbackModels: [
       'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
       'nvidia/nemotron-3.5-lightning:free'
-    ]
+    ],
+    creditMultiplier: 1.0,
+    baseCreditCost: 5,
   },
   {
     id: 'nixima-0.1-reasoning',
@@ -32,7 +34,9 @@ export const NIXIMA_MODELS: ModelOption[] = [
     fallbackModels: [
       'openrouter/free',
       'nvidia/nemotron-3.5-lightning:free'
-    ]
+    ],
+    creditMultiplier: 2.5,
+    baseCreditCost: 12,
   },
   {
     id: 'nixima-0.1-coder',
@@ -48,7 +52,9 @@ export const NIXIMA_MODELS: ModelOption[] = [
     fallbackModels: [
       'openrouter/free',
       'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free'
-    ]
+    ],
+    creditMultiplier: 1.5,
+    baseCreditCost: 8,
   },
   {
     id: 'nixima-0.1-flash',
@@ -64,8 +70,11 @@ export const NIXIMA_MODELS: ModelOption[] = [
     fallbackModels: [
       'openrouter/free',
       'cohere/north-mini-code:free'
-    ]
+    ],
+    creditMultiplier: 0.5,
+    baseCreditCost: 2,
   }
 ];
 
 export const DEFAULT_MODEL = NIXIMA_MODELS[0];
+export const MODELS = NIXIMA_MODELS;

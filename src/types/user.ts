@@ -8,6 +8,7 @@ export interface NiximaUser {
   createdAt: number;
   avatarBg?: string;
   preferredLanguage?: 'en' | 'uk';
+  credits?: number;
 }
 
 export interface AuthSession {

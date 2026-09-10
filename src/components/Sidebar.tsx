@@ -14,7 +14,8 @@ import {
   Check,
   Download,
   LogOut,
-  Sliders
+  Sliders,
+  Coins
 } from 'lucide-react';
 import { Conversation } from '../types/chat';
 import { NiximaUser } from '../types/user';
@@ -373,9 +374,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <NiximaIdLogo size={9} glow={false} /> ID
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5 text-[10px] text-zinc-500 font-mono truncate">
-                  <CountryFlag country={language === 'uk' ? 'ua' : 'us'} size="xs" />
-                  <span className="truncate">{currentUser?.email || 'operator@nixima.ai'}</span>
+                <div className="flex items-center justify-between text-[10px] text-zinc-500 font-mono mt-0.5">
+                  <div className="flex items-center gap-1.5 truncate">
+                    <CountryFlag country={language === 'uk' ? 'ua' : 'us'} size="xs" />
+                    <span className="truncate">{currentUser?.email || 'operator@nixima.ai'}</span>
+                  </div>
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 font-bold border border-amber-500/20 text-[9px] flex-shrink-0 ml-1">
+                    <Coins className="w-2.5 h-2.5 text-amber-400" />
+                    <span>{(currentUser?.credits ?? 1000).toLocaleString()} CR</span>
+                  </span>
                 </div>
               </div>
             </div>
