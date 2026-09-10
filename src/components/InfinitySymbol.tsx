@@ -16,14 +16,17 @@ export interface InfinitySymbolProps {
 }
 
 /**
- * Official Nixima Infinity Symbol (Iridescent Running Lemniscate Vector)
+ * Official Nixima Infinity Symbol (Pure Vector Iridescent Lemniscate)
+ * 
+ * 100% Vector implementation with ZERO raster filters or offscreen bitmap buffers,
+ * completely eliminating rectangular box artifacts / clipping on dark backgrounds.
  * 
  * Features:
  * - Mathematical continuous cubic Bézier closed loop circuit (path length = 81.9px)
  * - Beveled titanium chassis conduit holding an internal holographic light channel
  * - Circulating iridescent laser stream with running spectrum colors (cyan, indigo, purple, fuchsia, gold, emerald)
  * - Prismatic leading spark and ambient chromatic underglow
- * - Physical 3D optical overlap giving authentic Mobius ribbon depth
+ * - Physical 3D optical overlap with uniform ribbon width (no bulky dark clamps)
  */
 export const InfinitySymbol: React.FC<InfinitySymbolProps> = ({
   size = 14,
@@ -40,6 +43,14 @@ export const InfinitySymbol: React.FC<InfinitySymbolProps> = ({
   const loopPath =
     'M 16 8 C 12.8 3.8 9.6 2 6.5 2 C 3.2 2 1.5 4.5 1.5 8 C 1.5 11.5 3.2 14 6.5 14 C 9.6 14 12.8 12.2 16 8 C 19.2 3.8 22.4 2 25.5 2 C 28.8 2 30.5 4.5 30.5 8 C 30.5 11.5 28.8 14 25.5 14 C 22.4 14 19.2 12.2 16 8 Z';
 
+  // Under-strand sub-path through crossover
+  const underStrand =
+    'M 12 11.8 C 13.5 10.2 14.8 9 16 8 C 17.2 7 18.5 5.8 20 4.2';
+
+  // Over-strand sub-path through crossover (passes cleanly on top)
+  const overStrand =
+    'M 12.5 4.8 C 14 6.2 15.2 7.2 16 8 C 16.8 8.8 18 9.8 19.5 11.2';
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -47,20 +58,17 @@ export const InfinitySymbol: React.FC<InfinitySymbolProps> = ({
       width={width}
       height={height}
       fill="none"
+      overflow="visible"
       className={`inline-block select-none flex-shrink-0 align-middle ${className}`}
-      style={{
-        filter: glow
-          ? 'drop-shadow(0 0 8px rgba(168, 85, 247, 0.6)) drop-shadow(0 0 16px rgba(56, 189, 248, 0.4))'
-          : 'drop-shadow(0 0 2.5px rgba(168, 85, 247, 0.35))',
-      }}
+      style={{ overflow: 'visible' }}
       aria-label="Infinity"
     >
       <defs>
         {/* Outer Titanium Chassis Rim Gradient */}
         <linearGradient id={`${id}-titanium`} x1="1" y1="2" x2="31" y2="14" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.95" />
-          <stop offset="35%" stopColor="#A1A1AA" stopOpacity="0.75" />
-          <stop offset="70%" stopColor="#52525B" stopOpacity="0.6" />
+          <stop offset="30%" stopColor="#A1A1AA" stopOpacity="0.8" />
+          <stop offset="65%" stopColor="#52525B" stopOpacity="0.65" />
           <stop offset="100%" stopColor="#E4E4E7" stopOpacity="0.9" />
         </linearGradient>
 
@@ -75,27 +83,40 @@ export const InfinitySymbol: React.FC<InfinitySymbolProps> = ({
           <stop offset="100%" stopColor="#38BDF8" />   {/* Electric Cyan */}
         </linearGradient>
 
-        {/* Soft Radial Center Depth Occlusion */}
-        <radialGradient id={`${id}-crossover`} cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="#09090B" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="#09090B" stopOpacity="0" />
-        </radialGradient>
+        {/* Pure Vector Soft Ambient Glow Stroke (Zero Raster Filter) */}
+        <linearGradient id={`${id}-softglow`} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.4" />
+          <stop offset="50%" stopColor="#C084FC" stopOpacity="0.4" />
+          <stop offset="100%" stopColor="#F472B6" stopOpacity="0.4" />
+        </linearGradient>
       </defs>
 
-      {/* 1. Outer Titanium Beveled Chassis */}
+      {/* 0. Optional Pure Vector Soft Corona Glow (Only when glow is requested, 100% vector without bitmap blur) */}
+      {glow && (
+        <path
+          d={loopPath}
+          stroke={`url(#${id}-softglow)`}
+          strokeWidth="5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          opacity="0.5"
+        />
+      )}
+
+      {/* 1. Outer Titanium Beveled Chassis (Consistent 2.4px Ribbon Width) */}
       <path
         d={loopPath}
         stroke={`url(#${id}-titanium)`}
-        strokeWidth="3.2"
+        strokeWidth="2.4"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
 
-      {/* 2. Deep Recessed Hollow Conduit (Dark Bed) */}
+      {/* 2. Deep Recessed Internal Conduit (1.4px Track) */}
       <path
         d={loopPath}
-        stroke="#0E0E12"
-        strokeWidth="2.2"
+        stroke="#09090B"
+        strokeWidth="1.4"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -104,71 +125,66 @@ export const InfinitySymbol: React.FC<InfinitySymbolProps> = ({
       <path
         d={loopPath}
         stroke={`url(#${id}-iridescent)`}
-        strokeWidth="1.6"
-        opacity="0.38"
+        strokeWidth="1.2"
+        opacity="0.3"
         className={animated ? 'animate-infinity-breath' : ''}
       />
 
-      {/* 4. Active Circulating Iridescent Energy Beam */}
-      <g className={animated ? 'animate-infinity-hue' : ''}>
-        {/* Continuous Running Iridescent Fluid Stream */}
-        <path
-          d={loopPath}
-          stroke={`url(#${id}-iridescent)`}
-          strokeWidth="1.7"
-          strokeLinecap="round"
-          strokeDasharray="36 46"
-          className={animated ? 'animate-infinity-flow' : ''}
-          style={{
-            filter: 'drop-shadow(0 0 2px rgba(192, 132, 252, 0.8))',
-          }}
-        />
-
-        {/* High-Luminance Prismatic White Spark at the Head of the Stream */}
-        <path
-          d={loopPath}
-          stroke="#FFFFFF"
-          strokeWidth="1.1"
-          strokeLinecap="round"
-          strokeDasharray="7 75"
-          opacity="0.95"
-          className={animated ? 'animate-infinity-flow' : ''}
-          style={{
-            filter: 'drop-shadow(0 0 3px #FFFFFF)',
-          }}
-        />
-      </g>
-
-      {/* 5. 3D Overlap Shadow Barrier (Creates physical depth at the center crossover) */}
-      <circle
-        cx="16"
-        cy="8"
-        r="2.6"
-        fill={`url(#${id}-crossover)`}
+      {/* 4. Active Circulating Iridescent Energy Beam (Pure Vector Stroke Dash Animation) */}
+      {/* Continuous Running Iridescent Fluid Stream */}
+      <path
+        d={loopPath}
+        stroke={`url(#${id}-iridescent)`}
+        strokeWidth="1.3"
+        strokeLinecap="round"
+        strokeDasharray="36 46"
+        className={animated ? 'animate-infinity-flow' : ''}
       />
 
-      {/* 6. Foreground Strand Overpass Cap at (16, 8) with negative-space depth */}
+      {/* High-Luminance Prismatic White Spark at the Head of the Stream */}
       <path
-        d="M 13.8 5.6 L 18.2 10.4"
+        d={loopPath}
+        stroke="#FFFFFF"
+        strokeWidth="0.9"
+        strokeLinecap="round"
+        strokeDasharray="7 75"
+        opacity="0.95"
+        className={animated ? 'animate-infinity-flow' : ''}
+      />
+
+      {/* 5. 3D Overlap Weave: Over-strand passes cleanly on top at (16, 8) with identical ribbon width */}
+      {/* Precision Micro-Cut under the overpass to create the optical overlap */}
+      <path
+        d="M 14.8 6.5 L 17.2 9.5"
         stroke="#09090B"
-        strokeWidth="3.8"
+        strokeWidth="2.8"
         strokeLinecap="round"
       />
+
+      {/* Over-strand Titanium Body */}
       <path
-        d="M 13.8 5.6 L 18.2 10.4"
+        d={overStrand}
         stroke={`url(#${id}-titanium)`}
-        strokeWidth="2.6"
+        strokeWidth="2.4"
         strokeLinecap="round"
       />
-      <g className={animated ? 'animate-infinity-hue' : ''}>
-        <path
-          d="M 14.2 6.0 L 17.8 10.0"
-          stroke={`url(#${id}-iridescent)`}
-          strokeWidth="1.4"
-          strokeLinecap="round"
-          opacity="0.9"
-        />
-      </g>
+
+      {/* Over-strand Internal Conduit */}
+      <path
+        d={overStrand}
+        stroke="#09090B"
+        strokeWidth="1.4"
+        strokeLinecap="round"
+      />
+
+      {/* Over-strand Iridescent Laser Stream */}
+      <path
+        d={overStrand}
+        stroke={`url(#${id}-iridescent)`}
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        opacity="0.85"
+      />
     </svg>
   );
 };
