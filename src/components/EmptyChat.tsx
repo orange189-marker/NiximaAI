@@ -8,7 +8,10 @@ import {
   Shield,
   Zap,
   Code2,
-  BarChart3
+  BarChart3,
+  TrendingUp,
+  LineChart,
+  ArrowUpRight
 } from 'lucide-react';
 import { ModelOption } from '../types/chat';
 import { useLanguage } from '../context/LanguageContext';
@@ -45,6 +48,53 @@ export const EmptyChat: React.FC<EmptyChatProps> = ({
     prompt: card.prompt,
     category: card.category,
   }));
+
+  const getChartChipMeta = (chartType?: string, index?: number) => {
+    const type = chartType || (index === 0 ? 'bar' : index === 1 ? 'area' : index === 2 ? 'line' : 'pyramid');
+    switch (type) {
+      case 'bar':
+        return {
+          icon: <BarChart3 className="w-3.5 h-3.5" />,
+          badgeBg: 'bg-cyan-950/80',
+          badgeBorder: 'border-cyan-500/50',
+          badgeColor: 'text-cyan-300',
+          badgeShadow: 'shadow-[0_0_10px_rgba(6,182,212,0.25)]',
+          tagStyle: 'bg-cyan-950/60 text-cyan-300 border-cyan-600/40',
+          cardHover: 'hover:border-cyan-500/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.15)]',
+        };
+      case 'area':
+        return {
+          icon: <TrendingUp className="w-3.5 h-3.5" />,
+          badgeBg: 'bg-purple-950/80',
+          badgeBorder: 'border-purple-500/50',
+          badgeColor: 'text-purple-300',
+          badgeShadow: 'shadow-[0_0_10px_rgba(168,85,247,0.25)]',
+          tagStyle: 'bg-purple-950/60 text-purple-300 border-purple-600/40',
+          cardHover: 'hover:border-purple-500/50 hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]',
+        };
+      case 'line':
+        return {
+          icon: <LineChart className="w-3.5 h-3.5" />,
+          badgeBg: 'bg-emerald-950/80',
+          badgeBorder: 'border-emerald-500/50',
+          badgeColor: 'text-emerald-300',
+          badgeShadow: 'shadow-[0_0_10px_rgba(16,185,129,0.25)]',
+          tagStyle: 'bg-emerald-950/60 text-emerald-300 border-emerald-600/40',
+          cardHover: 'hover:border-emerald-500/50 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)]',
+        };
+      case 'pyramid':
+      default:
+        return {
+          icon: <Layers className="w-3.5 h-3.5" />,
+          badgeBg: 'bg-amber-950/80',
+          badgeBorder: 'border-amber-500/50',
+          badgeColor: 'text-amber-300',
+          badgeShadow: 'shadow-[0_0_10px_rgba(245,158,11,0.25)]',
+          tagStyle: 'bg-amber-950/60 text-amber-300 border-amber-600/40',
+          cardHover: 'hover:border-amber-500/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.15)]',
+        };
+    }
+  };
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-4 sm:p-6 max-w-4xl mx-auto w-full text-center select-none animate-fade-in">
@@ -118,31 +168,69 @@ export const EmptyChat: React.FC<EmptyChatProps> = ({
 
       {/* Interactive Visualizations & Graphs Quick Launch */}
       {t.emptyChat.graphChips && (
-        <div className="mt-6 w-full space-y-2 text-left">
-          <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-zinc-400 px-1">
-            <BarChart3 className="w-3.5 h-3.5 text-cyan-400" />
-            <span>{t.emptyChat.graphSectionTitle}</span>
-            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-              NEW
-            </span>
+        <div className="mt-8 w-full space-y-3 text-left animate-fade-in">
+          {/* Section Header */}
+          <div className="flex items-center justify-between px-1">
+            <div className="flex items-center gap-2.5">
+              <div className="w-5 h-5 rounded-md bg-cyan-950/80 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.25)]">
+                <BarChart3 className="w-3 h-3" />
+              </div>
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-200">
+                {t.emptyChat.graphSectionTitle}
+              </span>
+              <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-500/50 shadow-[0_0_8px_rgba(6,182,212,0.2)]">
+                NEW
+              </span>
+            </div>
+            {t.emptyChat.graphSectionSubtitle && (
+              <span className="hidden sm:inline-block text-[11px] font-sans text-zinc-500">
+                {t.emptyChat.graphSectionSubtitle}
+              </span>
+            )}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-            {t.emptyChat.graphChips.map((chip, cIdx) => (
-              <button
-                key={cIdx}
-                type="button"
-                onClick={() => onSelectPrompt(chip.prompt)}
-                className="p-2.5 rounded-xl bg-zinc-900/50 hover:bg-zinc-800/80 border border-zinc-800 hover:border-zinc-700 transition-all text-left flex flex-col justify-between group cursor-pointer shadow-sm hover:shadow-glow-subtle"
-              >
-                <span className="text-xs font-semibold text-zinc-200 group-hover:text-white flex items-center justify-between">
-                  <span>{chip.title}</span>
-                  <ArrowRight className="w-3 h-3 text-zinc-500 group-hover:text-white transition-colors" />
-                </span>
-                <span className="text-[10px] font-mono text-zinc-400 line-clamp-1 mt-1">
-                  {chip.prompt}
-                </span>
-              </button>
-            ))}
+
+          {/* Cards Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+            {t.emptyChat.graphChips.map((chip, cIdx) => {
+              const meta = getChartChipMeta(chip.chartType, cIdx);
+              const cleanTitle = (chip.title || '').replace(/^[\p{Emoji}\s]+/u, '').trim();
+
+              return (
+                <button
+                  key={cIdx}
+                  type="button"
+                  onClick={() => onSelectPrompt(chip.prompt)}
+                  className={`p-3.5 rounded-2xl bg-gradient-to-b from-[#131318]/90 via-[#0e0e13]/95 to-[#09090c]/98 border border-zinc-800/80 ${meta.cardHover} transition-all duration-200 text-left flex flex-col justify-between group cursor-pointer shadow-[inset_0_1px_0_rgba(255,255,255,0.06),0_4px_16px_rgba(0,0,0,0.5)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_8px_24px_rgba(0,0,0,0.6)] hover:-translate-y-0.5 min-h-[120px]`}
+                >
+                  {/* Top Bar: Glowing Micro Icon Badge + Category Tag + Arrow */}
+                  <div className="flex items-center justify-between w-full mb-2.5">
+                    <div className={`p-1.5 rounded-lg border flex items-center justify-center transition-transform duration-200 group-hover:scale-105 ${meta.badgeBg} ${meta.badgeBorder} ${meta.badgeColor} ${meta.badgeShadow}`}>
+                      {meta.icon}
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      {chip.tag && (
+                        <span className={`text-[9px] font-mono font-bold tracking-wider px-1.5 py-0.5 rounded border uppercase ${meta.tagStyle}`}>
+                          {chip.tag}
+                        </span>
+                      )}
+                      <div className="w-5 h-5 rounded-md bg-zinc-850/80 group-hover:bg-zinc-800 border border-zinc-750/70 flex items-center justify-center text-zinc-400 group-hover:text-white transition-colors">
+                        <ArrowUpRight className="w-3 h-3 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Title and Prompt */}
+                  <div className="space-y-1 w-full flex-1 flex flex-col justify-between">
+                    <h4 className="font-semibold text-xs text-zinc-100 group-hover:text-white leading-snug tracking-tight font-sans transition-colors line-clamp-1">
+                      {cleanTitle}
+                    </h4>
+                    <p className="text-[11px] text-zinc-400 group-hover:text-zinc-300 line-clamp-2 leading-relaxed font-sans transition-colors">
+                      {chip.prompt}
+                    </p>
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       )}

@@ -315,9 +315,12 @@ export interface Translations {
       prompt: string;
     }>;
     graphSectionTitle: string;
+    graphSectionSubtitle?: string;
     graphChips: Array<{
       title: string;
       prompt: string;
+      tag?: string;
+      chartType?: 'bar' | 'area' | 'line' | 'pyramid';
     }>;
     contextWindowLabel: string;
     throughputLabel: string;
@@ -815,21 +818,30 @@ export const translations: Record<Language, Translations> = {
         },
       ],
       graphSectionTitle: 'Interactive Graph & Data Visualizations',
+      graphSectionSubtitle: 'One-click live charts, coordinate mathematics & interactive models',
       graphChips: [
         {
-          title: '📊 World GDP Leaders',
+          title: 'World GDP Leaders',
+          tag: 'BAR',
+          chartType: 'bar',
           prompt: 'Generate an interactive horizontal bar chart comparing the top 10 economies by nominal GDP in trillions USD.',
         },
         {
-          title: '📈 World Population 1960–2020',
+          title: 'World Population 1960–2020',
+          tag: 'AREA',
+          chartType: 'area',
           prompt: 'Plot an interactive area chart showing global population growth from 1960 to 2020 by decade.',
         },
         {
-          title: '📐 Linear Graph f(x) = 2x + 1',
+          title: 'Linear Graph f(x) = 2x + 1',
+          tag: 'MATH 2D',
+          chartType: 'line',
           prompt: 'Plot the linear function f(x) = 2x + 1 on a 2D Cartesian coordinate grid with slope and root telemetry.',
         },
         {
-          title: '🏛️ Population Age Pyramid',
+          title: 'Population Age Pyramid',
+          tag: 'PYRAMID',
+          chartType: 'pyramid',
           prompt: 'Generate a demographic population age pyramid comparing male vs female cohorts across age brackets.',
         },
       ],
@@ -1396,21 +1408,30 @@ export const translations: Record<Language, Translations> = {
         },
       ],
       graphSectionTitle: 'Інтерактивні графіки та візуалізації',
+      graphSectionSubtitle: 'Живі діаграми, декартові координати та демографічні моделі в один клік',
       graphChips: [
         {
-          title: '📊 Лідери світового ВВП',
+          title: 'Лідери світового ВВП',
+          tag: 'СТОВПЧИКИ',
+          chartType: 'bar',
           prompt: 'Згенеруй інтерактивну стовпчикову діаграму з порівнянням топ-10 економік світу за номінальним ВВП у трильйонах USD.',
         },
         {
-          title: '📈 Населення світу 1960–2020',
+          title: 'Населення світу 1960–2020',
+          tag: 'ПЛОЩА',
+          chartType: 'area',
           prompt: 'Побудуй інтерактивний графік зростання населення Землі з 1960 по 2020 роки по десятиліттях.',
         },
         {
-          title: '📐 Лінійний графік f(x) = 2x + 1',
+          title: 'Лінійний графік f(x) = 2x + 1',
+          tag: 'МАТЕМАТИКА',
+          chartType: 'line',
           prompt: 'Побудуй лінійну функцію f(x) = 2x + 1 на 2D декартовій площині з телеметрією нахилу та кореня.',
         },
         {
-          title: '🏛️ Вікова піраміда населення',
+          title: 'Вікова піраміда населення',
+          tag: 'ПІРАМІДА',
+          chartType: 'pyramid',
           prompt: 'Створи демографічну вікову піраміду населення з розподілом чоловічих та жіночих когорт.',
         },
       ],
