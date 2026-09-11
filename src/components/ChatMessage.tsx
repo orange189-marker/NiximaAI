@@ -40,6 +40,7 @@ import { LinkPill } from './LinkPill';
 import { SearchActionFeed } from './SearchActionFeed';
 import { renderWithNiximaBrand } from './NiximaWordmark';
 import { detectArtifactType, inferArtifactTitle, extractArtifactsFromMessage } from '../utils/artifactDetector';
+import { highlightCode } from '../utils/syntaxHighlighter';
 
 interface ChatMessageProps {
   message: Message;
@@ -290,7 +291,13 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   // Helper function to render text with code blocks, tables, math blocks, and basic markdown
   const renderFormattedContent = (content: string) => {
     const codeBlockRegex = /```([a-zA-Z0-9_-]*)\n([\s\S]*?)```/g;
-    const parts = [];
+    const parts: Array<{
+      type: 'text' | 'code';
+      content?: string;
+      language?: string;
+      code?: string;
+      isStreaming?: boolean;
+    }> = [];
     let lastIndex = 0;
     let match;
 
@@ -304,6 +311,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         type: 'code',
         language: (match[1] || 'plaintext').toLowerCase(),
         code: match[2].trimEnd(),
+        isStreaming: false,
       });
 
       lastIndex = match.index + match[0].length;
@@ -311,7 +319,38 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
     const textAfter = content.substring(lastIndex);
     if (textAfter) {
-      parts.push({ type: 'text', content: textAfter });
+      // Check if textAfter contains an unclosed code block (while model is streaming)
+      // 1. Unclosed block with newline: ```lang\ncode...
+      const matchWithNewline = /```([a-zA-Z0-9_#+-]*)[^\S\r\n]*\r?\n([\s\S]*)$/.exec(textAfter);
+      if (matchWithNewline) {
+        const textBeforeUnclosed = textAfter.substring(0, matchWithNewline.index);
+        if (textBeforeUnclosed) {
+          parts.push({ type: 'text', content: textBeforeUnclosed });
+        }
+        parts.push({
+          type: 'code',
+          language: (matchWithNewline[1] || 'plaintext').toLowerCase(),
+          code: matchWithNewline[2],
+          isStreaming: Boolean(message.isStreaming),
+        });
+      } else {
+        // 2. Unclosed block without newline yet: ```lang or ```
+        const matchWithoutNewline = /```([a-zA-Z0-9_#+-]*)$/.exec(textAfter);
+        if (matchWithoutNewline) {
+          const textBeforeUnclosed = textAfter.substring(0, matchWithoutNewline.index);
+          if (textBeforeUnclosed) {
+            parts.push({ type: 'text', content: textBeforeUnclosed });
+          }
+          parts.push({
+            type: 'code',
+            language: (matchWithoutNewline[1] || 'plaintext').toLowerCase(),
+            code: '',
+            isStreaming: Boolean(message.isStreaming),
+          });
+        } else {
+          parts.push({ type: 'text', content: textAfter });
+        }
+      }
     }
 
     if (parts.length === 0) {
@@ -355,12 +394,13 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             onOpenArtifact={onOpenArtifact}
             messageId={message.id}
             blockIndex={idx}
+            isStreaming={part.isStreaming}
           />
         );
       }
 
       // Step 1: Extract display math blocks ($$...$$ and \[...\])
-      const mathSegments = parseDisplayMath(part.content);
+      const mathSegments = parseDisplayMath(part.content || '');
 
       return mathSegments.map((segment, mIdx) => {
         if (segment.type === 'math-block') {
@@ -1135,18 +1175,23 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   );
 };
 
-// Subcomponent: High-contrast Code Block with Copy & Download File & Open in Canvas
+// Subcomponent: High-contrast Code Block with Copy & Download File & Open in Canvas & Live Streaming
 const CodeBlock: React.FC<{ 
   language: string; 
   code: string;
   onOpenArtifact?: (artifact: NiximaArtifact) => void;
   messageId?: string;
   blockIndex?: number;
-}> = ({ language, code, onOpenArtifact, messageId, blockIndex }) => {
-  const { t } = useLanguage();
+  isStreaming?: boolean;
+}> = ({ language, code, onOpenArtifact, messageId, blockIndex, isStreaming = false }) => {
+  const { language: currentLang, t } = useLanguage();
   const [copied, setCopied] = useState(false);
 
   const artifactType = detectArtifactType(language, code);
+
+  const highlightedHtml = React.useMemo(() => {
+    return highlightCode(code, language);
+  }, [code, language]);
 
   const getExtension = (lang: string) => {
     const map: Record<string, string> = {
@@ -1207,9 +1252,23 @@ const CodeBlock: React.FC<{
   };
 
   return (
-    <div className="my-3 rounded-lg overflow-hidden border border-zinc-800 bg-[#0c0c0e] shadow-lg">
-      <div className="flex items-center justify-between px-3.5 py-1.5 bg-zinc-900/80 border-b border-zinc-800/80 text-[11px] font-mono text-zinc-400">
-        <span className="uppercase text-zinc-400 font-semibold">{language}</span>
+    <div className={`my-3 rounded-xl overflow-hidden border transition-all duration-200 bg-[#0c0c0e] shadow-xl ${
+      isStreaming ? 'border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.12)]' : 'border-zinc-800/90'
+    }`}>
+      {/* Code Block Header Toolbar */}
+      <div className="flex items-center justify-between px-3.5 py-2 bg-[#121216] border-b border-zinc-800/80 text-[11px] font-mono text-zinc-400 select-none">
+        <div className="flex items-center gap-2">
+          <span className="uppercase text-zinc-300 font-semibold tracking-wider font-mono">
+            {language || 'code'}
+          </span>
+          {isStreaming && (
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9.5px] font-mono font-medium bg-cyan-950/70 text-cyan-300 border border-cyan-800/60 shadow-[0_0_8px_rgba(6,182,212,0.25)]">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+              <span>{currentLang === 'uk' ? 'Генерація коду...' : 'Streaming code...'}</span>
+            </span>
+          )}
+        </div>
+
         <div className="flex items-center gap-2 sm:gap-3">
           {artifactType && (
             <button
@@ -1225,7 +1284,7 @@ const CodeBlock: React.FC<{
 
           <button
             onClick={downloadSnippet}
-            className="flex items-center gap-1 hover:text-white transition-colors"
+            className="flex items-center gap-1 text-zinc-400 hover:text-white transition-colors cursor-pointer"
             title={t.chatMessage.downloadCode}
           >
             <Download className="w-3 h-3" />
@@ -1233,7 +1292,7 @@ const CodeBlock: React.FC<{
           </button>
           <button
             onClick={copyCode}
-            className={`relative rounded-md transition-all duration-300 flex items-center justify-center gap-1.5 px-2 py-0.5 select-none ${
+            className={`relative rounded-md transition-all duration-300 flex items-center justify-center gap-1.5 px-2 py-0.5 select-none cursor-pointer ${
               copied
                 ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
                 : 'hover:text-white hover:bg-zinc-800/80 text-zinc-400 border border-transparent active:scale-95'
@@ -1255,8 +1314,16 @@ const CodeBlock: React.FC<{
           </button>
         </div>
       </div>
-      <pre className="p-4 text-xs font-mono overflow-x-auto text-zinc-200 leading-relaxed">
-        <code>{code}</code>
+
+      {/* Code Content Container with Syntax Highlighting */}
+      <pre className="p-4 text-[13px] font-mono overflow-x-auto text-zinc-200 leading-relaxed nixima-code-block selection:bg-cyan-500/30">
+        <code 
+          className={`language-${language || 'plaintext'} font-mono`}
+          dangerouslySetInnerHTML={{ __html: highlightedHtml }} 
+        />
+        {isStreaming && (
+          <span className="inline-block w-2 h-4 ml-0.5 bg-cyan-400 align-middle animate-code-cursor" />
+        )}
       </pre>
     </div>
   );

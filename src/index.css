@@ -304,3 +304,107 @@
   filter: drop-shadow(0 1px 8px rgba(255, 255, 255, 0.12));
 }
 
+/* ==========================================================================
+   Nixima Premium Developer Dark Theme Code Syntax Highlighting (PrismJS)
+   Inspired by OneDark Pro & Tokyo Night: high-contrast, vibrant, and readable.
+   ========================================================================== */
+.nixima-code-block pre {
+  font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* Comments and documentation */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: #71717a !important;
+  font-style: italic;
+}
+
+/* Punctuation & Delimiters */
+.token.punctuation {
+  color: #a1a1aa !important;
+}
+
+/* Tags, properties, and constants */
+.token.property,
+.token.tag,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: #fb7185 !important;
+}
+
+/* Booleans and numbers */
+.token.boolean,
+.token.number {
+  color: #fbbf24 !important;
+}
+
+/* Strings, characters, and attributes */
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: #4ade80 !important;
+}
+
+/* Operators, entities, and URLs */
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: #38bdf8 !important;
+}
+
+/* Control flow, keywords, and imports */
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: #c084fc !important;
+  font-weight: 600;
+}
+
+/* Function names and methods */
+.token.function,
+.token.class-name {
+  color: #60a5fa !important;
+  font-weight: 500;
+}
+
+/* Regex, variables, and decorators */
+.token.regex,
+.token.important,
+.token.variable {
+  color: #f472b6 !important;
+}
+
+.token.important,
+.token.bold {
+  font-weight: 700;
+}
+
+.token.italic {
+  font-style: italic;
+}
+
+/* Blinking terminal cursor for streaming code blocks */
+@keyframes codeCursorPulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+  50% {
+    opacity: 0.2;
+    transform: scaleY(0.9);
+  }
+}
+
+.animate-code-cursor {
+  animation: codeCursorPulse 0.9s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+
