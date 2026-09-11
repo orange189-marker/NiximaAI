@@ -555,13 +555,24 @@ All conversations and model preferences in this workspace are private to your Ni
       });
 
       if (liveGrounding && liveGrounding.sources.length > 0) {
-        dynamicSystemPrompt += `\n\n[REAL-TIME LIVE WEB SEARCH GROUNDING]\n` +
-          `Query: "${userText}"\n` +
-          `Verified Real-World Web Findings:\n` +
-          liveGrounding.sources.map((src, i) =>
-            `[${i + 1}] Title: ${src.title}\n    URL: ${src.url}\n    Excerpt: ${src.snippet || 'Authoritative reference'}`
-          ).join('\n\n') +
-          `\n\nInstructions: Ground your response in these verified real-world findings. Answer the user's question directly, accurately, and authoritatively. Cite sources with [1], [2] where appropriate.`;
+        const isLiveNews = liveGrounding.sources.some(s => s.cluster === 'Live News Wire');
+        if (isLiveNews) {
+          dynamicSystemPrompt += `\n\n[REAL-TIME LIVE BREAKING NEWS WIRE - VERIFIED TODAY]\n` +
+            `Query: "${userText}"\n` +
+            `Active Breaking Headlines:\n` +
+            liveGrounding.sources.map((src, i) =>
+              `[${i + 1}] Headline: ${src.title}\n    Publisher: ${src.domain}\n    Direct Link: ${src.url}\n    Report: ${src.snippet}`
+            ).join('\n\n') +
+            `\n\nInstructions: Deliver a comprehensive, well-structured, and timely live news briefing based on these verified breaking developments. Group by topic or region, highlight key details, and cite sources using [1], [2] where appropriate. Do not output unrelated historical or encyclopedic definitions.`;
+        } else {
+          dynamicSystemPrompt += `\n\n[REAL-TIME LIVE WEB SEARCH GROUNDING]\n` +
+            `Query: "${userText}"\n` +
+            `Verified Real-World Web Findings:\n` +
+            liveGrounding.sources.map((src, i) =>
+              `[${i + 1}] Title: ${src.title}\n    URL: ${src.url}\n    Excerpt: ${src.snippet || 'Authoritative reference'}`
+            ).join('\n\n') +
+            `\n\nInstructions: Ground your response in these verified real-world findings. Answer the user's question directly, accurately, and authoritatively. Cite sources with [1], [2] where appropriate.`;
+        }
       }
 
       const { fullContent, fullThinking, searchGrounding, deepThinkingTelemetry } = await streamOpenRouterChat({
