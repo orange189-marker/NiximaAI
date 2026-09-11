@@ -58,7 +58,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { language, toggleLanguage, t } = useLanguage();
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
-  const [filterTab, setFilterTab] = useState<'all' | 'search'>('all');
+  const [filterTab, setFilterTab] = useState<'all' | '0.3' | '0.2' | 'search' | 'code'>('all');
   const [hotkeyConfig, setHotkeyConfig] = useState<HotkeyConfig>(() => getSavedHotkey());
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -242,115 +242,216 @@ export const Header: React.FC<HeaderProps> = ({
               );
             })()}
 
-            {/* Category Filter Tabs: All vs Search-Optimized */}
-            <div className="flex items-center gap-1 p-1 mt-1 mb-1.5 bg-zinc-900/80 rounded-xl border border-zinc-800 text-[11px] font-mono">
-              <button
-                type="button"
-                onClick={() => setFilterTab('all')}
-                className={`flex-1 py-1 rounded-lg text-center font-medium transition-all cursor-pointer ${
-                  filterTab === 'all' 
-                    ? 'bg-zinc-800 text-white shadow-inner-light' 
-                    : 'text-zinc-400 hover:text-zinc-200'
-                }`}
-              >
-                {t.header.allModelsTab}
-              </button>
-              <button
-                type="button"
-                onClick={() => setFilterTab('search')}
-                className={`flex-1 py-1 rounded-lg text-center font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
-                  filterTab === 'search' 
-                    ? 'bg-zinc-800 text-white shadow-inner-light' 
-                    : 'text-zinc-400 hover:text-zinc-200'
-                }`}
-              >
-                <Globe className="w-3 h-3 text-zinc-400" />
-                <span>{t.header.searchOptimizedTab}</span>
-              </button>
-            </div>
+            {/* Category & Generation Filter Tabs */}
+            {(() => {
+              const countAll = NIXIMA_MODELS.length;
+              const count03 = NIXIMA_MODELS.filter(m => m.generation === '0.3' || m.id.includes('0.3')).length;
+              const count02 = NIXIMA_MODELS.filter(m => (m.generation === '0.2' || m.id.includes('0.2')) && !m.id.includes('0.3')).length;
+              const countSearch = NIXIMA_MODELS.filter(m => Boolean(m.searchOptimization)).length;
+              const countCode = NIXIMA_MODELS.filter(m => m.id.includes('coder') || m.id.includes('omni')).length;
 
-            <div className="space-y-1 max-h-[60vh] sm:max-h-none overflow-y-auto">
-              {NIXIMA_MODELS.map((model) => {
-                const isSelected = currentModel.id === model.id;
-                const modelTr = t.models[model.id];
-                const searchOpt = model.searchOptimization;
+              const filteredModels = NIXIMA_MODELS.filter((model) => {
+                if (filterTab === '0.3') return model.generation === '0.3' || model.id.includes('0.3');
+                if (filterTab === '0.2') return (model.generation === '0.2' || model.id.includes('0.2')) && !model.id.includes('0.3');
+                if (filterTab === 'search') return Boolean(model.searchOptimization);
+                if (filterTab === 'code') return model.id.includes('coder') || model.id.includes('omni');
+                return true;
+              });
 
-                return (
-                  <button
-                    key={model.id}
-                    type="button"
-                    onClick={() => {
-                      onSelectModel(model);
-                      setIsModelDropdownOpen(false);
-                    }}
-                    className={`w-full text-left p-2.5 rounded-xl transition-all flex items-start justify-between group cursor-pointer ${
-                      isSelected 
-                        ? 'bg-zinc-800/90 border border-zinc-600 shadow-glow-subtle' 
-                        : 'hover:bg-zinc-800/50 border border-transparent'
-                    }`}
-                  >
-                    <div className="space-y-1 flex-1 min-w-0 pr-2">
-                      <div className="flex items-center gap-2">
-                        <span className="flex-shrink-0">{getModelIcon(model.id)}</span>
-                        <span className="font-semibold text-sm text-white group-hover:text-white truncate">
-                          {renderWithNiximaBrand(modelTr?.name || model.name)}
-                        </span>
-                        {model.isFlagship && (
-                          <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-white text-black font-bold flex-shrink-0">
-                            {t.header.defaultBadge}
-                          </span>
-                        )}
-                        {filterTab === 'search' && searchOpt && (
-                          <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-zinc-200 flex-shrink-0 ml-auto">
-                            {searchOpt.searchRating}
-                          </span>
-                        )}
+              return (
+                <>
+                  <div className="flex items-center gap-1 p-1 mt-1 mb-2 bg-zinc-900/90 rounded-xl border border-zinc-800/80 text-[11px] font-mono overflow-x-auto no-scrollbar scroll-smooth">
+                    <button
+                      type="button"
+                      onClick={() => setFilterTab('all')}
+                      className={`px-2.5 py-1 rounded-lg text-center font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 ${
+                        filterTab === 'all' 
+                          ? 'bg-zinc-800 text-white shadow-inner-light border border-zinc-700' 
+                          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40 border border-transparent'
+                      }`}
+                    >
+                      <span>{t.header.allModelsTab}</span>
+                      <span className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-mono ${filterTab === 'all' ? 'bg-zinc-700 text-white' : 'bg-zinc-800 text-zinc-400'}`}>
+                        {countAll}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setFilterTab('0.3')}
+                      className={`px-2.5 py-1 rounded-lg text-center font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 ${
+                        filterTab === '0.3' 
+                          ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.25)]' 
+                          : 'text-zinc-400 hover:text-emerald-300 hover:bg-emerald-950/30 border border-transparent'
+                      }`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span>{t.header.gen03Tab}</span>
+                      <span className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-mono ${filterTab === '0.3' ? 'bg-emerald-900/90 text-emerald-200 border border-emerald-700/50' : 'bg-zinc-800 text-zinc-400'}`}>
+                        {count03}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setFilterTab('0.2')}
+                      className={`px-2.5 py-1 rounded-lg text-center font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 ${
+                        filterTab === '0.2' 
+                          ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-500/50 shadow-[0_0_12px_rgba(6,182,212,0.25)]' 
+                          : 'text-zinc-400 hover:text-cyan-300 hover:bg-cyan-950/30 border border-transparent'
+                      }`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                      <span>{t.header.gen02Tab}</span>
+                      <span className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-mono ${filterTab === '0.2' ? 'bg-cyan-900/90 text-cyan-200 border border-cyan-700/50' : 'bg-zinc-800 text-zinc-400'}`}>
+                        {count02}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setFilterTab('search')}
+                      className={`px-2.5 py-1 rounded-lg text-center font-medium transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap flex-shrink-0 ${
+                        filterTab === 'search' 
+                          ? 'bg-sky-950/80 text-sky-300 border border-sky-500/50 shadow-[0_0_12px_rgba(14,165,233,0.25)]' 
+                          : 'text-zinc-400 hover:text-sky-300 hover:bg-sky-950/30 border border-transparent'
+                      }`}
+                    >
+                      <Globe className="w-3 h-3 text-sky-400" />
+                      <span>{t.header.searchOptimizedTab}</span>
+                      <span className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-mono ${filterTab === 'search' ? 'bg-sky-900/90 text-sky-200 border border-sky-700/50' : 'bg-zinc-800 text-zinc-400'}`}>
+                        {countSearch}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setFilterTab('code')}
+                      className={`px-2.5 py-1 rounded-lg text-center font-medium transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap flex-shrink-0 ${
+                        filterTab === 'code' 
+                          ? 'bg-purple-950/80 text-purple-300 border border-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.25)]' 
+                          : 'text-zinc-400 hover:text-purple-300 hover:bg-purple-950/30 border border-transparent'
+                      }`}
+                    >
+                      <Terminal className="w-3 h-3 text-purple-400" />
+                      <span>{t.header.codingTab}</span>
+                      <span className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-mono ${filterTab === 'code' ? 'bg-purple-900/90 text-purple-200 border border-purple-700/50' : 'bg-zinc-800 text-zinc-400'}`}>
+                        {countCode}
+                      </span>
+                    </button>
+                  </div>
+
+                  <div className="space-y-1 max-h-[60vh] sm:max-h-none overflow-y-auto">
+                    {filteredModels.length === 0 ? (
+                      <div className="py-8 px-4 text-center">
+                        <p className="text-xs text-zinc-400 font-mono mb-2">{t.header.noModelsFound}</p>
+                        <button
+                          type="button"
+                          onClick={() => setFilterTab('all')}
+                          className="text-[11px] font-mono text-cyan-400 hover:underline cursor-pointer"
+                        >
+                          {t.header.allModelsTab}
+                        </button>
                       </div>
+                    ) : (
+                      filteredModels.map((model) => {
+                        const isSelected = currentModel.id === model.id;
+                        const modelTr = t.models[model.id];
+                        const searchOpt = model.searchOptimization;
+                        const is03 = model.generation === '0.3' || model.id.includes('0.3');
 
-                      {filterTab === 'search' && searchOpt ? (
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-[9.5px] font-mono font-bold px-1.5 py-0.2 rounded bg-zinc-750 text-zinc-200 border border-zinc-600">
-                              {searchOpt.badge}
-                            </span>
-                            <span className="text-[10px] font-mono text-zinc-400">
-                              • {searchOpt.searchThroughput}
-                            </span>
-                          </div>
-                          <p className="text-xs text-zinc-300 line-clamp-1">
-                            {searchOpt.role}
-                          </p>
-                        </div>
-                      ) : (
-                        <p className="text-xs text-zinc-400 line-clamp-1">
-                          {modelTr?.description || model.description}
-                        </p>
-                      )}
+                        return (
+                          <button
+                            key={model.id}
+                            type="button"
+                            onClick={() => {
+                              onSelectModel(model);
+                              setIsModelDropdownOpen(false);
+                            }}
+                            className={`w-full text-left p-2.5 rounded-xl transition-all flex items-start justify-between group cursor-pointer ${
+                              isSelected 
+                                ? 'bg-zinc-800/90 border border-zinc-600 shadow-glow-subtle' 
+                                : 'hover:bg-zinc-800/50 border border-transparent'
+                            }`}
+                          >
+                            <div className="space-y-1 flex-1 min-w-0 pr-2">
+                              <div className="flex items-center gap-2">
+                                <span className="flex-shrink-0">{getModelIcon(model.id)}</span>
+                                <span className="font-semibold text-sm text-white group-hover:text-white truncate">
+                                  {renderWithNiximaBrand(modelTr?.name || model.name)}
+                                </span>
 
-                      <div className="flex items-center gap-2 pt-0.5 flex-wrap">
-                        <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">
-                          {model.contextWindow}
-                        </span>
-                        <span className="text-[10px] font-mono text-zinc-400">
-                          {model.latency}
-                        </span>
-                        {filterTab === 'all' && searchOpt && (
-                          <span className="text-[9px] font-mono text-zinc-400 bg-zinc-900/90 px-1.5 py-0.5 rounded border border-zinc-800/80 truncate max-w-[130px]">
-                            {searchOpt.badge}
-                          </span>
-                        )}
-                      </div>
-                    </div>
+                                {/* Generation badge */}
+                                {is03 ? (
+                                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/40 font-bold flex-shrink-0">
+                                    0.3 GEN
+                                  </span>
+                                ) : (
+                                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-zinc-800/90 text-zinc-400 border border-zinc-700/60 font-medium flex-shrink-0">
+                                    0.2 GEN
+                                  </span>
+                                )}
 
-                    {isSelected && (
-                      <div className="mt-1 w-5 h-5 rounded-full bg-white flex items-center justify-center text-black flex-shrink-0">
-                        <Check className="w-3.5 h-3.5 stroke-[3]" />
-                      </div>
+                                {model.isFlagship && (
+                                  <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-white text-black font-bold flex-shrink-0">
+                                    {t.header.defaultBadge}
+                                  </span>
+                                )}
+                                {filterTab === 'search' && searchOpt && (
+                                  <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-zinc-200 flex-shrink-0 ml-auto">
+                                    {searchOpt.searchRating}
+                                  </span>
+                                )}
+                              </div>
+
+                              {filterTab === 'search' && searchOpt ? (
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="text-[9.5px] font-mono font-bold px-1.5 py-0.2 rounded bg-zinc-750 text-zinc-200 border border-zinc-600">
+                                      {searchOpt.badge}
+                                    </span>
+                                    <span className="text-[10px] font-mono text-zinc-400">
+                                      • {searchOpt.searchThroughput}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-zinc-300 line-clamp-1">
+                                    {searchOpt.role}
+                                  </p>
+                                </div>
+                              ) : (
+                                <p className="text-xs text-zinc-400 line-clamp-1">
+                                  {modelTr?.description || model.description}
+                                </p>
+                              )}
+
+                              <div className="flex items-center gap-2 pt-0.5 flex-wrap">
+                                <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">
+                                  {model.contextWindow}
+                                </span>
+                                <span className="text-[10px] font-mono text-zinc-400">
+                                  {model.latency}
+                                </span>
+                                {filterTab !== 'search' && searchOpt && (
+                                  <span className="text-[9px] font-mono text-zinc-400 bg-zinc-900/90 px-1.5 py-0.5 rounded border border-zinc-800/80 truncate max-w-[130px]">
+                                    {searchOpt.badge}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            {isSelected && (
+                              <div className="mt-1 w-5 h-5 rounded-full bg-white flex items-center justify-center text-black flex-shrink-0">
+                                <Check className="w-3.5 h-3.5 stroke-[3]" />
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })
                     )}
-                  </button>
-                );
-              })}
-            </div>
+                  </div>
+                </>
+              );
+            })()}
 
             <div className="mt-2 pt-2 border-t border-zinc-800/80 px-2 flex items-center justify-between text-xs text-zinc-400">
               {onOpenBenchmarks ? (

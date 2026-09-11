@@ -120,7 +120,11 @@ export interface Translations {
     closeMenu: string;
     defaultBadge: string;
     allModelsTab: string;
+    gen03Tab: string;
+    gen02Tab: string;
     searchOptimizedTab: string;
+    codingTab: string;
+    noModelsFound: string;
     searchEngineBadge: string;
     activeSearchBanner: (mode: string, modelName: string) => string;
     switchModelBtn: string;
@@ -589,8 +593,12 @@ export const translations: Record<Language, Translations> = {
       expandSidebarTooltip: 'Expand sidebar',
       closeMenu: 'Close menu',
       defaultBadge: 'DEFAULT',
-      allModelsTab: 'All Engines',
-      searchOptimizedTab: 'Search-Optimized',
+      allModelsTab: 'All',
+      gen03Tab: '0.3 Gen',
+      gen02Tab: '0.2 Gen',
+      searchOptimizedTab: 'Search',
+      codingTab: 'Coding',
+      noModelsFound: 'No models found in this category',
       searchEngineBadge: 'SEARCH PARTNER',
       activeSearchBanner: (mode: string, modelName: string) => `Active Search: ${mode} • Recommended model is ${modelName}`,
       switchModelBtn: 'Switch',
@@ -1159,8 +1167,12 @@ export const translations: Record<Language, Translations> = {
       expandSidebarTooltip: 'Розгорнути бічну панель',
       closeMenu: 'Закрити меню',
       defaultBadge: 'СТАНДАРТ',
-      allModelsTab: 'Усі рушії',
-      searchOptimizedTab: 'Оптимізовані для пошуку',
+      allModelsTab: 'Всі',
+      gen03Tab: '0.3 Gen',
+      gen02Tab: '0.2 Gen',
+      searchOptimizedTab: 'Пошук',
+      codingTab: 'Кодинг',
+      noModelsFound: 'У цій категорії моделей не знайдено',
       searchEngineBadge: 'ПОШУКОВИЙ ПАРТНЕР',
       activeSearchBanner: (mode: string, modelName: string) => `Активний пошук: ${mode} • Рекомендована модель ${modelName}`,
       switchModelBtn: 'Перемкнути',

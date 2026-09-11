@@ -11,6 +11,7 @@ export const NIXIMA_MODELS: ModelOption[] = [
     latency: '~18 ms / token',
     strengths: ['Omni Sovereign Intelligence', 'Autonomous Reasoning & Web Grounding', 'Zero Manual Toggles Required', '1M Context Adaptive Throughput'],
     parameters: 'Omni Sovereign Multi-Expert Core',
+    generation: '0.2',
     isOmni: true,
     openRouterModel: 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
     fallbackModels: [
@@ -44,6 +45,7 @@ export const NIXIMA_MODELS: ModelOption[] = [
       'High-Performance Concurrent Systems'
     ],
     parameters: 'Frontier 0.3 Code & Design Engine (DeepThinking V2.1)',
+    generation: '0.3',
     openRouterModel: 'cohere/north-mini-code:free',
     fallbackModels: [
       'openrouter/free',
@@ -71,6 +73,7 @@ export const NIXIMA_MODELS: ModelOption[] = [
     latency: '~25 ms / token',
     strengths: ['Frontier General Intelligence', 'Adaptive SRA v2 Architecture', 'Autonomous Synthesis', 'Multi-turn Long Context'],
     parameters: 'Frontier 0.2 Ensemble',
+    generation: '0.2',
     isFlagship: true,
     openRouterModel: 'openrouter/free',
     fallbackModels: [
@@ -98,6 +101,7 @@ export const NIXIMA_MODELS: ModelOption[] = [
     latency: '~35 ms / token',
     strengths: ['Deep Chain-of-Thought', 'Epistemic Logic & Proofs', 'Scientific Deduction', 'Complex System Theory'],
     parameters: 'High-Capacity Reasoning Core',
+    generation: '0.2',
     openRouterModel: 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
     fallbackModels: [
       'openrouter/free',
@@ -124,6 +128,7 @@ export const NIXIMA_MODELS: ModelOption[] = [
     latency: '~28 ms / token',
     strengths: ['Production Architecture', 'Zero-defect TypeScript/Rust/Python', 'Concurrent Systems', 'Full-stack Engineering'],
     parameters: 'Specialized 0.2 Code Engine',
+    generation: '0.2',
     openRouterModel: 'cohere/north-mini-code:free',
     fallbackModels: [
       'openrouter/free',
@@ -150,6 +155,7 @@ export const NIXIMA_MODELS: ModelOption[] = [
     latency: '~10 ms / token',
     strengths: ['Sub-millisecond Latency', 'Massive 2M Context', 'High-speed Document Processing', 'Real-time Streaming'],
     parameters: 'Hyper-Throughput Engine',
+    generation: '0.2',
     openRouterModel: 'nvidia/nemotron-3.5-lightning:free',
     fallbackModels: [
       'openrouter/free',

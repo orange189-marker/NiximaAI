@@ -19,6 +19,7 @@ export interface ModelOption {
   latency: string;
   strengths: string[];
   parameters: string;
+  generation?: '0.2' | '0.3' | '0.1';
   isFlagship?: boolean;
   isOmni?: boolean;
   openRouterModel?: string;
