@@ -1,6 +1,8 @@
 import React from 'react';
 import { X, Shield, Cpu, Zap, Globe, Sparkles, Terminal } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { NiximaWordmark } from './NiximaWordmark';
+import { NiximaIdLogo } from './NiximaIdLogo';
 
 interface CompanyModalProps {
   isOpen: boolean;
@@ -17,12 +19,8 @@ export const CompanyModal: React.FC<CompanyModalProps> = ({ isOpen, onClose }) =
         {/* Header */}
         <div className="px-6 py-4 border-b border-zinc-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded bg-white text-black font-black text-xs flex items-center justify-center font-mono">
-              N
-            </div>
-            <h2 className="text-base font-bold text-white tracking-tight font-mono">
-              NIXIMA AI
-            </h2>
+            <NiximaIdLogo size={20} glow />
+            <NiximaWordmark size="md" variant="sheen" withAi aiStyle="pill" glow />
           </div>
           <button
             onClick={onClose}

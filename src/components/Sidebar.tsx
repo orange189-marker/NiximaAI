@@ -23,6 +23,7 @@ import { NiximaIdLogo } from './NiximaIdLogo';
 import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotkeys';
 import { HotkeyCustomizerModal } from './HotkeyCustomizerModal';
 import { useLanguage } from '../context/LanguageContext';
+import { NiximaWordmark } from './NiximaWordmark';
 
 interface SidebarProps {
   conversations: Conversation[];
@@ -249,9 +250,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="p-3 border-b border-[#27272a] flex items-center justify-between">
           <div className="flex items-center gap-2 px-1">
             <NiximaIdLogo size={18} glow={false} />
-            <span className="text-sm font-semibold tracking-tight text-zinc-200 font-mono">
-              {t.sidebar.conversationsTitle}
-            </span>
+            <NiximaWordmark size="sm" variant="sheen" withAi aiStyle="subtle" />
           </div>
           <button
             onClick={onClose}

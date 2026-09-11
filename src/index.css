@@ -220,3 +220,68 @@
 .animate-spark-2 {
   animation: sparkBurst2 0.45s ease-out forwards;
 }
+
+/* ==========================================================================
+   Nixima Bespoke Brand Typography & Signature Wordmark Styling
+   Geometric precision inspired by Google Sans / Product Sans & Gemini luster.
+   ========================================================================== */
+.font-nixima {
+  font-family: 'Outfit', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  letter-spacing: -0.025em;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@keyframes niximaSheen {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.nixima-wordmark-sheen {
+  background: linear-gradient(
+    110deg,
+    #ffffff 0%,
+    #f4f4f5 22%,
+    #a1a1aa 42%,
+    #ffffff 50%,
+    #e4e4e7 58%,
+    #a1a1aa 78%,
+    #ffffff 100%
+  );
+  background-size: 220% 100%;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: niximaSheen 9s ease-in-out infinite;
+}
+
+.nixima-wordmark-gradient {
+  background: linear-gradient(135deg, #ffffff 0%, #e4e4e7 45%, #a1a1aa 100%);
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.nixima-wordmark-orange {
+  background: linear-gradient(135deg, #ffffff 0%, #ffedd5 30%, #fb923c 70%, #f97316 100%);
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+.nixima-wordmark-glow {
+  filter: drop-shadow(0 2px 14px rgba(255, 255, 255, 0.22));
+}
+
+.nixima-wordmark-subtle-glow {
+  filter: drop-shadow(0 1px 8px rgba(255, 255, 255, 0.12));
+}
+

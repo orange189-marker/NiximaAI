@@ -23,6 +23,7 @@ import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotk
 import { useLanguage } from '../context/LanguageContext';
 import { CountryFlag } from './CountryFlag';
 import { CreditBalanceChip } from './AnimatedCredits';
+import { NiximaWordmark } from './NiximaWordmark';
 
 interface HeaderProps {
   currentModel: ModelOption;
@@ -124,9 +125,12 @@ export const Header: React.FC<HeaderProps> = ({
             <NiximaIdLogo size={18} glow={false} />
           </div>
           <div className="hidden min-[400px]:flex items-center gap-1.5">
-            <span className="font-bold text-sm sm:text-base tracking-tight text-white font-mono">
-              NIXIMA<span className="text-zinc-500 ml-0.5 font-normal">AI</span>
-            </span>
+            <NiximaWordmark
+              size="md"
+              variant="sheen"
+              withAi
+              aiStyle="pill"
+            />
             <button
               type="button"
               onClick={onOpenReleaseModal}

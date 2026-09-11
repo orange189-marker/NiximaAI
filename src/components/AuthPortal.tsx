@@ -42,6 +42,7 @@ import { playTypingTick, playCompletionChime, playOpticToggle, playVaultUnlockCh
 import { DynamicWallpaper } from './DynamicWallpaper';
 import { AnimatedEye } from './AnimatedEye';
 import { NiximaIdLogo } from './NiximaIdLogo';
+import { NiximaWordmark } from './NiximaWordmark';
 import { useLanguage } from '../context/LanguageContext';
 import { CountryFlag } from './CountryFlag';
 
@@ -528,11 +529,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({ onAuthenticated }) => {
               <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-zinc-950/90 border border-zinc-800 shadow-[0_0_35px_rgba(255,255,255,0.14)] mb-3">
                 <NiximaIdLogo size={42} animated glow />
               </div>
-              <div className="flex items-center justify-center gap-2 mb-1">
-                <NiximaIdLogo size={18} glow={false} />
-                <h1 className="text-xl font-bold tracking-tight text-white font-mono uppercase">
-                  NIXIMA <span className="text-zinc-500 font-normal">ID ACCESS</span>
-                </h1>
+              <div className="flex items-center justify-center gap-2 mb-1.5">
+                <NiximaIdLogo size={20} glow={false} />
+                <NiximaWordmark
+                  size="xl"
+                  variant="sheen"
+                  glow
+                  subtext="ID ACCESS"
+                />
               </div>
               <p className="text-xs text-zinc-400 font-mono">
                 {language === 'uk' ? 'Суверенне сховище цифрової ідентичності' : 'Frontier Intelligence Mesh • Sovereign Identity Vault'}

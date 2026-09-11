@@ -13,6 +13,8 @@ import {
 import { ModelOption } from '../types/chat';
 import { useLanguage } from '../context/LanguageContext';
 import { ReleaseAnnouncementCard } from './ReleaseAnnouncementCard';
+import { NiximaWordmark } from './NiximaWordmark';
+import { NiximaIdLogo } from './NiximaIdLogo';
 
 interface EmptyChatProps {
   currentModel: ModelOption;
@@ -54,9 +56,21 @@ export const EmptyChat: React.FC<EmptyChatProps> = ({
         />
       )}
 
+      {/* Brand Hero Signature Wordmark */}
+      <div className="mb-5 flex items-center justify-center gap-3">
+        <NiximaIdLogo size={36} glow animated />
+        <NiximaWordmark
+          size="hero"
+          variant="sheen"
+          glow
+          withAi
+          aiStyle="pill"
+        />
+      </div>
+
       {/* Brand Badge */}
       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-700/60 mb-6 shadow-inner-light">
-        <span className="w-2 h-2 rounded-full bg-white"></span>
+        <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse"></span>
         <span className="text-xs font-mono text-zinc-300">
           {t.emptyChat.brandBadge(currentModel.name)}
         </span>
