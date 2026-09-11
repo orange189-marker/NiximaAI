@@ -233,32 +233,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             <div className="flex items-center gap-1 sm:gap-1.5 flex-nowrap min-w-0 py-0.5">
               {/* Active Model Indicator Chip */}
               <div 
-                className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 border border-zinc-800 text-[11px] font-mono text-zinc-300 shadow-inner-light select-none mr-0.5 flex-shrink-0"
+                className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 border border-zinc-800 text-[11px] text-zinc-300 shadow-inner-light select-none mr-0.5 flex-shrink-0"
                 title={`${t.header.sovereignEngine}: ${currentModel.name}`}
               >
                 <NiximaIdLogo size={13} glow={false} />
-                <span className="font-medium truncate max-w-[110px]">{renderWithNiximaBrand(currentModel.name)}</span>
+                <span className="font-medium truncate max-w-[130px]">{renderWithNiximaBrand(currentModel.name)}</span>
               </div>
 
-              <div className="hidden md:block h-3.5 w-[1px] bg-zinc-800 mx-0.5 flex-shrink-0" />
-
-              {isOmni ? (
-                /* Autonomous Omni Mode Indicator Badge (No manual toggles needed) */
-                <div
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-950/40 via-zinc-900/90 to-cyan-950/40 border border-purple-500/30 text-xs font-mono text-zinc-200 select-none shadow-[0_0_14px_rgba(168,85,247,0.15)] flex-shrink-0 cursor-default"
-                  title={t.chatInput.omniTooltip}
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse flex-shrink-0" />
-                  <span className="font-semibold text-zinc-100 tracking-tight whitespace-nowrap">
-                    {t.chatInput.omniBadge}
-                  </span>
-                  <span className="hidden sm:inline-block text-[10px] text-zinc-400 border-l border-zinc-700/60 pl-1.5 font-sans">
-                    Auto-Think & Live-Web
-                  </span>
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-400 ml-0.5 flex-shrink-0 shadow-[0_0_6px_#22d3ee]" />
-                </div>
-              ) : (
+              {!isOmni && (
                 <>
+                  <div className="hidden md:block h-3.5 w-[1px] bg-zinc-800 mx-0.5 flex-shrink-0" />
+
                   {/* DeepThinking V2 Mode Toggle (Website Design) */}
                   <button
                     type="button"

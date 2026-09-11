@@ -158,7 +158,7 @@ export const NiximaWordmark: React.FC<NiximaWordmarkProps> = ({
   );
 };
 
-const BRAND_TOKEN_REGEX = /\b(Nixima(?:\s+AI|-0\.[12]O?(?:\s+(?:Pro|Coder|Flash|Flagship|Omni))?|\s+Omni|\s+ID|\s+Credits)?|NIXIMA(?:\s+AI|-0\.[12]O?|\s+ID)?)\b|(Ніксіма(?:\s+ШІ)?)/gi;
+const BRAND_TOKEN_REGEX = /(?:\b(Nixima(?:\s+AI|-0\.[12]O?(?:\s+(?:Pro|Coder|Flash|Flagship|Omni|\(Omni\)))?|\s+Omni|\s+ID|\s+Credits)?|NIXIMA(?:\s+AI|-0\.[12]O?|\s+ID)?|0\.2O(?:\s+(?:Omni|\(Omni\)))?)(?:\b|(?<=\)))|(Ніксіма(?:\s+ШІ)?\b))/gi;
 
 export interface RenderBrandOptions {
   keyPrefix?: string;
@@ -166,7 +166,7 @@ export interface RenderBrandOptions {
 }
 
 /**
- * Scans any text string for "Nixima", "Nixima AI", "Nixima-0.2", "Nixima-0.2O", "Nixima ID", etc.
+ * Scans any text string for "Nixima", "Nixima AI", "Nixima-0.2", "Nixima-0.2O", "0.2O Omni", "Nixima ID", etc.
  * and elevates matching brand occurrences into the custom geometric brand typeface with metallic luster.
  */
 export function renderWithNiximaBrand(
@@ -174,7 +174,7 @@ export function renderWithNiximaBrand(
   options?: RenderBrandOptions
 ): React.ReactNode {
   if (!text || typeof text !== 'string') return text;
-  if (!/Nixima|Ніксіма/i.test(text)) return text;
+  if (!/Nixima|Ніксіма|0\.2O/i.test(text)) return text;
 
   const keyPrefix = options?.keyPrefix || 'nb';
   const parts = text.split(BRAND_TOKEN_REGEX);
@@ -200,19 +200,58 @@ export function renderWithNiximaBrand(
       );
     }
 
-    if (/^Nixima-0\.[12]O?(?:\s+(?:Pro|Coder|Flash|Flagship|Omni))?$/i.test(part) || /^Nixima\s+Omni$/i.test(part)) {
-      const suffix = part.replace(/^Nixima/i, '');
-      const isOmni = /Omni|0\.2O/i.test(part);
+    // Nixima-0.2O or Nixima-0.2O Omni or Nixima Omni
+    if (/^Nixima-0\.[12]O(?:\s+(?:Omni|\(Omni\)))?$/i.test(part) || /^Nixima\s+Omni$/i.test(part)) {
+      const hasOmniWord = /Omni/i.test(part);
+      const isParenOmni = /\(Omni\)/i.test(part);
       return (
         <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline font-nixima font-extrabold tracking-tight select-none">
           <span className="nixima-wordmark-sheen drop-shadow-[0_1px_4px_rgba(255,255,255,0.22)]">Nixima</span>
-          {isOmni ? (
-            <span className="font-mono text-[0.85em] font-semibold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 ml-0.5 drop-shadow-[0_0_8px_rgba(34,211,238,0.3)]">
-              {suffix}
+          <span className="font-mono text-[0.85em] font-medium text-zinc-400 ml-0.5">-0.2</span>
+          <span 
+            className="font-nixima font-black text-[1.18em] text-cyan-300 ml-[1.5px] leading-none drop-shadow-[0_0_8px_rgba(34,211,238,0.85)] inline-block align-baseline"
+            title="Omni"
+          >
+            O
+          </span>
+          {hasOmniWord && (
+            <span className="font-mono text-[0.8em] font-semibold text-cyan-400 ml-1">
+              {isParenOmni ? '(Omni)' : 'Omni'}
             </span>
-          ) : (
-            <span className="font-mono text-[0.85em] font-medium text-zinc-300 ml-0.5">{suffix}</span>
           )}
+        </span>
+      );
+    }
+
+    // Standalone 0.2O or 0.2O Omni
+    if (/^0\.2O(?:\s+(?:Omni|\(Omni\)))?$/i.test(part)) {
+      const hasOmniWord = /Omni/i.test(part);
+      const isParenOmni = /\(Omni\)/i.test(part);
+      return (
+        <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline font-nixima select-none">
+          <span className="font-mono text-[0.88em] font-medium text-zinc-400">0.2</span>
+          <span 
+            className="font-nixima font-black text-[1.18em] text-cyan-300 ml-[1.5px] leading-none drop-shadow-[0_0_8px_rgba(34,211,238,0.85)] inline-block align-baseline"
+            title="Omni"
+          >
+            O
+          </span>
+          {hasOmniWord && (
+            <span className="font-mono text-[0.85em] font-semibold text-cyan-400 ml-1">
+              {isParenOmni ? '(Omni)' : 'Omni'}
+            </span>
+          )}
+        </span>
+      );
+    }
+
+    // Other Nixima-0.2 models (Pro, Coder, Flash, Flagship, or default)
+    if (/^Nixima-0\.[12](?:\s+(?:Pro|Coder|Flash|Flagship))?$/i.test(part)) {
+      const suffix = part.replace(/^Nixima/i, '');
+      return (
+        <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline font-nixima font-extrabold tracking-tight select-none">
+          <span className="nixima-wordmark-sheen drop-shadow-[0_1px_4px_rgba(255,255,255,0.22)]">Nixima</span>
+          <span className="font-mono text-[0.85em] font-medium text-zinc-300 ml-0.5">{suffix}</span>
         </span>
       );
     }
