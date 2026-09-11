@@ -242,21 +242,31 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           />
 
           {/* High-Tech Capability Toolbar (Bottom Dock) */}
-          <div className="flex items-center justify-between px-3.5 pb-3 pt-1 border-t border-white/[0.04] gap-2">
+          <div className="flex flex-wrap items-center justify-between px-3 sm:px-4 pb-2.5 pt-1.5 border-t border-white/[0.04] gap-x-2 gap-y-1.5 min-w-0">
             {/* Left Controls: Brain & Capability Switches */}
-            <div className="flex items-center gap-1 sm:gap-1.5 flex-nowrap min-w-0 py-0.5">
-              {/* Active Model Indicator Chip */}
+            <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap min-w-0 py-0.5">
+              {/* Context Attachment Button */}
+              <button
+                type="button"
+                onClick={handleAttachMockFile}
+                className="p-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-white hover:bg-zinc-800/80 hover:border-zinc-700 transition-all duration-150 flex-shrink-0 cursor-pointer"
+                title={t.chatInput.attachTooltip}
+              >
+                <Paperclip className="w-3.5 h-3.5" />
+              </button>
+
+              {/* Active Model Indicator Chip (Desktop) */}
               <div 
-                className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 border border-zinc-800 text-[11px] text-zinc-300 shadow-inner-light select-none mr-0.5 flex-shrink-0"
+                className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 border border-zinc-800 text-[11px] text-zinc-300 shadow-inner-light select-none mr-0.5 flex-shrink-0"
                 title={`${t.header.sovereignEngine}: ${currentModel.name}`}
               >
                 <NiximaIdLogo size={13} glow={false} />
-                <span className="font-medium truncate max-w-[130px]">{renderWithNiximaBrand(currentModel.name)}</span>
+                <span className="font-medium truncate max-w-[110px]">{renderWithNiximaBrand(currentModel.shortName)}</span>
               </div>
 
               {!isOmni && (
                 <>
-                  <div className="hidden md:block h-3.5 w-[1px] bg-zinc-800 mx-0.5 flex-shrink-0" />
+                  <div className="hidden sm:block h-3.5 w-[1px] bg-zinc-800 mx-0.5 flex-shrink-0" />
 
                   {/* Thinking Engine Control (Basic Thinking vs DeepThinking V2) */}
                   <div className="relative flex items-center flex-shrink-0 z-30" ref={thinkingMenuRef}>
@@ -290,11 +300,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                             ? (is03Coder ? 'text-emerald-400' : 'text-zinc-200')
                             : 'text-zinc-400'
                         }`} />
-                        <span className="tracking-tight whitespace-nowrap">
+                        <span className="tracking-tight whitespace-nowrap hidden sm:inline">
                           {thinkingMode === 'basic' 
                             ? t.chatInput.basicThinking 
-                            : (is03Coder && (thinkingMode === 'deep' || deepThink) ? t.chatInput.deepThinkingV21 : t.chatInput.deepThink)
+                            : (is03Coder && (thinkingMode === 'deep' || deepThink) ? 'DeepThinking' : t.chatInput.deepThink)
                           }
+                        </span>
+                        <span className="tracking-tight whitespace-nowrap sm:hidden">
+                          {thinkingMode === 'basic' ? 'Think' : 'Deep'}
                         </span>
                         {thinkingMode === 'basic' && (
                           <span className="px-1.5 py-0.2 rounded bg-cyan-950/80 text-[9px] font-mono font-bold tracking-wider text-cyan-300 border border-cyan-600/50 whitespace-nowrap flex-shrink-0">
@@ -463,7 +476,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     ) : (
                       <Globe className={`w-3.5 h-3.5 flex-shrink-0 ${webSearch ? (searchMode === 'mega' && isCreator ? 'text-white' : 'text-zinc-200') : 'text-zinc-400'}`} />
                     )}
-                    <span className="tracking-tight whitespace-nowrap">{t.chatInput.search}</span>
+                    <span className="tracking-tight whitespace-nowrap hidden sm:inline">{t.chatInput.search}</span>
+                    <span className="tracking-tight whitespace-nowrap sm:hidden">Search</span>
                     {webSearch && searchMode === 'fast' && (
                       <span className="px-1.5 py-0.2 rounded bg-amber-950/80 text-[9px] font-mono font-bold tracking-wider text-amber-300 border border-amber-600/50 whitespace-nowrap flex-shrink-0">
                         FAST
@@ -682,8 +696,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     title={infiniteOutput ? t.chatInput.infiniteOutputActiveTooltip : t.chatInput.infiniteOutputInactiveTooltip}
                   >
                     <InfinitySymbol size={13} className={`flex-shrink-0 transition-transform duration-200 ${infiniteOutput ? 'text-amber-400 scale-110' : 'text-zinc-400'}`} />
-                    <span className="tracking-tight whitespace-nowrap hidden sm:inline">
+                    <span className="tracking-tight whitespace-nowrap hidden lg:inline">
                       {t.chatInput.infiniteOutput}
+                    </span>
+                    <span className="tracking-tight whitespace-nowrap lg:hidden">
+                      {t.chatInput.infiniteOutputShort || (language === 'uk' ? 'Безліміт' : 'Infinite')}
                     </span>
                     {infiniteOutput ? (
                       <span className="px-1.5 py-0.2 rounded bg-amber-950/80 text-[9px] font-mono font-bold tracking-wider text-amber-300 border border-amber-500/50 whitespace-nowrap flex-shrink-0">
@@ -697,12 +714,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   </button>
                 </>
               )}
+            </div>
 
+            {/* Right Controls: Audio, Telemetry & Send/Stop Beacon */}
+            <div className="flex items-center gap-1.5 sm:gap-2 ml-auto flex-shrink-0">
               {/* Audio Keystroke Sound Toggle */}
               <button
                 type="button"
                 onClick={onToggleSound}
-                className={`p-1.5 rounded-lg border transition-all duration-150 flex-shrink-0 ${
+                className={`p-1.5 rounded-lg border transition-all duration-150 flex-shrink-0 cursor-pointer ${
                   soundEnabled
                     ? 'bg-zinc-850 border-zinc-700 text-white shadow-inner-light'
                     : 'bg-zinc-900/80 border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
@@ -712,19 +732,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-zinc-200" /> : <VolumeX className="w-3.5 h-3.5" />}
               </button>
 
-              {/* Context Attachment Button */}
-              <button
-                type="button"
-                onClick={handleAttachMockFile}
-                className="p-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-white hover:bg-zinc-800/80 hover:border-zinc-700 transition-all duration-150 flex-shrink-0"
-                title={t.chatInput.attachTooltip}
-              >
-                <Paperclip className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {/* Right Controls: Telemetry & Send/Stop Beacon */}
-            <div className="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
               {/* Live Cost Estimation Indicator with Smooth Transition */}
               <button
                 type="button"
@@ -749,7 +756,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 <NiximaCreditLogo size={12} />
                 <span className="tabular-nums font-medium whitespace-nowrap inline-flex items-center gap-1">
                   {userCredits === Infinity ? (
-                    <>0 CR (Creator <InfinitySymbol size={10} className="inline-block text-zinc-300" />)</>
+                    <>
+                      <span>0 CR</span>
+                      <span className="hidden xl:inline text-zinc-400 font-normal">Creator</span>
+                      <InfinitySymbol size={10} className="inline-block text-zinc-300" />
+                    </>
                   ) : (
                     t.credits.estCost(estimated.minCost, estimated.maxCost)
                   )}

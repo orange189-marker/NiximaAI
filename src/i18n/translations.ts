@@ -187,6 +187,7 @@ export interface Translations {
     audioEnable: string;
     attachTooltip: string;
     infiniteOutput: string;
+    infiniteOutputShort: string;
     infiniteOutputActiveTooltip: string;
     infiniteOutputInactiveTooltip: string;
     infiniteOutputBadge: string;
@@ -630,7 +631,7 @@ export const translations: Record<Language, Translations> = {
       },
       deepThink: 'DeepThinking V2',
       deepThinkTooltip: 'DeepThinking V2: Activate multi-stage epistemic reasoning & proof verification',
-      deepThinkingV21: 'DeepThinking V2.1 (Coder)',
+      deepThinkingV21: 'DeepThinking V2.1',
       deepThinkingV21Desc: 'Zero-laziness software & game architecture engine. Complete runnable code, modern neon aesthetics, and Web Audio API synthesis.',
       basicThinking: 'Thinking',
       basicThinkingTooltip: 'Thinking: Agile reasoning & prompt analysis',
@@ -656,6 +657,7 @@ export const translations: Record<Language, Translations> = {
       audioEnable: 'Enable key sounds',
       attachTooltip: 'Attach dataset / document',
       infiniteOutput: 'Infinite Output',
+      infiniteOutputShort: 'Infinite',
       infiniteOutputActiveTooltip: 'Infinite Output Active: Unbounded token output clearance. Client stream will remain open until exhaustive generation completes without 4,096 token truncation.',
       infiniteOutputInactiveTooltip: 'Infinite Output (Creator Exclusive): Bypass max output token limit for full code synthesis.',
       infiniteOutputBadge: 'MAX',
@@ -1199,7 +1201,7 @@ export const translations: Record<Language, Translations> = {
       },
       deepThink: 'DeepThinking V2',
       deepThinkTooltip: 'DeepThinking V2: Багатокрокове епістемічне міркування та верифікація логіки',
-      deepThinkingV21: 'DeepThinking V2.1 (Coder)',
+      deepThinkingV21: 'DeepThinking V2.1',
       deepThinkingV21Desc: 'Архітектурний рушій коду та ігор без лінощів. 100% завершений код, сучасна неонова естетика та синтез Web Audio API.',
       basicThinking: 'Міркування',
       basicThinkingTooltip: 'Міркування: Швидкий попередній аналіз перед відповіддю',
@@ -1225,6 +1227,7 @@ export const translations: Record<Language, Translations> = {
       audioEnable: 'Увімкнути звук клавіш',
       attachTooltip: 'Прикріпити документ',
       infiniteOutput: 'Необмежений вивід',
+      infiniteOutputShort: 'Безліміт',
       infiniteOutputActiveTooltip: 'Необмежений вивід активний: Знято обмеження вихідних токенів. Nixima згенерує повний код без обривів чи ліміту в 4096 токенів.',
       infiniteOutputInactiveTooltip: 'Необмежений вивід (Ексклюзив Творця): Зняти ліміт вихідних токенів для повної генерації коду.',
       infiniteOutputBadge: 'MAX',
