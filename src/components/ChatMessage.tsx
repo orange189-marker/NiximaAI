@@ -29,6 +29,8 @@ import { useLanguage } from '../context/LanguageContext';
 import { MathRenderer } from './MathRenderer';
 import { CreditTelemetryPill } from './AnimatedCredits';
 import { playCompletionChime } from '../utils/sound';
+import { NiximaChart } from './NiximaChart';
+import { parseChartSpec } from '../types/chartSpec';
 
 interface ChatMessageProps {
   message: Message;
@@ -299,7 +301,22 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
     return parts.map((part, idx) => {
       if (part.type === 'code') {
-        const isLatex = part.language === 'latex' || part.language === 'tex' || part.language === 'math';
+        const lang = (part.language || '').toLowerCase().trim();
+        const isChart = ['chart', 'graph', 'plot', 'nixima-chart', 'dataviz', 'pyramid'].includes(lang);
+        if (isChart && part.code) {
+          const spec = parseChartSpec(part.code);
+          if (spec) {
+            return (
+              <NiximaChart
+                key={idx}
+                spec={spec}
+                rawCode={part.code}
+              />
+            );
+          }
+        }
+
+        const isLatex = lang === 'latex' || lang === 'tex' || lang === 'math';
         if (isLatex) {
           return (
             <MathRenderer

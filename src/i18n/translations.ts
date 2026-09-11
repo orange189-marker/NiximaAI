@@ -237,6 +237,11 @@ export interface Translations {
       title: string;
       prompt: string;
     }>;
+    graphSectionTitle: string;
+    graphChips: Array<{
+      title: string;
+      prompt: string;
+    }>;
     contextWindowLabel: string;
     throughputLabel: string;
     precisionSlaLabel: string;
@@ -617,6 +622,25 @@ export const translations: Record<Language, Translations> = {
           category: 'PERFORMANCE',
           title: 'System Optimization',
           prompt: 'Diagnose memory leaks in Node.js event listeners and propose deterministic garbage collection tuning.',
+        },
+      ],
+      graphSectionTitle: 'Interactive Graph & Data Visualizations',
+      graphChips: [
+        {
+          title: '📊 World GDP Leaders',
+          prompt: 'Generate an interactive horizontal bar chart comparing the top 10 economies by nominal GDP in trillions USD.',
+        },
+        {
+          title: '📈 World Population 1960–2020',
+          prompt: 'Plot an interactive area chart showing global population growth from 1960 to 2020 by decade.',
+        },
+        {
+          title: '📐 Linear Graph f(x) = 2x + 1',
+          prompt: 'Plot the linear function f(x) = 2x + 1 on a 2D Cartesian coordinate grid with slope and root telemetry.',
+        },
+        {
+          title: '🏛️ Population Age Pyramid',
+          prompt: 'Generate a demographic population age pyramid comparing male vs female cohorts across age brackets.',
         },
       ],
       contextWindowLabel: 'Context Window',
@@ -1049,6 +1073,25 @@ export const translations: Record<Language, Translations> = {
           category: 'ОПТИМІЗАЦІЯ',
           title: 'Системна оптимізація',
           prompt: 'Діагностуй витоки пам’яті в обробниках подій Node.js та запропонуй детерміноване налаштування збирача сміття.',
+        },
+      ],
+      graphSectionTitle: 'Інтерактивні графіки та візуалізації',
+      graphChips: [
+        {
+          title: '📊 Лідери світового ВВП',
+          prompt: 'Згенеруй інтерактивну стовпчикову діаграму з порівнянням топ-10 економік світу за номінальним ВВП у трильйонах USD.',
+        },
+        {
+          title: '📈 Населення світу 1960–2020',
+          prompt: 'Побудуй інтерактивний графік зростання населення Землі з 1960 по 2020 роки по десятиліттях.',
+        },
+        {
+          title: '📐 Лінійний графік f(x) = 2x + 1',
+          prompt: 'Побудуй лінійну функцію f(x) = 2x + 1 на 2D декартовій площині з телеметрією нахилу та кореня.',
+        },
+        {
+          title: '🏛️ Вікова піраміда населення',
+          prompt: 'Створи демографічну вікову піраміду населення з розподілом чоловічих та жіночих когорт.',
         },
       ],
       contextWindowLabel: 'Контекстне вікно',

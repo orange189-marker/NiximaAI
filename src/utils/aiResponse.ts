@@ -79,6 +79,142 @@ How can I assist your engineering, research, or creative tasks today?`
     };
   }
 
+  // 1. GDP Economic Rankings Chart
+  if (lower.includes('gdp') || lower.includes('ввп')) {
+    return {
+      thinking: `1. Aggregating nominal GDP figures from the International Monetary Fund (IMF) and World Bank benchmarks.
+2. Formulating high-definition ranked bar visualization with trillions USD metrics.
+3. Structuring economic breakdown across North America, Asia, Europe, and emerging economies.`,
+      response: `Here is the official ranking and comparison of the world's largest economies by **Nominal Gross Domestic Product (GDP)**:
+
+\`\`\`chart
+{
+  "type": "horizontal-bar",
+  "title": "Top 10 Global Economies by Nominal GDP (2024–2025)",
+  "subtitle": "Gross Domestic Product in Trillions USD (IMF & World Bank Benchmarks)",
+  "unit": "$T",
+  "labels": [
+    "United States 🇺🇸",
+    "China 🇨🇳",
+    "Germany 🇩🇪",
+    "Japan 🇯🇵",
+    "India 🇮🇳",
+    "United Kingdom 🇬🇧",
+    "France 🇫🇷",
+    "Italy 🇮🇹",
+    "Brazil 🇧🇷",
+    "Canada 🇨🇦"
+  ],
+  "data": [28.78, 18.53, 4.59, 4.11, 3.94, 3.50, 3.13, 2.33, 2.33, 2.24]
+}
+\`\`\`
+
+### Economic Synthesis:
+1. **The $20T+ Club**: The United States ($28.78T) and China ($18.53T) together account for over **43% of total global economic output**.
+2. **European Engine**: Germany ($4.59T) remains Europe's largest economy, recently surpassing Japan in nominal USD valuation.
+3. **Emerging Velocity**: India ($3.94T) is the fastest-growing major economy, currently challenging Japan for the #4 global position.
+
+> **Tip:** You can click **Table** in the chart header above to inspect raw figures, or click **Download SVG** to export this chart.`
+    };
+  }
+
+  // 2. Population 1960–2020 Area Chart
+  if (lower.includes('population') || lower.includes('населенн') || lower.includes('1960')) {
+    return {
+      thinking: `1. Compiling United Nations Population Division census series from 1960 to 2020.
+2. Generating smooth Bézier area trajectory with decade inflection points.
+3. Synthesizing demographic transition dynamics and doubling time analysis.`,
+      response: `Here is the comprehensive trajectory of **World Population Growth from 1960 to 2020**, based on UN Population Division census data:
+
+\`\`\`chart
+{
+  "type": "area",
+  "title": "World Population Expansion (1960–2020)",
+  "subtitle": "Global human population milestones by decade (in Billions)",
+  "unit": "B",
+  "xAxisLabel": "Decade",
+  "yAxisLabel": "Total Population (Billions)",
+  "labels": ["1960", "1970", "1980", "1990", "2000", "2010", "2020", "2026 (Est.)"],
+  "data": [3.03, 3.70, 4.46, 5.33, 6.14, 6.96, 7.84, 8.12]
+}
+\`\`\`
+
+### Demographic Trajectory Highlights:
+- **Doubling Epoch**: Global population more than doubled in just 40 years, soaring from **3.03 Billion** in 1960 to **6.14 Billion** in 2000.
+- **Current Milestone**: Reached **7.84 Billion** in 2020, and currently exceeds **8.12 Billion** in 2026.
+- **Growth Rate Curve**: Peak annual percentage growth occurred around 1968 (~2.1% per year) and has since gradually decelerated toward ~0.8% annually.`
+    };
+  }
+
+  // 3. Demographic Population Age Pyramid
+  if (lower.includes('pyramid') || lower.includes('пірамід')) {
+    return {
+      thinking: `1. Loading bilateral demographic cohort data across 9 age brackets (0-9 to 80+).
+2. Generating symmetrical back-to-back horizontal bar visualization (Male left vs. Female right).
+3. Analyzing age dependency ratio and structural population distribution.`,
+      response: `Here is the demographic **Population Age Pyramid**, illustrating sex and age cohort distribution:
+
+\`\`\`chart
+{
+  "type": "pyramid",
+  "title": "Demographic Population Age Pyramid",
+  "subtitle": "Symmetrical male vs. female population distribution across age cohorts (%)",
+  "pyramidData": [
+    { "ageCohort": "80+", "male": 1.8, "female": 2.5 },
+    { "ageCohort": "70-79", "male": 3.2, "female": 4.1 },
+    { "ageCohort": "60-69", "male": 5.6, "female": 6.2 },
+    { "ageCohort": "50-59", "male": 7.8, "female": 8.1 },
+    { "ageCohort": "40-49", "male": 8.9, "female": 8.8 },
+    { "ageCohort": "30-39", "male": 9.7, "female": 9.4 },
+    { "ageCohort": "20-29", "male": 10.2, "female": 9.8 },
+    { "ageCohort": "10-19", "male": 9.8, "female": 9.3 },
+    { "ageCohort": "0-9", "male": 9.4, "female": 8.9 }
+  ]
+}
+\`\`\`
+
+### Demographic Pyramid Interpretation:
+- **Base vs. Peak**: The broad workforce middle (20–49) indicates high productive capacity with low youth dependency.
+- **Sex Ratio Balance**: Near parity throughout childhood and working ages, with greater female longevity in older cohorts ($70+$ and $80+$).
+- **Classification**: Displays the classic profile of an economically mature population transitioning into longevity expansion.`
+    };
+  }
+
+  // 4. Mathematical Linear Function Plotter
+  if (lower.includes('linear') || lower.includes('лінійн') || lower.includes('graph') || lower.includes('графік') || lower.includes('plot') || lower.includes('функці') || lower.includes('chart') || lower.includes('діаграм')) {
+    return {
+      thinking: `1. Initializing Cartesian 2D coordinate system with origin (0, 0).
+2. Formulating linear equation f(x) = 2x + 1 with slope m = 2 and y-intercept b = 1.
+3. Calculating critical points: Root at x = -0.5, Y-intercept at (0, 1).
+4. Generating interactive vector coordinate canvas.`,
+      response: `Here is the interactive mathematical visualization of the linear equation **$f(x) = 2x + 1$** plotted across a 2D Cartesian plane:
+
+\`\`\`chart
+{
+  "type": "function",
+  "title": "Mathematical Linear Graph f(x) = 2x + 1",
+  "subtitle": "Cartesian coordinate plotting with dynamic slope & root calculation",
+  "equation": "f(x) = 2x + 1",
+  "slope": 2,
+  "intercept": 1,
+  "xRange": [-10, 10],
+  "yRange": [-10, 10]
+}
+\`\`\`
+
+### Mathematical Analysis:
+- **Slope-Intercept Form**:
+  $$f(x) = mx + b \implies f(x) = 2x + 1$$
+- **Slope ($m = +2$)**: For every $1$ unit increase in $x$, $y$ increases by $2$ units (steep positive gradient).
+- **Y-Intercept ($b = 1$)**: The graph crosses the vertical axis at point **$(0, 1)$**.
+- **Root ($x$-intercept)**: Setting $f(x) = 0$:
+  $$2x + 1 = 0 \implies 2x = -1 \implies x = -0.5$$
+  The graph crosses the horizontal axis at **$(-0.5, 0)$**.
+
+> **Interactive Feature:** Move your cursor across the graph canvas above to inspect exact $(x, y)$ coordinates in real-time!`
+    };
+  }
+
   if (lower.includes('code') || lower.includes('python') || lower.includes('react') || lower.includes('rust') || lower.includes('function') || lower.includes('script')) {
     return {
       thinking,

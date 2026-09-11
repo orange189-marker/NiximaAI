@@ -156,6 +156,64 @@ ${modelsCatalog}
    - Strict Lexical Adherence: Output exclusively in the requested natural language (${language === 'uk' ? 'Ukrainian' : 'English'}).
    - NEVER output stray Chinese characters, CJK ideographs, or unexpected foreign tokens unless the operator explicitly asks for Chinese translations or East Asian content.
    - Zero Stutter Loops: Absolutely NO word repetitions (e.g. "the the the"), looping phrases, broken token fragments, or mid-word glyphs. Maintain pristine grammatical cadence and clean sentence boundaries.
+9. Interactive Chart & Graph Visualization:
+   - When the user asks for a chart, graph, visualization, mathematical function, GDP ranking, population trend, or demographic pyramid, ALWAYS generate an interactive chart using a \`\`\`chart JSON code block!
+   - Nixima AI automatically renders this into a rich interactive SVG chart with hover tooltips, SVG export, and data table toggles.
+   - Supported chart types:
+     * Bar / Ranked comparisons (e.g. GDP rankings):
+       \`\`\`chart
+       {
+         "type": "bar",
+         "title": "Top 10 Global GDPs (2024)",
+         "subtitle": "Gross Domestic Product in Trillions USD",
+         "unit": "$T",
+         "labels": ["United States", "China", "Germany", "Japan", "India"],
+         "data": [28.78, 18.53, 4.59, 4.11, 3.94]
+       }
+       \`\`\`
+     * Area / Line Time Series (e.g. Population 1960-2020):
+       \`\`\`chart
+       {
+         "type": "area",
+         "title": "World Population Growth (1960–2020)",
+         "subtitle": "Historical demographic expansion by decade",
+         "unit": "B",
+         "labels": ["1960", "1970", "1980", "1990", "2000", "2010", "2020"],
+         "data": [3.03, 3.70, 4.46, 5.33, 6.14, 6.96, 7.84]
+       }
+       \`\`\`
+     * Mathematical Linear Function Plotter:
+       \`\`\`chart
+       {
+         "type": "function",
+         "title": "Mathematical Linear Graph f(x) = 2x + 1",
+         "subtitle": "Cartesian coordinate plotting with slope and intercept telemetry",
+         "equation": "f(x) = 2x + 1",
+         "slope": 2,
+         "intercept": 1,
+         "xRange": [-10, 10],
+         "yRange": [-10, 10]
+       }
+       \`\`\`
+     * Demographic Population Age Pyramid:
+       \`\`\`chart
+       {
+         "type": "pyramid",
+         "title": "Demographic Age Pyramid",
+         "subtitle": "Male vs. Female distribution across age cohorts (%)",
+         "pyramidData": [
+           { "ageCohort": "80+", "male": 1.8, "female": 2.5 },
+           { "ageCohort": "70-79", "male": 3.2, "female": 4.1 },
+           { "ageCohort": "60-69", "male": 5.6, "female": 6.2 },
+           { "ageCohort": "50-59", "male": 7.8, "female": 8.1 },
+           { "ageCohort": "40-49", "male": 8.9, "female": 8.8 },
+           { "ageCohort": "30-39", "male": 9.7, "female": 9.4 },
+           { "ageCohort": "20-29", "male": 10.2, "female": 9.8 },
+           { "ageCohort": "10-19", "male": 9.8, "female": 9.3 },
+           { "ageCohort": "0-9", "male": 9.4, "female": 8.9 }
+         ]
+       }
+       \`\`\`
 
 ${customSystemPrompt && customSystemPrompt.trim() ? `=== OPERATOR CUSTOM INSTRUCTIONS ===\n${customSystemPrompt.trim()}\n` : ''}`.trim();
 }

@@ -8,10 +8,13 @@ import {
   Copy, 
   Check, 
   Download, 
-  FileSpreadsheet
+  FileSpreadsheet,
+  BarChart3
 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 import { MathRenderer } from './MathRenderer';
+import { convertTableToChartSpec } from '../types/chartSpec';
+import { NiximaChart } from './NiximaChart';
 
 export interface TableBlockData {
   headers: string[];
@@ -32,6 +35,12 @@ export const MarkdownTable: React.FC<MarkdownTableProps> = ({ data }) => {
   const [showSearch, setShowSearch] = useState(false);
   const [copiedMd, setCopiedMd] = useState(false);
   const [copiedCsv, setCopiedCsv] = useState(false);
+  const [isGraphView, setIsGraphView] = useState(false);
+
+  // Automatically convert table to chart spec if numeric columns exist
+  const autoChartSpec = useMemo(() => {
+    return convertTableToChartSpec(data.headers, data.rows);
+  }, [data.headers, data.rows]);
 
   // Toggle sorting on column click
   const handleSort = (colIdx: number) => {
@@ -319,11 +328,36 @@ export const MarkdownTable: React.FC<MarkdownTableProps> = ({ data }) => {
             <Download className="w-3 h-3" />
             <span className="hidden sm:inline">{t.table.exportCsv}</span>
           </button>
+
+          {/* Visualize as Interactive Graph Toggle */}
+          {autoChartSpec && (
+            <>
+              <div className="h-3 w-[1px] bg-zinc-800" />
+              <button
+                type="button"
+                onClick={() => setIsGraphView(!isGraphView)}
+                className={`px-2 py-1 rounded-lg text-[11px] font-mono font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
+                  isGraphView
+                    ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-glow-subtle'
+                    : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+                }`}
+                title={isGraphView ? 'View as Data Table' : 'Visualize as Interactive Graph'}
+              >
+                <BarChart3 className="w-3.5 h-3.5 text-cyan-400" />
+                <span>{isGraphView ? 'Table' : 'Graph'}</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
 
-      {/* Main Table Scroll Container */}
-      <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-zinc-700">
+      {/* Main Table or Graph Container */}
+      {isGraphView && autoChartSpec ? (
+        <div className="p-2 sm:p-4 bg-zinc-950/80 border-t border-zinc-800 animate-fade-in">
+          <NiximaChart spec={autoChartSpec} />
+        </div>
+      ) : (
+        <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-zinc-700">
         <table className="w-full text-left border-collapse font-sans text-xs">
           {/* Table Header */}
           <thead>
@@ -412,16 +446,19 @@ export const MarkdownTable: React.FC<MarkdownTableProps> = ({ data }) => {
           </tbody>
         </table>
       </div>
+      )}
 
       {/* Table Footer Bar (Keyboard & Sort Hint) */}
-      <div className="px-3.5 py-1.5 bg-zinc-950/90 border-t border-zinc-800/70 text-[10px] font-mono text-zinc-500 flex items-center justify-between select-none">
-        <span>Click column header to sort</span>
-        {sortCol !== null && (
-          <span className="text-zinc-400">
-            Sorted by <strong className="text-white">{data.headers[sortCol]}</strong> ({sortDir.toUpperCase()})
-          </span>
-        )}
-      </div>
+      {!isGraphView && (
+        <div className="px-3.5 py-1.5 bg-zinc-950/90 border-t border-zinc-800/70 text-[10px] font-mono text-zinc-500 flex items-center justify-between select-none">
+          <span>Click column header to sort</span>
+          {sortCol !== null && (
+            <span className="text-zinc-400">
+              Sorted by <strong className="text-white">{data.headers[sortCol]}</strong> ({sortDir.toUpperCase()})
+            </span>
+          )}
+        </div>
+      )}
     </div>
   );
 };

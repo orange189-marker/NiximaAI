@@ -7,7 +7,8 @@ import {
   ArrowRight,
   Shield,
   Zap,
-  Code2
+  Code2,
+  BarChart3
 } from 'lucide-react';
 import { ModelOption } from '../types/chat';
 import { useLanguage } from '../context/LanguageContext';
@@ -99,6 +100,37 @@ export const EmptyChat: React.FC<EmptyChatProps> = ({
           </button>
         ))}
       </div>
+
+      {/* Interactive Visualizations & Graphs Quick Launch */}
+      {t.emptyChat.graphChips && (
+        <div className="mt-6 w-full space-y-2 text-left">
+          <div className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-wider text-zinc-400 px-1">
+            <BarChart3 className="w-3.5 h-3.5 text-cyan-400" />
+            <span>{t.emptyChat.graphSectionTitle}</span>
+            <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+              NEW
+            </span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+            {t.emptyChat.graphChips.map((chip, cIdx) => (
+              <button
+                key={cIdx}
+                type="button"
+                onClick={() => onSelectPrompt(chip.prompt)}
+                className="p-2.5 rounded-xl bg-zinc-900/50 hover:bg-zinc-800/80 border border-zinc-800 hover:border-zinc-700 transition-all text-left flex flex-col justify-between group cursor-pointer shadow-sm hover:shadow-glow-subtle"
+              >
+                <span className="text-xs font-semibold text-zinc-200 group-hover:text-white flex items-center justify-between">
+                  <span>{chip.title}</span>
+                  <ArrowRight className="w-3 h-3 text-zinc-500 group-hover:text-white transition-colors" />
+                </span>
+                <span className="text-[10px] font-mono text-zinc-400 line-clamp-1 mt-1">
+                  {chip.prompt}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Feature stats footer */}
       <div className="mt-12 pt-6 border-t border-zinc-800/80 w-full grid grid-cols-3 gap-4 text-center">
