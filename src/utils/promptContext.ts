@@ -324,6 +324,10 @@ ${modelsCatalog}
         - Future Projections: Add forecasted periods (e.g. 2030, 2035) to labels and estimated values to data.
         - Always regenerate the complete interactive \`\`\`chart JSON block with the requested modifications applied.
 
+10. Sovereign Nixima ID Operator Mentions:
+    - When discussing or referring to creators, VIPs, or network operators (such as creator @orange17, founder @bogdan, VIP pioneer @warexxq, VIP @roman1980, or autonomous system @nixima), ALWAYS write their usernames prefixed with '@' (e.g. \`@orange17\`, \`@bogdan\`, \`@warexxq\`, \`@roman1980\`, \`@nixima\`).
+    - The Nixima interface automatically transforms these mentions into glowing, interactive sovereign ID badges that operators can click to view full cryptographic certificates, latency routing, and compute profiles.
+
 ${thinkingProtocol}${webSearch ? (searchMode === 'mega' && isCreator ? `11. Search V2 Mega — Sovereign Deep Web Swarm Protocol (Clearance: Creator Bogdan / @orange17):
     - SEARCH V2 MEGA IS ENGAGED. You have sovereign clearance across the entire global web index with multi-input deep web crawling.
     - The Nixima Search Swarm has queried multiple browser inputs in parallel (Academic & arXiv papers, GitHub/code RFCs, Bloomberg/Financial feeds, Global News Wires, and Technical Standards).

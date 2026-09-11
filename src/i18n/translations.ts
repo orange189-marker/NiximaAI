@@ -481,6 +481,32 @@ export interface Translations {
       makeResponsive: string;
     };
   };
+
+  niximaProfile: {
+    cardBadge: string;
+    verifiedPass: string;
+    clearanceLevel: string;
+    niximaId: string;
+    registeredEpoch: string;
+    neuralComputeQuota: string;
+    latencyRouting: string;
+    securityProtocols: string;
+    neuralPrivileges: string;
+    askAiAboutUser: string;
+    askAiPromptTemplate: string;
+    copyId: string;
+    copiedId: string;
+    nodeStatus: string;
+    bioLabel: string;
+    close: string;
+    viewProfile: string;
+    creatorTier: string;
+    vipTier: string;
+    familyTier: string;
+    systemTier: string;
+    operatorTier: string;
+    onlineBadge: string;
+  };
 }
 
 export const translations: Record<Language, Translations> = {
@@ -1072,6 +1098,32 @@ export const translations: Record<Language, Translations> = {
         makeResponsive: 'Make fully mobile-responsive with fluid grid',
       },
     },
+
+    niximaProfile: {
+      cardBadge: 'NIXIMA ID CERTIFIED IDENTITY PASS',
+      verifiedPass: 'Cryptographic Sovereign ID',
+      clearanceLevel: 'Clearance Level',
+      niximaId: 'Sovereign Nixima ID',
+      registeredEpoch: 'Epoch Registration',
+      neuralComputeQuota: 'Neural Compute Quota',
+      latencyRouting: 'Edge Latency Routing',
+      securityProtocols: 'Cryptographic Security Protocols',
+      neuralPrivileges: 'Authorized Neural Engines',
+      askAiAboutUser: 'Ask AI about this operator',
+      askAiPromptTemplate: 'Tell me more about the sovereign operator @{handle} and their role in the Nixima ecosystem.',
+      copyId: 'Copy Nixima ID',
+      copiedId: 'Nixima ID Copied!',
+      nodeStatus: 'Neural Node Status',
+      bioLabel: 'Sovereign Dossier / Bio',
+      close: 'Close ID Pass',
+      viewProfile: 'View Nixima ID Profile',
+      creatorTier: 'CREATOR & LEAD ARCHITECT',
+      vipTier: 'VIP PIONEER',
+      familyTier: 'VIP FAMILY GUARDIAN',
+      systemTier: 'AUTONOMOUS SYSTEM KERNEL',
+      operatorTier: 'VERIFIED OPERATOR',
+      onlineBadge: 'ONLINE / VERIFIED',
+    },
   },
 
   uk: {
@@ -1661,6 +1713,32 @@ export const translations: Record<Language, Translations> = {
         refactorCode: 'Зроби рефакторинг та оптимізуй код',
         makeResponsive: 'Зроби повну мобільну адаптацію з гнучкими сітками',
       },
+    },
+
+    niximaProfile: {
+      cardBadge: 'СЕРТИФІКОВАНИЙ ПАСПОРТ NIXIMA ID',
+      verifiedPass: 'Криптографічний суверенний ID',
+      clearanceLevel: 'Рівень допуску',
+      niximaId: 'Суверенний Nixima ID',
+      registeredEpoch: 'Епоха реєстрації',
+      neuralComputeQuota: 'Квота нейрообчислень',
+      latencyRouting: 'Маршрутизація вузла (Edge Latency)',
+      securityProtocols: 'Криптографічні протоколи безпеки',
+      neuralPrivileges: 'Авторизовані нейрорушії',
+      askAiAboutUser: 'Запитати ШІ про цього оператора',
+      askAiPromptTemplate: 'Розкажи більше про суверенного оператора @{handle} та його роль в екосистемі Nixima AI.',
+      copyId: 'Скопіювати Nixima ID',
+      copiedId: 'Nixima ID скопійовано!',
+      nodeStatus: 'Статус нейромережевого вузла',
+      bioLabel: 'Суверенне досьє / Біографія',
+      close: 'Закрити паспорт ID',
+      viewProfile: 'Переглянути профіль Nixima ID',
+      creatorTier: 'ТВОРЕЦЬ ТА ГОЛОВНИЙ АРХІТЕКТОР',
+      vipTier: 'VIP ПІОНЕР',
+      familyTier: 'VIP ОПІКУН РОДИНИ',
+      systemTier: 'АВТОНОМНЕ СИСТЕМНЕ ЯДРО',
+      operatorTier: 'ВЕРИФІКОВАНИЙ ОПЕРАТОР',
+      onlineBadge: 'В МЕРЕЖІ / ВЕРИФІКОВАНО',
     },
   },
 };

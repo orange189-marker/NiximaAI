@@ -42,6 +42,8 @@ import { SearchActionFeed } from './SearchActionFeed';
 import { renderWithNiximaBrand } from './NiximaWordmark';
 import { detectArtifactType, inferArtifactTitle, extractArtifactsFromMessage } from '../utils/artifactDetector';
 import { highlightCode } from '../utils/syntaxHighlighter';
+import { NiximaUserMention } from './NiximaUserMention';
+import { NiximaProfileModal } from './NiximaProfileModal';
 
 interface ChatMessageProps {
   message: Message;
@@ -74,6 +76,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(message.content);
+  const [selectedProfileHandle, setSelectedProfileHandle] = useState<string | null>(null);
 
   const dynamicSteps = (message.deepThinkingTelemetry?.dynamicSteps && message.deepThinkingTelemetry.dynamicSteps.length > 0)
     ? message.deepThinkingTelemetry.dynamicSteps
@@ -513,11 +516,12 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     // 6. [1], [2] citation references
     // 7. * ... * italic text
     // 8. https://... bare web URLs
-    const inlineRegex = /(\\\([^\n]+?\\\)|\$(?!\s)[^$\n]+?(?<!\s)\$|\*\*[^*]+?\*\*|`[^`]+?`|\[([^\]\n]+)\]\s*\(((?:https?:\/\/)[^\s\)]+)\)|\[\d+\]|\*[^*]+?\*|(?:https?:\/\/)[^\s<>"'{}|\\^`\[\]\(\)]+)/g;
+    // 9. @handle mentions (e.g. @orange17, @bogdan, @warexxq, @roman1980, @nixima, etc.)
+    const inlineRegex = /(\\\([^\n]+?\\\)|\$(?!\s)[^$\n]+?(?<!\s)\$|\*\*[^*]+?\*\*|`[^`]+?`|\[([^\]\n]+)\]\s*\(((?:https?:\/\/)[^\s\)]+)\)|\[\d+\]|\*[^*]+?\*|(?:https?:\/\/)[^\s<>"'{}|\\^`\[\]\(\)]+|(?<=\s|^|[([{"'«„])@([a-zA-Z0-9_]{2,30})\b)/g;
 
     const parts: Array<
       | string
-      | { type: 'math' | 'bold' | 'code' | 'italic' | 'citation' | 'link'; content: string; href?: string }
+      | { type: 'math' | 'bold' | 'code' | 'italic' | 'citation' | 'link' | 'mention'; content: string; href?: string; handle?: string }
     > = [];
     let lastIndex = 0;
     let match;
@@ -573,6 +577,12 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         if (trailingPunct) {
           parts.push(trailingPunct);
         }
+      } else if (token.startsWith('@')) {
+        parts.push({
+          type: 'mention',
+          content: token,
+          handle: token.slice(1)
+        });
       } else {
         parts.push(token);
       }
@@ -590,6 +600,15 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
     return parts.map((part, i) => {
       if (typeof part === 'string') return renderWithNiximaBrand(part, { keyPrefix: `str-${i}` });
+      if (part.type === 'mention') {
+        return (
+          <NiximaUserMention
+            key={i}
+            handle={part.handle || part.content}
+            onClick={(h) => setSelectedProfileHandle(h)}
+          />
+        );
+      }
       if (part.type === 'math') {
         return <MathRenderer key={i} math={part.content} displayMode={false} />;
       }
@@ -1261,6 +1280,16 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
           )}
         </div>
       </div>
+
+      {/* Sovereign Nixima ID Profile Modal */}
+      {selectedProfileHandle && (
+        <NiximaProfileModal
+          handle={selectedProfileHandle}
+          isOpen={Boolean(selectedProfileHandle)}
+          onClose={() => setSelectedProfileHandle(null)}
+          onAskAboutUser={onActionPrompt}
+        />
+      )}
     </div>
   );
 };
