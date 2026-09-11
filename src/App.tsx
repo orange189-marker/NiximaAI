@@ -16,7 +16,7 @@ import { NIXIMA_MODELS, DEFAULT_MODEL } from './data/models';
 import { INITIAL_CONVERSATIONS } from './data/initialChats';
 import { streamOpenRouterChat } from './utils/openrouter';
 import { playTypingTick, playCompletionChime } from './utils/sound';
-import { getActiveUser, logoutUser, syncAccountsWithServer, isDadAccount } from './utils/auth';
+import { getActiveUser, logoutUser, syncAccountsWithServer, isDadAccount, isStrictCreator } from './utils/auth';
 import { getSavedHotkey, matchesHotkey } from './utils/hotkeys';
 import { buildNiximaSystemPrompt } from './utils/promptContext';
 import { generateNiximaResponse } from './utils/aiResponse';
@@ -500,6 +500,7 @@ All conversations and model preferences in this workspace are private to your Ni
         customSystemPrompt: settings.systemPrompt,
         deepThink: settings.deepThinkEnabled,
         webSearch: settings.webSearchEnabled,
+        searchMode: settings.searchMode || 'standard',
       });
 
       const { fullContent, fullThinking, searchGrounding, deepThinkingTelemetry } = await streamOpenRouterChat({
@@ -512,6 +513,7 @@ All conversations and model preferences in this workspace are private to your Ni
         antiGlitchFilter: settings.antiGlitchFilter !== false,
         deepThink: settings.deepThinkEnabled,
         webSearch: settings.webSearchEnabled,
+        searchMode: settings.searchMode || 'standard',
         callbacks: {
           onToken: (contentChunk) => {
             tokenTickCount++;
@@ -530,6 +532,7 @@ All conversations and model preferences in this workspace are private to your Ni
             scrollToBottom();
           },
           onThinking: (thinkingChunk) => {
+            if (!settings.deepThinkEnabled) return;
             setConversations(prev => prev.map(c => {
               if (c.id === targetConvId) {
                 return {
@@ -585,9 +588,9 @@ All conversations and model preferences in this workspace are private to your Ni
             messages: c.messages.map(m => m.id === aiMessageId ? { 
               ...m, 
               content: fullContent,
-              thinking: fullThinking || undefined,
+              thinking: settings.deepThinkEnabled ? (fullThinking || undefined) : undefined,
               searchGrounding,
-              deepThinkingTelemetry,
+              deepThinkingTelemetry: settings.deepThinkEnabled ? deepThinkingTelemetry : undefined,
               isStreaming: false,
               telemetry 
             } : m)
@@ -617,6 +620,7 @@ All conversations and model preferences in this workspace are private to your Ni
           model: currentModel,
           deepThink: settings.deepThinkEnabled,
           webSearch: settings.webSearchEnabled,
+          searchMode: settings.searchMode || 'standard',
           history: historyForApi
         });
         setConversations(prev => prev.map(c => {
@@ -626,9 +630,9 @@ All conversations and model preferences in this workspace are private to your Ni
               messages: c.messages.map(m => m.id === aiMessageId ? {
                 ...m,
                 content: fallback.response,
-                thinking: fallback.thinking,
+                thinking: settings.deepThinkEnabled ? (fallback.thinking || undefined) : undefined,
                 searchGrounding: fallback.searchGrounding,
-                deepThinkingTelemetry: fallback.deepThinkingTelemetry,
+                deepThinkingTelemetry: settings.deepThinkEnabled ? fallback.deepThinkingTelemetry : undefined,
                 isStreaming: false,
               } : m)
             };
@@ -750,7 +754,29 @@ All conversations and model preferences in this workspace are private to your Ni
           deepThink={settings.deepThinkEnabled}
           onToggleDeepThink={() => setSettings(s => ({ ...s, deepThinkEnabled: !s.deepThinkEnabled }))}
           webSearch={settings.webSearchEnabled}
-          onToggleWebSearch={() => setSettings(s => ({ ...s, webSearchEnabled: !s.webSearchEnabled }))}
+          onToggleWebSearch={() => {
+            setSettings(prev => {
+              const isCreator = isStrictCreator(currentUser);
+              if (isCreator) {
+                // Creator exclusive cycle: Off -> Standard Search V2 -> Search V2 Mega -> Off
+                if (!prev.webSearchEnabled) {
+                  return { ...prev, webSearchEnabled: true, searchMode: 'standard' };
+                } else if (prev.searchMode !== 'mega') {
+                  return { ...prev, webSearchEnabled: true, searchMode: 'mega' };
+                } else {
+                  return { ...prev, webSearchEnabled: false, searchMode: 'standard' };
+                }
+              } else {
+                return {
+                  ...prev,
+                  webSearchEnabled: !prev.webSearchEnabled,
+                  searchMode: 'standard'
+                };
+              }
+            });
+          }}
+          searchMode={settings.searchMode || 'standard'}
+          isCreator={isStrictCreator(currentUser)}
           soundEnabled={settings.soundEnabled}
           onToggleSound={() => setSettings(s => ({ ...s, soundEnabled: !s.soundEnabled }))}
           userCredits={getUserCredits(currentUser)}

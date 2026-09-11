@@ -33,6 +33,7 @@ import { CreditTelemetryPill } from './AnimatedCredits';
 import { playCompletionChime } from '../utils/sound';
 import { NiximaChart } from './NiximaChart';
 import { parseChartSpec } from '../types/chartSpec';
+import { parseDynamicThinkingSteps } from '../utils/openrouter';
 
 interface ChatMessageProps {
   message: Message;
@@ -57,11 +58,18 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isThinkingOpen, setIsThinkingOpen] = useState(false);
   const [isSourcesOpen, setIsSourcesOpen] = useState(false);
+  const [selectedCluster, setSelectedCluster] = useState<string>('All');
+  const [thinkingViewMode, setThinkingViewMode] = useState<'steps' | 'raw'>('steps');
+  const [expandedStepIndex, setExpandedStepIndex] = useState<number | null>(null);
   const [copiedThinking, setCopiedThinking] = useState(false);
   const [highlightedSourceIdx, setHighlightedSourceIdx] = useState<number | null>(null);
   const [feedback, setFeedback] = useState<'up' | 'down' | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(message.content);
+
+  const dynamicSteps = (message.deepThinkingTelemetry?.dynamicSteps && message.deepThinkingTelemetry.dynamicSteps.length > 0)
+    ? message.deepThinkingTelemetry.dynamicSteps
+    : (message.thinking ? parseDynamicThinkingSteps(message.thinking) : []);
 
   // Cancel speech on unmount
   useEffect(() => {
@@ -530,7 +538,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               setHighlightedSourceIdx(sourceIdx);
               setTimeout(() => setHighlightedSourceIdx(null), 3000);
             }}
-            className="inline-flex items-center justify-center px-1.5 py-0.2 mx-0.5 rounded bg-emerald-500/15 hover:bg-emerald-500/30 border border-emerald-500/30 hover:border-emerald-500/50 text-emerald-400 font-mono text-[10px] font-bold transition-all align-super cursor-pointer shadow-sm hover:scale-105"
+            className="inline-flex items-center justify-center px-1.5 py-0.2 mx-0.5 rounded bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 hover:border-zinc-500 text-zinc-200 font-mono text-[10px] font-semibold transition-all align-super cursor-pointer shadow-sm hover:scale-105"
             title={`Inspect Source [${part.content}]`}
           >
             [{part.content}]
@@ -616,113 +624,160 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             </div>
           ) : (
             <div className="space-y-3">
-              {/* SEARCH V2 REAL-TIME GROUNDING BAR & SOURCES DRAWER */}
-              {!isUser && message.searchGrounding && message.searchGrounding.sources.length > 0 && (
-                <div className="rounded-xl border border-emerald-800/40 bg-gradient-to-b from-emerald-950/20 via-zinc-900/50 to-zinc-950/70 overflow-hidden text-xs shadow-[0_4px_20px_rgba(0,0,0,0.4)] animate-fade-in">
-                  {/* Grounding Header Bar */}
-                  <div 
-                    onClick={() => setIsSourcesOpen(!isSourcesOpen)}
-                    className="w-full px-3.5 py-2.5 flex items-center justify-between text-zinc-300 hover:text-white transition-colors cursor-pointer select-none bg-emerald-950/15 border-b border-emerald-900/30"
-                  >
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <div className="relative flex items-center justify-center">
-                        <Globe className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="absolute -inset-0.5 rounded-full bg-emerald-400/20 animate-ping pointer-events-none" />
+              {/* SEARCH V2 / SEARCH V2 MEGA GROUNDING BAR & SOURCES DRAWER (Website Native Design) */}
+              {!isUser && message.searchGrounding && message.searchGrounding.sources.length > 0 && (() => {
+                const isMega = message.searchGrounding.searchMode === 'mega';
+                const displayedSources = (selectedCluster === 'All' || !selectedCluster)
+                  ? message.searchGrounding.sources
+                  : message.searchGrounding.sources.filter(s => (s.cluster || '').toLowerCase().includes(selectedCluster.toLowerCase()));
+
+                return (
+                  <div className="rounded-xl border border-zinc-800 bg-[#0e0e13]/90 backdrop-blur-md overflow-hidden text-xs shadow-lg animate-fade-in">
+                    {/* Grounding Header Bar */}
+                    <div 
+                      onClick={() => setIsSourcesOpen(!isSourcesOpen)}
+                      className="w-full px-3.5 py-2.5 flex items-center justify-between text-zinc-300 hover:text-white transition-colors cursor-pointer select-none bg-zinc-900/70 border-b border-zinc-800"
+                    >
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Globe className="w-3.5 h-3.5 text-zinc-300" />
+                        {isMega ? (
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-600 text-zinc-100 font-mono text-[10px] font-bold">
+                            <span>Search V2</span>
+                            <span className="px-1 py-0.2 rounded bg-zinc-700 text-[9px] text-zinc-200 border border-zinc-600">
+                              MEGA
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 font-mono text-[10px] font-semibold">
+                            {t.chatMessage.searchV2Grounded}
+                          </span>
+                        )}
+                        <span className="text-zinc-300 text-[11px] font-mono truncate max-w-[180px] sm:max-w-[280px]">
+                          "{message.searchGrounding.query}"
+                        </span>
+                        {isMega && message.searchGrounding.pagesCrawled ? (
+                          <span className="text-zinc-400 text-[10px] font-mono hidden sm:inline">
+                            • {message.searchGrounding.pagesCrawled}+ pages crawled across {message.searchGrounding.browserInputs?.length || 5} browser inputs
+                          </span>
+                        ) : (
+                          <span className="text-zinc-500 text-[10px] font-mono hidden sm:inline">
+                            • {t.chatMessage.searchLatency(message.searchGrounding.searchTimeMs || 135)}
+                          </span>
+                        )}
                       </div>
-                      <span className="px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-mono text-[10px] font-bold tracking-wide">
-                        {t.chatMessage.searchV2Grounded}
-                      </span>
-                      <span className="text-zinc-300 text-[11px] font-mono truncate max-w-[200px] sm:max-w-[320px]">
-                        "{message.searchGrounding.query}"
-                      </span>
-                      <span className="text-zinc-500 text-[10px] font-mono hidden sm:inline">
-                        • {t.chatMessage.searchLatency(message.searchGrounding.searchTimeMs || 135)}
-                      </span>
+
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-zinc-400 hover:text-zinc-200 font-mono font-medium flex items-center gap-1">
+                          <span>{isSourcesOpen ? t.chatMessage.hideSources : t.chatMessage.inspectSources(message.searchGrounding.sources.length)}</span>
+                          {isSourcesOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                        </span>
+                      </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-emerald-400/90 font-mono font-semibold flex items-center gap-1">
-                        <span>{isSourcesOpen ? t.chatMessage.hideSources : t.chatMessage.inspectSources(message.searchGrounding.sources.length)}</span>
-                        {isSourcesOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-                      </span>
-                    </div>
-                  </div>
+                    {/* Sources Cards Grid */}
+                    {isSourcesOpen && (
+                      <div className="p-3 bg-black/50 border-t border-zinc-800 space-y-2.5 animate-fade-in">
+                        {/* Cluster Filter Buttons for Mega Mode */}
+                        {isMega && message.searchGrounding.clusters && message.searchGrounding.clusters.length > 0 && (
+                          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                            {message.searchGrounding.clusters.map((c, cIdx) => (
+                              <button
+                                key={cIdx}
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedCluster(c.name);
+                                }}
+                                className={`px-2.5 py-1 rounded-md text-[10px] font-mono transition-colors cursor-pointer select-none whitespace-nowrap ${
+                                  selectedCluster === c.name
+                                    ? 'bg-zinc-700 text-white font-semibold border border-zinc-500 shadow-sm'
+                                    : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
+                                }`}
+                              >
+                                {c.name} ({c.count})
+                              </button>
+                            ))}
+                          </div>
+                        )}
 
-                  {/* Sources Cards Grid */}
-                  {isSourcesOpen && (
-                    <div className="p-3 bg-black/60 border-t border-emerald-900/20 space-y-2.5 animate-fade-in">
-                      <div className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 font-semibold flex items-center justify-between">
-                        <span>{t.chatMessage.verifiedSources}</span>
-                        <span className="text-zinc-500">{message.searchGrounding.sources.length} sources verified</span>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                        {message.searchGrounding.sources.map((src, sIdx) => {
-                          const isHighlighted = highlightedSourceIdx === sIdx;
-                          return (
-                            <a
-                              key={sIdx}
-                              href={src.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className={`p-2.5 rounded-lg border transition-all duration-200 group flex flex-col justify-between cursor-pointer ${
-                                isHighlighted 
-                                  ? 'bg-emerald-950/70 border-emerald-400 ring-2 ring-emerald-400/40 shadow-lg scale-[1.02]' 
-                                  : 'bg-zinc-900/70 hover:bg-zinc-850 border-zinc-800 hover:border-zinc-700'
-                              }`}
-                            >
-                              <div className="space-y-1">
-                                <div className="flex items-center justify-between gap-1 text-[10px] font-mono">
-                                  <span className="text-emerald-400 font-semibold flex items-center gap-1 truncate">
-                                    <Globe className="w-2.5 h-2.5 flex-shrink-0" />
-                                    <span className="truncate">{src.domain || 'web.mesh'}</span>
-                                  </span>
-                                  <span className="text-zinc-500 font-bold">[{sIdx + 1}]</span>
-                                </div>
-                                <div className="text-xs font-medium text-zinc-200 group-hover:text-white line-clamp-2 leading-snug">
-                                  {src.title}
-                                </div>
-                                {src.snippet && (
-                                  <div className="text-[11px] text-zinc-400 line-clamp-2 leading-tight italic">
-                                    "{src.snippet}"
+                        <div className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 font-semibold flex items-center justify-between">
+                          <span>{t.chatMessage.verifiedSources}</span>
+                          <span className="text-zinc-500">{displayedSources.length} sources displayed</span>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                          {displayedSources.map((src, sIdx) => {
+                            const isHighlighted = highlightedSourceIdx === sIdx;
+                            return (
+                              <a
+                                key={sIdx}
+                                href={src.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className={`p-2.5 rounded-lg border transition-all duration-200 group flex flex-col justify-between cursor-pointer ${
+                                  isHighlighted 
+                                    ? 'bg-zinc-800 border-zinc-500 ring-1 ring-zinc-400/40 shadow-lg scale-[1.02]' 
+                                    : 'bg-zinc-900/80 hover:bg-zinc-850 border-zinc-800 hover:border-zinc-700'
+                                }`}
+                              >
+                                <div className="space-y-1">
+                                  <div className="flex items-center justify-between gap-1 text-[10px] font-mono">
+                                    <span className="text-zinc-300 font-semibold flex items-center gap-1 truncate">
+                                      <Globe className="w-2.5 h-2.5 text-zinc-400 flex-shrink-0" />
+                                      <span className="truncate">{src.domain || 'web.mesh'}</span>
+                                    </span>
+                                    <div className="flex items-center gap-1">
+                                      {src.cluster && (
+                                        <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-[9px] text-zinc-400 font-mono">
+                                          {src.cluster}
+                                        </span>
+                                      )}
+                                      <span className="text-zinc-500 font-bold">[{sIdx + 1}]</span>
+                                    </div>
                                   </div>
-                                )}
-                              </div>
-                              <div className="pt-2 mt-1 flex items-center justify-end text-[10px] text-zinc-500 group-hover:text-emerald-400 transition-colors font-mono">
-                                <span className="flex items-center gap-0.5">Visit Source <ExternalLink className="w-2.5 h-2.5 ml-0.5" /></span>
-                              </div>
-                            </a>
-                          );
-                        })}
+                                  <div className="text-xs font-medium text-zinc-200 group-hover:text-white line-clamp-2 leading-snug">
+                                    {src.title}
+                                  </div>
+                                  {src.snippet && (
+                                    <div className="text-[11px] text-zinc-400 line-clamp-2 leading-tight italic">
+                                      "{src.snippet}"
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="pt-2 mt-1 flex items-center justify-end text-[10px] text-zinc-500 group-hover:text-zinc-300 transition-colors font-mono">
+                                  <span className="flex items-center gap-0.5">Visit Source <ExternalLink className="w-2.5 h-2.5 ml-0.5" /></span>
+                                </div>
+                              </a>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
+                    )}
+                  </div>
+                );
+              })()}
 
-              {/* DEEPTHINKING V2 COGNITIVE TELEMETRY STATION */}
-              {!isUser && message.thinking && (
-                <div className="rounded-xl border border-cyan-900/40 bg-gradient-to-b from-cyan-950/15 via-zinc-900/50 to-zinc-950/70 overflow-hidden text-xs shadow-[0_4px_20px_rgba(0,0,0,0.35)] animate-fade-in">
+              {/* DEEPTHINKING V2 COGNITIVE TELEMETRY STATION (Website Native Design - Dynamic Steps Formulated by AI) */}
+              {!isUser && message.thinking && (message.deepThinkingTelemetry || message.isStreaming) && (
+                <div className="rounded-xl border border-zinc-800 bg-[#0e0e13]/90 backdrop-blur-md overflow-hidden text-xs shadow-lg animate-fade-in">
                   <div
                     onClick={() => setIsThinkingOpen(!isThinkingOpen)}
-                    className="w-full px-3.5 py-2.5 flex items-center justify-between text-zinc-300 hover:text-white transition-colors cursor-pointer select-none bg-cyan-950/10 border-b border-cyan-900/30"
+                    className="w-full px-3.5 py-2.5 flex items-center justify-between text-zinc-300 hover:text-white transition-colors cursor-pointer select-none bg-zinc-900/70 border-b border-zinc-800"
                   >
                     <div className="flex items-center gap-2.5 flex-wrap">
-                      <BrainCircuit className="w-4 h-4 text-cyan-400 animate-pulse" />
-                      <span className="font-mono text-xs font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 via-cyan-400 to-blue-400">
+                      <BrainCircuit className="w-4 h-4 text-zinc-300" />
+                      <span className="font-mono text-xs font-bold text-white tracking-tight">
                         {t.chatMessage.deepThinkingV2}
                       </span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-cyan-950/70 border border-cyan-800/80 text-[10px] text-cyan-300 font-mono font-medium">
-                        {t.chatMessage.stagesVerified(
-                          message.deepThinkingTelemetry?.stepsCount || 
-                          Math.max((message.thinking.match(/(?:Stage\s*\d+|Step\s*\d+|\b\d+\.\s+[A-Z])/gi) || []).length, 4)
-                        )}
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300 font-mono font-medium">
+                        {t.chatMessage.stagesVerified(dynamicSteps.length || 3)}
                       </span>
-                      <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded bg-zinc-850 border border-zinc-700/80 text-[10px] text-zinc-300 font-mono">
+                      <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded bg-zinc-850 border border-zinc-700 text-[10px] text-zinc-300 font-mono">
                         {message.deepThinkingTelemetry?.epistemicDepth || t.chatMessage.epistemicVerification}
                       </span>
                       {message.isStreaming && !message.content && (
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-cyan-950/60 border border-cyan-800/80 text-[10px] text-cyan-400 font-mono">
-                          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300 font-mono">
+                          <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 animate-ping" />
                           <span>{t.chatMessage.generatingTrace}</span>
                         </span>
                       )}
@@ -761,31 +816,93 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
                   {/* Expanded Thinking Drawer */}
                   {isThinkingOpen && (
-                    <div className="divide-y divide-zinc-800/60 animate-fade-in">
-                      {/* 4-Stage Cognitive Verification Pipeline */}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-3 bg-black/40 text-[10px] font-mono">
-                        {[
-                          { stage: '1', title: 'Decomposition', desc: 'Axioms & Invariants' },
-                          { stage: '2', title: 'Hypothesis', desc: 'Counterfactual Tests' },
-                          { stage: '3', title: 'Validation', desc: 'Logic Soundness' },
-                          { stage: '4', title: 'Synthesis', desc: 'Epistemic Delivery' },
-                        ].map((p, idx) => (
-                          <div key={idx} className="p-2 rounded-lg bg-zinc-900/60 border border-cyan-950/80 flex items-center gap-2 shadow-inner">
-                            <span className="w-4 h-4 rounded-full bg-cyan-500/20 text-cyan-400 font-bold flex items-center justify-center text-[9px] flex-shrink-0">
-                              {p.stage}
-                            </span>
-                            <div className="truncate">
-                              <div className="text-zinc-200 font-semibold truncate">{p.title}</div>
-                              <div className="text-zinc-500 text-[9px] truncate">{p.desc}</div>
-                            </div>
-                          </div>
-                        ))}
+                    <div className="divide-y divide-zinc-800 bg-black/40 animate-fade-in">
+                      {/* View Mode Toggle Sub-bar */}
+                      <div className="px-3.5 py-2 flex items-center justify-between text-[10.5px] font-mono border-b border-zinc-800/80 bg-zinc-950/60">
+                        <span className="text-zinc-400 uppercase tracking-wider font-semibold">
+                          Cognitive Trace Telemetry
+                        </span>
+                        <div className="flex items-center gap-1 bg-zinc-900 rounded-lg p-0.5 border border-zinc-800">
+                          <button
+                            type="button"
+                            onClick={() => setThinkingViewMode('steps')}
+                            className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors cursor-pointer select-none ${
+                              thinkingViewMode === 'steps'
+                                ? 'bg-zinc-700 text-white font-semibold'
+                                : 'text-zinc-400 hover:text-white'
+                            }`}
+                          >
+                            AI Steps ({dynamicSteps.length})
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setThinkingViewMode('raw')}
+                            className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors cursor-pointer select-none ${
+                              thinkingViewMode === 'raw'
+                                ? 'bg-zinc-700 text-white font-semibold'
+                                : 'text-zinc-400 hover:text-white'
+                            }`}
+                          >
+                            Full Stream
+                          </button>
+                        </div>
                       </div>
 
+                      {/* DYNAMIC AI-GENERATED REASONING STEPS WITH EXPLANATIONS (NO STATIC 4 BOXES) */}
+                      {thinkingViewMode === 'steps' && (
+                        <div className="p-3.5 space-y-2.5">
+                          {dynamicSteps.map((step, sIdx) => {
+                            const isStepExpanded = expandedStepIndex === sIdx || (expandedStepIndex === null && dynamicSteps.length <= 4);
+                            return (
+                              <div
+                                key={sIdx}
+                                className="rounded-lg bg-zinc-900/60 hover:bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 transition-all duration-150 overflow-hidden"
+                              >
+                                <div
+                                  onClick={() => setExpandedStepIndex(isStepExpanded ? -1 : sIdx)}
+                                  className="p-3 flex items-start justify-between gap-3 cursor-pointer select-none"
+                                >
+                                  <div className="flex items-center gap-2.5 min-w-0">
+                                    <span className="w-5 h-5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                                      {String(step.stepNumber).padStart(2, '0')}
+                                    </span>
+                                    <span className="text-zinc-100 font-semibold text-xs tracking-tight truncate">
+                                      {step.title}
+                                    </span>
+                                  </div>
+                                  <div className="text-zinc-500 hover:text-zinc-300 transition-colors flex-shrink-0 pt-0.5">
+                                    {isStepExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                                  </div>
+                                </div>
+
+                                {isStepExpanded && (
+                                  <div className="px-3 pb-3 pt-1 border-t border-zinc-800/60 font-mono text-[11px] text-zinc-300 leading-relaxed whitespace-pre-wrap selection:bg-zinc-700 animate-fade-in">
+                                    {step.bullets && step.bullets.length > 0 ? (
+                                      <div className="space-y-1.5 pt-1">
+                                        {step.bullets.map((b, bIdx) => (
+                                          <div key={bIdx} className="flex items-start gap-2">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 mt-1.5 flex-shrink-0" />
+                                            <span>{b}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    ) : (
+                                      <div>{step.explanation}</div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+
                       {/* Full Thought Stream */}
-                      <div className="p-3.5 bg-black/60 font-mono text-[11px] text-zinc-300 leading-relaxed whitespace-pre-wrap selection:bg-cyan-500/30 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700">
-                        {message.thinking}
-                      </div>
+                      {thinkingViewMode === 'raw' && (
+                        <div className="p-3.5 font-mono text-[11px] text-zinc-300 leading-relaxed whitespace-pre-wrap selection:bg-zinc-700 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700">
+                          {message.thinking}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>

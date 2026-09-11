@@ -7,6 +7,7 @@ interface GenerateResponseOptions {
   model: ModelOption;
   deepThink: boolean;
   webSearch?: boolean;
+  searchMode?: 'standard' | 'mega';
   history: { role: string; content: string }[];
 }
 
@@ -20,15 +21,15 @@ interface AIResponseResult {
 export function generateNiximaResponse(options: GenerateResponseOptions): AIResponseResult {
   const allowCjk = isCjkRequested(options.prompt);
   const raw = generateRawNiximaResponse(options);
-  const sanitizedThinking = sanitizeModelOutput(raw.thinking, { allowCjk });
+  const sanitizedThinking = options.deepThink ? sanitizeModelOutput(raw.thinking, { allowCjk }) : '';
   const sanitizedResponse = sanitizeModelOutput(raw.response, { allowCjk });
 
-  const deepThinkingTelemetry = (options.deepThink || sanitizedThinking.length > 50)
+  const deepThinkingTelemetry = (options.deepThink && sanitizedThinking.length > 20)
     ? computeDeepThinkingTelemetry(sanitizedThinking)
     : undefined;
 
   const searchGrounding = options.webSearch
-    ? generateDefaultGrounding(options.prompt)
+    ? generateDefaultGrounding(options.prompt, options.searchMode)
     : raw.searchGrounding;
 
   return {
@@ -46,27 +47,23 @@ function generateRawNiximaResponse({
 }: GenerateResponseOptions): AIResponseResult {
   const lower = prompt.toLowerCase();
 
-  // Thinking trace generation based on model and settings
+  // Thinking trace generation strictly gated by deepThink
   let thinking = '';
-  if (deepThink || model.id.includes('reasoning') || model.id.includes('pro')) {
-    thinking = `Stage 1: Problem Decomposition & Invariant Constraints
-- Semantic analysis: "${prompt.slice(0, 50)}..."
-- Identified domain boundary conditions, operator clearance, and temporal scope (Year 2026).
-- Invariance: zero logical contradictions, strict lexical purity in user language.
+  if (deepThink) {
+    thinking = `### 1. Problem Space Decomposition & Invariants
+- Semantic decomposition of prompt: "${prompt.slice(0, 60)}..."
+- Identified domain boundary conditions, operator clearance, and temporal context (Year 2026).
+- Ensuring zero lexical cross-contamination and strict linguistic purity in user language.
 
-Stage 2: Axiomatic Exploration & Counterfactual Testing
+### 2. Neural Candidate Synthesis & Counterfactual Testing
 - Exploring candidate synthesis pathways across ${model.name} neural weights.
 - Stress-testing edge cases, exception boundaries, and potential hallucinations.
 - Validated epistemic confidence: 99.85%.
 
-Stage 3: Rigorous Logic / Mathematical Validation
-- Verifying logical soundness, semantic cadence, and precision metrics.
-- Applied Nixima Constitutional Safety & Quality standard v4.
-
-Stage 4: Epistemic Synthesis & Final Delivery
+### 3. Epistemic Synthesis & Definitive Delivery
 - Assembling structured, authoritative response with maximal engineering rigor.`;
   } else {
-    thinking = `Routed through ${model.name} neural pipeline. Validated tokens in 18ms.`;
+    thinking = '';
   }
 
   // Response generation logic

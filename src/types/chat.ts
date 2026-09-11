@@ -28,6 +28,8 @@ export interface SearchSource {
   url: string;
   domain?: string;
   snippet?: string;
+  cluster?: string; // e.g. "Academic", "Code", "Financial", "News", "Deep Web"
+  relevanceScore?: number;
 }
 
 export interface SearchGrounding {
@@ -35,12 +37,24 @@ export interface SearchGrounding {
   sources: SearchSource[];
   searchTimeMs?: number;
   indexedResultsCount?: number;
+  searchMode?: 'standard' | 'mega';
+  clusters?: { name: string; count: number }[];
+  pagesCrawled?: number;
+  browserInputs?: string[];
+}
+
+export interface DynamicThinkingStep {
+  stepNumber: number;
+  title: string;
+  explanation: string;
+  bullets?: string[];
 }
 
 export interface DeepThinkingTelemetry {
   stepsCount?: number;
   durationMs?: number;
   epistemicDepth?: string; // e.g. "Frontier L3 Epistemic Proof"
+  dynamicSteps?: DynamicThinkingStep[];
   phases?: string[];
 }
 
@@ -77,6 +91,7 @@ export interface UserSettings {
   personaTone: 'architect' | 'cyberpunk' | 'academic' | 'executive';
   deepThinkEnabled: boolean;
   webSearchEnabled: boolean;
+  searchMode?: 'standard' | 'mega';
   soundEnabled: boolean;
   streamSpeed: 'fast' | 'cinematic' | 'instant';
   themeContrast: 'titanium' | 'pure-black';

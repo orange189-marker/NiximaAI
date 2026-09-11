@@ -13,6 +13,7 @@ export interface PromptContextOptions {
   customSystemPrompt?: string;
   deepThink?: boolean;
   webSearch?: boolean;
+  searchMode?: 'standard' | 'mega';
 }
 
 /**
@@ -33,6 +34,7 @@ export function buildNiximaSystemPrompt({
   customSystemPrompt,
   deepThink,
   webSearch,
+  searchMode = 'standard',
 }: PromptContextOptions): string {
   const isCreator = isStrictCreator(user);
   const isDad = isDadAccount(user);
@@ -226,16 +228,29 @@ ${modelsCatalog}
         - Future Projections: Add forecasted periods (e.g. 2030, 2035) to labels and estimated values to data.
         - Always regenerate the complete interactive \`\`\`chart JSON block with the requested modifications applied.
 
-${deepThink ? `10. DeepThinking V2 Epistemic Reasoning Protocol:
-    - DEEPTHINKING V2 MODE IS ACTIVATED BY OPERATOR.
-    - Encapsulate your inner reasoning trace inside <think>...</think> tags before delivering your final answer.
-    - Structure your reasoning trace into 4 explicit cognitive stages:
-      Stage 1: Problem Decomposition & Invariant Constraints (Define exact goals, boundaries, assumptions).
-      Stage 2: Axiomatic Exploration & Counterfactual Testing (Explore candidate paths, stress-test edge cases).
-      Stage 3: Rigorous Logic / Mathematical Validation (Prove correctness, verify syntax/soundness, check boundary transitions).
-      Stage 4: Epistemic Synthesis & Final Delivery (Formulate the authoritative, clear, and uncompromising final answer).
+${deepThink ? `10. DeepThinking V2 Dynamic Cognitive Reasoning Protocol:
+    - DEEPTHINKING V2 MODE IS ACTIVATED. You must perform rigorous, genuine epistemic reasoning before delivering your final answer.
+    - Encapsulate your inner reasoning trace inside <think>...</think> tags.
+    - Create your own dynamic, contextual reasoning steps tailored specifically to this inquiry!
+    - For each step, use a clear title and detailed explanation of what you are analyzing, for example:
+      ### 1. [Your Step Title Here]
+      [Your deep explanation, analysis of boundary constraints, or reasoning]
+      ### 2. [Your Step Title Here]
+      [Your exploration of alternative paths, counterfactual testing, or calculation]
+    - Do not output fixed or generic headings; create meaningful, domain-specific step titles that accurately describe your thinking on this exact problem!
     - After closing </think>, provide the polished, authoritative response.
-` : ''}${webSearch ? `11. Search V2 Real-Time Grounding Protocol:
+` : ''}${webSearch ? (searchMode === 'mega' && isCreator ? `11. Search V2 Mega — Sovereign Deep Web Swarm Protocol (Clearance: Creator Bogdan / @orange17):
+    - SEARCH V2 MEGA IS ENGAGED. You have sovereign clearance across the entire global web index with multi-input deep web crawling.
+    - The Nixima Search Swarm has queried multiple browser inputs in parallel (Academic & arXiv papers, GitHub/code RFCs, Bloomberg/Financial feeds, Global News Wires, and Technical Standards).
+    - Provide deep, exhaustive, authoritative coverage citing multiple distinct perspectives and specific data points.
+    - Use inline bracketed citations [1], [2], [3] throughout your response to ground specific facts and assertions.
+    - At the very end of your response, provide a structured sources block using:
+      \`\`\`sources
+      [
+        { "title": "Source Page Title", "url": "https://...", "domain": "example.com", "snippet": "Key verified fact", "cluster": "Academic" }
+      ]
+      \`\`\`
+` : `11. Search V2 Real-Time Grounding Protocol:
     - SEARCH V2 REAL-TIME WEB GROUNDING IS ACTIVATED BY OPERATOR.
     - Access real-time knowledge via the Nixima Web Mesh (Temporal baseline: current year 2026).
     - Provide current, up-to-date facts, real-world statistics, and verifiable findings.
@@ -247,6 +262,6 @@ ${deepThink ? `10. DeepThinking V2 Epistemic Reasoning Protocol:
       ]
       \`\`\`
       Nixima AI will automatically parse this block into interactive verified source cards with live web mesh telemetry.
-` : ''}
+`) : ''}
 ${customSystemPrompt && customSystemPrompt.trim() ? `=== OPERATOR CUSTOM INSTRUCTIONS ===\n${customSystemPrompt.trim()}\n` : ''}`.trim();
 }

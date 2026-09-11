@@ -31,6 +31,8 @@ interface ChatInputProps {
   onToggleDeepThink: () => void;
   webSearch: boolean;
   onToggleWebSearch: () => void;
+  searchMode?: 'standard' | 'mega';
+  isCreator?: boolean;
   soundEnabled: boolean;
   onToggleSound: () => void;
   userCredits?: number;
@@ -46,6 +48,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onToggleDeepThink,
   webSearch,
   onToggleWebSearch,
+  searchMode = 'standard',
+  isCreator = false,
   soundEnabled,
   onToggleSound,
   userCredits = 1000,
@@ -204,45 +208,50 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
               <div className="hidden sm:block h-3.5 w-[1px] bg-zinc-800 mx-0.5" />
 
-              {/* DeepThinking V2 Mode Toggle */}
+              {/* DeepThinking V2 Mode Toggle (Website Design) */}
               <button
                 type="button"
                 onClick={onToggleDeepThink}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono transition-all duration-200 border cursor-pointer select-none ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono transition-all duration-150 border cursor-pointer select-none ${
                   deepThink 
-                    ? 'bg-gradient-to-r from-cyan-950/80 via-zinc-900/90 to-blue-950/80 text-white font-bold border-cyan-500/60 shadow-[0_0_20px_rgba(6,182,212,0.35)] scale-[1.02]' 
-                    : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-800/80'
+                    ? 'bg-zinc-800 text-white font-semibold border-zinc-600 shadow-inner-light scale-[1.02]' 
+                    : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-850/80'
                 }`}
                 title={t.chatInput.deepThinkTooltip}
               >
-                <BrainCircuit className={`w-3.5 h-3.5 ${deepThink ? 'text-cyan-400 animate-pulse' : 'text-zinc-400'}`} />
-                <span className="font-semibold tracking-tight">{t.chatInput.deepThink}</span>
+                <BrainCircuit className={`w-3.5 h-3.5 ${deepThink ? 'text-zinc-200' : 'text-zinc-400'}`} />
+                <span className="tracking-tight">{t.chatInput.deepThink}</span>
                 {deepThink && (
-                  <span className="relative flex h-2 w-2 ml-0.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500" />
-                  </span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-zinc-300 ml-0.5" />
                 )}
               </button>
 
-              {/* Search V2 Grounding Toggle */}
+              {/* Search V2 / Search V2 Mega Grounding Toggle (Website Design) */}
               <button
                 type="button"
                 onClick={onToggleWebSearch}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono transition-all duration-200 border cursor-pointer select-none ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono transition-all duration-150 border cursor-pointer select-none ${
                   webSearch 
-                    ? 'bg-gradient-to-r from-emerald-950/80 via-zinc-900/90 to-teal-950/80 text-white font-bold border-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.35)] scale-[1.02]' 
-                    : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-800/80'
+                    ? (searchMode === 'mega' && isCreator)
+                      ? 'bg-zinc-800 text-white font-semibold border-zinc-500 shadow-inner-light scale-[1.02]'
+                      : 'bg-zinc-800 text-white font-semibold border-zinc-600 shadow-inner-light scale-[1.02]' 
+                    : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-850/80'
                 }`}
-                title={t.chatInput.searchTooltip}
+                title={
+                  isCreator 
+                    ? (webSearch ? (searchMode === 'mega' ? 'Search V2 Mega Active (Exclusive Creator Swarm) • Click to disable' : 'Search V2 Active • Click to switch to Search V2 Mega') : 'Click to enable Search V2 (Creator Clearance)')
+                    : t.chatInput.searchTooltip
+                }
               >
-                <Globe className={`w-3.5 h-3.5 ${webSearch ? 'text-emerald-400 animate-pulse' : 'text-zinc-400'}`} />
-                <span className="font-semibold tracking-tight">{t.chatInput.search}</span>
-                {webSearch && (
-                  <span className="relative flex h-2 w-2 ml-0.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                <Globe className={`w-3.5 h-3.5 ${webSearch ? (searchMode === 'mega' && isCreator ? 'text-white' : 'text-zinc-200') : 'text-zinc-400'}`} />
+                <span className="tracking-tight">{t.chatInput.search}</span>
+                {webSearch && isCreator && searchMode === 'mega' && (
+                  <span className="px-1.5 py-0.2 rounded bg-zinc-700 text-[9px] font-mono font-bold tracking-wider text-zinc-100 border border-zinc-600">
+                    MEGA
                   </span>
+                )}
+                {webSearch && (
+                  <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ml-0.5 ${searchMode === 'mega' && isCreator ? 'bg-white' : 'bg-zinc-300'}`} />
                 )}
               </button>
 
