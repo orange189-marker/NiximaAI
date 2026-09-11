@@ -204,35 +204,46 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
               <div className="hidden sm:block h-3.5 w-[1px] bg-zinc-800 mx-0.5" />
 
-              {/* Deep Think Mode Toggle */}
+              {/* DeepThinking V2 Mode Toggle */}
               <button
                 type="button"
                 onClick={onToggleDeepThink}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono transition-all duration-150 border ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono transition-all duration-200 border cursor-pointer select-none ${
                   deepThink 
-                    ? 'bg-white text-black font-bold border-white shadow-[0_0_15px_rgba(255,255,255,0.35)] scale-[1.02]' 
+                    ? 'bg-gradient-to-r from-cyan-950/80 via-zinc-900/90 to-blue-950/80 text-white font-bold border-cyan-500/60 shadow-[0_0_20px_rgba(6,182,212,0.35)] scale-[1.02]' 
                     : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-800/80'
                 }`}
                 title={t.chatInput.deepThinkTooltip}
               >
-                <BrainCircuit className="w-3.5 h-3.5" />
-                <span>{t.chatInput.deepThink}</span>
-                {deepThink && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse ml-0.5" />}
+                <BrainCircuit className={`w-3.5 h-3.5 ${deepThink ? 'text-cyan-400 animate-pulse' : 'text-zinc-400'}`} />
+                <span className="font-semibold tracking-tight">{t.chatInput.deepThink}</span>
+                {deepThink && (
+                  <span className="relative flex h-2 w-2 ml-0.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500" />
+                  </span>
+                )}
               </button>
 
-              {/* Web Search Telemetry Toggle */}
+              {/* Search V2 Grounding Toggle */}
               <button
                 type="button"
                 onClick={onToggleWebSearch}
-                className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono transition-all duration-150 border ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono transition-all duration-200 border cursor-pointer select-none ${
                   webSearch 
-                    ? 'bg-zinc-200 text-black font-bold border-zinc-200 shadow-glow-subtle' 
+                    ? 'bg-gradient-to-r from-emerald-950/80 via-zinc-900/90 to-teal-950/80 text-white font-bold border-emerald-500/60 shadow-[0_0_20px_rgba(16,185,129,0.35)] scale-[1.02]' 
                     : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-800/80'
                 }`}
                 title={t.chatInput.searchTooltip}
               >
-                <Globe className="w-3.5 h-3.5" />
-                <span>{t.chatInput.search}</span>
+                <Globe className={`w-3.5 h-3.5 ${webSearch ? 'text-emerald-400 animate-pulse' : 'text-zinc-400'}`} />
+                <span className="font-semibold tracking-tight">{t.chatInput.search}</span>
+                {webSearch && (
+                  <span className="relative flex h-2 w-2 ml-0.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                  </span>
+                )}
               </button>
 
               {/* Audio Keystroke Sound Toggle */}

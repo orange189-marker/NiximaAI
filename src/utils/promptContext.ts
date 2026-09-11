@@ -11,6 +11,8 @@ export interface PromptContextOptions {
   language: 'en' | 'uk';
   model: ModelOption;
   customSystemPrompt?: string;
+  deepThink?: boolean;
+  webSearch?: boolean;
 }
 
 /**
@@ -29,6 +31,8 @@ export function buildNiximaSystemPrompt({
   language,
   model,
   customSystemPrompt,
+  deepThink,
+  webSearch,
 }: PromptContextOptions): string {
   const isCreator = isStrictCreator(user);
   const isDad = isDadAccount(user);
@@ -222,5 +226,27 @@ ${modelsCatalog}
         - Future Projections: Add forecasted periods (e.g. 2030, 2035) to labels and estimated values to data.
         - Always regenerate the complete interactive \`\`\`chart JSON block with the requested modifications applied.
 
+${deepThink ? `10. DeepThinking V2 Epistemic Reasoning Protocol:
+    - DEEPTHINKING V2 MODE IS ACTIVATED BY OPERATOR.
+    - Encapsulate your inner reasoning trace inside <think>...</think> tags before delivering your final answer.
+    - Structure your reasoning trace into 4 explicit cognitive stages:
+      Stage 1: Problem Decomposition & Invariant Constraints (Define exact goals, boundaries, assumptions).
+      Stage 2: Axiomatic Exploration & Counterfactual Testing (Explore candidate paths, stress-test edge cases).
+      Stage 3: Rigorous Logic / Mathematical Validation (Prove correctness, verify syntax/soundness, check boundary transitions).
+      Stage 4: Epistemic Synthesis & Final Delivery (Formulate the authoritative, clear, and uncompromising final answer).
+    - After closing </think>, provide the polished, authoritative response.
+` : ''}${webSearch ? `11. Search V2 Real-Time Grounding Protocol:
+    - SEARCH V2 REAL-TIME WEB GROUNDING IS ACTIVATED BY OPERATOR.
+    - Access real-time knowledge via the Nixima Web Mesh (Temporal baseline: current year 2026).
+    - Provide current, up-to-date facts, real-world statistics, and verifiable findings.
+    - Use inline bracketed citations [1], [2], [3] throughout your response to ground specific factual assertions.
+    - At the very end of your response, provide a structured sources block using:
+      \`\`\`sources
+      [
+        { "title": "Source Page Title", "url": "https://...", "domain": "example.com", "snippet": "Key verified fact or excerpt" }
+      ]
+      \`\`\`
+      Nixima AI will automatically parse this block into interactive verified source cards with live web mesh telemetry.
+` : ''}
 ${customSystemPrompt && customSystemPrompt.trim() ? `=== OPERATOR CUSTOM INSTRUCTIONS ===\n${customSystemPrompt.trim()}\n` : ''}`.trim();
 }

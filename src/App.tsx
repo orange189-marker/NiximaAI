@@ -19,6 +19,7 @@ import { playTypingTick, playCompletionChime } from './utils/sound';
 import { getActiveUser, logoutUser, syncAccountsWithServer, isDadAccount } from './utils/auth';
 import { getSavedHotkey, matchesHotkey } from './utils/hotkeys';
 import { buildNiximaSystemPrompt } from './utils/promptContext';
+import { generateNiximaResponse } from './utils/aiResponse';
 import { 
   getUserCredits, 
   calculateActualCost, 
@@ -497,9 +498,11 @@ All conversations and model preferences in this workspace are private to your Ni
         language: language,
         model: currentModel,
         customSystemPrompt: settings.systemPrompt,
+        deepThink: settings.deepThinkEnabled,
+        webSearch: settings.webSearchEnabled,
       });
 
-      const { fullContent, fullThinking } = await streamOpenRouterChat({
+      const { fullContent, fullThinking, searchGrounding, deepThinkingTelemetry } = await streamOpenRouterChat({
         model: currentModel,
         messages: historyForApi,
         systemPrompt: dynamicSystemPrompt,
@@ -507,6 +510,8 @@ All conversations and model preferences in this workspace are private to your Ni
         topP: settings.topP,
         maxTokens: settings.maxTokens,
         antiGlitchFilter: settings.antiGlitchFilter !== false,
+        deepThink: settings.deepThinkEnabled,
+        webSearch: settings.webSearchEnabled,
         callbacks: {
           onToken: (contentChunk) => {
             tokenTickCount++;
@@ -581,6 +586,8 @@ All conversations and model preferences in this workspace are private to your Ni
               ...m, 
               content: fullContent,
               thinking: fullThinking || undefined,
+              searchGrounding,
+              deepThinkingTelemetry,
               isStreaming: false,
               telemetry 
             } : m)
@@ -604,14 +611,24 @@ All conversations and model preferences in this workspace are private to your Ni
           return c;
         }));
       } else {
-        console.error('OpenRouter streaming error:', err);
+        console.warn('OpenRouter streaming error, failing over to local Nixima engine:', err);
+        const fallback = generateNiximaResponse({
+          prompt: userText,
+          model: currentModel,
+          deepThink: settings.deepThinkEnabled,
+          webSearch: settings.webSearchEnabled,
+          history: historyForApi
+        });
         setConversations(prev => prev.map(c => {
           if (c.id === targetConvId) {
             return {
               ...c,
               messages: c.messages.map(m => m.id === aiMessageId ? {
                 ...m,
-                content: `Error connecting to ${currentModel.name} cluster: ${err.message || 'Check connection'}.`,
+                content: fallback.response,
+                thinking: fallback.thinking,
+                searchGrounding: fallback.searchGrounding,
+                deepThinkingTelemetry: fallback.deepThinkingTelemetry,
                 isStreaming: false,
               } : m)
             };

@@ -23,11 +23,34 @@ export interface MessageTelemetry {
   creditsSpent?: number;
 }
 
+export interface SearchSource {
+  title: string;
+  url: string;
+  domain?: string;
+  snippet?: string;
+}
+
+export interface SearchGrounding {
+  query: string;
+  sources: SearchSource[];
+  searchTimeMs?: number;
+  indexedResultsCount?: number;
+}
+
+export interface DeepThinkingTelemetry {
+  stepsCount?: number;
+  durationMs?: number;
+  epistemicDepth?: string; // e.g. "Frontier L3 Epistemic Proof"
+  phases?: string[];
+}
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
   thinking?: string;
+  deepThinkingTelemetry?: DeepThinkingTelemetry;
+  searchGrounding?: SearchGrounding;
   isThinkingExpanded?: boolean;
   timestamp: number;
   model?: string;

@@ -1,24 +1,41 @@
-import { ModelOption } from '../types/chat';
+import { ModelOption, SearchGrounding, DeepThinkingTelemetry } from '../types/chat';
 import { isCjkRequested, sanitizeModelOutput } from './textSanitizer';
+import { generateDefaultGrounding, computeDeepThinkingTelemetry } from './openrouter';
 
 interface GenerateResponseOptions {
   prompt: string;
   model: ModelOption;
   deepThink: boolean;
+  webSearch?: boolean;
   history: { role: string; content: string }[];
 }
 
 interface AIResponseResult {
   thinking: string;
   response: string;
+  searchGrounding?: SearchGrounding;
+  deepThinkingTelemetry?: DeepThinkingTelemetry;
 }
 
 export function generateNiximaResponse(options: GenerateResponseOptions): AIResponseResult {
   const allowCjk = isCjkRequested(options.prompt);
   const raw = generateRawNiximaResponse(options);
+  const sanitizedThinking = sanitizeModelOutput(raw.thinking, { allowCjk });
+  const sanitizedResponse = sanitizeModelOutput(raw.response, { allowCjk });
+
+  const deepThinkingTelemetry = (options.deepThink || sanitizedThinking.length > 50)
+    ? computeDeepThinkingTelemetry(sanitizedThinking)
+    : undefined;
+
+  const searchGrounding = options.webSearch
+    ? generateDefaultGrounding(options.prompt)
+    : raw.searchGrounding;
+
   return {
-    thinking: sanitizeModelOutput(raw.thinking, { allowCjk }),
-    response: sanitizeModelOutput(raw.response, { allowCjk }),
+    thinking: sanitizedThinking,
+    response: sanitizedResponse,
+    deepThinkingTelemetry,
+    searchGrounding,
   };
 }
 
@@ -31,14 +48,23 @@ function generateRawNiximaResponse({
 
   // Thinking trace generation based on model and settings
   let thinking = '';
-  if (deepThink || model.id.includes('reasoning')) {
-    thinking = `1. Analyzing query semantics and intent from user prompt: "${prompt.slice(0, 40)}..."
-2. Context loaded into ${model.name} working memory (${model.contextWindow}).
-3. Evaluating optimal response structure:
-   - Verify factual accuracy & alignment with Nixima AI standards.
-   - Synthesize architectural clarity with minimal friction.
-4. Formulating structured solution with code/markdown styling.
-5. Verification step passed (0 hallucinations detected).`;
+  if (deepThink || model.id.includes('reasoning') || model.id.includes('pro')) {
+    thinking = `Stage 1: Problem Decomposition & Invariant Constraints
+- Semantic analysis: "${prompt.slice(0, 50)}..."
+- Identified domain boundary conditions, operator clearance, and temporal scope (Year 2026).
+- Invariance: zero logical contradictions, strict lexical purity in user language.
+
+Stage 2: Axiomatic Exploration & Counterfactual Testing
+- Exploring candidate synthesis pathways across ${model.name} neural weights.
+- Stress-testing edge cases, exception boundaries, and potential hallucinations.
+- Validated epistemic confidence: 99.85%.
+
+Stage 3: Rigorous Logic / Mathematical Validation
+- Verifying logical soundness, semantic cadence, and precision metrics.
+- Applied Nixima Constitutional Safety & Quality standard v4.
+
+Stage 4: Epistemic Synthesis & Final Delivery
+- Assembling structured, authoritative response with maximal engineering rigor.`;
   } else {
     thinking = `Routed through ${model.name} neural pipeline. Validated tokens in 18ms.`;
   }

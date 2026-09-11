@@ -197,6 +197,17 @@ export interface Translations {
     critique: string;
     branchChat: string;
     downloadMessage: string;
+    deepThinkingV2: string;
+    epistemicVerification: string;
+    stagesVerified: (count: number) => string;
+    copyThoughtTrace: string;
+    copiedThoughtTrace: string;
+    searchV2Grounded: string;
+    inspectSources: (count: number) => string;
+    hideSources: string;
+    verifiedSources: string;
+    queriedMesh: (query: string) => string;
+    searchLatency: (ms: number) => string;
   };
 
   table: {
@@ -522,15 +533,15 @@ export const translations: Record<Language, Translations> = {
         deepProof: { label: 'Deep Proof', prompt: '[Formulate rigorous mathematical or logical derivation]' },
         table: { label: 'Comparison Table', prompt: '[Format output into structured markdown comparison tables]' },
       },
-      deepThink: 'Deep Think',
-      deepThinkTooltip: 'Activate extended multi-step reasoning',
-      search: 'Search',
-      searchTooltip: 'Search live web data',
-      audioMute: 'Mute typing audio',
-      audioEnable: 'Enable typing audio',
-      attachTooltip: 'Attach document context',
+      deepThink: 'DeepThinking V2',
+      deepThinkTooltip: 'DeepThinking V2: Activate multi-stage epistemic reasoning & proof verification',
+      search: 'Search V2',
+      searchTooltip: 'Search V2: Real-time web mesh grounding & verified sources',
+      audioMute: 'Mute key sounds',
+      audioEnable: 'Enable key sounds',
+      attachTooltip: 'Attach dataset / document',
       stopTooltip: 'Stop generation (Esc)',
-      sendTooltip: 'Send message (Enter)',
+      sendTooltip: 'Send prompt (Enter)',
       chars: 'chars',
       meshOnline: 'Nixima AI Mesh • Online',
       enterToSend: 'Press Enter ↵ to send',
@@ -565,6 +576,17 @@ export const translations: Record<Language, Translations> = {
       critique: 'Fact-check & verify',
       branchChat: 'Branch chat from here',
       downloadMessage: 'Download response (.md)',
+      deepThinkingV2: 'DeepThinking V2',
+      epistemicVerification: 'L3 Epistemic Proof',
+      stagesVerified: (count: number) => `${count} Reasoning Stages Verified`,
+      copyThoughtTrace: 'Copy trace',
+      copiedThoughtTrace: 'Trace copied!',
+      searchV2Grounded: 'Search V2 Grounded',
+      inspectSources: (count: number) => `Inspect Sources (${count})`,
+      hideSources: 'Hide Sources',
+      verifiedSources: 'Verified Web Sources',
+      queriedMesh: (query: string) => `Query: "${query}"`,
+      searchLatency: (ms: number) => `Retrieved in ${ms}ms via Nixima Web Mesh`,
     },
 
     table: {
@@ -973,10 +995,10 @@ export const translations: Record<Language, Translations> = {
         deepProof: { label: 'Глибинне доведення', prompt: '[Сформулюйте суворе математичне або логічне доведення]' },
         table: { label: 'Порівняльна таблиця', prompt: '[Сформуйте вивід у вигляді структурованої порівняльної markdown-таблиці]' },
       },
-      deepThink: 'Глибинне мислення',
-      deepThinkTooltip: 'Активувати розширене багатокрокове міркування',
-      search: 'Пошук',
-      searchTooltip: 'Пошук актуальних даних в Інтернеті',
+      deepThink: 'DeepThinking V2',
+      deepThinkTooltip: 'DeepThinking V2: Багатокрокове епістемічне міркування та верифікація логіки',
+      search: 'Search V2',
+      searchTooltip: 'Search V2: Реальний веб-пошук у мережі та перевірені джерела',
       audioMute: 'Вимкнути звук клавіш',
       audioEnable: 'Увімкнути звук клавіш',
       attachTooltip: 'Прикріпити документ',
@@ -1016,6 +1038,17 @@ export const translations: Record<Language, Translations> = {
       critique: 'Перевірити точність',
       branchChat: 'Створити гілку звідси',
       downloadMessage: 'Завантажити відповідь (.md)',
+      deepThinkingV2: 'DeepThinking V2',
+      epistemicVerification: 'L3 Епістемічний доказ',
+      stagesVerified: (count: number) => `Верифіковано ${count} етапів міркування`,
+      copyThoughtTrace: 'Копіювати ланцюжок',
+      copiedThoughtTrace: 'Ланцюжок скопійовано!',
+      searchV2Grounded: 'Search V2 Верифіковано',
+      inspectSources: (count: number) => `Переглянути джерела (${count})`,
+      hideSources: 'Сховати джерела',
+      verifiedSources: 'Перевірені веб-джерела',
+      queriedMesh: (query: string) => `Запит: "${query}"`,
+      searchLatency: (ms: number) => `Отримано за ${ms}мс через Nixima Web Mesh`,
     },
 
     table: {
