@@ -227,7 +227,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           {/* High-Tech Capability Toolbar (Bottom Dock) */}
           <div className="flex items-center justify-between px-3.5 pb-3 pt-1 border-t border-white/[0.04] gap-2">
             {/* Left Controls: Brain & Capability Switches */}
-            <div className="flex items-center gap-1 sm:gap-1.5 flex-nowrap min-w-0 overflow-x-auto scrollbar-none py-0.5">
+            <div className="flex items-center gap-1 sm:gap-1.5 flex-nowrap min-w-0 py-0.5">
               {/* Active Model Indicator Chip */}
               <div 
                 className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 border border-zinc-800 text-[11px] font-mono text-zinc-300 shadow-inner-light select-none mr-0.5 flex-shrink-0"
@@ -258,7 +258,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               </button>
 
               {/* Search V2 Engine Control (Fast, Standard, Mega + Model Pairing) */}
-              <div className="relative flex items-center flex-shrink-0" ref={searchMenuRef}>
+              <div className="relative flex items-center flex-shrink-0 z-30" ref={searchMenuRef}>
                 <div
                   className={`flex items-center rounded-full text-xs font-mono transition-all duration-150 border select-none ${
                     webSearch 
@@ -318,7 +318,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
                 {/* Search Engine Selection Popover Panel */}
                 {isSearchPopoverOpen && (
-                  <div className="absolute bottom-full mb-2 left-0 w-80 sm:w-96 rounded-2xl bg-[#121215] border border-zinc-700/90 shadow-[0_12px_45px_rgba(0,0,0,0.9)] p-3 z-50 animate-fade-in backdrop-blur-2xl">
+                  <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-0 w-80 sm:w-96 max-w-[calc(100vw-2rem)] rounded-2xl bg-[#121215] border border-zinc-700/90 shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-3 z-[100] animate-fade-in backdrop-blur-2xl">
                     <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
                       <div className="flex items-center gap-1.5">
                         <Globe className="w-4 h-4 text-zinc-300" />
