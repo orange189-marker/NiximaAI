@@ -252,6 +252,7 @@ export interface Translations {
     activeScanning: string;
     relevanceMatch: (pct: number) => string;
     openInCanvas: string;
+    launchInCanvas: string;
   };
 
   table: {
@@ -708,7 +709,8 @@ export const translations: Record<Language, Translations> = {
       stepSynthesize: 'Multi-Source Synthesis & Consensus',
       activeScanning: 'Inspecting website content in real time...',
       relevanceMatch: (pct: number) => `${pct}% Match`,
-      openInCanvas: 'Canvas',
+      openInCanvas: 'Open in Canvas',
+      launchInCanvas: 'Open in Canvas',
     },
 
     table: {
@@ -1254,7 +1256,8 @@ export const translations: Record<Language, Translations> = {
       stepSynthesize: 'Синтез кількох джерел та консенсус',
       activeScanning: 'Огляд вмісту веб-сайту в реальному часі...',
       relevanceMatch: (pct: number) => `${pct}% Відповідність`,
-      openInCanvas: 'Canvas',
+      openInCanvas: 'Відкрити у Canvas',
+      launchInCanvas: 'Відкрити у Canvas',
     },
 
     table: {

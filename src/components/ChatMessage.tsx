@@ -39,7 +39,7 @@ import { parseDynamicThinkingSteps } from '../utils/openrouter';
 import { LinkPill } from './LinkPill';
 import { SearchActionFeed } from './SearchActionFeed';
 import { renderWithNiximaBrand } from './NiximaWordmark';
-import { detectArtifactType, inferArtifactTitle } from '../utils/artifactDetector';
+import { detectArtifactType, inferArtifactTitle, extractArtifactsFromMessage } from '../utils/artifactDetector';
 
 interface ChatMessageProps {
   message: Message;
@@ -890,8 +890,34 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               {/* Telemetry metrics bar for AI responses */}
               {!isUser && !message.isStreaming && (
                 <div className="pt-2 flex flex-wrap items-center justify-between gap-2 text-zinc-500 text-xs border-t border-zinc-900/60 mt-3">
-                  {/* Action buttons (Clean icon-only toolbar) */}
-                  <div className="flex items-center flex-wrap gap-1">
+                  {/* Action buttons (Clean icon-only toolbar + Canvas Launch) */}
+                  <div className="flex items-center flex-wrap gap-1.5">
+                    {/* Launch Artifact in Nixima Canvas Button */}
+                    {(() => {
+                      const detected = (message.artifacts && message.artifacts.length > 0)
+                        ? message.artifacts
+                        : extractArtifactsFromMessage(message.content, message.id);
+                      const primary = detected[0];
+                      if (!primary) return null;
+                      return (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (onOpenArtifact) {
+                              onOpenArtifact(primary);
+                            } else {
+                              window.dispatchEvent(new CustomEvent('NIXIMA_OPEN_ARTIFACT', { detail: primary }));
+                            }
+                          }}
+                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/50 hover:border-cyan-400 text-cyan-300 hover:text-white transition-all shadow-[0_0_15px_rgba(6,182,212,0.25)] active:scale-95 cursor-pointer font-mono text-xs font-semibold mr-1"
+                          title={primary.title}
+                        >
+                          <Layers className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                          <span>{t.chatMessage.launchInCanvas}</span>
+                        </button>
+                      );
+                    })()}
+
                     {/* Cool Animated Copy Button */}
                     <div className="relative inline-flex items-center">
                       <button
@@ -1165,14 +1191,15 @@ const CodeBlock: React.FC<{
       <div className="flex items-center justify-between px-3.5 py-1.5 bg-zinc-900/80 border-b border-zinc-800/80 text-[11px] font-mono text-zinc-400">
         <span className="uppercase text-zinc-400 font-semibold">{language}</span>
         <div className="flex items-center gap-2 sm:gap-3">
-          {artifactType && onOpenArtifact && (
+          {artifactType && (
             <button
+              type="button"
               onClick={handleOpenCanvas}
-              className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-cyan-950/70 hover:bg-cyan-900/80 border border-cyan-700/60 hover:border-cyan-500 text-cyan-300 hover:text-white transition-all shadow-sm active:scale-95 cursor-pointer font-medium"
-              title="Open in Nixima Canvas"
+              className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-cyan-950/90 hover:bg-cyan-900 border border-cyan-500/60 hover:border-cyan-400 text-cyan-200 hover:text-white transition-all shadow-[0_0_12px_rgba(6,182,212,0.3)] active:scale-95 cursor-pointer font-medium text-[11px]"
+              title="Open and run in Nixima Canvas"
             >
-              <Layers className="w-3 h-3 text-cyan-400" />
-              <span>{t.chatMessage.openInCanvas || 'Canvas'}</span>
+              <Layers className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+              <span>{t.chatMessage.openInCanvas}</span>
             </button>
           )}
 

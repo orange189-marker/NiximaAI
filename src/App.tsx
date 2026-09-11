@@ -337,6 +337,17 @@ const AppContent: React.FC = () => {
     });
   };
 
+  // Global listener for opening artifacts from anywhere in the app
+  useEffect(() => {
+    const handleArtifactEvent = (e: any) => {
+      if (e.detail) {
+        handleOpenArtifact(e.detail);
+      }
+    };
+    window.addEventListener('NIXIMA_OPEN_ARTIFACT', handleArtifactEvent);
+    return () => window.removeEventListener('NIXIMA_OPEN_ARTIFACT', handleArtifactEvent);
+  }, []);
+
   // Load user data on authentication change
   const handleAuthenticated = (user: NiximaUser) => {
     setCurrentUser(user);
