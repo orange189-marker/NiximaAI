@@ -116,13 +116,15 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
           <div className="hidden md:flex items-center gap-2 text-[10px] font-mono text-zinc-400">
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-850 border border-zinc-800 text-zinc-300">
               <Layers className="w-3 h-3 text-zinc-400" />
-              <span>{t.chatMessage.searchActionsTelemetry(websiteActions.length, searchActions.length)}</span>
+              <span>{isStreaming && sources.length === 0 ? 'Scanning Web Index...' : t.chatMessage.searchActionsTelemetry(websiteActions.length, searchActions.length)}</span>
             </span>
 
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-850 border border-zinc-800 text-emerald-400">
-              <ShieldCheck className="w-3 h-3 text-emerald-400" />
-              <span>{consensusScore}% Consensus</span>
-            </span>
+            {sources.length > 0 && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-850 border border-zinc-800 text-emerald-400">
+                <ShieldCheck className="w-3 h-3 text-emerald-400" />
+                <span>{consensusScore}% Consensus</span>
+              </span>
+            )}
 
             {isFast ? (
               <span className="text-amber-400/90">
@@ -245,13 +247,17 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
                 >
                   {/* Step Node Marker on vertical rail */}
                   <div className={`absolute left-1.5 top-2.5 -translate-x-1/2 w-4 h-4 rounded-full border flex items-center justify-center text-[9px] font-mono font-bold transition-all shadow-sm ${
-                    isSynth 
+                    action.status === 'in_progress'
+                      ? 'bg-amber-950 border-amber-500/80 text-amber-300 ring-2 ring-amber-500/30 animate-pulse'
+                      : isSynth 
                       ? 'bg-emerald-950 border-emerald-600/80 text-emerald-300 ring-2 ring-emerald-500/20'
                       : isQuery
                       ? 'bg-zinc-850 border-zinc-600 text-zinc-200'
                       : 'bg-zinc-900 border-zinc-700 text-zinc-300'
                   }`}>
-                    {isSynth ? (
+                    {action.status === 'in_progress' ? (
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+                    ) : isSynth ? (
                       <Check className="w-2.5 h-2.5 text-emerald-400 stroke-[3]" />
                     ) : (
                       action.stepNumber
@@ -291,15 +297,24 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
 
                       {/* Right Telemetry: Latency & Relevance */}
                       <div className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-400">
-                        {action.relevanceScore && (
-                          <span className="px-1.5 py-0.2 rounded bg-zinc-800/80 border border-zinc-700 text-zinc-300">
-                            {t.chatMessage.relevanceMatch(action.relevanceScore)}
+                        {action.status === 'in_progress' ? (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-950/70 border border-amber-600/50 text-amber-300 text-[9.5px]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+                            <span>In Progress...</span>
                           </span>
-                        )}
-                        {action.latencyMs && (
-                          <span className="text-zinc-500">
-                            {action.latencyMs}ms
-                          </span>
+                        ) : (
+                          <>
+                            {action.relevanceScore && (
+                              <span className="px-1.5 py-0.2 rounded bg-zinc-800/80 border border-zinc-700 text-zinc-300">
+                                {t.chatMessage.relevanceMatch(action.relevanceScore)}
+                              </span>
+                            )}
+                            {action.latencyMs && (
+                              <span className="text-zinc-500">
+                                {action.latencyMs}ms
+                              </span>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>
@@ -359,6 +374,17 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
                 </div>
               );
             })}
+
+            {sources.length === 0 && isStreaming && (
+              <div className="relative pl-8 group animate-fade-in">
+                <div className="absolute left-1.5 top-3 -translate-x-1/2 w-4 h-4 rounded-full border border-amber-500/80 bg-amber-950/80 flex items-center justify-center ring-2 ring-amber-500/30">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+                </div>
+                <div className="rounded-xl border border-zinc-800/90 bg-[#111116]/90 p-3 flex items-center gap-2.5 text-zinc-300 font-mono text-xs shadow-sm">
+                  <span className="text-zinc-400 animate-pulse">Scouring live web index and cross-referencing multi-source records...</span>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Quick Access Verified Sources Strip */}

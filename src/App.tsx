@@ -14,7 +14,7 @@ import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry, Sea
 import { NiximaUser } from './types/user';
 import { NIXIMA_MODELS, DEFAULT_MODEL } from './data/models';
 import { INITIAL_CONVERSATIONS } from './data/initialChats';
-import { streamOpenRouterChat, generateDefaultGrounding } from './utils/openrouter';
+import { streamOpenRouterChat, fetchLiveWebGrounding } from './utils/openrouter';
 import { playTypingTick, playCompletionChime } from './utils/sound';
 import { getActiveUser, logoutUser, syncAccountsWithServer, isDadAccount, isStrictCreator } from './utils/auth';
 import { getSavedHotkey, matchesHotkey } from './utils/hotkeys';
@@ -456,8 +456,30 @@ All conversations and model preferences in this workspace are private to your Ni
     const newTitle = isFirstMessage ? (userText.length > 28 ? userText.slice(0, 28) + '...' : userText) : currentConv.title;
 
     const aiMessageId = 'ai-' + Date.now();
-    const initialGrounding = settings.webSearchEnabled
-      ? generateDefaultGrounding(userText, settings.searchMode || 'standard')
+    const initialGrounding: SearchGrounding | undefined = settings.webSearchEnabled
+      ? {
+          query: userText,
+          sources: [],
+          searchMode: settings.searchMode || 'standard',
+          searchTimeMs: 0,
+          indexedResultsCount: 0,
+          consensusScore: 99,
+          searchActions: [
+            {
+              stepNumber: 1,
+              actionType: 'query',
+              title: settings.searchMode === 'fast'
+                ? (language === 'uk' ? 'Швидкий запит до вебіндексу' : 'Dispatching Rapid Vector Query')
+                : settings.searchMode === 'mega'
+                ? (language === 'uk' ? 'Мультикластерний пошуковий запит' : 'Multi-Cluster Swarm Query Dispatch')
+                : (language === 'uk' ? 'Ініціалізація пошуку у вебі' : 'Dispatching Neural Search Queries'),
+              reasoning: language === 'uk'
+                ? `Опитування реального пошукового індексу за запитом «${userText.slice(0, 60)}»...`
+                : `Querying real-time web index for "${userText.slice(0, 60)}"...`,
+              status: 'in_progress',
+            }
+          ]
+        }
       : undefined;
 
     const aiMessagePlaceholder: Message = {
@@ -490,6 +512,7 @@ All conversations and model preferences in this workspace are private to your Ni
 
     const startTime = performance.now();
     let tokenTickCount = 0;
+    let liveGrounding: SearchGrounding | undefined;
 
     try {
       const historyForApi = [
@@ -497,7 +520,30 @@ All conversations and model preferences in this workspace are private to your Ni
         { role: 'user', content: userText }
       ];
 
-      const dynamicSystemPrompt = buildNiximaSystemPrompt({
+      // If Web Search is enabled, fetch genuine live web search results before prompt execution
+      if (settings.webSearchEnabled) {
+        try {
+          liveGrounding = await fetchLiveWebGrounding(userText, language, settings.searchMode || 'standard');
+
+          // Immediately reflect genuine retrieved sources & step actions in the UI
+          setConversations(prev => prev.map(c => {
+            if (c.id === targetConvId) {
+              return {
+                ...c,
+                messages: c.messages.map(m => m.id === aiMessageId ? {
+                  ...m,
+                  searchGrounding: liveGrounding
+                } : m)
+              };
+            }
+            return c;
+          }));
+        } catch (searchErr) {
+          console.warn('[Nixima Search] Live web fetch failed:', searchErr);
+        }
+      }
+
+      let dynamicSystemPrompt = buildNiximaSystemPrompt({
         user: currentUser,
         credits: getUserCredits(currentUser),
         language: language,
@@ -507,6 +553,16 @@ All conversations and model preferences in this workspace are private to your Ni
         webSearch: settings.webSearchEnabled,
         searchMode: settings.searchMode || 'standard',
       });
+
+      if (liveGrounding && liveGrounding.sources.length > 0) {
+        dynamicSystemPrompt += `\n\n[REAL-TIME LIVE WEB SEARCH GROUNDING]\n` +
+          `Query: "${userText}"\n` +
+          `Verified Real-World Web Findings:\n` +
+          liveGrounding.sources.map((src, i) =>
+            `[${i + 1}] Title: ${src.title}\n    URL: ${src.url}\n    Excerpt: ${src.snippet || 'Authoritative reference'}`
+          ).join('\n\n') +
+          `\n\nInstructions: Ground your response in these verified real-world findings. Answer the user's question directly, accurately, and authoritatively. Cite sources with [1], [2] where appropriate.`;
+      }
 
       const { fullContent, fullThinking, searchGrounding, deepThinkingTelemetry } = await streamOpenRouterChat({
         model: currentModel,
@@ -519,6 +575,7 @@ All conversations and model preferences in this workspace are private to your Ni
         deepThink: settings.deepThinkEnabled,
         webSearch: settings.webSearchEnabled,
         searchMode: settings.searchMode || 'standard',
+        initialSearchGrounding: liveGrounding,
         callbacks: {
           onToken: (contentChunk) => {
             tokenTickCount++;
@@ -636,7 +693,7 @@ All conversations and model preferences in this workspace are private to your Ni
                 ...m,
                 content: fallback.response,
                 thinking: settings.deepThinkEnabled ? (fallback.thinking || undefined) : undefined,
-                searchGrounding: fallback.searchGrounding,
+                searchGrounding: liveGrounding || fallback.searchGrounding,
                 deepThinkingTelemetry: settings.deepThinkEnabled ? fallback.deepThinkingTelemetry : undefined,
                 isStreaming: false,
               } : m)
