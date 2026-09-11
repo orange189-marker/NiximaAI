@@ -1,3 +1,14 @@
+export type SearchMode = 'fast' | 'standard' | 'mega';
+
+export interface SearchOptimizationProfile {
+  recommendedMode: SearchMode;
+  badge: string;
+  role: string;
+  searchThroughput: string;
+  searchStrengths: string[];
+  searchRating: string;
+}
+
 export interface ModelOption {
   id: string;
   name: string;
@@ -13,6 +24,7 @@ export interface ModelOption {
   fallbackModels?: string[];
   creditMultiplier?: number;
   baseCreditCost?: number;
+  searchOptimization?: SearchOptimizationProfile;
 }
 
 export interface MessageTelemetry {
@@ -37,7 +49,7 @@ export interface SearchGrounding {
   sources: SearchSource[];
   searchTimeMs?: number;
   indexedResultsCount?: number;
-  searchMode?: 'standard' | 'mega';
+  searchMode?: SearchMode;
   clusters?: { name: string; count: number }[];
   pagesCrawled?: number;
   browserInputs?: string[];
@@ -91,7 +103,8 @@ export interface UserSettings {
   personaTone: 'architect' | 'cyberpunk' | 'academic' | 'executive';
   deepThinkEnabled: boolean;
   webSearchEnabled: boolean;
-  searchMode?: 'standard' | 'mega';
+  searchMode?: SearchMode;
+  autoSyncSearchModel?: boolean;
   soundEnabled: boolean;
   streamSpeed: 'fast' | 'cinematic' | 'instant';
   themeContrast: 'titanium' | 'pure-black';

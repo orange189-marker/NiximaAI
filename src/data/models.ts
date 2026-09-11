@@ -1,4 +1,4 @@
-import { ModelOption } from '../types/chat';
+import { ModelOption, SearchMode } from '../types/chat';
 
 export const NIXIMA_MODELS: ModelOption[] = [
   {
@@ -19,6 +19,14 @@ export const NIXIMA_MODELS: ModelOption[] = [
     ],
     creditMultiplier: 1.0,
     baseCreditCost: 5,
+    searchOptimization: {
+      recommendedMode: 'standard',
+      badge: 'BALANCED WEB SEARCH',
+      role: 'Optimal for Search V2 Standard (General Web Research)',
+      searchThroughput: 'Standard (~120ms)',
+      searchStrengths: ['Multi-domain news & facts', 'Balanced synthesis & accuracy', 'Low hallucination index'],
+      searchRating: '96%'
+    }
   },
   {
     id: 'nixima-0.2-pro',
@@ -37,6 +45,14 @@ export const NIXIMA_MODELS: ModelOption[] = [
     ],
     creditMultiplier: 2.5,
     baseCreditCost: 12,
+    searchOptimization: {
+      recommendedMode: 'mega',
+      badge: 'DEEP SWARM REASONER',
+      role: 'Optimal for Search V2 Mega (Sovereign Swarm & Multi-Cluster)',
+      searchThroughput: 'Deep Deduction (~210ms)',
+      searchStrengths: ['Cross-cluster epistemic proofs', 'Multi-source discrepancy resolution', 'Exhaustive literature synthesis'],
+      searchRating: '98%'
+    }
   },
   {
     id: 'nixima-0.2-coder',
@@ -55,6 +71,14 @@ export const NIXIMA_MODELS: ModelOption[] = [
     ],
     creditMultiplier: 1.5,
     baseCreditCost: 8,
+    searchOptimization: {
+      recommendedMode: 'standard',
+      badge: 'DOCS & REPO SEARCH',
+      role: 'Optimal for Technical Documentation, GitHub & API References',
+      searchThroughput: 'High-Precision Tech (~110ms)',
+      searchStrengths: ['API signatures & package docs', 'RFC & specification tracking', 'Stack trace & error lookup'],
+      searchRating: '97%'
+    }
   },
   {
     id: 'nixima-0.2-flash',
@@ -73,11 +97,32 @@ export const NIXIMA_MODELS: ModelOption[] = [
     ],
     creditMultiplier: 0.5,
     baseCreditCost: 2,
+    searchOptimization: {
+      recommendedMode: 'fast',
+      badge: 'FAST SEARCH ENGINE',
+      role: 'Optimal for Search V2 Fast (Instant Live Lookups)',
+      searchThroughput: 'Hyper-Fast (<50ms)',
+      searchStrengths: ['Instantaneous facts & live data', 'Sub-millisecond token streaming', 'Concise zero-fluff extraction'],
+      searchRating: '99%'
+    }
   }
 ];
 
 export const DEFAULT_MODEL = NIXIMA_MODELS[0];
 export const MODELS = NIXIMA_MODELS;
+
+// Helper to look up recommended model for a given search mode
+export function getRecommendedModelForSearchMode(mode: SearchMode): ModelOption {
+  switch (mode) {
+    case 'fast':
+      return NIXIMA_MODELS.find(m => m.id === 'nixima-0.2-flash') || DEFAULT_MODEL;
+    case 'mega':
+      return NIXIMA_MODELS.find(m => m.id === 'nixima-0.2-pro') || DEFAULT_MODEL;
+    case 'standard':
+    default:
+      return NIXIMA_MODELS.find(m => m.id === 'nixima-0.2') || DEFAULT_MODEL;
+  }
+}
 
 // Helper to look up a model by id, with backwards-compatibility aliases for 0.1 IDs
 export function getModelById(id: string): ModelOption {

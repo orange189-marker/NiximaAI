@@ -10,7 +10,7 @@ import { VipWelcomeModal } from './components/VipWelcomeModal';
 import { BenchmarksModal } from './components/BenchmarksModal';
 import { ReleaseAnnouncementModal } from './components/ReleaseAnnouncementModal';
 import { AuthPortal } from './components/AuthPortal';
-import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry } from './types/chat';
+import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry, SearchMode } from './types/chat';
 import { NiximaUser } from './types/user';
 import { NIXIMA_MODELS, DEFAULT_MODEL } from './data/models';
 import { INITIAL_CONVERSATIONS } from './data/initialChats';
@@ -716,6 +716,8 @@ All conversations and model preferences in this workspace are private to your Ni
           onNewChat={handleNewChat}
           credits={getUserCredits(currentUser)}
           onOpenCredits={handleOpenCredits}
+          webSearchEnabled={settings.webSearchEnabled}
+          searchMode={settings.searchMode || 'standard'}
         />
 
         {/* Chat Messages Container */}
@@ -758,22 +760,37 @@ All conversations and model preferences in this workspace are private to your Ni
             setSettings(prev => {
               const isCreator = isStrictCreator(currentUser);
               if (isCreator) {
-                // Creator exclusive cycle: Off -> Standard Search V2 -> Search V2 Mega -> Off
+                // Creator exclusive cycle: Off -> Fast -> Standard -> Mega -> Off
                 if (!prev.webSearchEnabled) {
+                  return { ...prev, webSearchEnabled: true, searchMode: 'fast' };
+                } else if (prev.searchMode === 'fast') {
                   return { ...prev, webSearchEnabled: true, searchMode: 'standard' };
-                } else if (prev.searchMode !== 'mega') {
+                } else if (prev.searchMode === 'standard') {
                   return { ...prev, webSearchEnabled: true, searchMode: 'mega' };
                 } else {
-                  return { ...prev, webSearchEnabled: false, searchMode: 'standard' };
+                  return { ...prev, webSearchEnabled: false, searchMode: 'fast' };
                 }
               } else {
-                return {
-                  ...prev,
-                  webSearchEnabled: !prev.webSearchEnabled,
-                  searchMode: 'standard'
-                };
+                // Regular user cycle: Off -> Fast -> Standard -> Off
+                if (!prev.webSearchEnabled) {
+                  return { ...prev, webSearchEnabled: true, searchMode: 'fast' };
+                } else if (prev.searchMode === 'fast') {
+                  return { ...prev, webSearchEnabled: true, searchMode: 'standard' };
+                } else {
+                  return { ...prev, webSearchEnabled: false, searchMode: 'fast' };
+                }
               }
             });
+          }}
+          onSelectSearchMode={(mode: SearchMode) => {
+            setSettings(prev => ({
+              ...prev,
+              webSearchEnabled: true,
+              searchMode: mode
+            }));
+          }}
+          onSelectModel={(model: ModelOption) => {
+            setCurrentModel(model);
           }}
           searchMode={settings.searchMode || 'standard'}
           isCreator={isStrictCreator(currentUser)}

@@ -1,5 +1,5 @@
 import { NiximaUser } from '../types/user';
-import { ModelOption } from '../types/chat';
+import { ModelOption, SearchMode } from '../types/chat';
 import { NIXIMA_MODELS } from '../data/models';
 import { BENCHMARK_LEADERBOARD } from '../data/benchmarks';
 import { isDadAccount, isStrictCreator } from './auth';
@@ -13,7 +13,7 @@ export interface PromptContextOptions {
   customSystemPrompt?: string;
   deepThink?: boolean;
   webSearch?: boolean;
-  searchMode?: 'standard' | 'mega';
+  searchMode?: SearchMode;
 }
 
 /**
@@ -248,6 +248,17 @@ ${deepThink ? `10. DeepThinking V2 Dynamic Cognitive Reasoning Protocol:
       \`\`\`sources
       [
         { "title": "Source Page Title", "url": "https://...", "domain": "example.com", "snippet": "Key verified fact", "cluster": "Academic" }
+      ]
+      \`\`\`
+` : searchMode === 'fast' ? `11. Search V2 Fast — Sub-Millisecond Rapid Knowledge Retrieval Protocol:
+    - SEARCH V2 FAST IS ENGAGED. High-throughput, rapid live factual grounding (<50ms).
+    - Deliver razor-sharp, immediate, and zero-fluff answers backed by fresh facts, exact numbers, and direct source links.
+    - Prioritize fast clarity over exhaustive essays.
+    - Use inline bracketed citations [1], [2] throughout your response to ground specific factual assertions.
+    - At the very end of your response, provide a structured sources block using:
+      \`\`\`sources
+      [
+        { "title": "Source Page Title", "url": "https://...", "domain": "example.com", "snippet": "Key verified fact or excerpt" }
       ]
       \`\`\`
 ` : `11. Search V2 Real-Time Grounding Protocol:

@@ -13,9 +13,12 @@ import {
   Sparkles,
   CornerDownLeft,
   X,
-  Flame
+  Flame,
+  ChevronDown,
+  Check
 } from 'lucide-react';
-import { ModelOption } from '../types/chat';
+import { ModelOption, SearchMode } from '../types/chat';
+import { getRecommendedModelForSearchMode } from '../data/models';
 import { NiximaIdLogo } from './NiximaIdLogo';
 import { useLanguage } from '../context/LanguageContext';
 import { calculateEstimatedCost } from '../utils/credits';
@@ -31,7 +34,9 @@ interface ChatInputProps {
   onToggleDeepThink: () => void;
   webSearch: boolean;
   onToggleWebSearch: () => void;
-  searchMode?: 'standard' | 'mega';
+  onSelectSearchMode?: (mode: SearchMode) => void;
+  onSelectModel?: (model: ModelOption) => void;
+  searchMode?: SearchMode;
   isCreator?: boolean;
   soundEnabled: boolean;
   onToggleSound: () => void;
@@ -48,6 +53,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onToggleDeepThink,
   webSearch,
   onToggleWebSearch,
+  onSelectSearchMode,
+  onSelectModel,
   searchMode = 'standard',
   isCreator = false,
   soundEnabled,
@@ -59,6 +66,30 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [input, setInput] = useState('');
   const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [isSearchPopoverOpen, setIsSearchPopoverOpen] = useState(false);
+  const [autoSyncSearchModel, setAutoSyncSearchModel] = useState(true);
+  const searchMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchMenuRef.current && !searchMenuRef.current.contains(event.target as Node)) {
+        setIsSearchPopoverOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSelectSearchMode = (mode: SearchMode, shouldPair = autoSyncSearchModel) => {
+    if (onSelectSearchMode) {
+      onSelectSearchMode(mode);
+    }
+    if (shouldPair && onSelectModel) {
+      const rec = getRecommendedModelForSearchMode(mode);
+      onSelectModel(rec);
+    }
+    setIsSearchPopoverOpen(false);
+  };
 
   // Auto-resize textarea height smoothly
   useEffect(() => {
@@ -226,34 +257,235 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 )}
               </button>
 
-              {/* Search V2 / Search V2 Mega Grounding Toggle (Website Design) */}
-              <button
-                type="button"
-                onClick={onToggleWebSearch}
-                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-mono transition-all duration-150 border cursor-pointer select-none flex-shrink-0 ${
-                  webSearch 
-                    ? (searchMode === 'mega' && isCreator)
-                      ? 'bg-zinc-800 text-white font-semibold border-zinc-500 shadow-inner-light scale-[1.02]'
-                      : 'bg-zinc-800 text-white font-semibold border-zinc-600 shadow-inner-light scale-[1.02]' 
-                    : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-850/80'
-                }`}
-                title={
-                  isCreator 
-                    ? (webSearch ? (searchMode === 'mega' ? 'Search V2 Mega Active (Exclusive Creator Swarm) • Click to disable' : 'Search V2 Active • Click to switch to Search V2 Mega') : 'Click to enable Search V2 (Creator Clearance)')
-                    : t.chatInput.searchTooltip
-                }
-              >
-                <Globe className={`w-3.5 h-3.5 ${webSearch ? (searchMode === 'mega' && isCreator ? 'text-white' : 'text-zinc-200') : 'text-zinc-400'}`} />
-                <span className="tracking-tight whitespace-nowrap">{t.chatInput.search}</span>
-                {webSearch && isCreator && searchMode === 'mega' && (
-                  <span className="px-1.5 py-0.2 rounded bg-zinc-700 text-[9px] font-mono font-bold tracking-wider text-zinc-100 border border-zinc-600 whitespace-nowrap flex-shrink-0">
-                    MEGA
-                  </span>
+              {/* Search V2 Engine Control (Fast, Standard, Mega + Model Pairing) */}
+              <div className="relative flex items-center flex-shrink-0" ref={searchMenuRef}>
+                <div
+                  className={`flex items-center rounded-full text-xs font-mono transition-all duration-150 border select-none ${
+                    webSearch 
+                      ? searchMode === 'fast'
+                        ? 'bg-zinc-800 text-white font-semibold border-amber-600/50 shadow-inner-light scale-[1.02]'
+                        : (searchMode === 'mega' && isCreator)
+                        ? 'bg-zinc-800 text-white font-semibold border-zinc-500 shadow-inner-light scale-[1.02]'
+                        : 'bg-zinc-800 text-white font-semibold border-zinc-600 shadow-inner-light scale-[1.02]' 
+                      : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-850/80'
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={onToggleWebSearch}
+                    className="flex items-center gap-1.5 pl-2.5 sm:pl-3 pr-1 py-1.5 cursor-pointer"
+                    title={
+                      webSearch
+                        ? `Search V2 ${searchMode.toUpperCase()} active • Click to cycle`
+                        : t.chatInput.searchTooltip
+                    }
+                  >
+                    {webSearch && searchMode === 'fast' ? (
+                      <Zap className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                    ) : (
+                      <Globe className={`w-3.5 h-3.5 flex-shrink-0 ${webSearch ? (searchMode === 'mega' && isCreator ? 'text-white' : 'text-zinc-200') : 'text-zinc-400'}`} />
+                    )}
+                    <span className="tracking-tight whitespace-nowrap">{t.chatInput.search}</span>
+                    {webSearch && searchMode === 'fast' && (
+                      <span className="px-1.5 py-0.2 rounded bg-amber-950/80 text-[9px] font-mono font-bold tracking-wider text-amber-300 border border-amber-600/50 whitespace-nowrap flex-shrink-0">
+                        FAST
+                      </span>
+                    )}
+                    {webSearch && isCreator && searchMode === 'mega' && (
+                      <span className="px-1.5 py-0.2 rounded bg-zinc-700 text-[9px] font-mono font-bold tracking-wider text-zinc-100 border border-zinc-600 whitespace-nowrap flex-shrink-0">
+                        MEGA
+                      </span>
+                    )}
+                    {webSearch && (
+                      <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ml-0.5 flex-shrink-0 ${
+                        searchMode === 'fast' ? 'bg-amber-400' : searchMode === 'mega' && isCreator ? 'bg-white' : 'bg-zinc-300'
+                      }`} />
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setIsSearchPopoverOpen(!isSearchPopoverOpen);
+                    }}
+                    className="pr-2 pl-0.5 py-1.5 text-zinc-400 hover:text-white cursor-pointer transition-colors"
+                    title={t.chatInput.searchEngineTitle}
+                  >
+                    <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isSearchPopoverOpen ? 'rotate-180 text-white' : ''}`} />
+                  </button>
+                </div>
+
+                {/* Search Engine Selection Popover Panel */}
+                {isSearchPopoverOpen && (
+                  <div className="absolute bottom-full mb-2 left-0 w-80 sm:w-96 rounded-2xl bg-[#121215] border border-zinc-700/90 shadow-[0_12px_45px_rgba(0,0,0,0.9)] p-3 z-50 animate-fade-in backdrop-blur-2xl">
+                    <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
+                      <div className="flex items-center gap-1.5">
+                        <Globe className="w-4 h-4 text-zinc-300" />
+                        <span className="text-xs font-semibold text-white font-mono uppercase tracking-wider">
+                          {t.chatInput.searchEngineTitle}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setIsSearchPopoverOpen(false)}
+                        className="p-1 rounded text-zinc-400 hover:text-white cursor-pointer"
+                        title="Close"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    <p className="text-[11px] text-zinc-400 mt-1 mb-2 font-mono">
+                      {t.chatInput.searchEngineSubtitle}
+                    </p>
+
+                    <div className="space-y-1.5">
+                      {/* 1. Search V2 Fast */}
+                      {(() => {
+                        const recFast = getRecommendedModelForSearchMode('fast');
+                        const isModeActive = webSearch && searchMode === 'fast';
+                        return (
+                          <div 
+                            onClick={() => handleSelectSearchMode('fast')}
+                            className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
+                              isModeActive 
+                                ? 'bg-zinc-850/90 border-amber-600/70 shadow-sm' 
+                                : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className="p-1 rounded-md bg-amber-950/60 border border-amber-800/60 text-amber-300">
+                                  <Zap className="w-3.5 h-3.5" />
+                                </div>
+                                <span className="font-semibold text-xs text-white font-mono">Search V2 Fast</span>
+                                <span className="px-1.5 py-0.2 rounded bg-amber-950/80 border border-amber-600/40 text-[9px] font-mono font-bold text-amber-300">
+                                  &lt;50MS
+                                </span>
+                              </div>
+                              {isModeActive && (
+                                <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center">
+                                  <Check className="w-3 h-3 stroke-[3]" />
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-zinc-400 mt-1">
+                              {t.chatInput.searchFastDesc}
+                            </p>
+                            <div className="mt-1.5 pt-1.5 border-t border-zinc-800/60 flex items-center justify-between text-[10px] font-mono text-zinc-400">
+                              <span className="flex items-center gap-1 text-amber-300/90">
+                                <span>⚡ Optimal:</span>
+                                <strong className="text-zinc-200">{recFast.shortName}</strong>
+                              </span>
+                              <span className="text-zinc-500">2-3 Sources</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      {/* 2. Search V2 Standard */}
+                      {(() => {
+                        const recStd = getRecommendedModelForSearchMode('standard');
+                        const isModeActive = webSearch && searchMode === 'standard';
+                        return (
+                          <div 
+                            onClick={() => handleSelectSearchMode('standard')}
+                            className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
+                              isModeActive 
+                                ? 'bg-zinc-850/90 border-zinc-500 shadow-sm' 
+                                : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
+                                  <Globe className="w-3.5 h-3.5" />
+                                </div>
+                                <span className="font-semibold text-xs text-white font-mono">Search V2 Standard</span>
+                                <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-[9px] font-mono font-bold text-zinc-300">
+                                  BALANCED
+                                </span>
+                              </div>
+                              {isModeActive && (
+                                <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center">
+                                  <Check className="w-3 h-3 stroke-[3]" />
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-zinc-400 mt-1">
+                              {t.chatInput.searchStandardDesc}
+                            </p>
+                            <div className="mt-1.5 pt-1.5 border-t border-zinc-800/60 flex items-center justify-between text-[10px] font-mono text-zinc-400">
+                              <span className="flex items-center gap-1 text-zinc-300">
+                                <span>🌐 Optimal:</span>
+                                <strong className="text-zinc-100">{recStd.shortName}</strong>
+                              </span>
+                              <span className="text-zinc-500">4-6 Sources</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+
+                      {/* 3. Search V2 Mega (Creator Clearance) */}
+                      {isCreator && (() => {
+                        const recMega = getRecommendedModelForSearchMode('mega');
+                        const isModeActive = webSearch && searchMode === 'mega';
+                        return (
+                          <div 
+                            onClick={() => handleSelectSearchMode('mega')}
+                            className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
+                              isModeActive 
+                                ? 'bg-zinc-850/90 border-zinc-400 shadow-sm' 
+                                : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className="p-1 rounded-md bg-zinc-800 border border-zinc-600 text-white">
+                                  <BrainCircuit className="w-3.5 h-3.5" />
+                                </div>
+                                <span className="font-semibold text-xs text-white font-mono">Search V2 Mega</span>
+                                <span className="px-1.5 py-0.2 rounded bg-zinc-700 border border-zinc-600 text-[9px] font-mono font-bold text-zinc-100">
+                                  CREATOR SWARM
+                                </span>
+                              </div>
+                              {isModeActive && (
+                                <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center">
+                                  <Check className="w-3 h-3 stroke-[3]" />
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-zinc-400 mt-1">
+                              {t.chatInput.searchMegaDesc}
+                            </p>
+                            <div className="mt-1.5 pt-1.5 border-t border-zinc-800/60 flex items-center justify-between text-[10px] font-mono text-zinc-400">
+                              <span className="flex items-center gap-1 text-zinc-200">
+                                <span>🧠 Optimal:</span>
+                                <strong className="text-white">{recMega.shortName}</strong>
+                              </span>
+                              <span className="text-zinc-400">20+ Sources • 5 Clusters</span>
+                            </div>
+                          </div>
+                        );
+                      })()}
+                    </div>
+
+                    {/* Auto-Sync Model with Search Mode Toggle */}
+                    <div className="mt-2.5 pt-2 border-t border-zinc-800/80 flex items-center justify-between">
+                      <label className="flex items-center gap-2 text-[10.5px] font-mono text-zinc-400 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={autoSyncSearchModel}
+                          onChange={(e) => setAutoSyncSearchModel(e.target.checked)}
+                          className="rounded border-zinc-700 bg-zinc-900 text-white focus:ring-0 w-3.5 h-3.5 accent-white cursor-pointer"
+                        />
+                        <span>{t.chatInput.autoSyncModel}</span>
+                      </label>
+                    </div>
+                  </div>
                 )}
-                {webSearch && (
-                  <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ml-0.5 flex-shrink-0 ${searchMode === 'mega' && isCreator ? 'bg-white' : 'bg-zinc-300'}`} />
-                )}
-              </button>
+              </div>
 
               {/* Audio Keystroke Sound Toggle */}
               <button

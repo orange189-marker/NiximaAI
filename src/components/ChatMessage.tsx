@@ -22,7 +22,8 @@ import {
   ShieldAlert,
   GitBranch,
   Globe,
-  ExternalLink
+  ExternalLink,
+  Zap
 } from 'lucide-react';
 import { Message } from '../types/chat';
 import { MarkdownTable, TableBlockData } from './MarkdownTable';
@@ -666,6 +667,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               {/* SEARCH V2 / SEARCH V2 MEGA GROUNDING BAR & SOURCES DRAWER (Website Native Design) */}
               {!isUser && message.searchGrounding && message.searchGrounding.sources.length > 0 && (() => {
                 const isMega = message.searchGrounding.searchMode === 'mega';
+                const isFast = message.searchGrounding.searchMode === 'fast';
                 const displayedSources = (selectedCluster === 'All' || !selectedCluster)
                   ? message.searchGrounding.sources
                   : message.searchGrounding.sources.filter(s => (s.cluster || '').toLowerCase().includes(selectedCluster.toLowerCase()));
@@ -678,12 +680,23 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                       className="w-full px-3.5 py-2.5 flex items-center justify-between text-zinc-300 hover:text-white transition-colors cursor-pointer select-none bg-zinc-900/70 border-b border-zinc-800"
                     >
                       <div className="flex items-center gap-2 flex-wrap">
-                        <Globe className="w-3.5 h-3.5 text-zinc-300" />
+                        {isFast ? (
+                          <Zap className="w-3.5 h-3.5 text-amber-400" />
+                        ) : (
+                          <Globe className="w-3.5 h-3.5 text-zinc-300" />
+                        )}
                         {isMega ? (
                           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-600 text-zinc-100 font-mono text-[10px] font-bold">
                             <span>Search V2</span>
                             <span className="px-1 py-0.2 rounded bg-zinc-700 text-[9px] text-zinc-200 border border-zinc-600">
                               MEGA
+                            </span>
+                          </span>
+                        ) : isFast ? (
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 border border-amber-500/40 text-zinc-100 font-mono text-[10px] font-bold">
+                            <span>Search V2</span>
+                            <span className="px-1 py-0.2 rounded bg-amber-950/80 text-[9px] text-amber-300 border border-amber-600/50">
+                              FAST
                             </span>
                           </span>
                         ) : (
@@ -697,6 +710,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                         {isMega && message.searchGrounding.pagesCrawled ? (
                           <span className="text-zinc-400 text-[10px] font-mono hidden sm:inline">
                             • {message.searchGrounding.pagesCrawled}+ pages crawled across {message.searchGrounding.browserInputs?.length || 5} browser inputs
+                          </span>
+                        ) : isFast ? (
+                          <span className="text-amber-400/90 text-[10px] font-mono hidden sm:inline">
+                            • {t.chatMessage.fastLatency(message.searchGrounding.searchTimeMs || 42)}
                           </span>
                         ) : (
                           <span className="text-zinc-500 text-[10px] font-mono hidden sm:inline">

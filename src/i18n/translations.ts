@@ -119,6 +119,11 @@ export interface Translations {
     expandSidebarTooltip: string;
     closeMenu: string;
     defaultBadge: string;
+    allModelsTab: string;
+    searchOptimizedTab: string;
+    searchEngineBadge: string;
+    activeSearchBanner: (mode: string, modelName: string) => string;
+    switchModelBtn: string;
   };
 
   sidebar: {
@@ -158,6 +163,16 @@ export interface Translations {
     deepThinkTooltip: string;
     search: string;
     searchTooltip: string;
+    searchFast: string;
+    searchFastTooltip: string;
+    searchEngineTitle: string;
+    searchEngineSubtitle: string;
+    searchFastDesc: string;
+    searchStandardDesc: string;
+    searchMegaDesc: string;
+    autoSyncModel: string;
+    switchModelTip: string;
+    applyModel: string;
     audioMute: string;
     audioEnable: string;
     attachTooltip: string;
@@ -203,11 +218,13 @@ export interface Translations {
     copyThoughtTrace: string;
     copiedThoughtTrace: string;
     searchV2Grounded: string;
+    searchV2FastGrounded: string;
     inspectSources: (count: number) => string;
     hideSources: string;
     verifiedSources: string;
     queriedMesh: (query: string) => string;
     searchLatency: (ms: number) => string;
+    fastLatency: (ms: number) => string;
   };
 
   table: {
@@ -498,6 +515,11 @@ export const translations: Record<Language, Translations> = {
       expandSidebarTooltip: 'Expand sidebar',
       closeMenu: 'Close menu',
       defaultBadge: 'DEFAULT',
+      allModelsTab: 'All Engines',
+      searchOptimizedTab: 'Search-Optimized',
+      searchEngineBadge: 'SEARCH PARTNER',
+      activeSearchBanner: (mode: string, modelName: string) => `Active Search: ${mode} • Recommended model is ${modelName}`,
+      switchModelBtn: 'Switch',
     },
 
     sidebar: {
@@ -537,6 +559,16 @@ export const translations: Record<Language, Translations> = {
       deepThinkTooltip: 'DeepThinking V2: Activate multi-stage epistemic reasoning & proof verification',
       search: 'Search V2',
       searchTooltip: 'Search V2: Real-time web mesh grounding & verified sources',
+      searchFast: 'Fast',
+      searchFastTooltip: 'Search V2 Fast: Ultra-low-latency real-time lookup (<50ms)',
+      searchEngineTitle: 'Search V2 Grounding Engine',
+      searchEngineSubtitle: 'Select search speed, depth & AI engine pairing',
+      searchFastDesc: 'Sub-50ms instant live facts, headlines, and rapid snippet synthesis.',
+      searchStandardDesc: 'Comprehensive multi-domain web grounding with balanced factual synthesis.',
+      searchMegaDesc: 'Sovereign deep web crawler indexing 20+ sources across 5 clusters.',
+      autoSyncModel: 'Auto-sync optimal AI model for search mode',
+      switchModelTip: 'Switch AI model to match',
+      applyModel: 'Apply Engine',
       audioMute: 'Mute key sounds',
       audioEnable: 'Enable key sounds',
       attachTooltip: 'Attach dataset / document',
@@ -582,11 +614,13 @@ export const translations: Record<Language, Translations> = {
       copyThoughtTrace: 'Copy trace',
       copiedThoughtTrace: 'Trace copied!',
       searchV2Grounded: 'Search V2 Grounded',
+      searchV2FastGrounded: 'Search V2 FAST Grounded',
       inspectSources: (count: number) => `Inspect Sources (${count})`,
       hideSources: 'Hide Sources',
       verifiedSources: 'Verified Web Sources',
       queriedMesh: (query: string) => `Query: "${query}"`,
       searchLatency: (ms: number) => `Retrieved in ${ms}ms via Nixima Web Mesh`,
+      fastLatency: (ms: number) => `Instant retrieval in ${ms}ms via Lightning Mesh`,
     },
 
     table: {
@@ -960,6 +994,11 @@ export const translations: Record<Language, Translations> = {
       expandSidebarTooltip: 'Розгорнути бічну панель',
       closeMenu: 'Закрити меню',
       defaultBadge: 'СТАНДАРТ',
+      allModelsTab: 'Усі рушії',
+      searchOptimizedTab: 'Оптимізовані для пошуку',
+      searchEngineBadge: 'ПОШУКОВИЙ ПАРТНЕР',
+      activeSearchBanner: (mode: string, modelName: string) => `Активний пошук: ${mode} • Рекомендована модель ${modelName}`,
+      switchModelBtn: 'Перемкнути',
     },
 
     sidebar: {
@@ -999,6 +1038,16 @@ export const translations: Record<Language, Translations> = {
       deepThinkTooltip: 'DeepThinking V2: Багатокрокове епістемічне міркування та верифікація логіки',
       search: 'Search V2',
       searchTooltip: 'Search V2: Реальний веб-пошук у мережі та перевірені джерела',
+      searchFast: 'Швидкий',
+      searchFastTooltip: 'Search V2 Fast: Надшвидкий пошук у реальному часі (<50мс)',
+      searchEngineTitle: 'Пошуковий рушій Search V2',
+      searchEngineSubtitle: 'Оберіть швидкість, глибину пошуку та пару AI-рушія',
+      searchFastDesc: 'Миттєві факти, заголовки новин та оперативні витяги до 50мс.',
+      searchStandardDesc: 'Глибокий багатодоменний веб-пошук зі збалансованим синтезом джерел.',
+      searchMegaDesc: 'Суверенний пошуковий рій з індексацією 20+ джерел у 5 кластерах.',
+      autoSyncModel: 'Автоперемикання моделі під режим пошуку',
+      switchModelTip: 'Перемкнути AI-модель',
+      applyModel: 'Застосувати',
       audioMute: 'Вимкнути звук клавіш',
       audioEnable: 'Увімкнути звук клавіш',
       attachTooltip: 'Прикріпити документ',
@@ -1044,11 +1093,13 @@ export const translations: Record<Language, Translations> = {
       copyThoughtTrace: 'Копіювати ланцюжок',
       copiedThoughtTrace: 'Ланцюжок скопійовано!',
       searchV2Grounded: 'Search V2 Верифіковано',
+      searchV2FastGrounded: 'Search V2 FAST Верифіковано',
       inspectSources: (count: number) => `Переглянути джерела (${count})`,
       hideSources: 'Сховати джерела',
       verifiedSources: 'Перевірені веб-джерела',
       queriedMesh: (query: string) => `Запит: "${query}"`,
       searchLatency: (ms: number) => `Отримано за ${ms}мс через Nixima Web Mesh`,
+      fastLatency: (ms: number) => `Миттєве отримання за ${ms}мс через Lightning Mesh`,
     },
 
     table: {

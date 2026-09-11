@@ -1,4 +1,4 @@
-import { ModelOption, SearchGrounding, DeepThinkingTelemetry } from '../types/chat';
+import { ModelOption, SearchGrounding, DeepThinkingTelemetry, SearchMode } from '../types/chat';
 import { isCjkRequested, sanitizeModelOutput } from './textSanitizer';
 import { generateDefaultGrounding, computeDeepThinkingTelemetry } from './openrouter';
 
@@ -7,7 +7,7 @@ interface GenerateResponseOptions {
   model: ModelOption;
   deepThink: boolean;
   webSearch?: boolean;
-  searchMode?: 'standard' | 'mega';
+  searchMode?: SearchMode;
   history: { role: string; content: string }[];
 }
 

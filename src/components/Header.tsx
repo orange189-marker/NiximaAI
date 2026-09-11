@@ -13,10 +13,11 @@ import {
   Sliders,
   Plus,
   X,
-  BarChart3
+  BarChart3,
+  Globe
 } from 'lucide-react';
-import { ModelOption } from '../types/chat';
-import { NIXIMA_MODELS } from '../data/models';
+import { ModelOption, SearchMode } from '../types/chat';
+import { NIXIMA_MODELS, getRecommendedModelForSearchMode } from '../data/models';
 import { NiximaIdLogo } from './NiximaIdLogo';
 import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotkeys';
 import { useLanguage } from '../context/LanguageContext';
@@ -35,6 +36,8 @@ interface HeaderProps {
   onNewChat?: () => void;
   credits?: number;
   onOpenCredits?: () => void;
+  webSearchEnabled?: boolean;
+  searchMode?: SearchMode;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -48,10 +51,13 @@ export const Header: React.FC<HeaderProps> = ({
   onToggleSidebar,
   onNewChat,
   credits = 1000,
-  onOpenCredits
+  onOpenCredits,
+  webSearchEnabled = false,
+  searchMode = 'standard'
 }) => {
   const { language, toggleLanguage, t } = useLanguage();
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
+  const [filterTab, setFilterTab] = useState<'all' | 'search'>('all');
   const [hotkeyConfig, setHotkeyConfig] = useState<HotkeyConfig>(() => getSavedHotkey());
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -189,10 +195,81 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
 
-            <div className="mt-1 space-y-1 max-h-[60vh] sm:max-h-none overflow-y-auto">
+            {/* Dynamic Search Recommendation Banner */}
+            {webSearchEnabled && (() => {
+              const rec = getRecommendedModelForSearchMode(searchMode);
+              const isRec = currentModel.id === rec.id;
+              const modeLabel = searchMode === 'fast' ? 'Search V2 Fast' : searchMode === 'mega' ? 'Search V2 Mega' : 'Search V2';
+              return (
+                <div className={`mx-1 mt-2 mb-1.5 p-2 rounded-xl border flex items-center justify-between gap-2 text-xs font-mono animate-fade-in ${
+                  isRec 
+                    ? 'bg-zinc-900/90 border-zinc-700/80 text-zinc-300'
+                    : searchMode === 'fast'
+                    ? 'bg-amber-950/40 border-amber-800/60 text-amber-200'
+                    : 'bg-zinc-900/90 border-zinc-600 text-zinc-200'
+                }`}>
+                  <div className="flex items-center gap-2 min-w-0">
+                    {searchMode === 'fast' ? (
+                      <Zap className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                    ) : (
+                      <Globe className="w-3.5 h-3.5 text-zinc-300 flex-shrink-0" />
+                    )}
+                    <div className="min-w-0">
+                      <div className="text-[10.5px] truncate">
+                        {isRec ? (
+                          <span>Optimal Search Model Paired: <strong className="text-white">{rec.shortName}</strong></span>
+                        ) : (
+                          <span>{t.header.activeSearchBanner(modeLabel, rec.name)}</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  {!isRec && (
+                    <button
+                      type="button"
+                      onClick={() => onSelectModel(rec)}
+                      className="px-2 py-0.5 rounded bg-white hover:bg-zinc-200 text-black text-[10px] font-bold tracking-tight whitespace-nowrap transition-all cursor-pointer flex-shrink-0 shadow-sm"
+                    >
+                      {t.header.switchModelBtn}
+                    </button>
+                  )}
+                </div>
+              );
+            })()}
+
+            {/* Category Filter Tabs: All vs Search-Optimized */}
+            <div className="flex items-center gap-1 p-1 mt-1 mb-1.5 bg-zinc-900/80 rounded-xl border border-zinc-800 text-[11px] font-mono">
+              <button
+                type="button"
+                onClick={() => setFilterTab('all')}
+                className={`flex-1 py-1 rounded-lg text-center font-medium transition-all cursor-pointer ${
+                  filterTab === 'all' 
+                    ? 'bg-zinc-800 text-white shadow-inner-light' 
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+              >
+                {t.header.allModelsTab}
+              </button>
+              <button
+                type="button"
+                onClick={() => setFilterTab('search')}
+                className={`flex-1 py-1 rounded-lg text-center font-medium transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+                  filterTab === 'search' 
+                    ? 'bg-zinc-800 text-white shadow-inner-light' 
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+              >
+                <Globe className="w-3 h-3 text-zinc-400" />
+                <span>{t.header.searchOptimizedTab}</span>
+              </button>
+            </div>
+
+            <div className="space-y-1 max-h-[60vh] sm:max-h-none overflow-y-auto">
               {NIXIMA_MODELS.map((model) => {
                 const isSelected = currentModel.id === model.id;
                 const modelTr = t.models[model.id];
+                const searchOpt = model.searchOptimization;
+
                 return (
                   <button
                     key={model.id}
@@ -207,7 +284,7 @@ export const Header: React.FC<HeaderProps> = ({
                         : 'hover:bg-zinc-800/50 border border-transparent'
                     }`}
                   >
-                    <div className="space-y-0.5 flex-1 min-w-0 pr-2">
+                    <div className="space-y-1 flex-1 min-w-0 pr-2">
                       <div className="flex items-center gap-2">
                         <span className="flex-shrink-0">{getModelIcon(model.id)}</span>
                         <span className="font-semibold text-sm text-white group-hover:text-white truncate">
@@ -218,17 +295,45 @@ export const Header: React.FC<HeaderProps> = ({
                             {t.header.defaultBadge}
                           </span>
                         )}
+                        {filterTab === 'search' && searchOpt && (
+                          <span className="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-700 text-zinc-200 flex-shrink-0 ml-auto">
+                            {searchOpt.searchRating}
+                          </span>
+                        )}
                       </div>
-                      <p className="text-xs text-zinc-400 line-clamp-1">
-                        {modelTr?.description || model.description}
-                      </p>
-                      <div className="flex items-center gap-2 pt-1">
+
+                      {filterTab === 'search' && searchOpt ? (
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-[9.5px] font-mono font-bold px-1.5 py-0.2 rounded bg-zinc-750 text-zinc-200 border border-zinc-600">
+                              {searchOpt.badge}
+                            </span>
+                            <span className="text-[10px] font-mono text-zinc-400">
+                              • {searchOpt.searchThroughput}
+                            </span>
+                          </div>
+                          <p className="text-xs text-zinc-300 line-clamp-1">
+                            {searchOpt.role}
+                          </p>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-zinc-400 line-clamp-1">
+                          {modelTr?.description || model.description}
+                        </p>
+                      )}
+
+                      <div className="flex items-center gap-2 pt-0.5 flex-wrap">
                         <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">
                           {model.contextWindow}
                         </span>
                         <span className="text-[10px] font-mono text-zinc-400">
                           {model.latency}
                         </span>
+                        {filterTab === 'all' && searchOpt && (
+                          <span className="text-[9px] font-mono text-zinc-400 bg-zinc-900/90 px-1.5 py-0.5 rounded border border-zinc-800/80 truncate max-w-[130px]">
+                            {searchOpt.badge}
+                          </span>
+                        )}
                       </div>
                     </div>
 
