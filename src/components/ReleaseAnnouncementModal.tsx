@@ -19,6 +19,7 @@ import { ModelOption } from '../types/chat';
 import { NIXIMA_MODELS } from '../data/models';
 import { useLanguage } from '../context/LanguageContext';
 import { NiximaIdLogo } from './NiximaIdLogo';
+import { renderWithNiximaBrand } from './NiximaWordmark';
 
 interface ReleaseAnnouncementModalProps {
   isOpen: boolean;
@@ -84,14 +85,14 @@ export const ReleaseAnnouncementModal: React.FC<ReleaseAnnouncementModalProps> =
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-white text-black uppercase tracking-wider">
-                  NIXIMA 0.2 GENERATION
+                  {renderWithNiximaBrand("NIXIMA 0.2 GENERATION")}
                 </span>
                 <span className="text-[11px] font-mono text-zinc-500">
                   {language === 'uk' ? 'Офіційний реліз' : 'Official Release'}
                 </span>
               </div>
               <h2 className="text-lg sm:text-xl font-bold text-white tracking-tight">
-                {t.releaseAnnouncement.modalTitle}
+                {renderWithNiximaBrand(t.releaseAnnouncement.modalTitle)}
               </h2>
             </div>
           </div>
@@ -112,7 +113,7 @@ export const ReleaseAnnouncementModal: React.FC<ReleaseAnnouncementModalProps> =
           {/* Subtitle / Intro */}
           <div className="p-4 rounded-xl bg-zinc-900/60 border border-zinc-800 text-xs sm:text-sm text-zinc-300 leading-relaxed font-sans">
             <p>
-              {t.releaseAnnouncement.modalSubtitle}
+              {renderWithNiximaBrand(t.releaseAnnouncement.modalSubtitle)}
             </p>
           </div>
 
@@ -129,7 +130,7 @@ export const ReleaseAnnouncementModal: React.FC<ReleaseAnnouncementModalProps> =
                   <span>{t.releaseAnnouncement.highlight1Title}</span>
                 </div>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  {t.releaseAnnouncement.highlight1Desc}
+                  {renderWithNiximaBrand(t.releaseAnnouncement.highlight1Desc)}
                 </p>
               </div>
 
@@ -139,7 +140,7 @@ export const ReleaseAnnouncementModal: React.FC<ReleaseAnnouncementModalProps> =
                   <span>{t.releaseAnnouncement.highlight2Title}</span>
                 </div>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  {t.releaseAnnouncement.highlight2Desc}
+                  {renderWithNiximaBrand(t.releaseAnnouncement.highlight2Desc)}
                 </p>
               </div>
 
@@ -149,7 +150,7 @@ export const ReleaseAnnouncementModal: React.FC<ReleaseAnnouncementModalProps> =
                   <span>{t.releaseAnnouncement.highlight3Title}</span>
                 </div>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  {t.releaseAnnouncement.highlight3Desc}
+                  {renderWithNiximaBrand(t.releaseAnnouncement.highlight3Desc)}
                 </p>
               </div>
 
@@ -159,7 +160,7 @@ export const ReleaseAnnouncementModal: React.FC<ReleaseAnnouncementModalProps> =
                   <span>{t.releaseAnnouncement.highlight4Title}</span>
                 </div>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
-                  {t.releaseAnnouncement.highlight4Desc}
+                  {renderWithNiximaBrand(t.releaseAnnouncement.highlight4Desc)}
                 </p>
               </div>
             </div>
@@ -194,7 +195,7 @@ export const ReleaseAnnouncementModal: React.FC<ReleaseAnnouncementModalProps> =
                           </div>
                           <div>
                             <div className="font-bold text-sm sm:text-base text-white tracking-tight flex items-center gap-2">
-                              <span>{modelTr.name || model.name}</span>
+                              <span>{renderWithNiximaBrand(modelTr.name || model.name)}</span>
                               {isSelected && <Check className="w-4 h-4 text-emerald-400 stroke-[2.5]" />}
                             </div>
                             <span className="text-[10px] font-mono text-zinc-400">
@@ -211,7 +212,7 @@ export const ReleaseAnnouncementModal: React.FC<ReleaseAnnouncementModalProps> =
                       </div>
 
                       <p className="text-xs text-zinc-300 leading-relaxed mb-3">
-                        {modelTr.description || model.description}
+                        {renderWithNiximaBrand(modelTr.description || model.description)}
                       </p>
 
                       {/* Strengths Pills */}

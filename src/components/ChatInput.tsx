@@ -24,6 +24,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { calculateEstimatedCost } from '../utils/credits';
 import { NiximaCreditLogo } from './NiximaCreditLogo';
 import { InfinitySymbol } from './InfinitySymbol';
+import { renderWithNiximaBrand } from './NiximaWordmark';
 
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
@@ -234,7 +235,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 title={`${t.header.sovereignEngine}: ${currentModel.name}`}
               >
                 <NiximaIdLogo size={13} glow={false} />
-                <span className="font-medium truncate max-w-[110px]">{currentModel.name}</span>
+                <span className="font-medium truncate max-w-[110px]">{renderWithNiximaBrand(currentModel.name)}</span>
               </div>
 
               <div className="hidden md:block h-3.5 w-[1px] bg-zinc-800 mx-0.5 flex-shrink-0" />

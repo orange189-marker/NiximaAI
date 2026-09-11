@@ -14,6 +14,7 @@ import {
 import { ModelOption } from '../types/chat';
 import { NIXIMA_MODELS } from '../data/models';
 import { useLanguage } from '../context/LanguageContext';
+import { renderWithNiximaBrand } from './NiximaWordmark';
 
 interface ReleaseAnnouncementCardProps {
   currentModel: ModelOption;
@@ -98,7 +99,7 @@ export const ReleaseAnnouncementCard: React.FC<ReleaseAnnouncementCardProps> = (
             <span className="relative inline-flex rounded-full h-2 w-2 bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]" />
           </span>
           <span className="text-[11px] font-mono font-bold tracking-wider uppercase text-white">
-            {t.releaseAnnouncement.badge}
+            {renderWithNiximaBrand(t.releaseAnnouncement.badge)}
           </span>
         </div>
 
@@ -156,7 +157,7 @@ export const ReleaseAnnouncementCard: React.FC<ReleaseAnnouncementCardProps> = (
                 </div>
 
                 <div className="font-semibold text-xs sm:text-sm text-white tracking-tight mb-1 flex items-center gap-1.5">
-                  <span>{modelTr.name || model.name}</span>
+                  <span>{renderWithNiximaBrand(modelTr.name || model.name)}</span>
                   {isSelected && <Check className="w-3.5 h-3.5 text-emerald-400 stroke-[2.5]" />}
                 </div>
 

@@ -157,3 +157,96 @@ export const NiximaWordmark: React.FC<NiximaWordmarkProps> = ({
     </div>
   );
 };
+
+const BRAND_TOKEN_REGEX = /\b(Nixima(?:\s+AI|-0\.[12](?:\s+(?:Pro|Coder|Flash|Flagship))?|\s+ID|\s+Credits)?|NIXIMA(?:\s+AI|-0\.[12]|\s+ID)?)\b|(Ніксіма(?:\s+ШІ)?)/gi;
+
+export interface RenderBrandOptions {
+  keyPrefix?: string;
+  sheen?: boolean;
+}
+
+/**
+ * Scans any text string for "Nixima", "Nixima AI", "Nixima-0.2", "Nixima ID", etc.
+ * and elevates matching brand occurrences into the custom geometric brand typeface with metallic luster.
+ */
+export function renderWithNiximaBrand(
+  text: string,
+  options?: RenderBrandOptions
+): React.ReactNode {
+  if (!text || typeof text !== 'string') return text;
+  if (!/Nixima|Ніксіма/i.test(text)) return text;
+
+  const keyPrefix = options?.keyPrefix || 'nb';
+  const parts = text.split(BRAND_TOKEN_REGEX);
+
+  return parts.map((part, idx) => {
+    if (!part) return null;
+
+    if (/^Nixima\s+AI$/i.test(part)) {
+      return (
+        <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline font-nixima font-extrabold tracking-tight select-none">
+          <span className="nixima-wordmark-sheen drop-shadow-[0_1px_4px_rgba(255,255,255,0.22)]">Nixima</span>
+          <span className="font-mono text-[0.8em] font-semibold text-zinc-300 ml-1 px-1 py-0.2 rounded bg-zinc-800/80 border border-zinc-700/60 align-baseline">AI</span>
+        </span>
+      );
+    }
+
+    if (/^Ніксіма\s+ШІ$/i.test(part)) {
+      return (
+        <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline font-nixima font-extrabold tracking-tight select-none">
+          <span className="nixima-wordmark-sheen drop-shadow-[0_1px_4px_rgba(255,255,255,0.22)]">Ніксіма</span>
+          <span className="font-mono text-[0.8em] font-semibold text-zinc-300 ml-1 px-1 py-0.2 rounded bg-zinc-800/80 border border-zinc-700/60 align-baseline">ШІ</span>
+        </span>
+      );
+    }
+
+    if (/^Nixima-0\.[12](?:\s+(?:Pro|Coder|Flash|Flagship))?$/i.test(part)) {
+      const suffix = part.replace(/^Nixima/i, '');
+      return (
+        <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline font-nixima font-extrabold tracking-tight select-none">
+          <span className="nixima-wordmark-sheen drop-shadow-[0_1px_4px_rgba(255,255,255,0.22)]">Nixima</span>
+          <span className="font-mono text-[0.85em] font-medium text-zinc-300 ml-0.5">{suffix}</span>
+        </span>
+      );
+    }
+
+    if (/^Nixima\s+ID$/i.test(part)) {
+      return (
+        <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline font-nixima font-extrabold tracking-tight select-none">
+          <span className="nixima-wordmark-sheen drop-shadow-[0_1px_4px_rgba(255,255,255,0.22)]">Nixima</span>
+          <span className="font-mono text-[0.8em] font-semibold text-zinc-400 uppercase ml-1">ID</span>
+        </span>
+      );
+    }
+
+    if (/^Nixima\s+Credits$/i.test(part)) {
+      return (
+        <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline font-nixima font-extrabold tracking-tight select-none">
+          <span className="nixima-wordmark-sheen drop-shadow-[0_1px_4px_rgba(255,255,255,0.22)]">Nixima</span>
+          <span className="font-mono text-[0.85em] font-medium text-zinc-300 ml-1">Credits</span>
+        </span>
+      );
+    }
+
+    if (/^(?:Nixima|NIXIMA|Ніксіма)$/i.test(part)) {
+      return (
+        <span
+          key={`${keyPrefix}-${idx}`}
+          className="font-nixima font-extrabold tracking-tight nixima-wordmark-sheen drop-shadow-[0_1px_4px_rgba(255,255,255,0.22)] select-none"
+        >
+          {part}
+        </span>
+      );
+    }
+
+    return part;
+  });
+}
+
+export const NiximaText: React.FC<{ children: string; className?: string }> = ({
+  children,
+  className = '',
+}) => {
+  return <span className={className}>{renderWithNiximaBrand(children)}</span>;
+};
+

@@ -13,7 +13,7 @@ import {
 import { ModelOption } from '../types/chat';
 import { useLanguage } from '../context/LanguageContext';
 import { ReleaseAnnouncementCard } from './ReleaseAnnouncementCard';
-import { NiximaWordmark } from './NiximaWordmark';
+import { NiximaWordmark, renderWithNiximaBrand } from './NiximaWordmark';
 import { NiximaIdLogo } from './NiximaIdLogo';
 
 interface EmptyChatProps {
@@ -72,7 +72,7 @@ export const EmptyChat: React.FC<EmptyChatProps> = ({
       <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-700/60 mb-6 shadow-inner-light">
         <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse"></span>
         <span className="text-xs font-mono text-zinc-300">
-          {t.emptyChat.brandBadge(currentModel.name)}
+          {renderWithNiximaBrand(t.emptyChat.brandBadge(currentModel.name))}
         </span>
       </div>
 
@@ -82,7 +82,7 @@ export const EmptyChat: React.FC<EmptyChatProps> = ({
       </h1>
 
       <p className="text-sm text-zinc-400 max-w-md mx-auto mb-10 leading-relaxed">
-        {t.emptyChat.heroSubtitle(currentModel.name)}
+        {renderWithNiximaBrand(t.emptyChat.heroSubtitle(currentModel.name))}
       </p>
 
       {/* Suggestion Cards Grid */}

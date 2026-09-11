@@ -23,7 +23,7 @@ import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotk
 import { useLanguage } from '../context/LanguageContext';
 import { CountryFlag } from './CountryFlag';
 import { CreditBalanceChip } from './AnimatedCredits';
-import { NiximaWordmark } from './NiximaWordmark';
+import { NiximaWordmark, renderWithNiximaBrand } from './NiximaWordmark';
 
 interface HeaderProps {
   currentModel: ModelOption;
@@ -158,7 +158,7 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="flex items-center gap-1.5 min-w-0">
             <span className="flex-shrink-0">{getModelIcon(currentModel.id)}</span>
             <span className="font-semibold text-xs sm:text-sm text-white tracking-tight whitespace-nowrap truncate">
-              {t.models[currentModel.id]?.name || currentModel.name}
+              {renderWithNiximaBrand(t.models[currentModel.id]?.name || currentModel.name)}
             </span>
           </div>
 
@@ -292,7 +292,7 @@ export const Header: React.FC<HeaderProps> = ({
                       <div className="flex items-center gap-2">
                         <span className="flex-shrink-0">{getModelIcon(model.id)}</span>
                         <span className="font-semibold text-sm text-white group-hover:text-white truncate">
-                          {modelTr?.name || model.name}
+                          {renderWithNiximaBrand(modelTr?.name || model.name)}
                         </span>
                         {model.isFlagship && (
                           <span className="text-[9px] font-mono px-1 py-0.5 rounded bg-white text-black font-bold flex-shrink-0">

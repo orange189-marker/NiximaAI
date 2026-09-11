@@ -31,6 +31,7 @@ import { BenchmarkSuite, ModelBenchmarkResult } from '../types/benchmark';
 import { MathRenderer } from './MathRenderer';
 import { useLanguage } from '../context/LanguageContext';
 import { NiximaCreditLogo } from './NiximaCreditLogo';
+import { renderWithNiximaBrand } from './NiximaWordmark';
 import { streamOpenRouterChat } from '../utils/openrouter';
 import { playTypingTick, playCompletionChime, playSupernovaBang } from '../utils/sound';
 
@@ -203,7 +204,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs sm:text-sm font-bold font-mono text-white tracking-tight">
-                  {isUk ? 'Офіційні бенчмарки Nixima AI' : 'Nixima AI Official Benchmarks'}
+                  {renderWithNiximaBrand(isUk ? 'Офіційні бенчмарки Nixima AI' : 'Nixima AI Official Benchmarks')}
                 </span>
                 <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-bold bg-zinc-800 text-zinc-300 border border-zinc-700">
                   4 MODELS
@@ -302,7 +303,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                           </div>
                           <div>
                             <h3 className="font-bold text-sm text-white group-hover:text-zinc-200 transition-colors">
-                              {modelObj?.name}
+                              {renderWithNiximaBrand(modelObj?.name || '')}
                             </h3>
                             <span className="text-[10px] font-mono text-zinc-500">
                               {modelObj?.parameters}
@@ -388,7 +389,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                           <tr key={item.modelId} className="hover:bg-zinc-800/30 transition-colors">
                             <td className="py-3 pr-2 font-bold text-white flex items-center gap-2">
                               {getModelIcon(item.modelId)}
-                              <span>{m.name}</span>
+                              <span>{renderWithNiximaBrand(m.name)}</span>
                             </td>
                             <td className="py-3 text-center">
                               <span className="px-2 py-0.5 rounded bg-zinc-800/80 font-bold text-purple-300">
@@ -520,7 +521,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                     <div className="text-xs font-mono">
                       <span className="block text-[10px] text-zinc-500 uppercase">{isUk ? 'Переможець сюїти' : 'Suite Winner'}</span>
                       <span className="font-bold text-white">
-                        {NIXIMA_MODELS.find(m => m.id === currentSuite.winnerModelId)?.name}
+                        {renderWithNiximaBrand(NIXIMA_MODELS.find(m => m.id === currentSuite.winnerModelId)?.name || '')}
                       </span>
                     </div>
                   </div>
@@ -576,7 +577,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                             : 'text-zinc-400 hover:text-zinc-200'
                         }`}
                       >
-                        {m.shortName}
+                        {renderWithNiximaBrand(m.shortName)}
                       </button>
                     ))}
                   </div>
@@ -608,7 +609,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                             <div className="flex items-center gap-1.5 min-w-0">
                               {getModelIcon(model.id)}
                               <span className="font-bold text-xs text-white truncate">
-                                {model.shortName}
+                                {renderWithNiximaBrand(model.shortName)}
                               </span>
                             </div>
 
@@ -806,7 +807,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                       <div className="flex items-center gap-2">
                         {getModelIcon(arenaModelA)}
                         <span className="font-bold text-xs text-white">
-                          {NIXIMA_MODELS.find(m => m.id === arenaModelA)?.name}
+                          {renderWithNiximaBrand(NIXIMA_MODELS.find(m => m.id === arenaModelA)?.name || '')}
                         </span>
                       </div>
                       {arenaMetricsA && (
@@ -841,7 +842,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                       <div className="flex items-center gap-2">
                         {getModelIcon(arenaModelB)}
                         <span className="font-bold text-xs text-white">
-                          {NIXIMA_MODELS.find(m => m.id === arenaModelB)?.name}
+                          {renderWithNiximaBrand(NIXIMA_MODELS.find(m => m.id === arenaModelB)?.name || '')}
                         </span>
                       </div>
                       {arenaMetricsB && (
@@ -881,7 +882,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
         <div className="px-4 py-3 sm:px-6 sm:py-3 bg-[#111118] border-t border-zinc-800 flex items-center justify-between text-xs font-mono shrink-0">
           <div className="flex items-center gap-2 text-zinc-500 text-[11px]">
             <ShieldCheck className="w-3.5 h-3.5 text-zinc-400" />
-            <span>Nixima Sovereign Telemetry v0.1 • 4 Frontier Models Tested</span>
+            <span>{renderWithNiximaBrand('Nixima Sovereign Telemetry v0.1 • 4 Frontier Models Tested')}</span>
           </div>
 
           <button

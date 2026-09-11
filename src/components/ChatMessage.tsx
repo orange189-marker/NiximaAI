@@ -37,6 +37,7 @@ import { parseChartSpec } from '../types/chartSpec';
 import { parseDynamicThinkingSteps } from '../utils/openrouter';
 import { LinkPill } from './LinkPill';
 import { SearchActionFeed } from './SearchActionFeed';
+import { renderWithNiximaBrand } from './NiximaWordmark';
 
 interface ChatMessageProps {
   message: Message;
@@ -536,16 +537,16 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
     }
 
     if (parts.length === 0) {
-      return [str];
+      return [renderWithNiximaBrand(str, { keyPrefix: 'raw' })];
     }
 
     return parts.map((part, i) => {
-      if (typeof part === 'string') return part;
+      if (typeof part === 'string') return renderWithNiximaBrand(part, { keyPrefix: `str-${i}` });
       if (part.type === 'math') {
         return <MathRenderer key={i} math={part.content} displayMode={false} />;
       }
       if (part.type === 'bold') {
-        return <strong key={i} className="font-semibold text-white">{part.content}</strong>;
+        return <strong key={i} className="font-semibold text-white">{renderWithNiximaBrand(part.content, { keyPrefix: `b-${i}` })}</strong>;
       }
       if (part.type === 'code') {
         return (
@@ -555,7 +556,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         );
       }
       if (part.type === 'italic') {
-        return <em key={i} className="text-zinc-300 italic">{part.content}</em>;
+        return <em key={i} className="text-zinc-300 italic">{renderWithNiximaBrand(part.content, { keyPrefix: `it-${i}` })}</em>;
       }
       if (part.type === 'link') {
         return (
@@ -610,8 +611,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
           {/* Header info */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-semibold text-white tracking-tight">
-                {isUser ? t.chatMessage.you : (message.model || activeModelName)}
+              <span className="text-xs font-semibold text-white tracking-tight flex items-center gap-1">
+                {isUser ? t.chatMessage.you : renderWithNiximaBrand(message.model || activeModelName)}
               </span>
               {!isUser && (
                 <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
