@@ -153,4 +153,5 @@ export interface UserSettings {
   streamSpeed: 'fast' | 'cinematic' | 'instant';
   themeContrast: 'titanium' | 'pure-black';
   antiGlitchFilter?: boolean;
+  infiniteOutputEnabled?: boolean;
 }

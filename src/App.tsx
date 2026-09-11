@@ -719,6 +719,9 @@ All conversations and model preferences in this workspace are private to your Ni
         }
       }
 
+      const isCreatorUser = isStrictCreator(currentUser);
+      const isInfiniteOutputActive = Boolean(isCreatorUser && settings.infiniteOutputEnabled);
+
       let dynamicSystemPrompt = buildNiximaSystemPrompt({
         user: currentUser,
         credits: getUserCredits(currentUser),
@@ -729,6 +732,7 @@ All conversations and model preferences in this workspace are private to your Ni
         thinkingMode: effectiveThinkingMode,
         webSearch: shouldRunWebSearch,
         searchMode: settings.searchMode || 'standard',
+        infiniteOutput: isInfiniteOutputActive,
       });
 
       // Prepare final user prompt with live grounding injected into immediate context
@@ -766,7 +770,8 @@ All conversations and model preferences in this workspace are private to your Ni
             ).join('\n\n') +
             `\n\nInstructions: Ground your response in these verified real-world findings. Answer the user's question directly, accurately, and authoritatively. Cite sources with [1], [2] where appropriate.`;
 
-          finalUserPrompt = `[REAL-TIME LIVE WEB GROUNDING — TODAY: ${nowStr}]\n` +
+          finalUserPrompt =
+            `[SEARCH V2 REAL-TIME GROUNDED WEB FINDINGS]\n` +
             liveGrounding.sources.map((src, i) =>
               `[Source ${i + 1}] ${src.title} (${src.domain})\nURL: ${src.url}\nSummary: ${src.snippet || 'Authoritative reference'}`
             ).join('\n\n') +
@@ -793,6 +798,7 @@ All conversations and model preferences in this workspace are private to your Ni
         webSearch: shouldRunWebSearch,
         searchMode: settings.searchMode || 'standard',
         initialSearchGrounding: liveGrounding,
+        infiniteOutput: isInfiniteOutputActive,
         callbacks: {
           onToken: (contentChunk) => {
             tokenTickCount++;
@@ -1136,6 +1142,8 @@ All conversations and model preferences in this workspace are private to your Ni
             }}
             searchMode={settings.searchMode || 'standard'}
             isCreator={isStrictCreator(currentUser)}
+            infiniteOutput={Boolean(isStrictCreator(currentUser) && settings.infiniteOutputEnabled)}
+            onToggleInfiniteOutput={() => setSettings(s => ({ ...s, infiniteOutputEnabled: !s.infiniteOutputEnabled }))}
             soundEnabled={settings.soundEnabled}
             onToggleSound={() => setSettings(s => ({ ...s, soundEnabled: !s.soundEnabled }))}
             userCredits={getUserCredits(currentUser)}

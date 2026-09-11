@@ -10,10 +10,12 @@ const DEFAULT_USERS: NiximaUser[] = [
     handle: 'bogdan',
     email: 'bogdan@nixima.ai',
     passphrase: 'nixima2026',
-    role: 'Founding Operator',
+    role: 'Founding Operator & Creator',
     createdAt: 1700000000000,
     avatarBg: 'from-zinc-100 to-zinc-400 text-black',
-    credits: 1000,
+    credits: Infinity,
+    isCreator: true,
+    unlimitedCredits: true,
   },
   {
     id: 'usr-creator-orange17',
@@ -95,8 +97,12 @@ export function isStrictCreator(user?: NiximaUser | null): boolean {
   const handle = (user.handle || '').toLowerCase().trim();
   const email = (user.email || '').toLowerCase().trim();
   return (
+    user.id === 'usr-founder' ||
+    user.id === 'usr-creator-orange17' ||
     handle === 'orange17' ||
+    handle === 'bogdan' ||
     email === 'orange17@nixima.ai' ||
+    email === 'bogdan@nixima.ai' ||
     (user.isCreator === true && !isDadAccount(user) && handle !== 'warexxq')
   );
 }

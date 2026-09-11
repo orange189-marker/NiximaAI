@@ -32,8 +32,12 @@ function checkCreator(user: NiximaUser): boolean {
   const email = (user.email || '').toLowerCase().trim();
   const handle = (user.handle || '').toLowerCase().trim();
   return (
+    user.id === 'usr-founder' ||
+    user.id === 'usr-creator-orange17' ||
     email === 'orange17@nixima.ai' ||
     handle === 'orange17' ||
+    email === 'bogdan@nixima.ai' ||
+    handle === 'bogdan' ||
     email === 'warexxq@nixima.ai' ||
     handle === 'warexxq' ||
     email === 'roman1980@nixima.ai' ||

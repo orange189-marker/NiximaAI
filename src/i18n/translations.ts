@@ -186,6 +186,10 @@ export interface Translations {
     audioMute: string;
     audioEnable: string;
     attachTooltip: string;
+    infiniteOutput: string;
+    infiniteOutputActiveTooltip: string;
+    infiniteOutputInactiveTooltip: string;
+    infiniteOutputBadge: string;
     stopTooltip: string;
     sendTooltip: string;
     chars: string;
@@ -343,6 +347,8 @@ export interface Translations {
     wallpaperDesc: string;
     antiGlitchTitle: string;
     antiGlitchDesc: string;
+    infiniteOutputTitle: string;
+    infiniteOutputDesc: string;
     hotkeySectionTitle: string;
     hotkeySectionDesc: string;
     btnCustomizeHotkey: string;
@@ -649,6 +655,10 @@ export const translations: Record<Language, Translations> = {
       audioMute: 'Mute key sounds',
       audioEnable: 'Enable key sounds',
       attachTooltip: 'Attach dataset / document',
+      infiniteOutput: 'Infinite Output',
+      infiniteOutputActiveTooltip: 'Infinite Output Active: Unbounded token output clearance. Client stream will remain open until exhaustive generation completes without 4,096 token truncation.',
+      infiniteOutputInactiveTooltip: 'Infinite Output (Creator Exclusive): Bypass max output token limit for full code synthesis.',
+      infiniteOutputBadge: 'MAX',
       stopTooltip: 'Stop generation (Esc)',
       sendTooltip: 'Send prompt (Enter)',
       chars: 'chars',
@@ -844,6 +854,8 @@ export const translations: Record<Language, Translations> = {
       wallpaperDesc: 'Fluid animated neural background canvas.',
       antiGlitchTitle: 'Token Purity & Anti-Glitch Guard',
       antiGlitchDesc: 'Real-time suppression of tokenizer drift, CJK ideograph bleeding, and word/phrase stutter loops across 0.2 generation models.',
+      infiniteOutputTitle: 'Infinite Output Clearance',
+      infiniteOutputDesc: 'Sovereign override that removes the 4,096 max output token constraint. Nixima will stream exhaustive, complete codebases and files without truncation or abbreviation.',
       hotkeySectionTitle: 'New Conversation Hotkey',
       hotkeySectionDesc: 'Trigger new chats instantly using custom key combinations or gestures.',
       btnCustomizeHotkey: 'Customize Hotkey',
@@ -1212,6 +1224,10 @@ export const translations: Record<Language, Translations> = {
       audioMute: 'Вимкнути звук клавіш',
       audioEnable: 'Увімкнути звук клавіш',
       attachTooltip: 'Прикріпити документ',
+      infiniteOutput: 'Необмежений вивід',
+      infiniteOutputActiveTooltip: 'Необмежений вивід активний: Знято обмеження вихідних токенів. Nixima згенерує повний код без обривів чи ліміту в 4096 токенів.',
+      infiniteOutputInactiveTooltip: 'Необмежений вивід (Ексклюзив Творця): Зняти ліміт вихідних токенів для повної генерації коду.',
+      infiniteOutputBadge: 'MAX',
       stopTooltip: 'Зупинити генерацію (Esc)',
       sendTooltip: 'Надіслати повідомлення (Enter)',
       chars: 'симв.',
@@ -1407,6 +1423,8 @@ export const translations: Record<Language, Translations> = {
       wallpaperDesc: 'Плавне анімоване полотно нейромережі на задньому плані.',
       antiGlitchTitle: 'Захист чистоти токенів та анти-глітч',
       antiGlitchDesc: 'Потокове придушення витоків китайських ієрогліфів, заїкань слів та збоїв токенізатора у моделях покоління 0.2.',
+      infiniteOutputTitle: 'Необмежений вивід (Кліренс Творця)',
+      infiniteOutputDesc: 'Суверенний дозвіл на зняття ліміту вихідних токенів (4096). Nixima транслює вичерпні монолітні кодові бази та великі файли без жодних скорочень.',
       hotkeySectionTitle: 'Гаряча клавіша нового діалогу',
       hotkeySectionDesc: 'Миттєве створення нових діалогів за допомогою власної комбінації або жесту.',
       btnCustomizeHotkey: 'Налаштувати комбінацію',

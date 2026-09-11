@@ -15,6 +15,7 @@ export interface PromptContextOptions {
   thinkingMode?: ThinkingMode;
   webSearch?: boolean;
   searchMode?: SearchMode;
+  infiniteOutput?: boolean;
 }
 
 /**
@@ -37,6 +38,7 @@ export function buildNiximaSystemPrompt({
   thinkingMode,
   webSearch,
   searchMode = 'standard',
+  infiniteOutput = false,
 }: PromptContextOptions): string {
   const isCreator = isStrictCreator(user);
   const isDad = isDadAccount(user);
@@ -355,6 +357,12 @@ ${thinkingProtocol}${webSearch ? (searchMode === 'mega' && isCreator ? `11. Sear
       * When writing HTML web apps or tools, feel free to use modern Tailwind CSS utility classes as Tailwind is preloaded in the Canvas sandbox.
       * The Nixima Canvas automatically mounts React components, compiles HTML/Tailwind widgets, renders SVG vectors, and captures console outputs in real time.
       * When asked to iterate or refine an existing artifact, generate the updated complete code block so the Canvas can instantly create and display the next version (v2, v3, etc.).
-
+${infiniteOutput ? `
+15. Sovereign Infinite Output Mandate (Creator Clearance Activated):
+    - INFINITE OUTPUT PROTOCOL IS ACTIVATED BY CREATOR AUTHORIZATION.
+    - Zero Truncation Mandate: You are released from all output token ceilings and brevity constraints.
+    - Absolutely NEVER shorten code, never omit methods, never write "// ... rest of code goes here", never use "/* implementation omitted */", and never insert placeholder ellipses.
+    - Deliver the complete, production-ready, fully detailed monolithic implementation from first line to last line without skipping anything. The stream will remain open until the code is fully finished.
+` : ''}
 ${customSystemPrompt && customSystemPrompt.trim() ? `=== OPERATOR CUSTOM INSTRUCTIONS ===\n${customSystemPrompt.trim()}\n` : ''}`.trim();
 }

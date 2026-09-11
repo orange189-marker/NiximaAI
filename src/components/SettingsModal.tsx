@@ -534,17 +534,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
               {/* Max Tokens */}
               <div className="space-y-2">
-                <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
-                  {t.settings.contextLimitTitle}
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
+                    {t.settings.contextLimitTitle}
+                  </label>
+                  {settings.infiniteOutputEnabled && (
+                    <span className="text-[10px] font-mono text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-600/50 flex items-center gap-1">
+                      <InfinitySymbol size={11} className="text-amber-400" />
+                      <span>{language === 'uk' ? 'БЕЗ ЛІМІТУ' : 'UNBOUNDED'}</span>
+                    </span>
+                  )}
+                </div>
                 <div className="grid grid-cols-4 gap-2">
                   {[1024, 2048, 4096, 8192].map((num) => (
                     <button
                       key={num}
                       type="button"
-                      onClick={() => onUpdateSettings({ maxTokens: num })}
-                      className={`py-1.5 px-2 rounded-lg text-xs font-mono border transition-all ${
-                        settings.maxTokens === num
+                      onClick={() => onUpdateSettings({ maxTokens: num, infiniteOutputEnabled: false })}
+                      className={`py-1.5 px-2 rounded-lg text-xs font-mono border transition-all cursor-pointer ${
+                        !settings.infiniteOutputEnabled && settings.maxTokens === num
                           ? 'bg-white text-black font-bold border-white'
                           : 'bg-zinc-900 text-zinc-400 border-zinc-800 hover:border-zinc-700'
                       }`}
@@ -554,6 +562,39 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   ))}
                 </div>
               </div>
+
+              {/* Creator Exclusive: Sovereign Infinite Output Clearance */}
+              {isStrictCreator(currentUser) && (
+                <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 flex items-center justify-between shadow-[0_0_20px_rgba(245,158,11,0.06)]">
+                  <div className="space-y-1 pr-4">
+                    <div className="flex items-center gap-2">
+                      <InfinitySymbol size={16} className="text-amber-400" />
+                      <span className="text-xs font-bold text-amber-300 uppercase tracking-wider font-mono">
+                        {t.settings.infiniteOutputTitle}
+                      </span>
+                      <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                        CREATOR CLEARANCE
+                      </span>
+                    </div>
+                    <p className="text-xs text-amber-200/80 leading-relaxed">
+                      {t.settings.infiniteOutputDesc}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onUpdateSettings({ infiniteOutputEnabled: !settings.infiniteOutputEnabled })}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                      settings.infiniteOutputEnabled ? 'bg-amber-500' : 'bg-zinc-800'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                        settings.infiniteOutputEnabled ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+              )}
 
               {/* Stream Speed */}
               <div className="space-y-2">

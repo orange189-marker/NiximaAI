@@ -33,6 +33,7 @@ export interface StreamChatParams {
   webSearch?: boolean;
   searchMode?: SearchMode;
   initialSearchGrounding?: SearchGrounding;
+  infiniteOutput?: boolean;
 }
 
 export interface StreamChatResult {
@@ -911,6 +912,7 @@ export async function streamOpenRouterChat({
   webSearch = false,
   searchMode = 'standard',
   initialSearchGrounding,
+  infiniteOutput = false,
 }: StreamChatParams): Promise<StreamChatResult> {
   const activeKey = getSystemApiKey();
   const effectiveThinkingMode: ThinkingMode = thinkingMode || (deepThink ? 'deep' : 'none');
@@ -976,9 +978,14 @@ export async function streamOpenRouterChat({
           messages: formattedMessages,
           temperature,
           top_p: topP,
-          max_tokens: maxTokens,
           stream: true,
         };
+
+        // When infinite output is enabled for the creator, omit max_tokens so OpenRouter and upstream providers
+        // stream up to their maximum model context limit without any 4096-token ceiling.
+        if (!infiniteOutput) {
+          requestPayload.max_tokens = maxTokens;
+        }
 
         const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
