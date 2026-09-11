@@ -103,8 +103,9 @@ export function calculateEstimatedCost(
   const cleanPrompt = prompt.trim();
   const inputLen = cleanPrompt.length;
 
-  const isThinkingActive = Boolean(thinkingMode === 'basic' || thinkingMode === 'deep' || deepThink);
-  const isDeep = thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic');
+  const isThinkingActive = Boolean(thinkingMode === 'basic' || thinkingMode === 'deep' || thinkingMode === 'ultra' || deepThink);
+  const isUltra = thinkingMode === 'ultra';
+  const isDeep = thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic' && !isUltra);
 
   // Detect if the prompt is computationally "hard"
   const hasCode = /```|function|def\s+|class\s+|SELECT\s+|import\s+/i.test(cleanPrompt);
@@ -119,7 +120,10 @@ export function calculateEstimatedCost(
   let estimatedMin = Math.round(baseMin + inputWeight * 0.8 * modelMult);
   let estimatedMax = Math.round(estimatedMin + (isHardPrompt ? 15 : 6) * modelMult);
 
-  if (isDeep) {
+  if (isUltra) {
+    estimatedMin = Math.round(estimatedMin * 1.8);
+    estimatedMax = Math.round(estimatedMax * 2.2);
+  } else if (isDeep) {
     estimatedMin = Math.round(estimatedMin * 1.5);
     estimatedMax = Math.round(estimatedMax * 1.8);
   } else if (thinkingMode === 'basic') {
@@ -146,7 +150,8 @@ export function calculateActualCost(
   response: string,
   thinking: string | undefined,
   model: ModelOption,
-  deepThink: boolean
+  deepThink: boolean,
+  thinkingMode?: ThinkingMode
 ): CreditCostBreakdown {
   const modelMult = model.creditMultiplier || 1.0;
   const baseMin = model.baseCreditCost || 5;
@@ -155,23 +160,27 @@ export function calculateActualCost(
   const inputTokens = Math.max(1, Math.round(prompt.length / 4));
   const outputTokens = Math.max(1, Math.round(response.length / 4));
   const thinkingTokens = thinking ? Math.round(thinking.length / 4) : 0;
+  const isUltra = thinkingMode === 'ultra';
 
   // Complexity indicator
   const isHardPrompt =
     inputTokens > 100 ||
     thinkingTokens > 60 ||
     deepThink ||
+    isUltra ||
     model.id.includes('reasoning') ||
     /```|\$|\\int|\\sum/i.test(prompt);
 
   // Compute components
   const inputCost = Math.ceil((inputTokens / 25) * modelMult);
   const outputCost = Math.ceil((outputTokens / 20) * modelMult);
-  // Thinking tokens have a higher compute intensity multiplier
-  const thinkingCost = thinkingTokens > 0 ? Math.ceil((thinkingTokens / 15) * modelMult * 1.3) : 0;
+  // Thinking tokens have a higher compute intensity multiplier (ultra reasoning has highest intensity)
+  const thinkingCostMult = isUltra ? 1.6 : 1.3;
+  const thinkingDivisor = isUltra ? 12 : 15;
+  const thinkingCost = thinkingTokens > 0 ? Math.ceil((thinkingTokens / thinkingDivisor) * modelMult * thinkingCostMult) : 0;
 
   const rawSum = inputCost + outputCost + thinkingCost;
-  const difficultySurge = isHardPrompt ? 1.15 : 1.0;
+  const difficultySurge = isUltra ? 1.25 : (isHardPrompt ? 1.15 : 1.0);
 
   const finalCredits = Math.max(baseMin, Math.round(rawSum * difficultySurge));
 

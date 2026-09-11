@@ -72,7 +72,7 @@ export interface SearchGrounding {
   consensusScore?: number;
 }
 
-export type ThinkingMode = 'none' | 'basic' | 'deep';
+export type ThinkingMode = 'none' | 'basic' | 'deep' | 'ultra';
 
 export type ArtifactType = 'html' | 'react' | 'svg' | 'markdown' | 'code' | 'chart';
 

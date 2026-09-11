@@ -694,7 +694,7 @@ All conversations and model preferences in this workspace are private to your Ni
       const effectiveThinkingMode: ThinkingMode = isOmni
         ? omniThinkingDecision
         : (settings.thinkingMode || (settings.deepThinkEnabled ? 'deep' : 'none'));
-      const effectiveDeepThink = effectiveThinkingMode === 'deep';
+      const effectiveDeepThink = effectiveThinkingMode === 'deep' || effectiveThinkingMode === 'ultra';
       const isThinkingActive = effectiveThinkingMode !== 'none';
 
       if (shouldRunWebSearch) {
@@ -845,7 +845,8 @@ All conversations and model preferences in this workspace are private to your Ni
         fullContent,
         fullThinking,
         currentModel,
-        effectiveDeepThink
+        effectiveDeepThink,
+        effectiveThinkingMode
       );
 
       const isCreator = currentUser && (
@@ -1085,16 +1086,19 @@ All conversations and model preferences in this workspace are private to your Ni
             isLoading={isLoading}
             onStopGeneration={handleStopGeneration}
             currentModel={currentModel}
-            deepThink={settings.thinkingMode === 'deep' || settings.deepThinkEnabled}
+            deepThink={settings.thinkingMode === 'deep' || settings.thinkingMode === 'ultra' || settings.deepThinkEnabled}
             thinkingMode={settings.thinkingMode || (settings.deepThinkEnabled ? 'deep' : 'none')}
             onToggleDeepThink={() => {
               setSettings(prev => {
                 const current = prev.thinkingMode || (prev.deepThinkEnabled ? 'deep' : 'none');
-                const next: ThinkingMode = current === 'none' ? 'basic' : current === 'basic' ? 'deep' : 'none';
+                const next: ThinkingMode =
+                  current === 'none' ? 'basic' :
+                  current === 'basic' ? 'deep' :
+                  current === 'deep' ? 'ultra' : 'none';
                 return {
                   ...prev,
                   thinkingMode: next,
-                  deepThinkEnabled: next === 'deep',
+                  deepThinkEnabled: next === 'deep' || next === 'ultra',
                 };
               });
             }}
@@ -1102,7 +1106,7 @@ All conversations and model preferences in this workspace are private to your Ni
               setSettings(prev => ({
                 ...prev,
                 thinkingMode: mode,
-                deepThinkEnabled: mode === 'deep',
+                deepThinkEnabled: mode === 'deep' || mode === 'ultra',
               }));
             }}
             webSearch={settings.webSearchEnabled}

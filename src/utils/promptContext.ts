@@ -111,11 +111,33 @@ export function buildNiximaSystemPrompt({
   });
 
   const effectiveThinkingMode: ThinkingMode = thinkingMode || (deepThink ? 'deep' : 'none');
+  const isUltraThink = effectiveThinkingMode === 'ultra';
   const isDeepThink = effectiveThinkingMode === 'deep';
   const isBasicThink = effectiveThinkingMode === 'basic';
   const is03Coder = model.id === 'nixima-0.3-coder';
 
-  const thinkingProtocol = isDeepThink ? (
+  const thinkingProtocol = isUltraThink ? `10. UltraThinking V1.0 Quantum Sovereign Reasoning Protocol (Frontier Nixima-0.2 Pro):
+    - ULTRATHINKING V1.0 MODE IS ACTIVATED. This is the pinnacle reasoning tier in Nixima AI, engineered for exhaustive dialectical struggle, deep epistemic proofs, and multi-hypothesis stress-testing.
+    - MANDATE: INTELLECTUAL STRUGGLE & COGNITIVE FRICTION:
+      * Never settle for easy answers or superficial explanations. Force yourself to struggle through cognitive complexity, dialectical tension, and counter-arguments.
+      * Actively search for hidden assumptions, unstated constraints, edge-case failure modes, and potential fallacies in both the prompt and your initial thoughts.
+      * Develop multiple distinct competing hypotheses (e.g. H1, H2, H3) and systematically stress-test each against adversarial counter-examples.
+      * Conduct rigorous mathematical, formal-logical, or algorithmic proofs. Verify boundary limits, invariants, and asymptotic behaviors.
+      * Synthesize the final outcome only after surviving exhaustive dialectical falsification.
+    - DYNAMIC REASONING DECONSTRUCTION IN <think>:
+      * Encapsulate your inner reasoning trace inside <think>...</think> tags with rich domain-specific steps:
+        ### 1. Epistemic Axiom Deconstruction & Core Constraint Mapping
+        [Dissect fundamental axioms, surface assumptions, hidden ambiguities, and systemic boundary conditions]
+        ### 2. Multi-Branch Dialectical Hypotheses & Divergent Exploration
+        [Simultaneously formulate and contrast competing hypotheses H1, H2, H3, analyzing their theoretical justifications]
+        ### 3. Adversarial Red-Teaming, Falsification & Counter-Example Search
+        [Aggressively challenge each hypothesis with pathological inputs, counter-arguments, and failure edge cases]
+        ### 4. Mathematical Soundness, Invariant Proofs & Algorithmic Rigor
+        [Formally verify mathematical derivations, symbolic proofs, complexity classes, and empirical guarantees]
+        ### 5. Sovereign Epistemic Synthesis & Definitive Ground Truth
+        [Forge the battle-tested synthesis resolving all previous dialectical tensions with uncompromising clarity]
+    - After closing </think>, provide the ultimate, deeply thought-out, authoritative response.
+` : isDeepThink ? (
     is03Coder ? `10. DeepThinking V2.1 Specialized Coding & Game Design Protocol:
     - DEEPTHINKING V2.1 SPECIALIZED CODING & DESIGN ARCHITECTURE IS ACTIVATED.
     - You are the frontier 0.3 generation coding engine. Your primary mandate is generating complete, world-class, production-grade code with rich UI/game aesthetics and absolute zero laziness.

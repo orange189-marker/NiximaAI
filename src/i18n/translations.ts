@@ -167,6 +167,10 @@ export interface Translations {
     deepThinkTooltip: string;
     deepThinkingV21: string;
     deepThinkingV21Desc: string;
+    ultraThinking: string;
+    ultraThinkingV1: string;
+    ultraThinkingTooltip: string;
+    ultraThinkingDesc: string;
     basicThinking: string;
     basicThinkingTooltip: string;
     thinkingEngineTitle: string;
@@ -235,6 +239,9 @@ export interface Translations {
     deepThinkingV21: string;
     coderV21Architecture: string;
     stagesVerifiedV21: (count: number) => string;
+    ultraThinkingV1: string;
+    ultraThinkingStruggle: string;
+    ultraStagesVerified: (count: number) => string;
     basicThinking: string;
     agileSynthesis: string;
     agileStages: (count: number) => string;
@@ -641,6 +648,10 @@ export const translations: Record<Language, Translations> = {
       deepThinkTooltip: 'DeepThinking V2: Activate multi-stage epistemic reasoning & proof verification',
       deepThinkingV21: 'DeepThinking V2.1',
       deepThinkingV21Desc: 'Zero-laziness software & game architecture engine. Complete runnable code, modern neon aesthetics, and Web Audio API synthesis.',
+      ultraThinking: 'UltraThinking',
+      ultraThinkingV1: 'UltraThinking V1.0',
+      ultraThinkingTooltip: 'UltraThinking V1.0: Deepest epistemic struggle & exhaustive multi-branch deduction (Nixima-0.2 Pro)',
+      ultraThinkingDesc: 'Frontier dialectical struggle engine. Forces model to struggle through multiple hypotheses, adversarial falsification, and rigorous mathematical proofs before finalizing.',
       basicThinking: 'Thinking',
       basicThinkingTooltip: 'Thinking: Agile reasoning & prompt analysis',
       thinkingEngineTitle: 'Thinking Engine',
@@ -709,6 +720,9 @@ export const translations: Record<Language, Translations> = {
       deepThinkingV21: 'DeepThinking V2.1 Coder',
       coderV21Architecture: 'V2.1 Code & UI Synthesis',
       stagesVerifiedV21: (count: number) => `${count} Architectural Stages Verified (Zero-Laziness)`,
+      ultraThinkingV1: 'UltraThinking V1.0',
+      ultraThinkingStruggle: 'Quantum Dialectical Proof (Nixima-0.2 Pro)',
+      ultraStagesVerified: (count: number) => `${count} Ultra-Reasoning Branches Verified`,
       basicThinking: 'Thinking',
       agileSynthesis: 'Agile Synthesis',
       agileStages: (count: number) => `${count} ${count === 1 ? 'Agile Step' : 'Agile Steps'}`,
@@ -1215,6 +1229,10 @@ export const translations: Record<Language, Translations> = {
       deepThinkTooltip: 'DeepThinking V2: Багатокрокове епістемічне міркування та верифікація логіки',
       deepThinkingV21: 'DeepThinking V2.1',
       deepThinkingV21Desc: 'Архітектурний рушій коду та ігор без лінощів. 100% завершений код, сучасна неонова естетика та синтез Web Audio API.',
+      ultraThinking: 'UltraThinking',
+      ultraThinkingV1: 'UltraThinking V1.0',
+      ultraThinkingTooltip: 'UltraThinking V1.0: Глибока діалектична боротьба думок та верифікація гіпотез (Nixima-0.2 Pro)',
+      ultraThinkingDesc: 'Флагманський інтелектуальний режим. Змушує модель долати сумніви, досліджувати кілька діалектичних гіпотез, шукати контрприклади та проводити математичні доведення.',
       basicThinking: 'Міркування',
       basicThinkingTooltip: 'Міркування: Швидкий попередній аналіз перед відповіддю',
       thinkingEngineTitle: 'Рушій міркування',
@@ -1283,6 +1301,9 @@ export const translations: Record<Language, Translations> = {
       deepThinkingV21: 'DeepThinking V2.1 Coder',
       coderV21Architecture: 'V2.1 Архітектура коду та дизайну',
       stagesVerifiedV21: (count: number) => `Верифіковано ${count} архітектурних стадій (Без скорочень)`,
+      ultraThinkingV1: 'UltraThinking V1.0',
+      ultraThinkingStruggle: 'Квантове діалектичне доведення (Nixima-0.2 Pro)',
+      ultraStagesVerified: (count: number) => `Верифіковано ${count} ультра-гіпотез`,
       basicThinking: 'Міркування',
       agileSynthesis: 'Швидкий аналіз',
       agileStages: (count: number) => `Аналіз у ${count} ${count === 1 ? 'крок' : count < 5 ? 'кроки' : 'кроків'}`,

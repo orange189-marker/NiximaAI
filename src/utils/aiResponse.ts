@@ -55,7 +55,30 @@ function generateRawNiximaResponse({
 
   // Thinking trace generation gated by thinkingMode
   let thinking = '';
-  if (effectiveMode === 'deep') {
+  if (effectiveMode === 'ultra') {
+    thinking = `### 1. Epistemic Axiom Deconstruction & Core Constraint Mapping
+- Deep intellectual struggle initiated on: "${prompt.slice(0, 60)}..."
+- Challenging default baseline assumptions; dissecting subtle ambiguities and hidden premises.
+- Establishing formal logical bounds, invariant constraints, and dimensional verification.
+
+### 2. Multi-Branch Dialectical Hypotheses (H1 vs H2 vs H3)
+- Developing Branch H1: Direct reductionist deduction under standard axiomatic models.
+- Developing Branch H2: Non-linear systemic perspective with adversarial counter-assumptions.
+- Developing Branch H3: Asymptotic boundary stress-test under extreme conditions.
+- Mapping theoretical divergence, cognitive friction, and trade-off matrices between candidate paths.
+
+### 3. Adversarial Red-Teaming, Falsification & Counter-Example Search
+- Aggressively probing leading hypotheses for theoretical fragility, edge case collapse, and second-order failures.
+- Discovered and resolved potential degenerate states and boundary discrepancies.
+- Verified absence of cognitive shortcuts or reasoning laziness.
+
+### 4. Mathematical Rigor & Invariant Soundness Proof
+- Formally verifying symbolic consistency, logical flow, and mathematical soundness.
+- Establishing invariant proofs: all claims corroborated with 99.98% epistemic certainty.
+
+### 5. Sovereign Dialectical Synthesis & Definitive Ground Truth
+- Synthesizing resolution from the dialectical struggle into a definitive, world-class response.`;
+  } else if (effectiveMode === 'deep') {
     if (model.id === 'nixima-0.3-coder') {
       thinking = `### 1. Game Mechanics & State Machine Invariants
 - Semantic parsing of requirements: "${prompt.slice(0, 60)}..."

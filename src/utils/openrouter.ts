@@ -887,8 +887,12 @@ export function computeDeepThinkingTelemetry(
   const dynamicSteps = parseDynamicThinkingSteps(thinking);
   return {
     stepsCount: dynamicSteps.length > 0 ? dynamicSteps.length : 1,
-    durationMs: durationMs || Math.min(Math.round(thinking.length * (mode === 'basic' ? 8 : 12)), 4800),
-    epistemicDepth: mode === 'basic' ? 'Agile Cognitive Synthesis' : 'Frontier L3 Epistemic Proof',
+    durationMs: durationMs || Math.min(Math.round(thinking.length * (mode === 'ultra' ? 18 : mode === 'basic' ? 8 : 12)), 6400),
+    epistemicDepth: mode === 'ultra'
+      ? 'Ultra-Reasoning L4 Epistemic Dialectic (Nixima-0.2 Pro)'
+      : mode === 'basic' 
+      ? 'Agile Cognitive Synthesis' 
+      : 'Frontier L3 Epistemic Proof',
     dynamicSteps,
     mode,
   };
@@ -919,6 +923,7 @@ export async function streamOpenRouterChat({
   const allowThinking = Boolean(
     effectiveThinkingMode === 'basic' || 
     effectiveThinkingMode === 'deep' || 
+    effectiveThinkingMode === 'ultra' ||
     deepThink || 
     model.isOmni
   );
@@ -985,6 +990,22 @@ export async function streamOpenRouterChat({
         // stream up to their maximum model context limit without any 4096-token ceiling.
         if (!infiniteOutput) {
           requestPayload.max_tokens = maxTokens;
+        }
+
+        // Configure reasoning effort based on thinking mode
+        if (effectiveThinkingMode === 'ultra') {
+          requestPayload.reasoning = {
+            effort: 'high',
+            max_tokens: infiniteOutput ? 16000 : 8192,
+          };
+        } else if (effectiveThinkingMode === 'deep') {
+          requestPayload.reasoning = {
+            effort: 'medium',
+          };
+        } else if (effectiveThinkingMode === 'basic') {
+          requestPayload.reasoning = {
+            effort: 'low',
+          };
         }
 
         const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {

@@ -719,30 +719,55 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                 />
               )}
 
-              {/* DEEPTHINKING V2 / V2.1 / BASIC THINKING COGNITIVE TELEMETRY STATION */}
+              {/* ULTRA THINKING V1.0 / DEEPTHINKING V2.1 / DEEPTHINKING V2 / BASIC COGNITIVE TELEMETRY STATION */}
               {!isUser && message.thinking && (message.deepThinkingTelemetry || message.isStreaming) && (() => {
-                const isBasicThinking = message.deepThinkingTelemetry?.mode === 'basic' || message.thinkingMode === 'basic';
+                const isUltra = message.deepThinkingTelemetry?.mode === 'ultra' || message.thinkingMode === 'ultra';
+                const isBasicThinking = !isUltra && (message.deepThinkingTelemetry?.mode === 'basic' || message.thinkingMode === 'basic');
                 const is03Coder = (message.model && message.model.toLowerCase().includes('0.3')) || (activeModelName && activeModelName.toLowerCase().includes('0.3'));
-                const isDeepV21 = is03Coder && !isBasicThinking;
+                const isDeepV21 = !isUltra && is03Coder && !isBasicThinking;
                 return (
-                <div className={`rounded-xl border bg-[#0e0e13]/90 backdrop-blur-md overflow-hidden text-xs shadow-lg animate-fade-in ${
-                  isDeepV21 ? 'border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.12)]' : 'border-zinc-800'
+                <div className={`rounded-xl border backdrop-blur-md overflow-hidden text-xs shadow-lg animate-fade-in ${
+                  isUltra
+                    ? 'border-purple-500/50 shadow-[0_0_25px_rgba(168,85,247,0.22)] bg-[#0f0b18]/95 ring-1 ring-purple-500/20'
+                    : isDeepV21
+                    ? 'border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.12)] bg-[#0e0e13]/90'
+                    : 'border-zinc-800 bg-[#0e0e13]/90'
                 }`}>
                   <div
                     onClick={() => setIsThinkingOpen(!isThinkingOpen)}
-                    className={`w-full px-3.5 py-2.5 flex items-center justify-between text-zinc-300 hover:text-white transition-colors cursor-pointer select-none border-b ${
-                      isDeepV21 ? 'bg-emerald-950/20 border-emerald-900/40' : 'bg-zinc-900/70 border-zinc-800'
+                    className={`w-full px-3.5 py-2.5 flex items-center justify-between transition-colors cursor-pointer select-none border-b ${
+                      isUltra
+                        ? 'bg-purple-950/30 border-purple-900/40 text-purple-200 hover:text-white hover:bg-purple-950/45'
+                        : isDeepV21
+                        ? 'bg-emerald-950/20 border-emerald-900/40 text-zinc-300 hover:text-white'
+                        : 'bg-zinc-900/70 border-zinc-800 text-zinc-300 hover:text-white'
                     }`}
                   >
                     <div className="flex items-center gap-2.5 flex-wrap">
-                      <BrainCircuit className={`w-4 h-4 ${isDeepV21 ? 'text-emerald-400' : isBasicThinking ? 'text-cyan-400' : 'text-zinc-300'}`} />
-                      <span className={`font-mono text-xs font-bold tracking-tight ${isDeepV21 ? 'text-emerald-300' : 'text-white'}`}>
-                        {isDeepV21 ? t.chatMessage.deepThinkingV21 : isBasicThinking ? t.chatMessage.basicThinking : t.chatMessage.deepThinkingV2}
+                      <BrainCircuit className={`w-4 h-4 ${
+                        isUltra ? 'text-purple-400 animate-pulse' : isDeepV21 ? 'text-emerald-400' : isBasicThinking ? 'text-cyan-400' : 'text-zinc-300'
+                      }`} />
+                      <span className={`font-mono text-xs font-bold tracking-tight ${
+                        isUltra ? 'text-purple-300 drop-shadow-[0_0_8px_rgba(192,132,252,0.4)]' : isDeepV21 ? 'text-emerald-300' : 'text-white'
+                      }`}>
+                        {isUltra
+                          ? t.chatMessage.ultraThinkingV1
+                          : isDeepV21
+                          ? t.chatMessage.deepThinkingV21
+                          : isBasicThinking
+                          ? t.chatMessage.basicThinking
+                          : t.chatMessage.deepThinkingV2}
                       </span>
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[10px] font-mono font-medium ${
-                        isDeepV21 ? 'bg-emerald-950/60 border-emerald-700/60 text-emerald-300' : 'bg-zinc-800 border-zinc-700 text-zinc-300'
+                        isUltra
+                          ? 'bg-purple-950/80 border-purple-600/70 text-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.25)]'
+                          : isDeepV21
+                          ? 'bg-emerald-950/60 border-emerald-700/60 text-emerald-300'
+                          : 'bg-zinc-800 border-zinc-700 text-zinc-300'
                       }`}>
-                        {isDeepV21
+                        {isUltra
+                          ? t.chatMessage.ultraStagesVerified(dynamicSteps.length || 5)
+                          : isDeepV21
                           ? t.chatMessage.stagesVerifiedV21(dynamicSteps.length || 3)
                           : isBasicThinking 
                           ? t.chatMessage.agileStages(dynamicSteps.length || 1)
@@ -750,10 +775,16 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                         }
                       </span>
                       <span className={`hidden sm:inline-flex items-center px-2 py-0.5 rounded border text-[10px] font-mono ${
-                        isDeepV21 ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-400' : 'bg-zinc-850 border-zinc-700 text-zinc-300'
+                        isUltra
+                          ? 'bg-purple-950/50 border-purple-800/60 text-purple-300'
+                          : isDeepV21
+                          ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-400'
+                          : 'bg-zinc-850 border-zinc-700 text-zinc-300'
                       }`}>
                         {message.deepThinkingTelemetry?.epistemicDepth || (
-                          isDeepV21 
+                          isUltra
+                            ? t.chatMessage.ultraThinkingStruggle
+                            : isDeepV21 
                             ? t.chatMessage.coderV21Architecture
                             : isBasicThinking 
                             ? t.chatMessage.agileSynthesis 
@@ -762,9 +793,13 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                       </span>
                       {message.isStreaming && !message.content && (
                         <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] font-mono ${
-                          isDeepV21 ? 'bg-emerald-950/60 border-emerald-700/60 text-emerald-300' : 'bg-zinc-800 border-zinc-700 text-zinc-300'
+                          isUltra
+                            ? 'bg-purple-950/80 border-purple-600/70 text-purple-200'
+                            : isDeepV21
+                            ? 'bg-emerald-950/60 border-emerald-700/60 text-emerald-300'
+                            : 'bg-zinc-800 border-zinc-700 text-zinc-300'
                         }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full animate-ping ${isDeepV21 ? 'bg-emerald-400' : 'bg-zinc-400'}`} />
+                          <span className={`w-1.5 h-1.5 rounded-full animate-ping ${isUltra ? 'bg-purple-400' : isDeepV21 ? 'bg-emerald-400' : 'bg-zinc-400'}`} />
                           <span>{t.chatMessage.generatingTrace}</span>
                         </span>
                       )}
@@ -780,13 +815,17 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                           playCompletionChime();
                           setTimeout(() => setCopiedThinking(false), 2000);
                         }}
-                        className="px-2 py-1 rounded-md hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors flex items-center gap-1 text-[11px] font-mono cursor-pointer"
+                        className={`px-2 py-1 rounded-md transition-colors flex items-center gap-1 text-[11px] font-mono cursor-pointer ${
+                          isUltra
+                            ? 'hover:bg-purple-900/40 text-purple-300 hover:text-white'
+                            : 'hover:bg-zinc-800 text-zinc-400 hover:text-white'
+                        }`}
                         title={t.chatMessage.copyThoughtTrace}
                       >
                         {copiedThinking ? (
                           <>
-                            <Check className="w-3 h-3 text-emerald-400" />
-                            <span className="text-emerald-400 text-[10px]">{t.chatMessage.copiedThoughtTrace}</span>
+                            <Check className={`w-3 h-3 ${isUltra ? 'text-purple-400' : 'text-emerald-400'}`} />
+                            <span className={`${isUltra ? 'text-purple-300' : 'text-emerald-400'} text-[10px]`}>{t.chatMessage.copiedThoughtTrace}</span>
                           </>
                         ) : (
                           <>
@@ -795,7 +834,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                           </>
                         )}
                       </button>
-                      <div className="text-zinc-500 pl-0.5">
+                      <div className={isUltra ? 'text-purple-400 pl-0.5' : 'text-zinc-500 pl-0.5'}>
                         {isThinkingOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                       </div>
                     </div>
@@ -803,20 +842,30 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
                   {/* Expanded Thinking Drawer */}
                   {isThinkingOpen && (
-                    <div className="divide-y divide-zinc-800 bg-black/40 animate-fade-in">
+                    <div className={`divide-y bg-black/40 animate-fade-in ${
+                      isUltra ? 'divide-purple-900/40' : 'divide-zinc-800'
+                    }`}>
                       {/* View Mode Toggle Sub-bar */}
-                      <div className="px-3.5 py-2 flex items-center justify-between text-[10.5px] font-mono border-b border-zinc-800/80 bg-zinc-950/60">
-                        <span className="text-zinc-400 uppercase tracking-wider font-semibold">
-                          Cognitive Trace Telemetry
+                      <div className={`px-3.5 py-2 flex items-center justify-between text-[10.5px] font-mono border-b ${
+                        isUltra
+                          ? 'border-purple-900/40 bg-purple-950/40'
+                          : 'border-zinc-800/80 bg-zinc-950/60'
+                      }`}>
+                        <span className={`uppercase tracking-wider font-semibold ${
+                          isUltra ? 'text-purple-300/90' : 'text-zinc-400'
+                        }`}>
+                          {isUltra ? 'Ultra Cognitive Dialectic Trace' : 'Cognitive Trace Telemetry'}
                         </span>
-                        <div className="flex items-center gap-1 bg-zinc-900 rounded-lg p-0.5 border border-zinc-800">
+                        <div className={`flex items-center gap-1 rounded-lg p-0.5 border ${
+                          isUltra ? 'bg-purple-950/60 border-purple-800/60' : 'bg-zinc-900 border-zinc-800'
+                        }`}>
                           <button
                             type="button"
                             onClick={() => setThinkingViewMode('steps')}
                             className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors cursor-pointer select-none ${
                               thinkingViewMode === 'steps'
-                                ? 'bg-zinc-700 text-white font-semibold'
-                                : 'text-zinc-400 hover:text-white'
+                                ? isUltra ? 'bg-purple-700/80 text-white font-semibold' : 'bg-zinc-700 text-white font-semibold'
+                                : isUltra ? 'text-purple-300/80 hover:text-white' : 'text-zinc-400 hover:text-white'
                             }`}
                           >
                             AI Steps ({dynamicSteps.length})
@@ -826,8 +875,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                             onClick={() => setThinkingViewMode('raw')}
                             className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors cursor-pointer select-none ${
                               thinkingViewMode === 'raw'
-                                ? 'bg-zinc-700 text-white font-semibold'
-                                : 'text-zinc-400 hover:text-white'
+                                ? isUltra ? 'bg-purple-700/80 text-white font-semibold' : 'bg-zinc-700 text-white font-semibold'
+                                : isUltra ? 'text-purple-300/80 hover:text-white' : 'text-zinc-400 hover:text-white'
                             }`}
                           >
                             Full Stream
@@ -835,7 +884,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                         </div>
                       </div>
 
-                      {/* DYNAMIC AI-GENERATED REASONING STEPS WITH EXPLANATIONS (NO STATIC 4 BOXES) */}
+                      {/* DYNAMIC AI-GENERATED REASONING STEPS WITH EXPLANATIONS */}
                       {thinkingViewMode === 'steps' && (
                         <div className="p-3.5 space-y-2.5">
                           {dynamicSteps.map((step, sIdx) => {
@@ -843,32 +892,50 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                             return (
                               <div
                                 key={sIdx}
-                                className="rounded-lg bg-zinc-900/60 hover:bg-zinc-900/90 border border-zinc-800 hover:border-zinc-700 transition-all duration-150 overflow-hidden"
+                                className={`rounded-lg border transition-all duration-150 overflow-hidden ${
+                                  isUltra
+                                    ? 'bg-purple-950/20 hover:bg-purple-950/35 border-purple-900/40 hover:border-purple-700/60'
+                                    : 'bg-zinc-900/60 hover:bg-zinc-900/90 border-zinc-800 hover:border-zinc-700'
+                                }`}
                               >
                                 <div
                                   onClick={() => setExpandedStepIndex(isStepExpanded ? -1 : sIdx)}
                                   className="p-3 flex items-start justify-between gap-3 cursor-pointer select-none"
                                 >
                                   <div className="flex items-center gap-2.5 min-w-0">
-                                    <span className="w-5 h-5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0">
+                                    <span className={`w-5 h-5 rounded border font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0 ${
+                                      isUltra
+                                        ? 'bg-purple-900/70 border-purple-600/70 text-purple-200'
+                                        : 'bg-zinc-800 border-zinc-700 text-zinc-200'
+                                    }`}>
                                       {String(step.stepNumber).padStart(2, '0')}
                                     </span>
-                                    <span className="text-zinc-100 font-semibold text-xs tracking-tight truncate">
+                                    <span className={`font-semibold text-xs tracking-tight truncate ${
+                                      isUltra ? 'text-purple-100' : 'text-zinc-100'
+                                    }`}>
                                       {step.title}
                                     </span>
                                   </div>
-                                  <div className="text-zinc-500 hover:text-zinc-300 transition-colors flex-shrink-0 pt-0.5">
+                                  <div className={`transition-colors flex-shrink-0 pt-0.5 ${
+                                    isUltra ? 'text-purple-400 hover:text-purple-200' : 'text-zinc-500 hover:text-zinc-300'
+                                  }`}>
                                     {isStepExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                                   </div>
                                 </div>
 
                                 {isStepExpanded && (
-                                  <div className="px-3 pb-3 pt-1 border-t border-zinc-800/60 font-mono text-[11px] text-zinc-300 leading-relaxed whitespace-pre-wrap selection:bg-zinc-700 animate-fade-in">
+                                  <div className={`px-3 pb-3 pt-1 border-t font-mono text-[11px] leading-relaxed whitespace-pre-wrap selection:bg-purple-900 animate-fade-in ${
+                                    isUltra
+                                      ? 'border-purple-900/40 text-purple-200/90'
+                                      : 'border-zinc-800/60 text-zinc-300'
+                                  }`}>
                                     {step.bullets && step.bullets.length > 0 ? (
                                       <div className="space-y-1.5 pt-1">
                                         {step.bullets.map((b, bIdx) => (
                                           <div key={bIdx} className="flex items-start gap-2">
-                                            <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 mt-1.5 flex-shrink-0" />
+                                            <span className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 ${
+                                              isUltra ? 'bg-purple-400' : 'bg-zinc-400'
+                                            }`} />
                                             <span>{b}</span>
                                           </div>
                                         ))}
@@ -886,7 +953,11 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
                       {/* Full Thought Stream */}
                       {thinkingViewMode === 'raw' && (
-                        <div className="p-3.5 font-mono text-[11px] text-zinc-300 leading-relaxed whitespace-pre-wrap selection:bg-zinc-700 max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700">
+                        <div className={`p-3.5 font-mono text-[11px] leading-relaxed whitespace-pre-wrap selection:bg-purple-900 max-h-96 overflow-y-auto scrollbar-thin ${
+                          isUltra
+                            ? 'text-purple-200/90 scrollbar-thumb-purple-800'
+                            : 'text-zinc-300 scrollbar-thumb-zinc-700'
+                        }`}>
                           {message.thinking}
                         </div>
                       )}
@@ -898,41 +969,58 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
               {/* Main content */}
               <div className="text-zinc-200">
-                {!message.content.trim() && message.isStreaming ? (
+                {!message.content.trim() && message.isStreaming ? (() => {
+                  const isUltraStreaming = message.deepThinkingTelemetry?.mode === 'ultra' || message.thinkingMode === 'ultra';
+                  return (
                   /* Cool Animated Thinking UI with Bouncing Neural Dots */
                   <div className="py-2.5 animate-fade-in select-none">
-                    <div className="inline-flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-[#0e0e13]/90 border border-zinc-800/90 shadow-[0_4px_25px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-xl">
+                    <div className={`inline-flex items-center gap-3 px-4 py-2.5 rounded-2xl backdrop-blur-xl transition-all ${
+                      isUltraStreaming
+                        ? 'bg-[#0f0b18]/95 border border-purple-500/50 shadow-[0_4px_25px_rgba(168,85,247,0.25),inset_0_1px_0_rgba(192,132,252,0.15)]'
+                        : 'bg-[#0e0e13]/90 border border-zinc-800/90 shadow-[0_4px_25px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)]'
+                    }`}>
                       {/* Animated Multi-Ring Neural Core */}
                       <div className="relative flex items-center justify-center w-5 h-5">
-                        <span className="absolute -inset-1 rounded-full bg-white/10 animate-ping opacity-60 pointer-events-none" />
+                        <span className={`absolute -inset-1 rounded-full animate-ping opacity-60 pointer-events-none ${
+                          isUltraStreaming ? 'bg-purple-500/20' : 'bg-white/10'
+                        }`} />
                         <NiximaIdLogo size={16} animated glow={false} />
                       </div>
 
                       {/* Thinking / Reasoning Label */}
                       <div className="flex items-center gap-2.5 font-mono text-xs">
-                        <span className="text-zinc-300 font-medium tracking-tight">
-                          {message.thinking ? t.chatMessage.reasoning : t.chatMessage.thinking}
+                        <span className={`font-medium tracking-tight ${
+                          isUltraStreaming ? 'text-purple-300 font-semibold' : 'text-zinc-300'
+                        }`}>
+                          {isUltraStreaming ? t.chatMessage.ultraThinkingV1 : message.thinking ? t.chatMessage.reasoning : t.chatMessage.thinking}
                         </span>
 
                         {/* 3 Glowing Bouncing Fluid Dots */}
                         <div className="flex items-center gap-1.5 pl-0.5">
                           <span
-                            className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)] animate-bounce"
+                            className={`w-1.5 h-1.5 rounded-full animate-bounce ${
+                              isUltraStreaming ? 'bg-purple-400 shadow-[0_0_8px_rgba(192,132,252,0.9)]' : 'bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]'
+                            }`}
                             style={{ animationDuration: '0.85s', animationDelay: '0ms' }}
                           />
                           <span
-                            className="w-1.5 h-1.5 rounded-full bg-zinc-300 shadow-[0_0_6px_rgba(255,255,255,0.6)] animate-bounce"
+                            className={`w-1.5 h-1.5 rounded-full animate-bounce ${
+                              isUltraStreaming ? 'bg-purple-300 shadow-[0_0_6px_rgba(168,85,247,0.7)]' : 'bg-zinc-300 shadow-[0_0_6px_rgba(255,255,255,0.6)]'
+                            }`}
                             style={{ animationDuration: '0.85s', animationDelay: '180ms' }}
                           />
                           <span
-                            className="w-1.5 h-1.5 rounded-full bg-zinc-500 shadow-[0_0_4px_rgba(255,255,255,0.3)] animate-bounce"
+                            className={`w-1.5 h-1.5 rounded-full animate-bounce ${
+                              isUltraStreaming ? 'bg-purple-500 shadow-[0_0_4px_rgba(147,51,234,0.5)]' : 'bg-zinc-500 shadow-[0_0_4px_rgba(255,255,255,0.3)]'
+                            }`}
                             style={{ animationDuration: '0.85s', animationDelay: '360ms' }}
                           />
                         </div>
                       </div>
                     </div>
                   </div>
-                ) : (
+                  );
+                })() : (
                   <>
                     {renderFormattedContent(message.content)}
                     {message.isStreaming && (

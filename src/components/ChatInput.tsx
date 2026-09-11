@@ -268,11 +268,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 <>
                   <div className="hidden sm:block h-3.5 w-[1px] bg-zinc-800 mx-0.5 flex-shrink-0" />
 
-                  {/* Thinking Engine Control (Basic Thinking vs DeepThinking V2) */}
+                  {/* Thinking Engine Control (Basic Thinking vs DeepThinking V2/V2.1 vs UltraThinking V1.0) */}
                   <div className="relative flex items-center flex-shrink-0 z-30" ref={thinkingMenuRef}>
                     <div
                       className={`flex items-center rounded-full text-xs font-mono transition-all duration-150 border select-none ${
-                        thinkingMode === 'basic'
+                        thinkingMode === 'ultra'
+                          ? 'bg-purple-950/50 text-purple-200 font-semibold border-purple-500/60 shadow-[0_0_16px_rgba(168,85,247,0.3)] scale-[1.02]'
+                          : thinkingMode === 'basic'
                           ? 'bg-zinc-800 text-white font-semibold border-cyan-600/50 shadow-inner-light scale-[1.02]'
                           : thinkingMode === 'deep' || deepThink
                           ? (is03Coder
@@ -286,7 +288,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                         onClick={onToggleDeepThink}
                         className="flex items-center gap-1.5 pl-2.5 sm:pl-3 pr-1 py-1.5 cursor-pointer"
                         title={
-                          thinkingMode === 'basic'
+                          thinkingMode === 'ultra'
+                            ? t.chatInput.ultraThinkingTooltip
+                            : thinkingMode === 'basic'
                             ? t.chatInput.basicThinkingTooltip
                             : thinkingMode === 'deep' || deepThink
                             ? (is03Coder ? t.chatInput.deepThinkingV21Desc : t.chatInput.deepThinkTooltip)
@@ -294,27 +298,36 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                         }
                       >
                         <BrainCircuit className={`w-3.5 h-3.5 flex-shrink-0 ${
-                          thinkingMode === 'basic'
+                          thinkingMode === 'ultra'
+                            ? 'text-purple-400 animate-pulse'
+                            : thinkingMode === 'basic'
                             ? 'text-cyan-400'
                             : thinkingMode === 'deep' || deepThink
                             ? (is03Coder ? 'text-emerald-400' : 'text-zinc-200')
                             : 'text-zinc-400'
                         }`} />
                         <span className="tracking-tight whitespace-nowrap hidden sm:inline">
-                          {thinkingMode === 'basic' 
+                          {thinkingMode === 'ultra'
+                            ? 'UltraThinking'
+                            : thinkingMode === 'basic' 
                             ? t.chatInput.basicThinking 
                             : (is03Coder && (thinkingMode === 'deep' || deepThink) ? 'DeepThinking' : t.chatInput.deepThink)
                           }
                         </span>
                         <span className="tracking-tight whitespace-nowrap sm:hidden">
-                          {thinkingMode === 'basic' ? 'Think' : 'Deep'}
+                          {thinkingMode === 'ultra' ? 'Ultra' : thinkingMode === 'basic' ? 'Think' : 'Deep'}
                         </span>
+                        {thinkingMode === 'ultra' && (
+                          <span className="px-1.5 py-0.2 rounded bg-purple-950/90 text-[9px] font-mono font-bold tracking-wider text-purple-300 border border-purple-500/60 whitespace-nowrap flex-shrink-0">
+                            V1.0
+                          </span>
+                        )}
                         {thinkingMode === 'basic' && (
                           <span className="px-1.5 py-0.2 rounded bg-cyan-950/80 text-[9px] font-mono font-bold tracking-wider text-cyan-300 border border-cyan-600/50 whitespace-nowrap flex-shrink-0">
                             BASIC
                           </span>
                         )}
-                        {(thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic')) && (
+                        {(thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic' && thinkingMode !== 'ultra')) && (
                           <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-bold tracking-wider border whitespace-nowrap flex-shrink-0 ${
                             is03Coder
                               ? 'bg-emerald-950/80 text-emerald-300 border-emerald-600/50'
@@ -323,9 +336,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                             {is03Coder ? 'V2.1' : 'DEEP'}
                           </span>
                         )}
-                        {(thinkingMode === 'basic' || thinkingMode === 'deep' || deepThink) && (
+                        {(thinkingMode === 'basic' || thinkingMode === 'deep' || thinkingMode === 'ultra' || deepThink) && (
                           <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ml-0.5 flex-shrink-0 ${
-                            thinkingMode === 'basic' ? 'bg-cyan-400' : is03Coder ? 'bg-emerald-400' : 'bg-white'
+                            thinkingMode === 'ultra' ? 'bg-purple-400 shadow-[0_0_6px_rgba(168,85,247,0.9)]' : thinkingMode === 'basic' ? 'bg-cyan-400' : is03Coder ? 'bg-emerald-400' : 'bg-white'
                           }`} />
                         )}
                       </button>
@@ -408,7 +421,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                               setIsThinkingPopoverOpen(false);
                             }}
                             className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
-                              thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic')
+                              thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic' && thinkingMode !== 'ultra')
                                 ? (is03Coder ? 'bg-zinc-850/90 border-emerald-600/70 shadow-sm' : 'bg-zinc-850/90 border-zinc-500 shadow-sm')
                                 : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
                             }`}
@@ -433,7 +446,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                                   {is03Coder ? 'V2.1 CODER' : 'L3 PROOF'}
                                 </span>
                               </div>
-                              {(thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic')) && (
+                              {(thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic' && thinkingMode !== 'ultra')) && (
                                 <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center">
                                   <Check className="w-3 h-3 stroke-[3]" />
                                 </div>
@@ -442,6 +455,50 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                             <p className="text-[11px] text-zinc-400 mt-1">
                               {is03Coder ? t.chatInput.deepThinkingV21Desc : t.chatInput.deepThinkingDesc}
                             </p>
+                          </div>
+
+                          {/* 3. UltraThinking V1.0 (Pinnacle Epistemic Struggle for Nixima-0.2 Pro) */}
+                          <div 
+                            onClick={() => {
+                              onChangeThinkingMode?.('ultra');
+                              if (currentModel.id !== 'nixima-0.2-pro' && onSelectModel) {
+                                const proModel = NIXIMA_MODELS.find(m => m.id === 'nixima-0.2-pro');
+                                if (proModel) onSelectModel(proModel);
+                              }
+                              setIsThinkingPopoverOpen(false);
+                            }}
+                            className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
+                              thinkingMode === 'ultra'
+                                ? 'bg-purple-950/40 border-purple-500/80 shadow-[0_0_15px_rgba(168,85,247,0.25)]' 
+                                : 'bg-zinc-900/60 border-zinc-800 hover:border-purple-700/60 hover:bg-zinc-850/50'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className="p-1 rounded-md bg-purple-950/80 border border-purple-700/60 text-purple-300 shadow-[0_0_8px_rgba(168,85,247,0.3)]">
+                                  <BrainCircuit className="w-3.5 h-3.5 text-purple-300 animate-pulse" />
+                                </div>
+                                <span className="font-semibold text-xs text-white font-mono">
+                                  {t.chatInput.ultraThinkingV1}
+                                </span>
+                                <span className="px-1.5 py-0.2 rounded bg-purple-950/90 text-[9px] font-mono font-bold text-purple-300 border border-purple-500/60">
+                                  ULTRA V1.0
+                                </span>
+                              </div>
+                              {thinkingMode === 'ultra' && (
+                                <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center">
+                                  <Check className="w-3 h-3 stroke-[3]" />
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-zinc-400 mt-1">
+                              {t.chatInput.ultraThinkingDesc}
+                            </p>
+                            {currentModel.id !== 'nixima-0.2-pro' && (
+                              <div className="mt-1.5 text-[10px] font-mono text-purple-300/90 flex items-center gap-1">
+                                <span>⚡ {language === 'uk' ? 'Підключає та оптимізує Nixima-0.2 Pro' : 'Auto-pairs with Nixima-0.2 Pro'}</span>
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
