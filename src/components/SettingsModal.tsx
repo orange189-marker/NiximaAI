@@ -568,7 +568,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 flex items-center justify-between shadow-[0_0_20px_rgba(245,158,11,0.06)]">
                   <div className="space-y-1 pr-4">
                     <div className="flex items-center gap-2">
-                      <InfinitySymbol size={16} className="text-amber-400" />
+                      <InfinitySymbol
+                        size={16}
+                        active={settings.infiniteOutputEnabled}
+                        theme="amber"
+                        glow={settings.infiniteOutputEnabled}
+                        className={`transition-all duration-300 ${settings.infiniteOutputEnabled ? 'scale-110' : 'opacity-70'}`}
+                      />
                       <span className="text-xs font-bold text-amber-300 uppercase tracking-wider font-mono">
                         {t.settings.infiniteOutputTitle}
                       </span>

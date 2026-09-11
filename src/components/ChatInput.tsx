@@ -688,14 +688,20 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   <button
                     type="button"
                     onClick={onToggleInfiniteOutput}
-                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-mono transition-all duration-200 border select-none cursor-pointer flex-shrink-0 ${
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-mono transition-all duration-300 border select-none cursor-pointer flex-shrink-0 active:scale-95 ${
                       infiniteOutput
-                        ? 'bg-amber-500/15 text-amber-300 font-semibold border-amber-500/60 shadow-[0_0_16px_rgba(245,158,11,0.25)] hover:bg-amber-500/25 scale-[1.02]'
+                        ? 'bg-amber-500/15 text-amber-300 font-semibold border-amber-500/60 shadow-[0_0_18px_rgba(245,158,11,0.28)] hover:bg-amber-500/25 scale-[1.02] animate-infinity-ignite'
                         : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-amber-200/90 hover:border-amber-600/40 hover:bg-zinc-850/80'
                     }`}
                     title={infiniteOutput ? t.chatInput.infiniteOutputActiveTooltip : t.chatInput.infiniteOutputInactiveTooltip}
                   >
-                    <InfinitySymbol size={13} className={`flex-shrink-0 transition-transform duration-200 ${infiniteOutput ? 'text-amber-400 scale-110' : 'text-zinc-400'}`} />
+                    <InfinitySymbol
+                      size={13}
+                      active={infiniteOutput}
+                      theme="amber"
+                      glow={infiniteOutput}
+                      className={`flex-shrink-0 transition-all duration-300 ${infiniteOutput ? 'scale-110' : 'scale-100 opacity-75'}`}
+                    />
                     <span className="tracking-tight whitespace-nowrap hidden lg:inline">
                       {t.chatInput.infiniteOutput}
                     </span>
@@ -703,11 +709,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                       {t.chatInput.infiniteOutputShort || (language === 'uk' ? 'Безліміт' : 'Infinite')}
                     </span>
                     {infiniteOutput ? (
-                      <span className="px-1.5 py-0.2 rounded bg-amber-950/80 text-[9px] font-mono font-bold tracking-wider text-amber-300 border border-amber-500/50 whitespace-nowrap flex-shrink-0">
+                      <span className="px-1.5 py-0.2 rounded bg-amber-950/80 text-[9px] font-mono font-bold tracking-wider text-amber-300 border border-amber-500/50 whitespace-nowrap flex-shrink-0 transition-all duration-300 animate-check-pop">
                         {t.chatInput.infiniteOutputBadge || 'MAX'}
                       </span>
                     ) : (
-                      <span className="px-1 py-0.2 rounded bg-zinc-800/80 text-[8.5px] font-mono font-semibold text-zinc-500 whitespace-nowrap flex-shrink-0">
+                      <span className="px-1 py-0.2 rounded bg-zinc-800/80 text-[8.5px] font-mono font-semibold text-zinc-500 whitespace-nowrap flex-shrink-0 transition-all duration-300">
                         OFF
                       </span>
                     )}
