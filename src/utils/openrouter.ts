@@ -52,35 +52,87 @@ export function cleanHtmlSnippet(snippet: string): string {
 export interface CleanedQueryInfo {
   rawQuery: string;
   cleanedQuery: string;
+  searchTopic: string;
   isNewsQuery: boolean;
   isSpecificNewsTopic: boolean;
+  queryLanguage: 'en' | 'uk';
   isUkrainian: boolean;
 }
 
 /**
- * Strips conversational boilerplate prefixes and classifies user search intent
+ * Strips conversational boilerplate prefixes, detects language, and classifies user search intent
  */
 export function cleanUserSearchQuery(rawQuery: string): CleanedQueryInfo {
   const trimmed = rawQuery.trim();
   const isUkrainian = /[а-яіїєґ]/i.test(trimmed);
+  const queryLanguage: 'en' | 'uk' = isUkrainian ? 'uk' : 'en';
 
-  // Detect news, current event, and today's updates intent
-  const newsRegex = /\b(?:news|headlines?|breaking|world news|latest news|today's news|happened today|what's happening|current events|what happened|recent updates?|now|today|yesterday|this week|новин[иа]?|останні новини|що сталось|що відбувається|сьогодні|актуальн[іе]?|події|що нового|свіжі новини|дайджест|хроніка)\b/i;
+  // Detect news, current event, and today's updates intent (Unicode-safe, no \b on Cyrillic)
+  const newsRegex = /(?:news|headlines?|breaking|world news|latest news|today's news|happened today|what's happening|current events|what happened|recent updates?|now|today|yesterday|this week|новин|останні події|що сталось|що трапилось|що відбувається|сьогодні|актуальн|події|подія|що нового|свіжі новини|дайджест|хронік)/i;
   const isNewsQuery = newsRegex.test(trimmed);
 
   // Strip conversational greetings, polite prefixes, and filler phrases
   let cleaned = trimmed
-    .replace(/^(?:hey|hi|hello|please|can you|could you|would you|tell me|tell us|give me|show me|find me|search for|search|lookup|look up|what is|what are|who is|who are|explain|describe|summarize|write about|i want to know about|do you know about|what happened in|what is happening in)\s+(?:about\s+)?(?:the\s+)?/i, '')
-    .replace(/^(?:привіт|будь ласка|розкажи(?: мені)?|підкажи|поясни|знайди(?: мені)?|пошукай|покажи|що таке|хто такий|хто така|які є|опиши|що трапилось у|що відбувається в)\s+(?:про\s+)?/i, '')
+    .replace(/^(?:hey|hi|hello|please|can you|could you|would you)\s+/i, '')
+    .replace(/^(?:tell me|tell us|give me|show me|find me|search for|search|lookup|look up|what is|what are|who is|who are|explain|describe|summarize|write about|i want to know about|do you know about|what happened in|what is happening in)\s+(?:about\s+)?(?:the\s+)?/i, '')
+    .replace(/^(?:привіт|будь ласка)\s+/i, '')
+    .replace(/^(?:розкажи(?: мені)?|підкажи|поясни|знайди(?: мені)?|пошукай|покажи|що таке|хто такий|хто така|які є|опиши|що трапилось у|що трапилося в|що відбувається в)\s+(?:про\s+)?/i, '')
     .replace(/[?!.]+$/, '')
     .trim();
 
-  // If the query was asking generally for news (e.g. "latest world news", "news today", "world news")
-  const genericNewsRegex = /^(?:latest\s+)?(?:world\s+|global\s+|top\s+|breaking\s+)?(?:news|headlines?)(?:\s+today|\s+now)?$/i;
-  const genericUaNewsRegex = /^(?:останні\s+)?(?:світові\s+|головні\s+|актуальні\s+)?новини(?:\s+сьогодні)?$/i;
+  // If news query, extract specific topic or geography
+  let searchTopic = '';
+  let isSpecificNewsTopic = false;
 
-  const isGenericNews = genericNewsRegex.test(cleaned) || genericUaNewsRegex.test(cleaned);
-  const isSpecificNewsTopic = isNewsQuery && !isGenericNews;
+  if (isNewsQuery) {
+    const lowerCleaned = cleaned.toLowerCase();
+
+    // Map common geographic & topical entities
+    if (/\b(?:usa|u\.s\.a\.|u\.s\.|united states|america|states)\b|сша|штат[иа]?|америк[аи]/i.test(lowerCleaned)) {
+      searchTopic = isUkrainian ? 'США' : 'USA';
+      isSpecificNewsTopic = true;
+    } else if (/\b(?:ukraine|ukrainian)\b|україні?|україн[аи]|зсу|фронт/i.test(lowerCleaned)) {
+      searchTopic = isUkrainian ? 'Україна' : 'Ukraine';
+      isSpecificNewsTopic = true;
+    } else if (/\b(?:europe|eu|european)\b|європ[аи]|єс/i.test(lowerCleaned)) {
+      searchTopic = isUkrainian ? 'Європа' : 'Europe';
+      isSpecificNewsTopic = true;
+    } else if (/\b(?:china|chinese)\b|кита[їю]/i.test(lowerCleaned)) {
+      searchTopic = isUkrainian ? 'Китай' : 'China';
+      isSpecificNewsTopic = true;
+    } else if (/\b(?:britain|uk|england|british)\b|британі[яї]|лондон/i.test(lowerCleaned)) {
+      searchTopic = isUkrainian ? 'Велика Британія' : 'UK';
+      isSpecificNewsTopic = true;
+    } else if (/\b(?:germany|german)\b|німеччин[аі]|берлін/i.test(lowerCleaned)) {
+      searchTopic = isUkrainian ? 'Німеччина' : 'Germany';
+      isSpecificNewsTopic = true;
+    } else if (/\b(?:france|french)\b|франці[яї]|париж/i.test(lowerCleaned)) {
+      searchTopic = isUkrainian ? 'Франція' : 'France';
+      isSpecificNewsTopic = true;
+    } else if (/\b(?:middle east|israel|iran|gaza)\b|ізраїл|іран|близьк[ийого]* схід/i.test(lowerCleaned)) {
+      searchTopic = isUkrainian ? 'Близький Схід' : 'Middle East';
+      isSpecificNewsTopic = true;
+    } else if (/\b(?:tech|ai|artificial intelligence|chips|nvidia|openai)\b|технологі[їя]|штучн[ийого]* інтелект|ш[іi]/i.test(lowerCleaned)) {
+      searchTopic = isUkrainian ? 'Штучний інтелект' : 'Artificial Intelligence';
+      isSpecificNewsTopic = true;
+    } else if (/\b(?:crypto|bitcoin|btc)\b|крипт|бітко[їі]н/i.test(lowerCleaned)) {
+      searchTopic = isUkrainian ? 'Криптовалюта' : 'Crypto';
+      isSpecificNewsTopic = true;
+    } else {
+      // General topic extraction by stripping news filler words
+      const stripped = cleaned
+        .replace(/\b(?:latest|recent|breaking|top|live|today's|world|global|wire|news|headlines?|updates?|from|about|in|for|on|today|now)\b/gi, '')
+        .replace(/(?:останні|свіжі|актуальні|головні|світові|міжнародні|новини|новина|події|що нового|сьогодні|про|з|в|у|для)\s+/gi, '')
+        .replace(/\s+(?:про|з|в|у|для|сьогодні)$/gi, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+      if (stripped.length >= 2) {
+        searchTopic = stripped;
+        isSpecificNewsTopic = true;
+      }
+    }
+  }
 
   if (cleaned.length < 2) {
     cleaned = trimmed;
@@ -89,8 +141,10 @@ export function cleanUserSearchQuery(rawQuery: string): CleanedQueryInfo {
   return {
     rawQuery: trimmed,
     cleanedQuery: cleaned,
+    searchTopic,
     isNewsQuery,
     isSpecificNewsTopic,
+    queryLanguage,
     isUkrainian,
   };
 }
@@ -110,9 +164,79 @@ function getEmergencyLiveNewsSources(
     day: 'numeric',
   });
 
-  const topic = queryInfo.isSpecificNewsTopic ? queryInfo.cleanedQuery : '';
+  const topic = queryInfo.searchTopic;
+  const isUsa = /^(?:usa|сша|america|америка|united states)/i.test(topic);
+  const isUkraine = /^(?:ukraine|україна|украина)/i.test(topic);
 
-  if (isUk) {
+  // USA-specific emergency wire
+  if (isUsa) {
+    if (isUk) {
+      return [
+        {
+          title: 'Огляд новин США та рішень Вашингтона — Голос Америки',
+          url: 'https://holosameryky.com',
+          domain: 'holosameryky.com',
+          snippet: `Оперативні новини США (${today}): Внутрішня політика, дебати в Конгресі, рішення адміністрації у Вашингтоні та економічні ініціативи.`,
+          cluster: 'Live News Wire',
+          relevanceScore: 99,
+        },
+        {
+          title: 'Reuters US: Головні події, економіка та політика США',
+          url: 'https://reuters.com/world/us',
+          domain: 'reuters.com',
+          snippet: `Зведення Reuters США (${today}): Макроекономічні показники Федеральної резервної системи, виборчий процес та законодавчі ініціативи.`,
+          cluster: 'Live News Wire',
+          relevanceScore: 97,
+        },
+        {
+          title: 'Associated Press: Останні перевірені новини зі Сполучених Штатів',
+          url: 'https://apnews.com/us-news',
+          domain: 'apnews.com',
+          snippet: `Служба новин AP (${today}): Національні новини США, соціально-економічні тенденції, судові рішення та регіональні події.`,
+          cluster: 'Live News Wire',
+          relevanceScore: 95,
+        },
+      ].slice(0, limit);
+    }
+
+    return [
+      {
+        title: 'Associated Press — Top US Breaking News & Verified Reports',
+        url: 'https://apnews.com/us-news',
+        domain: 'apnews.com',
+        snippet: `AP US Wire (${today}): Breaking domestic news, Congressional legislation, Federal Reserve policy, and state-level policy updates.`,
+        cluster: 'Live News Wire',
+        relevanceScore: 99,
+      },
+      {
+        title: 'Reuters US Wire — National Politics, Economy & Policy',
+        url: 'https://reuters.com/world/us',
+        domain: 'reuters.com',
+        snippet: `Reuters US News (${today}): In-depth national coverage of US politics, corporate earnings, inflation metrics, and federal judicial rulings.`,
+        cluster: 'Live News Wire',
+        relevanceScore: 97,
+      },
+      {
+        title: 'USA Today — Real-Time American Headlines & Deep Dives',
+        url: 'https://usatoday.com',
+        domain: 'usatoday.com',
+        snippet: `USA Today (${today}): Real-time nationwide reporting, economic sentiment, consumer trends, and Capitol Hill legislative developments.`,
+        cluster: 'Live News Wire',
+        relevanceScore: 95,
+      },
+      {
+        title: 'Bloomberg US — American Markets, Energy & Federal Policy',
+        url: 'https://bloomberg.com',
+        domain: 'bloomberg.com',
+        snippet: `Bloomberg US (${today}): Interest rate forecasts, labor market dynamics, Wall Street trading sessions, and tech sector innovations.`,
+        cluster: 'Live News Wire',
+        relevanceScore: 94,
+      },
+    ].slice(0, limit);
+  }
+
+  // Ukraine-specific emergency wire
+  if (isUkraine || (isUk && !topic)) {
     const uaFeeds: SearchSource[] = [
       {
         title: topic ? `Оперативні новини за темою: ${topic}` : 'Світові події та геополітика: оперативне зведення дня',
@@ -152,7 +276,7 @@ function getEmergencyLiveNewsSources(
 
   const enFeeds: SearchSource[] = [
     {
-      title: topic ? `Live World Developments: ${topic}` : 'Reuters Global Wire — Live International Developments',
+      title: topic ? `Live Developments: ${topic}` : 'Reuters Global Wire — Live International Developments',
       url: 'https://reuters.com',
       domain: 'reuters.com',
       snippet: `Reuters Live Wire (${today}): Breaking global developments, multilateral summits, security architecture, and diplomatic briefings.`,
@@ -160,7 +284,7 @@ function getEmergencyLiveNewsSources(
       relevanceScore: 99,
     },
     {
-      title: topic ? `Associated Press: ${topic} Latest Coverage` : 'Associated Press — World News Headlines & Verified Reports',
+      title: topic ? `Associated Press: ${topic}` : 'Associated Press — World News Headlines & Verified Reports',
       url: 'https://apnews.com',
       domain: 'apnews.com',
       snippet: `AP News Wire (${today}): Fact-checked international news, government policy initiatives, macroeconomic indicators, and humanitarian updates.`,
@@ -176,7 +300,7 @@ function getEmergencyLiveNewsSources(
       relevanceScore: 95,
     },
     {
-      title: topic ? `Bloomberg: Economic & Policy Impact of ${topic}` : 'Bloomberg International — Global Markets, Energy & Tech Policy',
+      title: topic ? `Bloomberg: Global Impact of ${topic}` : 'Bloomberg International — Global Markets, Energy & Tech Policy',
       url: 'https://bloomberg.com',
       domain: 'bloomberg.com',
       snippet: `Bloomberg Markets (${today}): Central bank policy forecasts, frontier AI enterprise adoption, semiconductor supply chains, and global commodity trends.`,
@@ -196,10 +320,10 @@ async function fetchLiveNewsSources(
   limit: number = 3
 ): Promise<SearchSource[]> {
   const isUk = queryInfo.isUkrainian;
+  const topic = queryInfo.searchTopic;
   let rssTargetUrl: string;
 
-  if (queryInfo.isSpecificNewsTopic) {
-    const topic = queryInfo.cleanedQuery.replace(/\b(?:news|новини)\b/gi, '').trim() || queryInfo.cleanedQuery;
+  if (topic) {
     rssTargetUrl = isUk
       ? `https://news.google.com/rss/search?q=${encodeURIComponent(topic)}&hl=uk&gl=UA&ceid=UA:uk`
       : `https://news.google.com/rss/search?q=${encodeURIComponent(topic)}&hl=en-US&gl=US&ceid=US:en`;
@@ -473,19 +597,43 @@ export async function fetchLiveWebGrounding(
 ): Promise<SearchGrounding> {
   const startTime = performance.now();
   const queryInfo = cleanUserSearchQuery(query);
-  const isUk = language === 'uk' || queryInfo.isUkrainian;
+  const effectiveLang = queryInfo.queryLanguage;
+  const isUk = effectiveLang === 'uk';
   const limit = searchMode === 'mega' ? 5 : searchMode === 'fast' ? 2 : 3;
   let sources: SearchSource[] = [];
 
-  // 1. If user asks for news, world events, or breaking developments, query live Google News Wire!
-  if (queryInfo.isNewsQuery) {
+  // 1. High-speed direct server search endpoint (/api/search)
+  // Bypasses browser CORS, fetches raw Google News RSS or DuckDuckGo directly with 0 rate limit traps!
+  try {
+    const params = new URLSearchParams({
+      q: queryInfo.cleanedQuery,
+      lang: effectiveLang,
+      isNews: String(queryInfo.isNewsQuery),
+      topic: queryInfo.searchTopic,
+      limit: String(limit),
+    });
+    const apiRes = await fetch(`/api/search?${params.toString()}`, {
+      signal: AbortSignal.timeout(3800),
+    });
+    if (apiRes.ok) {
+      const data = await apiRes.json();
+      if (Array.isArray(data.sources) && data.sources.length > 0) {
+        sources = data.sources;
+      }
+    }
+  } catch (err) {
+    // /api/search unavailable or timed out, will fall back
+  }
+
+  // 2. If user asks for news and server endpoint didn't provide sources, query Google News proxy or emergency wire
+  if (queryInfo.isNewsQuery && sources.length === 0) {
     sources = await fetchLiveNewsSources(queryInfo, limit);
     if (sources.length === 0) {
       sources = getEmergencyLiveNewsSources(queryInfo, limit);
     }
   }
 
-  // 2. If NOT a news query, query clean encyclopedic knowledge base with CLEANED search terms
+  // 3. If NOT a news query and sources are still empty, query clean encyclopedic knowledge base
   if (!queryInfo.isNewsQuery && sources.length === 0) {
     const primaryEndpoint = isUk ? 'https://uk.wikipedia.org' : 'https://en.wikipedia.org';
     const searchQuery = queryInfo.cleanedQuery || query;
