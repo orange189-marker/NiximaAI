@@ -251,6 +251,7 @@ export interface Translations {
     stepSynthesize: string;
     activeScanning: string;
     relevanceMatch: (pct: number) => string;
+    openInCanvas: string;
   };
 
   table: {
@@ -419,6 +420,40 @@ export interface Translations {
     description: string;
     strengths: string[];
   }>;
+
+  canvas: {
+    studioTitle: string;
+    studioSubtitle: string;
+    previewTab: string;
+    codeTab: string;
+    consoleTab: string;
+    version: string;
+    versionHistory: string;
+    latest: string;
+    applyAndRefresh: string;
+    runCode: string;
+    running: string;
+    clearConsole: string;
+    consoleEmpty: string;
+    copiedCode: string;
+    exportFile: string;
+    openInNewTab: string;
+    maximize: string;
+    restore: string;
+    close: string;
+    htmlApp: string;
+    reactComponent: string;
+    svgGraphic: string;
+    markdownDoc: string;
+    scriptCode: string;
+    interactiveSandbox: string;
+    promptSuggestions: {
+      darkMode: string;
+      addInteractivity: string;
+      refactorCode: string;
+      makeResponsive: string;
+    };
+  };
 }
 
 export const translations: Record<Language, Translations> = {
@@ -673,6 +708,7 @@ export const translations: Record<Language, Translations> = {
       stepSynthesize: 'Multi-Source Synthesis & Consensus',
       activeScanning: 'Inspecting website content in real time...',
       relevanceMatch: (pct: number) => `${pct}% Match`,
+      openInCanvas: 'Canvas',
     },
 
     table: {
@@ -931,6 +967,40 @@ export const translations: Record<Language, Translations> = {
         strengths: ['Instant Responses', 'Document Scanning'],
       },
     },
+
+    canvas: {
+      studioTitle: 'Nixima Canvas',
+      studioSubtitle: 'Interactive Artifacts & Sandbox Studio',
+      previewTab: 'Preview',
+      codeTab: 'Code',
+      consoleTab: 'Console',
+      version: 'Version',
+      versionHistory: 'Version History',
+      latest: 'Latest',
+      applyAndRefresh: 'Apply & Run',
+      runCode: 'Run Code',
+      running: 'Executing...',
+      clearConsole: 'Clear',
+      consoleEmpty: 'No console logs yet. Run code or interact with the preview to see outputs.',
+      copiedCode: 'Code copied to clipboard!',
+      exportFile: 'Export File',
+      openInNewTab: 'Open in New Tab',
+      maximize: 'Full Screen',
+      restore: 'Exit Full Screen',
+      close: 'Close Canvas',
+      htmlApp: 'Interactive Web App',
+      reactComponent: 'React Component',
+      svgGraphic: 'SVG Vector Graphic',
+      markdownDoc: 'Markdown Document',
+      scriptCode: 'Code Script',
+      interactiveSandbox: 'Live Sandboxed Environment',
+      promptSuggestions: {
+        darkMode: 'Add modern dark mode theme',
+        addInteractivity: 'Add interactive animations and sound',
+        refactorCode: 'Refactor code and improve performance',
+        makeResponsive: 'Make fully mobile-responsive with fluid grid',
+      },
+    },
   },
 
   uk: {
@@ -1184,6 +1254,7 @@ export const translations: Record<Language, Translations> = {
       stepSynthesize: 'Синтез кількох джерел та консенсус',
       activeScanning: 'Огляд вмісту веб-сайту в реальному часі...',
       relevanceMatch: (pct: number) => `${pct}% Відповідність`,
+      openInCanvas: 'Canvas',
     },
 
     table: {
@@ -1440,6 +1511,40 @@ export const translations: Record<Language, Translations> = {
         badge: 'LEGACY',
         description: 'Субмілісекундна швидкість для швидкого спілкування першого покоління.',
         strengths: ['Миттєві відповіді', 'Сканування документів'],
+      },
+    },
+
+    canvas: {
+      studioTitle: 'Nixima Canvas',
+      studioSubtitle: 'Інтерактивна студія артефактів та пісочниця',
+      previewTab: 'Прев’ю',
+      codeTab: 'Код',
+      consoleTab: 'Консоль',
+      version: 'Версія',
+      versionHistory: 'Історія версій',
+      latest: 'Остання',
+      applyAndRefresh: 'Застосувати та запустити',
+      runCode: 'Запустити код',
+      running: 'Виконання...',
+      clearConsole: 'Очистити',
+      consoleEmpty: 'Консоль порожня. Запустіть код або взаємодійте з прев’ю для виводу.',
+      copiedCode: 'Код скопійовано в буфер обміну!',
+      exportFile: 'Експортувати файл',
+      openInNewTab: 'Відкрити у новій вкладці',
+      maximize: 'На весь екран',
+      restore: 'Вийти з повного екрану',
+      close: 'Закрити Canvas',
+      htmlApp: 'Інтерактивний веб-додаток',
+      reactComponent: 'React компонент',
+      svgGraphic: 'Векторна SVG графіка',
+      markdownDoc: 'Markdown документ',
+      scriptCode: 'Скрипт / Код',
+      interactiveSandbox: 'Живе ізольоване середовище',
+      promptSuggestions: {
+        darkMode: 'Додай сучасну темну тему',
+        addInteractivity: 'Додай інтерактивні анімації та звук',
+        refactorCode: 'Зроби рефакторинг та оптимізуй код',
+        makeResponsive: 'Зроби повну мобільну адаптацію з гнучкими сітками',
       },
     },
   },

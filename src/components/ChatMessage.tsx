@@ -23,9 +23,10 @@ import {
   GitBranch,
   Globe,
   ExternalLink,
-  Zap
+  Zap,
+  Layers
 } from 'lucide-react';
-import { Message } from '../types/chat';
+import { Message, NiximaArtifact } from '../types/chat';
 import { MarkdownTable, TableBlockData } from './MarkdownTable';
 import { NiximaIdLogo } from './NiximaIdLogo';
 import { useLanguage } from '../context/LanguageContext';
@@ -38,6 +39,7 @@ import { parseDynamicThinkingSteps } from '../utils/openrouter';
 import { LinkPill } from './LinkPill';
 import { SearchActionFeed } from './SearchActionFeed';
 import { renderWithNiximaBrand } from './NiximaWordmark';
+import { detectArtifactType, inferArtifactTitle } from '../utils/artifactDetector';
 
 interface ChatMessageProps {
   message: Message;
@@ -45,6 +47,7 @@ interface ChatMessageProps {
   onEditMessage?: (newContent: string) => void;
   onActionPrompt?: (prompt: string) => void;
   onBranchMessage?: (messageId: string) => void;
+  onOpenArtifact?: (artifact: NiximaArtifact) => void;
   activeModelName?: string;
 }
 
@@ -54,6 +57,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   onEditMessage,
   onActionPrompt,
   onBranchMessage,
+  onOpenArtifact,
   activeModelName = 'Nixima-0.1'
 }) => {
   const { language, t } = useLanguage();
@@ -348,6 +352,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             key={idx} 
             language={part.language!} 
             code={part.code!} 
+            onOpenArtifact={onOpenArtifact}
+            messageId={message.id}
+            blockIndex={idx}
           />
         );
       }
@@ -1082,10 +1089,18 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   );
 };
 
-// Subcomponent: High-contrast Code Block with Copy & Download File
-const CodeBlock: React.FC<{ language: string; code: string }> = ({ language, code }) => {
+// Subcomponent: High-contrast Code Block with Copy & Download File & Open in Canvas
+const CodeBlock: React.FC<{ 
+  language: string; 
+  code: string;
+  onOpenArtifact?: (artifact: NiximaArtifact) => void;
+  messageId?: string;
+  blockIndex?: number;
+}> = ({ language, code, onOpenArtifact, messageId, blockIndex }) => {
   const { t } = useLanguage();
   const [copied, setCopied] = useState(false);
+
+  const artifactType = detectArtifactType(language, code);
 
   const getExtension = (lang: string) => {
     const map: Record<string, string> = {
@@ -1122,18 +1137,52 @@ const CodeBlock: React.FC<{ language: string; code: string }> = ({ language, cod
     link.remove();
   };
 
+  const handleOpenCanvas = () => {
+    if (!onOpenArtifact || !artifactType) return;
+    const title = inferArtifactTitle(artifactType, language, code, (blockIndex || 0) + 1);
+    onOpenArtifact({
+      id: `art_${messageId || 'code'}_${blockIndex || 0}`,
+      title,
+      type: artifactType,
+      language,
+      content: code,
+      versions: [
+        {
+          version: 1,
+          content: code,
+          timestamp: Date.now(),
+          description: 'Initial generation',
+        }
+      ],
+      currentVersion: 1,
+      messageId,
+      sourceCodeBlockIdx: blockIndex,
+    });
+  };
+
   return (
     <div className="my-3 rounded-lg overflow-hidden border border-zinc-800 bg-[#0c0c0e] shadow-lg">
       <div className="flex items-center justify-between px-3.5 py-1.5 bg-zinc-900/80 border-b border-zinc-800/80 text-[11px] font-mono text-zinc-400">
         <span className="uppercase text-zinc-400 font-semibold">{language}</span>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
+          {artifactType && onOpenArtifact && (
+            <button
+              onClick={handleOpenCanvas}
+              className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-cyan-950/70 hover:bg-cyan-900/80 border border-cyan-700/60 hover:border-cyan-500 text-cyan-300 hover:text-white transition-all shadow-sm active:scale-95 cursor-pointer font-medium"
+              title="Open in Nixima Canvas"
+            >
+              <Layers className="w-3 h-3 text-cyan-400" />
+              <span>{t.chatMessage.openInCanvas || 'Canvas'}</span>
+            </button>
+          )}
+
           <button
             onClick={downloadSnippet}
             className="flex items-center gap-1 hover:text-white transition-colors"
             title={t.chatMessage.downloadCode}
           >
             <Download className="w-3 h-3" />
-            <span>{t.chatMessage.downloadCode}</span>
+            <span className="hidden sm:inline">{t.chatMessage.downloadCode}</span>
           </button>
           <button
             onClick={copyCode}
@@ -1153,7 +1202,7 @@ const CodeBlock: React.FC<{ language: string; code: string }> = ({ language, cod
             ) : (
               <>
                 <Copy className="w-3 h-3" />
-                <span>{t.chatMessage.copyCode}</span>
+                <span className="hidden sm:inline">{t.chatMessage.copyCode}</span>
               </>
             )}
           </button>

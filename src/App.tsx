@@ -10,11 +10,13 @@ import { VipWelcomeModal } from './components/VipWelcomeModal';
 import { BenchmarksModal } from './components/BenchmarksModal';
 import { ReleaseAnnouncementModal } from './components/ReleaseAnnouncementModal';
 import { AuthPortal } from './components/AuthPortal';
-import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry, SearchMode, ThinkingMode } from './types/chat';
+import { NiximaCanvas } from './components/NiximaCanvas';
+import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry, SearchMode, ThinkingMode, NiximaArtifact } from './types/chat';
 import { NiximaUser } from './types/user';
 import { NIXIMA_MODELS, DEFAULT_MODEL } from './data/models';
 import { INITIAL_CONVERSATIONS } from './data/initialChats';
 import { streamOpenRouterChat, fetchLiveWebGrounding, cleanUserSearchQuery } from './utils/openrouter';
+import { extractArtifactsFromMessage } from './utils/artifactDetector';
 import { playTypingTick, playCompletionChime } from './utils/sound';
 import { getActiveUser, logoutUser, syncAccountsWithServer, isDadAccount, isStrictCreator } from './utils/auth';
 import { getSavedHotkey, matchesHotkey } from './utils/hotkeys';
@@ -279,6 +281,61 @@ const AppContent: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+
+  // 8. Nixima Canvas & Artifacts Workspace state
+  const [activeArtifact, setActiveArtifact] = useState<NiximaArtifact | null>(null);
+  const [isCanvasOpen, setIsCanvasOpen] = useState(false);
+  const [isCanvasMaximized, setIsCanvasMaximized] = useState(false);
+
+  const handleOpenArtifact = (artifact: NiximaArtifact) => {
+    setActiveArtifact(prev => {
+      // If the same artifact is already loaded, preserve its version stack
+      if (prev && prev.id === artifact.id) {
+        return prev;
+      }
+      return artifact;
+    });
+    setIsCanvasOpen(true);
+  };
+
+  const handleCloseCanvas = () => {
+    setIsCanvasOpen(false);
+    setIsCanvasMaximized(false);
+  };
+
+  const handleUpdateArtifactContent = (newContent: string) => {
+    setActiveArtifact(prev => {
+      if (!prev) return null;
+      const nextVer = (prev.currentVersion || 1) + 1;
+      return {
+        ...prev,
+        content: newContent,
+        versions: [
+          ...(prev.versions || []),
+          {
+            version: nextVer,
+            content: newContent,
+            timestamp: Date.now(),
+            description: `Manual edit in Canvas (v${nextVer})`,
+          },
+        ],
+        currentVersion: nextVer,
+      };
+    });
+  };
+
+  const handleSelectArtifactVersion = (verNumber: number) => {
+    setActiveArtifact(prev => {
+      if (!prev) return null;
+      const targetVer = prev.versions?.find(v => v.version === verNumber);
+      if (!targetVer) return prev;
+      return {
+        ...prev,
+        content: targetVer.content,
+        currentVersion: verNumber,
+      };
+    });
+  };
 
   // Load user data on authentication change
   const handleAuthenticated = (user: NiximaUser) => {
@@ -797,6 +854,30 @@ All conversations and model preferences in this workspace are private to your Ni
       };
 
       const hasThinkingToDisplay = (isThinkingActive || isOmni) && fullThinking.trim().length > 0;
+      const detectedArtifacts = extractArtifactsFromMessage(fullContent, aiMessageId);
+
+      // If Canvas is currently active and model generated an artifact update, auto-stack version
+      if (detectedArtifacts.length > 0) {
+        setActiveArtifact(prev => {
+          if (!prev) return detectedArtifacts[0];
+          const matching = detectedArtifacts.find(a => a.type === prev.type) || detectedArtifacts[0];
+          const nextVersion = (prev.currentVersion || 1) + 1;
+          return {
+            ...prev,
+            content: matching.content,
+            versions: [
+              ...(prev.versions || []),
+              {
+                version: nextVersion,
+                content: matching.content,
+                timestamp: Date.now(),
+                description: `Model update (v${nextVersion})`,
+              }
+            ],
+            currentVersion: nextVersion,
+          };
+        });
+      }
 
       setConversations(prev => prev.map(c => {
         if (c.id === targetConvId) {
@@ -810,6 +891,7 @@ All conversations and model preferences in this workspace are private to your Ni
               searchGrounding,
               deepThinkingTelemetry: hasThinkingToDisplay ? deepThinkingTelemetry : undefined,
               isStreaming: false,
+              artifacts: detectedArtifacts.length > 0 ? detectedArtifacts : undefined,
               telemetry 
             } : m)
           };
@@ -923,122 +1005,149 @@ All conversations and model preferences in this workspace are private to your Ni
         onOpenBenchmarks={() => setIsBenchmarksOpen(true)}
       />
 
-      {/* Main Chat Canvas */}
-      <div className={`flex-1 flex flex-col h-full min-w-0 relative ${isPureBlack ? 'bg-black' : 'bg-[#09090b]'}`}>
-        {/* Header with Model Selector */}
-        <Header
-          currentModel={currentModel}
-          onSelectModel={setCurrentModel}
-          onOpenSettings={() => handleOpenSettings('general')}
-          onOpenCompanyInfo={() => setIsCompanyModalOpen(true)}
-          onOpenBenchmarks={() => setIsBenchmarksOpen(true)}
-          onOpenReleaseModal={() => setIsReleaseModalOpen(true)}
-          isSidebarOpen={isSidebarOpen}
-          onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
-          onNewChat={handleNewChat}
-          credits={getUserCredits(currentUser)}
-          onOpenCredits={handleOpenCredits}
-          webSearchEnabled={settings.webSearchEnabled}
-          searchMode={settings.searchMode || 'standard'}
-        />
+      {/* Workspace Area: Chat + Nixima Canvas Split Screen */}
+      <div className="flex-1 flex overflow-hidden min-w-0 relative h-full">
+        {/* Main Chat Column */}
+        <div className={`flex flex-col h-full min-w-0 relative transition-all duration-200 ${isPureBlack ? 'bg-black' : 'bg-[#09090b]'} ${
+          isCanvasOpen && !isCanvasMaximized
+            ? 'hidden lg:flex lg:w-1/2 xl:w-[48%] border-r border-zinc-800/80'
+            : isCanvasMaximized
+            ? 'hidden'
+            : 'w-full flex-1'
+        }`}>
+          {/* Header with Model Selector */}
+          <Header
+            currentModel={currentModel}
+            onSelectModel={setCurrentModel}
+            onOpenSettings={() => handleOpenSettings('general')}
+            onOpenCompanyInfo={() => setIsCompanyModalOpen(true)}
+            onOpenBenchmarks={() => setIsBenchmarksOpen(true)}
+            onOpenReleaseModal={() => setIsReleaseModalOpen(true)}
+            isSidebarOpen={isSidebarOpen}
+            onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
+            onNewChat={handleNewChat}
+            credits={getUserCredits(currentUser)}
+            onOpenCredits={handleOpenCredits}
+            webSearchEnabled={settings.webSearchEnabled}
+            searchMode={settings.searchMode || 'standard'}
+          />
 
-        {/* Chat Messages Container */}
-        <div className="flex-1 overflow-y-auto min-w-0 bg-grid-pattern">
-          {!activeConversation || activeConversation.messages.length === 0 ? (
-            <EmptyChat
-              currentModel={currentModel}
-              onSelectPrompt={handleSendMessage}
-              onSelectModel={setCurrentModel}
-              onOpenReleaseModal={() => setIsReleaseModalOpen(true)}
-            />
-          ) : (
-            <div className="pb-8">
-              {activeConversation.messages.map((msg) => (
-                <ChatMessage
-                  key={msg.id}
-                  message={msg}
-                  onRegenerate={msg.role === 'assistant' ? handleRegenerate : undefined}
-                  onEditMessage={msg.role === 'user' ? (newContent) => handleEditUserMessage(msg.id, newContent) : undefined}
-                  onActionPrompt={handleSendMessage}
-                  onBranchMessage={handleBranchConversation}
-                  activeModelName={currentModel.name}
-                />
-              ))}
-              <div ref={messagesEndRef} className="h-4" />
-            </div>
-          )}
+          {/* Chat Messages Container */}
+          <div className="flex-1 overflow-y-auto min-w-0 bg-grid-pattern">
+            {!activeConversation || activeConversation.messages.length === 0 ? (
+              <EmptyChat
+                currentModel={currentModel}
+                onSelectPrompt={handleSendMessage}
+                onSelectModel={setCurrentModel}
+                onOpenReleaseModal={() => setIsReleaseModalOpen(true)}
+              />
+            ) : (
+              <div className="pb-8">
+                {activeConversation.messages.map((msg) => (
+                  <ChatMessage
+                    key={msg.id}
+                    message={msg}
+                    onRegenerate={msg.role === 'assistant' ? handleRegenerate : undefined}
+                    onEditMessage={msg.role === 'user' ? (newContent) => handleEditUserMessage(msg.id, newContent) : undefined}
+                    onActionPrompt={handleSendMessage}
+                    onBranchMessage={handleBranchConversation}
+                    onOpenArtifact={handleOpenArtifact}
+                    activeModelName={currentModel.name}
+                  />
+                ))}
+                <div ref={messagesEndRef} className="h-4" />
+              </div>
+            )}
+          </div>
+
+          {/* Input Bar Dock */}
+          <ChatInput
+            onSendMessage={handleSendMessage}
+            isLoading={isLoading}
+            onStopGeneration={handleStopGeneration}
+            currentModel={currentModel}
+            deepThink={settings.thinkingMode === 'deep' || settings.deepThinkEnabled}
+            thinkingMode={settings.thinkingMode || (settings.deepThinkEnabled ? 'deep' : 'none')}
+            onToggleDeepThink={() => {
+              setSettings(prev => {
+                const current = prev.thinkingMode || (prev.deepThinkEnabled ? 'deep' : 'none');
+                const next: ThinkingMode = current === 'none' ? 'basic' : current === 'basic' ? 'deep' : 'none';
+                return {
+                  ...prev,
+                  thinkingMode: next,
+                  deepThinkEnabled: next === 'deep',
+                };
+              });
+            }}
+            onChangeThinkingMode={(mode: ThinkingMode) => {
+              setSettings(prev => ({
+                ...prev,
+                thinkingMode: mode,
+                deepThinkEnabled: mode === 'deep',
+              }));
+            }}
+            webSearch={settings.webSearchEnabled}
+            onToggleWebSearch={() => {
+              setSettings(prev => {
+                const isCreator = isStrictCreator(currentUser);
+                if (isCreator) {
+                  // Creator exclusive cycle: Off -> Fast -> Standard -> Mega -> Off
+                  if (!prev.webSearchEnabled) {
+                    return { ...prev, webSearchEnabled: true, searchMode: 'fast' };
+                  } else if (prev.searchMode === 'fast') {
+                    return { ...prev, webSearchEnabled: true, searchMode: 'standard' };
+                  } else if (prev.searchMode === 'standard') {
+                    return { ...prev, webSearchEnabled: true, searchMode: 'mega' };
+                  } else {
+                    return { ...prev, webSearchEnabled: false, searchMode: 'fast' };
+                  }
+                } else {
+                  // Regular user cycle: Off -> Fast -> Standard -> Off
+                  if (!prev.webSearchEnabled) {
+                    return { ...prev, webSearchEnabled: true, searchMode: 'fast' };
+                  } else if (prev.searchMode === 'fast') {
+                    return { ...prev, webSearchEnabled: true, searchMode: 'standard' };
+                  } else {
+                    return { ...prev, webSearchEnabled: false, searchMode: 'fast' };
+                  }
+                }
+              });
+            }}
+            onSelectSearchMode={(mode: SearchMode) => {
+              setSettings(prev => ({
+                ...prev,
+                webSearchEnabled: true,
+                searchMode: mode
+              }));
+            }}
+            onSelectModel={(model: ModelOption) => {
+              setCurrentModel(model);
+            }}
+            searchMode={settings.searchMode || 'standard'}
+            isCreator={isStrictCreator(currentUser)}
+            soundEnabled={settings.soundEnabled}
+            onToggleSound={() => setSettings(s => ({ ...s, soundEnabled: !s.soundEnabled }))}
+            userCredits={getUserCredits(currentUser)}
+            onOpenCredits={handleOpenCredits}
+          />
         </div>
 
-        {/* Input Bar Dock */}
-        <ChatInput
-          onSendMessage={handleSendMessage}
-          isLoading={isLoading}
-          onStopGeneration={handleStopGeneration}
-          currentModel={currentModel}
-          deepThink={settings.thinkingMode === 'deep' || settings.deepThinkEnabled}
-          thinkingMode={settings.thinkingMode || (settings.deepThinkEnabled ? 'deep' : 'none')}
-          onToggleDeepThink={() => {
-            setSettings(prev => {
-              const current = prev.thinkingMode || (prev.deepThinkEnabled ? 'deep' : 'none');
-              const next: ThinkingMode = current === 'none' ? 'basic' : current === 'basic' ? 'deep' : 'none';
-              return {
-                ...prev,
-                thinkingMode: next,
-                deepThinkEnabled: next === 'deep',
-              };
-            });
-          }}
-          onChangeThinkingMode={(mode: ThinkingMode) => {
-            setSettings(prev => ({
-              ...prev,
-              thinkingMode: mode,
-              deepThinkEnabled: mode === 'deep',
-            }));
-          }}
-          webSearch={settings.webSearchEnabled}
-          onToggleWebSearch={() => {
-            setSettings(prev => {
-              const isCreator = isStrictCreator(currentUser);
-              if (isCreator) {
-                // Creator exclusive cycle: Off -> Fast -> Standard -> Mega -> Off
-                if (!prev.webSearchEnabled) {
-                  return { ...prev, webSearchEnabled: true, searchMode: 'fast' };
-                } else if (prev.searchMode === 'fast') {
-                  return { ...prev, webSearchEnabled: true, searchMode: 'standard' };
-                } else if (prev.searchMode === 'standard') {
-                  return { ...prev, webSearchEnabled: true, searchMode: 'mega' };
-                } else {
-                  return { ...prev, webSearchEnabled: false, searchMode: 'fast' };
-                }
-              } else {
-                // Regular user cycle: Off -> Fast -> Standard -> Off
-                if (!prev.webSearchEnabled) {
-                  return { ...prev, webSearchEnabled: true, searchMode: 'fast' };
-                } else if (prev.searchMode === 'fast') {
-                  return { ...prev, webSearchEnabled: true, searchMode: 'standard' };
-                } else {
-                  return { ...prev, webSearchEnabled: false, searchMode: 'fast' };
-                }
-              }
-            });
-          }}
-          onSelectSearchMode={(mode: SearchMode) => {
-            setSettings(prev => ({
-              ...prev,
-              webSearchEnabled: true,
-              searchMode: mode
-            }));
-          }}
-          onSelectModel={(model: ModelOption) => {
-            setCurrentModel(model);
-          }}
-          searchMode={settings.searchMode || 'standard'}
-          isCreator={isStrictCreator(currentUser)}
-          soundEnabled={settings.soundEnabled}
-          onToggleSound={() => setSettings(s => ({ ...s, soundEnabled: !s.soundEnabled }))}
-          userCredits={getUserCredits(currentUser)}
-          onOpenCredits={handleOpenCredits}
-        />
+        {/* Nixima Canvas Studio Drawer / Split Pane */}
+        {isCanvasOpen && activeArtifact && (
+          <div className={`h-full min-w-0 transition-all duration-200 ${
+            isCanvasMaximized ? 'w-full flex-1 z-50' : 'w-full lg:w-1/2 xl:w-[52%]'
+          }`}>
+            <NiximaCanvas
+              artifact={activeArtifact}
+              onClose={handleCloseCanvas}
+              onUpdateArtifactContent={handleUpdateArtifactContent}
+              onSelectVersion={handleSelectArtifactVersion}
+              onActionPrompt={handleSendMessage}
+              isMaximized={isCanvasMaximized}
+              onToggleMaximize={() => setIsCanvasMaximized(!isCanvasMaximized)}
+            />
+          </div>
+        )}
       </div>
 
       {/* Expanded Settings Modal */}

@@ -73,6 +73,27 @@ export interface SearchGrounding {
 
 export type ThinkingMode = 'none' | 'basic' | 'deep';
 
+export type ArtifactType = 'html' | 'react' | 'svg' | 'markdown' | 'code' | 'chart';
+
+export interface ArtifactVersion {
+  version: number;
+  content: string;
+  timestamp: number;
+  description?: string;
+}
+
+export interface NiximaArtifact {
+  id: string;
+  title: string;
+  type: ArtifactType;
+  language: string;
+  content: string;
+  versions: ArtifactVersion[];
+  currentVersion: number;
+  messageId?: string;
+  sourceCodeBlockIdx?: number;
+}
+
 export interface DynamicThinkingStep {
   stepNumber: number;
   title: string;
@@ -102,6 +123,7 @@ export interface Message {
   model?: string;
   isStreaming?: boolean;
   telemetry?: MessageTelemetry;
+  artifacts?: NiximaArtifact[];
 }
 
 export interface Conversation {
@@ -112,6 +134,7 @@ export interface Conversation {
   updatedAt: number;
   modelId: string;
   pinned?: boolean;
+  activeArtifactId?: string;
 }
 
 export interface UserSettings {
