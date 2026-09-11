@@ -178,25 +178,25 @@ export const NiximaCanvas: React.FC<NiximaCanvasProps> = ({
       isMaximized ? 'fixed inset-0 z-[150]' : 'relative'
     }`}>
       {/* 1. Header Toolbar */}
-      <div className="flex items-center justify-between px-3.5 py-2.5 bg-[#101014] border-b border-zinc-800/80 text-zinc-300">
+      <div className="flex items-center justify-between px-3 sm:px-3.5 py-2 sm:py-2.5 bg-[#101014] border-b border-zinc-800/80 text-zinc-300 gap-2 min-w-0">
         {/* Left: Type Pill & Artifact Title & Version Dropdown */}
-        <div className="flex items-center gap-2.5 min-w-0 pr-2">
+        <div className="flex items-center gap-2 min-w-0 pr-1">
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <span className="p-1 rounded bg-zinc-800 text-cyan-400 border border-zinc-700">
               <Layers className="w-3.5 h-3.5" />
             </span>
-            <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider border ${typeBadge.color}`}>
+            <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider border truncate max-w-[120px] sm:max-w-none ${typeBadge.color}`}>
               {typeBadge.label}
             </span>
           </div>
 
-          <h3 className="font-mono text-xs font-semibold text-white truncate max-w-[200px] sm:max-w-[280px]" title={artifact.title}>
+          <h3 className="font-mono text-xs font-semibold text-white truncate max-w-[140px] sm:max-w-[240px]" title={artifact.title}>
             {artifact.title}
           </h3>
 
           {/* Version Picker */}
           {versionsList.length > 1 && (
-            <div className="relative" ref={versionMenuRef}>
+            <div className="relative flex-shrink-0" ref={versionMenuRef}>
               <button
                 type="button"
                 onClick={() => setIsVersionDropdownOpen(!isVersionDropdownOpen)}
@@ -249,7 +249,7 @@ export const NiximaCanvas: React.FC<NiximaCanvasProps> = ({
         </div>
 
         {/* Center: Mode Tabs */}
-        <div className="flex items-center p-0.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs font-mono">
+        <div className="flex items-center p-0.5 rounded-lg bg-zinc-900 border border-zinc-800 text-xs font-mono flex-shrink-0">
           <button
             type="button"
             onClick={() => setActiveTab('preview')}
@@ -302,7 +302,7 @@ export const NiximaCanvas: React.FC<NiximaCanvasProps> = ({
         </div>
 
         {/* Right: Actions (Refresh, Copy, Download, Popout, Maximize, Close) */}
-        <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
           {hasUnsavedChanges ? (
             <button
               type="button"

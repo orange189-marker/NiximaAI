@@ -1022,34 +1022,36 @@ All conversations and model preferences in this workspace are private to your Ni
         onOpenBenchmarks={() => setIsBenchmarksOpen(true)}
       />
 
-      {/* Workspace Area: Chat + Nixima Canvas Split Screen */}
-      <div className="flex-1 flex overflow-hidden min-w-0 relative h-full">
-        {/* Main Chat Column */}
-        <div className={`flex flex-col h-full min-w-0 relative transition-all duration-200 ${isPureBlack ? 'bg-black' : 'bg-[#09090b]'} ${
-          isCanvasOpen && !isCanvasMaximized
-            ? 'hidden lg:flex lg:w-1/2 xl:w-[48%] border-r border-zinc-800/80'
-            : isCanvasMaximized
-            ? 'hidden'
-            : 'w-full flex-1'
-        }`}>
-          {/* Header with Model Selector */}
-          <Header
-            currentModel={currentModel}
-            onSelectModel={setCurrentModel}
-            onOpenSettings={() => handleOpenSettings('general')}
-            onOpenCompanyInfo={() => setIsCompanyModalOpen(true)}
-            onOpenBenchmarks={() => setIsBenchmarksOpen(true)}
-            onOpenReleaseModal={() => setIsReleaseModalOpen(true)}
-            isSidebarOpen={isSidebarOpen}
-            onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
-            onNewChat={handleNewChat}
-            credits={getUserCredits(currentUser)}
-            onOpenCredits={handleOpenCredits}
-            webSearchEnabled={settings.webSearchEnabled}
-            searchMode={settings.searchMode || 'standard'}
-          />
+      {/* Main Content Area: Global Header + Split-Screen Workspace */}
+      <div className="flex-1 flex flex-col h-full min-w-0 overflow-hidden relative">
+        {/* Global Application Header */}
+        <Header
+          currentModel={currentModel}
+          onSelectModel={setCurrentModel}
+          onOpenSettings={() => handleOpenSettings('general')}
+          onOpenCompanyInfo={() => setIsCompanyModalOpen(true)}
+          onOpenBenchmarks={() => setIsBenchmarksOpen(true)}
+          onOpenReleaseModal={() => setIsReleaseModalOpen(true)}
+          isSidebarOpen={isSidebarOpen}
+          onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
+          onNewChat={handleNewChat}
+          credits={getUserCredits(currentUser)}
+          onOpenCredits={handleOpenCredits}
+          webSearchEnabled={settings.webSearchEnabled}
+          searchMode={settings.searchMode || 'standard'}
+        />
 
-          {/* Chat Messages Container */}
+        {/* Workspace Area: Chat + Nixima Canvas Split Screen */}
+        <div className="flex-1 flex overflow-hidden min-w-0 relative h-full">
+          {/* Main Chat Column */}
+          <div className={`flex flex-col h-full min-w-0 relative transition-all duration-200 ${isPureBlack ? 'bg-black' : 'bg-[#09090b]'} ${
+            isCanvasOpen && !isCanvasMaximized
+              ? 'hidden lg:flex lg:w-1/2 xl:w-[48%] border-r border-zinc-800/80'
+              : isCanvasMaximized
+              ? 'hidden'
+              : 'w-full flex-1'
+          }`}>
+            {/* Chat Messages Container */}
           <div className="flex-1 overflow-y-auto min-w-0 bg-grid-pattern">
             {!activeConversation || activeConversation.messages.length === 0 ? (
               <EmptyChat
@@ -1168,6 +1170,7 @@ All conversations and model preferences in this workspace are private to your Ni
           </div>
         )}
       </div>
+    </div>
 
       {/* Expanded Settings Modal */}
       <SettingsModal

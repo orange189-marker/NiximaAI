@@ -110,7 +110,7 @@ export const CreditBalanceChip: React.FC<CreditBalanceChipProps> = ({
         {unit}
       </span>
       {isInfinite && (
-        <span className="ml-0.5 text-[8px] font-mono font-bold uppercase px-1 py-0.2 rounded bg-white/10 text-white border border-white/20">
+        <span className="hidden sm:inline-block ml-0.5 text-[8px] font-mono font-bold uppercase px-1 py-0.2 rounded bg-white/10 text-white border border-white/20">
           CREATOR
         </span>
       )}

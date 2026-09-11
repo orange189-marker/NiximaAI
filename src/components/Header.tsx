@@ -149,21 +149,21 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Center: Model Selector Dropdown */}
-      <div className="relative flex-shrink min-w-0 mx-auto" ref={dropdownRef}>
+      <div className="relative flex-1 flex justify-center min-w-0 px-1 sm:px-2 max-w-xs md:max-w-md mx-auto" ref={dropdownRef}>
         <button
           type="button"
           onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
-          className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/70 hover:border-zinc-500 transition-all duration-150 shadow-inner-light select-none cursor-pointer max-w-[170px] sm:max-w-none"
+          className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/70 hover:border-zinc-500 transition-all duration-150 shadow-inner-light select-none cursor-pointer max-w-[150px] sm:max-w-[240px] md:max-w-none min-w-0"
           title={`${t.common.active}: ${currentModel.name}`}
         >
-          <div className="flex items-center gap-1.5 min-w-0">
+          <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
             <span className="flex-shrink-0">{getModelIcon(currentModel.id)}</span>
             <span className="font-semibold text-xs sm:text-sm text-white tracking-tight whitespace-nowrap truncate">
               {renderWithNiximaBrand(t.models[currentModel.id]?.name || currentModel.name)}
             </span>
           </div>
 
-          <span className="hidden sm:inline-block text-[10px] font-mono px-1.5 py-0.2 rounded bg-white text-black font-bold tracking-wider uppercase flex-shrink-0">
+          <span className="hidden lg:inline-block text-[10px] font-mono px-1.5 py-0.2 rounded bg-white text-black font-bold tracking-wider uppercase flex-shrink-0">
             {t.models[currentModel.id]?.badge || currentModel.badge}
           </span>
 
@@ -388,19 +388,19 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Right section: Mobile New Chat + System status & Modals */}
-      <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+      <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0">
         {/* Mobile compact New Chat button */}
         {onNewChat && !isSidebarOpen && (
           <button
             onClick={onNewChat}
-            className="sm:hidden p-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black transition-all shadow-[0_0_10px_rgba(255,255,255,0.2)] active:scale-95 cursor-pointer flex items-center justify-center"
+            className="sm:hidden p-1.5 rounded-lg bg-white hover:bg-zinc-200 text-black transition-all shadow-[0_0_10px_rgba(255,255,255,0.2)] active:scale-95 cursor-pointer flex items-center justify-center flex-shrink-0"
             title={`${t.header.newChatTooltip} (${hotkeyConfig.label})`}
           >
             <Plus className="w-4 h-4 stroke-[2.5]" />
           </button>
         )}
 
-        <div className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[11px] font-mono text-zinc-400">
+        <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[11px] font-mono text-zinc-400 flex-shrink-0">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
           <span>{t.header.meshActive}</span>
         </div>
@@ -417,7 +417,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           type="button"
           onClick={toggleLanguage}
-          className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-all text-xs font-mono select-none cursor-pointer shadow-inner-light"
+          className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-1 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-all text-xs font-mono select-none cursor-pointer shadow-inner-light flex-shrink-0"
           title={language === 'uk' ? 'Мова: Українська (Натисніть щоб змінити на English)' : 'Language: English (Click to switch to Ukrainian)'}
         >
           <CountryFlag country={language === 'uk' ? 'ua' : 'us'} size="xs" glow />
@@ -429,7 +429,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={onOpenBenchmarks}
-            className="p-1.5 sm:p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors cursor-pointer"
+            className="hidden sm:flex p-1.5 sm:p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors cursor-pointer flex-shrink-0"
             title={language === 'uk' ? 'Офіційні бенчмарки 4 моделей' : 'Official Benchmarks (4 Models)'}
           >
             <BarChart3 className="w-4 h-4" />
@@ -438,7 +438,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           onClick={onOpenCompanyInfo}
-          className="p-1.5 sm:p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors cursor-pointer"
+          className="hidden md:flex p-1.5 sm:p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors cursor-pointer flex-shrink-0"
           title={t.header.aboutTooltip}
         >
           <Info className="w-4 h-4" />
@@ -446,7 +446,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           onClick={onOpenSettings}
-          className="p-1.5 sm:p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors cursor-pointer"
+          className="p-1.5 sm:p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors cursor-pointer flex-shrink-0"
           title={t.header.settingsTooltip}
         >
           <Settings className="w-4 h-4" />
