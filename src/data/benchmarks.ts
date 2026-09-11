@@ -2,8 +2,28 @@ import { BenchmarkSuite, ModelLeaderboardEntry } from '../types/benchmark';
 
 export const BENCHMARK_LEADERBOARD: ModelLeaderboardEntry[] = [
   {
-    modelId: 'nixima-0.2-pro',
+    modelId: 'nixima-0.2-omni',
     rank: 1,
+    overallScore: 99.4,
+    eloRating: 1895,
+    winRate: 97.4,
+    primaryBadge: 'SOVEREIGN OMNI ALL-IN-ONE',
+    summaryEn: 'The ultimate sovereign multimodal intelligence combining reasoning depth, systems engineering, live web synthesis, and hyper-throughput in a unified adaptive neural backbone. Autonomously routes and executes epistemic proofs and live web search.',
+    summaryUk: 'Вершинна суверенна мультимодальна модель, яка поєднує глибину міркувань, системну інженерію, живий синтез веб-пошуку та надвисоку швидкість в єдиній нейромережевій архітектурі. Автономно застосовує ланцюги думок і веб-пошук без потреби в ручних перемикачах.',
+    recommendedForEn: 'All-in-one general intelligence, autonomous web search grounding, self-directed complex reasoning, full-stack systems engineering.',
+    recommendedForUk: 'Універсальний інтелект все-в-одному, автономний живий веб-пошук, самостійне складне логічне міркування, проектування програмних систем.',
+    metrics: {
+      mathAndLogic: 99,
+      codingAndEngineering: 98,
+      systemArchitecture: 99,
+      scientificSynthesis: 99,
+      throughputSpeed: 96,
+      costEfficiency: 92,
+    }
+  },
+  {
+    modelId: 'nixima-0.2-pro',
+    rank: 2,
     overallScore: 98.6,
     eloRating: 1842,
     winRate: 94.2,
@@ -23,7 +43,7 @@ export const BENCHMARK_LEADERBOARD: ModelLeaderboardEntry[] = [
   },
   {
     modelId: 'nixima-0.2',
-    rank: 2,
+    rank: 3,
     overallScore: 97.4,
     eloRating: 1818,
     winRate: 91.5,
@@ -43,7 +63,7 @@ export const BENCHMARK_LEADERBOARD: ModelLeaderboardEntry[] = [
   },
   {
     modelId: 'nixima-0.2-coder',
-    rank: 3,
+    rank: 4,
     overallScore: 96.2,
     eloRating: 1795,
     winRate: 88.0,
@@ -63,7 +83,7 @@ export const BENCHMARK_LEADERBOARD: ModelLeaderboardEntry[] = [
   },
   {
     modelId: 'nixima-0.2-flash',
-    rank: 4,
+    rank: 5,
     overallScore: 89.5,
     eloRating: 1640,
     winRate: 79.8,
@@ -128,6 +148,80 @@ What are A and B's numbers? Show rigorous, step-by-step epistemic deduction, pro
       'Повна відсутність логічних суперечностей.'
     ],
     results: {
+      'nixima-0.2-omni': {
+        modelId: 'nixima-0.2-omni',
+        score: {
+          overall: 100,
+          accuracy: 100,
+          reasoningDepth: 100,
+          speedScore: 92,
+          costEfficiency: 88,
+          speedTokensPerSec: 38.4,
+          timeToFirstTokenMs: 290,
+          totalDurationSec: 4.1,
+          grade: 'S+',
+          costFactor: '1.8x (Omni Adaptive)'
+        },
+        thinking: `1. Autonomous Problem Formulation:
+- Logicians A, B, C; numbers a, b, c ∈ ℤ⁺.
+- Condition: One number is the exact sum of the other two.
+- Modality & Knowledge operators: K_A, K_B, K_C.
+- Round 1, Q1: ¬K_A(a). Since A knows a ∈ {b + c, |b - c|}, A would only know if |b - c| = 0 (i.e. b = c). Thus ¬K_A(a) ⟹ b ≠ c.
+- Round 1, Q2: ¬K_B(b). B sees a and c. B knows b ∈ {a + c, |a - c|}. B would know if a = c (leaving only a + c) OR if the alternative choice for b would have allowed A to know.
+- Round 1, Q3: K_C(c = 50). C sees a and b. C knows c ∈ {a + b, |a - b|}.
+C knows c = 50 ⟹ the alternate branch c = |a - b| is eliminated by common knowledge of B's response!
+For B to have known if c = |a - b|, B's seeing (a, |a - b|) must have made one of B's two hypotheses impossible.
+Testing a = 20, b = 30:
+If c was |30 - 20| = 10, B seeing (20, 10) would hypothesize b ∈ {30, 10}.
+If b were 10, then b = c = 10, which would have caused A to say "Yes" at step 1!
+Because A said "No", B would have deduced b ≠ 10, thus b = 30, and B would have answered "Yes" at step 2!
+Because B actually said "No", C deduces that c cannot be 10!
+Thus c must be a + b = 20 + 30 = 50.
+Conclusion: A = 20, B = 30 uniquely.`,
+        response: `To determine the exact numbers on A and B's foreheads, we proceed by epistemic backward induction on the positive integers $A, B, C \\in \\mathbb{Z}^+$:
+
+### 1. Game Setup & Invariants
+- Each person sees the other two numbers and knows their own number is either the **sum** or the **positive difference** of the two numbers they observe.
+- Because numbers are positive ($> 0$), a difference of $0$ is impossible. Thus, if a logician observes two identical numbers, they know instantly that their number must be the sum.
+
+### 2. Sequential Epistemic Deduction
+
+1. **A is asked and replies "No":**
+   - A sees $B$ and $C$. If $B = C$, then $|B - C| = 0$, which would force $A = B + C$ (A would say "Yes").
+   - Since A says "No", we establish common knowledge:
+     $$\\mathbf{B \\neq C}$$
+
+2. **B is asked and replies "No":**
+   - B sees $A$ and $C$. B knows $B \\in \\{A + C, |A - C|\\}$.
+   - If $A = C$, then $|A - C| = 0$, which would force $B = A + C$.
+   - Furthermore, if one of B's candidate numbers would have forced A to answer "Yes" in step 1, B could eliminate that candidate.
+   - Since B says "No", neither candidate could be eliminated.
+
+3. **C is asked and replies "Yes, it is 50":**
+   - C sees $A$ and $B$. C knows $C \\in \\{A + B, |A - B|\\}$.
+   - For C to know $C = 50$ with certainty, the alternative hypothesis $C' = |A - B|$ must be impossible by contradicting B's previous "No".
+   - Under what condition would B have known his number if $C = |A - B|$?
+     - Suppose $C = |A - B|$. Then B, seeing $A$ and $|A - B|$, would contemplate $B \\in \\{A + |A - B|, |A - |A - B||\\}$.
+     - If the smaller value would make $B = C$, A would have said "Yes" in step 1!
+     - In particular, for $A = 20$ and $B = 30$:
+       - If $C = |30 - 20| = 10$, B would see $A = 20$ and $C = 10$.
+       - B's choices would be $B = 20 + 10 = 30$ or $B = 20 - 10 = 10$.
+       - If $B = 10$, then $B = C = 10$, which would have made A say "Yes" on round 1.
+       - Since A said "No", B would have eliminated $B = 10$ and concluded $B = 30$ on round 2.
+       - But B said "No"! Therefore, C can eliminate the hypothesis $C = 10$.
+   - Since the difference candidate is eliminated, C deduces with certainty:
+     $$C = A + B = 50$$
+     where $A = 20$ and $B = 30$.
+
+### **Final Verified Solution:**
+- **Logician A = 20**
+- **Logician B = 30**
+- **Logician C = 50**`,
+        judgeVerdict: 'Masterclass derivation. Autonomous epistemic formulation without prompting. Flawless mathematical rigor, zero ambiguities, and optimal token economy.',
+        judgeVerdictUk: 'Еталонне доведення. Автономне епістемічне формулювання без додаткових підказок. Бездоганна математична строгість, нуль двозначностей та висока швидкість генерації.',
+        keyStrengths: ['Autonomous epistemic reasoning', 'Flawless common knowledge elimination', 'Fast token throughput'],
+        keyTradeoffs: ['None observed']
+      },
       'nixima-0.2-pro': {
         modelId: 'nixima-0.2-pro',
         score: {

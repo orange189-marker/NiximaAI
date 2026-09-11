@@ -282,6 +282,64 @@ function generateRawNiximaResponse({
     };
   }
 
+  // 0B. Nixima-0.2O Omni Inquiries
+  if (lower.includes('omni') || lower.includes('0.2o') || lower.includes('0.2-omni')) {
+    const isUk = /[а-яіїєґ]/i.test(prompt);
+    if (isUk) {
+      return {
+        thinking: `1. Аналіз запиту оператора щодо моделі Nixima-0.2O (Omni).
+2. Опис суверенної все-в-одному архітектури: поєднання міркувань (DeepThinking), системного кодування та пошуку (Search V2).
+3. Підкреслення відсутності потреби в ручних перемикачах: автономне прийняття рішень та динамічна активація.`,
+        response: `### 🔮 Nixima-0.2O (Omni) — Суверенна модель «Все-в-одному»
+
+**Nixima-0.2O (Omni)** — це флагманська суверенна мультимодальна модель нового покоління, створена для повного циклу інтелектуальних завдань без компромісів між швидкістю, глибиною міркувань та актуальністю даних.
+
+#### 🌟 Ключові інновації 0.2O:
+1. **Повна автономність (Zero Manual Toggles)**:
+   - Вам більше не потрібно вручну перемикати режими **DeepThinking V2** або **Search V2**.
+   - **Nixima-0.2O** самостійно визначає, коли потрібен глибокий математичний ланцюжок думок або коли запит вимагає перевірки фактів у живому інтернеті.
+2. **Уніфікований інтелект**:
+   - Поєднує високу логіку \`0.2 Pro\`, системну інженерію \`0.2 Coder\` та надшвидку генерацію \`0.2 Flash\`.
+3. **Гігантський контекст**:
+   - Робоче вікно в **1 000 000 токенів** для аналізу великих репозиторіїв коду, наукових статей та складної документації.
+
+| Характеристика | Параметри Nixima-0.2O |
+| :--- | :--- |
+| **Клас моделі** | Суверенний мультимодальний Omni-рушій |
+| **Контекст** | **1,000,000 токенів** |
+| **Швидкість** | ~18 мс / токен (адаптивна) |
+| **Автономні інструменти** | Dynamic DeepThinking & Live Search V2 Grounding |
+| **Кредитний множник** | 1.8x |`
+      };
+    }
+
+    return {
+      thinking: `1. Analyzing user query regarding the Nixima-0.2O (Omni) model architecture.
+2. Formulating comprehensive briefing on all-in-one capabilities: reasoning, coding, and live web search.
+3. Highlighting the toggle-free autonomous decision engine for DeepThinking and WebSearch.`,
+      response: `### 🔮 Nixima-0.2O (Omni) — Sovereign All-In-One Intelligence
+
+**Nixima-0.2O (Omni)** is our sovereign flagship multimodal model designed to eliminate the trade-off between reasoning depth, programming precision, and live web grounding.
+
+#### 🌟 Key Breakthroughs of 0.2O:
+1. **Autonomous Intelligence (Zero Manual Toggles)**:
+   - Eliminates the need to manually toggle **DeepThinking** or **WebSearch**.
+   - **Nixima-0.2O** autonomously detects when a problem demands formal multi-step epistemic reasoning or when live web grounding is required to fetch today's data.
+2. **Unified Neural Backbone**:
+   - Integrates the epistemic rigor of \`0.2 Pro\`, the production code precision of \`0.2 Coder\`, and the throughput of \`0.2 Flash\`.
+3. **Massive Context Window**:
+   - **1,000,000 tokens** of active context for full codebase ingest, complex multi-document synthesis, and long-horizon reasoning.
+
+| Metric | Nixima-0.2O Profile |
+| :--- | :--- |
+| **Model Classification** | Sovereign Multimodal Omni Engine |
+| **Context Window** | **1,000,000 tokens** |
+| **Token Latency** | ~18 ms / token (adaptive) |
+| **Autonomous Capabilities** | Self-directing DeepThinking & Live Web Search V2 |
+| **Credit Multiplier** | 1.8x |`
+    };
+  }
+
   if (lower.includes('who are you') || lower.includes('what is nixima') || lower.includes('about')) {
     return {
       thinking,
@@ -313,7 +371,7 @@ How can I assist your engineering, research, or creative tasks today?`
 | **Inference Host** | \`nixima.ai / Cloud Mesh\` |
 | **Safety Alignment** | Nixima Constitutional Layer v4 |
 
-> **Tip:** You can switch between **Nixima-0.2**, **Nixima-0.2 Pro**, **Nixima-0.2 Coder**, and **Nixima-0.2 Flash** anytime using the model selector in the top navigation bar.`
+> **Tip:** You can switch between **Nixima-0.2O (Omni)**, **Nixima-0.2**, **Nixima-0.2 Pro**, **Nixima-0.2 Coder**, and **Nixima-0.2 Flash** anytime using the model selector in the top navigation bar.`
     };
   }
 

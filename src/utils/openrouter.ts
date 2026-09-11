@@ -901,6 +901,7 @@ export async function streamOpenRouterChat({
   initialSearchGrounding,
 }: StreamChatParams): Promise<StreamChatResult> {
   const activeKey = getSystemApiKey();
+  const allowThinking = Boolean(deepThink || model.isOmni);
 
   // Determine if the conversation legitimately requests CJK characters
   const contextForCjk = messages.map(m => m.content).join('\n');
@@ -1010,8 +1011,8 @@ export async function streamOpenRouterChat({
               const delta = json.choices?.[0]?.delta;
               if (!delta) continue;
 
-              // Handle reasoning field if returned by model (strictly gate by deepThink)
-              if (delta.reasoning && deepThink) {
+              // Handle reasoning field if returned by model (gated by allowThinking)
+              if (delta.reasoning && allowThinking) {
                 fullThinking += delta.reasoning;
                 callbacks.onThinking(fullThinking);
               }
@@ -1028,7 +1029,7 @@ export async function streamOpenRouterChat({
                     fullContent += parts[0];
                     callbacks.onToken(antiGlitchFilter ? sanitizeTokenStream(fullContent, allowCjk) : fullContent);
                   }
-                  if (parts[1] && deepThink) {
+                  if (parts[1] && allowThinking) {
                     fullThinking += parts[1];
                     callbacks.onThinking(fullThinking);
                   }
@@ -1038,7 +1039,7 @@ export async function streamOpenRouterChat({
                 if (text.includes('</think>')) {
                   isInsideThinkingTag = false;
                   const parts = text.split('</think>');
-                  if (parts[0] && deepThink) {
+                  if (parts[0] && allowThinking) {
                     fullThinking += parts[0];
                     callbacks.onThinking(fullThinking);
                   }
@@ -1050,8 +1051,8 @@ export async function streamOpenRouterChat({
                 }
 
                 if (isInsideThinkingTag) {
-                  // If deepThinking is disabled, drop thought tokens so they never surface
-                  if (deepThink) {
+                  // If thinking is disabled, drop thought tokens so they never surface
+                  if (allowThinking) {
                     fullThinking += text;
                     callbacks.onThinking(fullThinking);
                   }
@@ -1068,13 +1069,13 @@ export async function streamOpenRouterChat({
       }
 
       // If we got content, return successfully with full token sanitization applied
-      if (fullContent.trim() || (deepThink && fullThinking.trim())) {
+      if (fullContent.trim() || (allowThinking && fullThinking.trim())) {
         const sanitizedContent = antiGlitchFilter
           ? sanitizeModelOutput(fullContent, { allowCjk })
           : fullContent;
-        const sanitizedThinking = (deepThink && antiGlitchFilter)
+        const sanitizedThinking = (allowThinking && antiGlitchFilter)
           ? sanitizeModelOutput(fullThinking, { allowCjk })
-          : (deepThink ? fullThinking : '');
+          : (allowThinking ? fullThinking : '');
 
         let searchGrounding: SearchGrounding | undefined = initialSearchGrounding;
         let finalContent = sanitizedContent;

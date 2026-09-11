@@ -161,6 +161,8 @@ export interface Translations {
     };
     deepThink: string;
     deepThinkTooltip: string;
+    omniBadge: string;
+    omniTooltip: string;
     search: string;
     searchTooltip: string;
     searchFast: string;
@@ -572,6 +574,8 @@ export const translations: Record<Language, Translations> = {
       },
       deepThink: 'DeepThinking V2',
       deepThinkTooltip: 'DeepThinking V2: Activate multi-stage epistemic reasoning & proof verification',
+      omniBadge: '0.2O Omni Autonomous',
+      omniTooltip: 'Nixima-0.2O Omni: All-in-one sovereign model. DeepThinking reasoning and real-time WebSearch trigger autonomously on demand.',
       search: 'Search V2',
       searchTooltip: 'Search V2: Real-time web mesh grounding & verified sources',
       searchFast: 'Fast',
@@ -853,6 +857,12 @@ export const translations: Record<Language, Translations> = {
     },
 
     models: {
+      'nixima-0.2-omni': {
+        name: 'Nixima-0.2O',
+        badge: 'OMNI ALL-IN-ONE',
+        description: 'Sovereign frontier all-in-one multimodal model combining deep epistemic reasoning, production systems engineering, live web search synthesis, and ultra-high throughput with zero manual toggles required.',
+        strengths: ['Omni Sovereign Intelligence', 'Autonomous Reasoning & Web Grounding', 'Zero Manual Toggles Required', '1M Context Adaptive Throughput'],
+      },
       'nixima-0.2': {
         name: 'Nixima-0.2',
         badge: 'FLAGSHIP',
@@ -1066,6 +1076,8 @@ export const translations: Record<Language, Translations> = {
       },
       deepThink: 'DeepThinking V2',
       deepThinkTooltip: 'DeepThinking V2: Багатокрокове епістемічне міркування та верифікація логіки',
+      omniBadge: '0.2O Omni Автономний',
+      omniTooltip: 'Nixima-0.2O Omni: Суверенна модель «все-в-одному». DeepThinking міркування та живий пошук активуються автономно за потребою.',
       search: 'Search V2',
       searchTooltip: 'Search V2: Реальний веб-пошук у мережі та перевірені джерела',
       searchFast: 'Швидкий',
@@ -1347,6 +1359,12 @@ export const translations: Record<Language, Translations> = {
     },
 
     models: {
+      'nixima-0.2-omni': {
+        name: 'Nixima-0.2O',
+        badge: 'OMNI ВСЕ-В-ОДНОМУ',
+        description: 'Суверенна модель нового покоління «все-в-одному». Поєднує глибокі епістемічні міркування, інженерію коду, живий синтез веб-пошуку та надвисоку швидкість без потреби ручних перемикачів.',
+        strengths: ['Суверенний інтелект Omni', 'Автономні міркування та веб-пошук', 'Full-stack розробка систем', 'Динамічна маршрутизація'],
+      },
       'nixima-0.2': {
         name: 'Nixima-0.2',
         badge: 'ФЛАГМАН',

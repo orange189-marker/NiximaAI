@@ -33,6 +33,76 @@ import { LanguageProvider, useLanguage } from './context/LanguageContext';
 
 const STORAGE_KEY_MODEL = 'nixima_active_model_v4';
 
+/**
+ * Evaluates whether Nixima-0.2O (Omni) should autonomously invoke live web grounding
+ */
+export function shouldOmniSearch(query: string): boolean {
+  const trimmed = query.trim().toLowerCase();
+
+  // 1. News, breaking events, current updates
+  const searchAnalysis = cleanUserSearchQuery(query);
+  if (searchAnalysis.isNewsQuery) return true;
+
+  // 2. Explicit search requests
+  if (
+    /(?:search(?:\s+for|\s+web|\s+the\s+web|\s+google|\s+online)?|google\s+this|find(?:\s+online|\s+on\s+the\s+web|\s+in\s+web)?|lookup|look\s+up|browse(?:\s+web)?|check\s+online|live\s+data|weather\s+in|stock\s+price|market\s+price|exchange\s+rate|latest\s+version|release\s+date|documentation\s+for)/i.test(trimmed) ||
+    /(?:пошукай(?:те)?|знайди(?:те)?(?:\s+в\s+інтернеті|\s+в\s+мережі|\s+в\s+гуглі|\s+онлайн)?|пошук|погугли|глянь\s+в\s+інтернеті|яка\s+погода|курс\s+валют|ціна\s+акцій|свіжі\s+дані|остання\s+версія)/i.test(trimmed)
+  ) {
+    return true;
+  }
+
+  // 3. URLs, domains, or web links
+  if (/https?:\/\/|www\.[a-z0-9-]+\.[a-z]{2,}|[a-z0-9-]+\.(?:com|org|io|ai|net|ua|gov|edu)\b/i.test(trimmed)) {
+    return true;
+  }
+
+  // 4. Temporal anchors indicating need for up-to-date data
+  if (/\b(?:2025|2026|today|tonight|this month|this year|right now|currently|current)\b/i.test(trimmed) ||
+      /(?:сьогодні|зараз|цього року|актуальн)/i.test(trimmed)) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Evaluates whether Nixima-0.2O (Omni) should autonomously invoke DeepThinking reasoning
+ */
+export function shouldOmniThink(query: string): boolean {
+  const trimmed = query.trim().toLowerCase();
+
+  // 1. Explicit thinking or reasoning commands
+  if (
+    /(?:think(?:\s+deeply|\s+step\s+by\s+step|\s+carefully)?|reason|chain\s+of\s+thought|step\s+by\s+step|derive|deduce|prove|verify\s+logically|break\s+it\s+down)/i.test(trimmed) ||
+    /(?:подумай|порозмірковуй|глибоко\s+подумай|покроково|ланцюжок\s+думок|доведи|виведи|обґрунтуй|поясни\s+логіку|розпиши\s+кроки)/i.test(trimmed)
+  ) {
+    return true;
+  }
+
+  // 2. Math, algorithmic or logic problems
+  if (
+    /(?:algorithm|complexity|o\(n\)|dynamic\s+programming|dijkstra|binary\s+tree|graph\s+traversal|matrix\s+multiplication|eigenvalue|derivative|integral|differential|theorem|axioms?|proof\b|puzzle|riddle|logician)/i.test(trimmed) ||
+    /(?:алгоритм|складність|дерево|граф|матриц|похідна|інтеграл|диференціал|теорем|аксіом|доведення|головоломк|загадк|мудрец)/i.test(trimmed)
+  ) {
+    return true;
+  }
+
+  // 3. Systems architecture, concurrency, and security
+  if (
+    /(?:architecture|concurrency|mutex|deadlock|race\s+condition|microservices|distributed\s+system|memory\s+leak|refactor|design\s+pattern)/i.test(trimmed) ||
+    /(?:архітектур|асинхрон|паралелізм|дедлок|гонка\s+станів|патерн|рефакторинг)/i.test(trimmed)
+  ) {
+    return true;
+  }
+
+  // 4. Substantial multi-part analytical queries
+  if (query.length > 280 && (query.includes('?') || query.includes(':'))) {
+    return true;
+  }
+
+  return false;
+}
+
 const AppContent: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
   // 1. Authentication state
@@ -515,10 +585,19 @@ All conversations and model preferences in this workspace are private to your Ni
     let liveGrounding: SearchGrounding | undefined;
 
     try {
-      // Determine whether web search should run: explicitly enabled, or user is querying current news/events
+      const isOmni = currentModel.isOmni || currentModel.id === 'nixima-0.2-omni';
+
+      // Determine whether web search should run: explicitly enabled, current news/events, or Omni autonomous
       const searchAnalysis = cleanUserSearchQuery(userText);
       const isNewsQuery = searchAnalysis.isNewsQuery;
-      const shouldRunWebSearch = settings.webSearchEnabled || isNewsQuery;
+      const shouldRunWebSearch = isOmni
+        ? shouldOmniSearch(userText)
+        : (settings.webSearchEnabled || isNewsQuery);
+
+      // Determine whether deep thinking should run: explicitly enabled, or Omni autonomous
+      const effectiveDeepThink = isOmni
+        ? shouldOmniThink(userText)
+        : settings.deepThinkEnabled;
 
       if (shouldRunWebSearch) {
         try {
@@ -548,7 +627,7 @@ All conversations and model preferences in this workspace are private to your Ni
         language: language,
         model: currentModel,
         customSystemPrompt: settings.systemPrompt,
-        deepThink: settings.deepThinkEnabled,
+        deepThink: effectiveDeepThink,
         webSearch: shouldRunWebSearch,
         searchMode: settings.searchMode || 'standard',
       });
@@ -610,8 +689,8 @@ All conversations and model preferences in this workspace are private to your Ni
         topP: settings.topP,
         maxTokens: settings.maxTokens,
         antiGlitchFilter: settings.antiGlitchFilter !== false,
-        deepThink: settings.deepThinkEnabled,
-        webSearch: settings.webSearchEnabled,
+        deepThink: effectiveDeepThink,
+        webSearch: shouldRunWebSearch,
         searchMode: settings.searchMode || 'standard',
         initialSearchGrounding: liveGrounding,
         callbacks: {
@@ -632,7 +711,7 @@ All conversations and model preferences in this workspace are private to your Ni
             scrollToBottom();
           },
           onThinking: (thinkingChunk) => {
-            if (!settings.deepThinkEnabled) return;
+            if (!effectiveDeepThink && !isOmni) return;
             setConversations(prev => prev.map(c => {
               if (c.id === targetConvId) {
                 return {
@@ -656,7 +735,7 @@ All conversations and model preferences in this workspace are private to your Ni
         fullContent,
         fullThinking,
         currentModel,
-        settings.deepThinkEnabled
+        effectiveDeepThink
       );
 
       const isCreator = currentUser && (
@@ -681,6 +760,8 @@ All conversations and model preferences in this workspace are private to your Ni
         creditsSpent: actualSpent,
       };
 
+      const hasThinkingToDisplay = (effectiveDeepThink || isOmni) && fullThinking.trim().length > 0;
+
       setConversations(prev => prev.map(c => {
         if (c.id === targetConvId) {
           return {
@@ -688,9 +769,9 @@ All conversations and model preferences in this workspace are private to your Ni
             messages: c.messages.map(m => m.id === aiMessageId ? { 
               ...m, 
               content: fullContent,
-              thinking: settings.deepThinkEnabled ? (fullThinking || undefined) : undefined,
+              thinking: hasThinkingToDisplay ? (fullThinking || undefined) : undefined,
               searchGrounding,
-              deepThinkingTelemetry: settings.deepThinkEnabled ? deepThinkingTelemetry : undefined,
+              deepThinkingTelemetry: hasThinkingToDisplay ? deepThinkingTelemetry : undefined,
               isStreaming: false,
               telemetry 
             } : m)
@@ -718,11 +799,12 @@ All conversations and model preferences in this workspace are private to your Ni
         const fallback = generateNiximaResponse({
           prompt: userText,
           model: currentModel,
-          deepThink: settings.deepThinkEnabled,
-          webSearch: settings.webSearchEnabled,
+          deepThink: effectiveDeepThink,
+          webSearch: shouldRunWebSearch,
           searchMode: settings.searchMode || 'standard',
           history: historyForApi
         });
+        const hasFallbackThinking = (effectiveDeepThink || isOmni) && (fallback.thinking || '').trim().length > 0;
         setConversations(prev => prev.map(c => {
           if (c.id === targetConvId) {
             return {
@@ -730,9 +812,9 @@ All conversations and model preferences in this workspace are private to your Ni
               messages: c.messages.map(m => m.id === aiMessageId ? {
                 ...m,
                 content: fallback.response,
-                thinking: settings.deepThinkEnabled ? (fallback.thinking || undefined) : undefined,
+                thinking: hasFallbackThinking ? (fallback.thinking || undefined) : undefined,
                 searchGrounding: liveGrounding || fallback.searchGrounding,
-                deepThinkingTelemetry: settings.deepThinkEnabled ? fallback.deepThinkingTelemetry : undefined,
+                deepThinkingTelemetry: hasFallbackThinking ? fallback.deepThinkingTelemetry : undefined,
                 isStreaming: false,
               } : m)
             };

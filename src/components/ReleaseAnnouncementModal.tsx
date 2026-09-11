@@ -51,6 +51,9 @@ export const ReleaseAnnouncementModal: React.FC<ReleaseAnnouncementModalProps> =
   if (!isOpen) return null;
 
   const getModelIcon = (id: string) => {
+    if (id.includes('omni')) {
+      return <Sparkles className="w-5 h-5 text-cyan-400" />;
+    }
     if (id.includes('pro') || id.includes('reasoning')) {
       return <BrainCircuit className="w-5 h-5 text-purple-400" />;
     }

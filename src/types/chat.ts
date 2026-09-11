@@ -20,6 +20,7 @@ export interface ModelOption {
   strengths: string[];
   parameters: string;
   isFlagship?: boolean;
+  isOmni?: boolean;
   openRouterModel?: string;
   fallbackModels?: string[];
   creditMultiplier?: number;

@@ -46,6 +46,9 @@ export const ReleaseAnnouncementCard: React.FC<ReleaseAnnouncementCardProps> = (
   };
 
   const getModelIcon = (id: string) => {
+    if (id.includes('omni')) {
+      return <Sparkles className="w-4 h-4 text-cyan-400" />;
+    }
     if (id.includes('pro') || id.includes('reasoning')) {
       return <BrainCircuit className="w-4 h-4 text-purple-400" />;
     }

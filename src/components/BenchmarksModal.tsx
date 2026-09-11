@@ -78,6 +78,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
   const currentSuite = BENCHMARK_SUITES.find(s => s.id === selectedSuiteId) || BENCHMARK_SUITES[0];
 
   const getModelColor = (id: string) => {
+    if (id.includes('omni')) return { text: 'text-cyan-400', border: 'border-cyan-500/40', bg: 'bg-cyan-500/10', glow: 'shadow-[0_0_15px_rgba(6,182,212,0.2)]' };
     if (id.includes('pro') || id.includes('reasoning')) return { text: 'text-purple-400', border: 'border-purple-500/40', bg: 'bg-purple-500/10', glow: '' };
     if (id.includes('coder')) return { text: 'text-emerald-400', border: 'border-emerald-500/40', bg: 'bg-emerald-500/10', glow: '' };
     if (id.includes('flash')) return { text: 'text-amber-400', border: 'border-amber-500/40', bg: 'bg-amber-500/10', glow: '' };
@@ -85,6 +86,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
   };
 
   const getModelIcon = (id: string) => {
+    if (id.includes('omni')) return <Sparkles className="w-4 h-4 text-cyan-400" />;
     if (id.includes('pro') || id.includes('reasoning')) return <BrainCircuit className="w-4 h-4 text-purple-400" />;
     if (id.includes('coder')) return <Terminal className="w-4 h-4 text-emerald-400" />;
     if (id.includes('flash')) return <Zap className="w-4 h-4 text-amber-400" />;

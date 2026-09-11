@@ -148,6 +148,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     setAttachedFiles(prev => prev.filter(f => f !== fileName));
   };
 
+  const isOmni = currentModel.isOmni || currentModel.id === 'nixima-0.2-omni';
+
   const modifiers = [
     { label: t.chatInput.modifiers.concise.label, icon: <Zap className="w-3 h-3 text-amber-400" />, prompt: t.chatInput.modifiers.concise.prompt },
     { label: t.chatInput.modifiers.codeOnly.label, icon: <Code2 className="w-3 h-3 text-emerald-400" />, prompt: t.chatInput.modifiers.codeOnly.prompt },
@@ -156,8 +158,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   ];
 
   const estimated = useMemo(() => {
-    return calculateEstimatedCost(input, currentModel, deepThink);
-  }, [input, currentModel, deepThink]);
+    return calculateEstimatedCost(input, currentModel, isOmni ? true : deepThink);
+  }, [input, currentModel, deepThink, isOmni]);
 
   const hasCredits = (userCredits ?? 1000) >= (currentModel.baseCreditCost || 2);
   const canSubmit = (input.trim().length > 0 || attachedFiles.length > 0) && !isLoading && hasCredits;
@@ -240,23 +242,40 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
               <div className="hidden md:block h-3.5 w-[1px] bg-zinc-800 mx-0.5 flex-shrink-0" />
 
-              {/* DeepThinking V2 Mode Toggle (Website Design) */}
-              <button
-                type="button"
-                onClick={onToggleDeepThink}
-                className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-mono transition-all duration-150 border cursor-pointer select-none flex-shrink-0 ${
-                  deepThink 
-                    ? 'bg-zinc-800 text-white font-semibold border-zinc-600 shadow-inner-light scale-[1.02]' 
-                    : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-850/80'
-                }`}
-                title={t.chatInput.deepThinkTooltip}
-              >
-                <BrainCircuit className={`w-3.5 h-3.5 ${deepThink ? 'text-zinc-200' : 'text-zinc-400'}`} />
-                <span className="tracking-tight whitespace-nowrap">{t.chatInput.deepThink}</span>
-                {deepThink && (
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-zinc-300 ml-0.5 flex-shrink-0" />
-                )}
-              </button>
+              {isOmni ? (
+                /* Autonomous Omni Mode Indicator Badge (No manual toggles needed) */
+                <div
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gradient-to-r from-purple-950/40 via-zinc-900/90 to-cyan-950/40 border border-purple-500/30 text-xs font-mono text-zinc-200 select-none shadow-[0_0_14px_rgba(168,85,247,0.15)] flex-shrink-0 cursor-default"
+                  title={t.chatInput.omniTooltip}
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse flex-shrink-0" />
+                  <span className="font-semibold text-zinc-100 tracking-tight whitespace-nowrap">
+                    {t.chatInput.omniBadge}
+                  </span>
+                  <span className="hidden sm:inline-block text-[10px] text-zinc-400 border-l border-zinc-700/60 pl-1.5 font-sans">
+                    Auto-Think & Live-Web
+                  </span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-400 ml-0.5 flex-shrink-0 shadow-[0_0_6px_#22d3ee]" />
+                </div>
+              ) : (
+                <>
+                  {/* DeepThinking V2 Mode Toggle (Website Design) */}
+                  <button
+                    type="button"
+                    onClick={onToggleDeepThink}
+                    className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-mono transition-all duration-150 border cursor-pointer select-none flex-shrink-0 ${
+                      deepThink 
+                        ? 'bg-zinc-800 text-white font-semibold border-zinc-600 shadow-inner-light scale-[1.02]' 
+                        : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-850/80'
+                    }`}
+                    title={t.chatInput.deepThinkTooltip}
+                  >
+                    <BrainCircuit className={`w-3.5 h-3.5 ${deepThink ? 'text-zinc-200' : 'text-zinc-400'}`} />
+                    <span className="tracking-tight whitespace-nowrap">{t.chatInput.deepThink}</span>
+                    {deepThink && (
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-zinc-300 ml-0.5 flex-shrink-0" />
+                    )}
+                  </button>
 
               {/* Search V2 Engine Control (Fast, Standard, Mega + Model Pairing) */}
               <div className="relative flex items-center flex-shrink-0 z-30" ref={searchMenuRef}>
@@ -487,6 +506,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   </div>
                 )}
               </div>
+                </>
+              )}
 
               {/* Audio Keystroke Sound Toggle */}
               <button

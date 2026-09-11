@@ -86,6 +86,7 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   const getModelIcon = (id: string) => {
+    if (id.includes('omni')) return <Sparkles className="w-4 h-4 text-cyan-400" />;
     if (id.includes('pro') || id.includes('reasoning')) return <BrainCircuit className="w-4 h-4 text-purple-400" />;
     if (id.includes('coder')) return <Terminal className="w-4 h-4 text-emerald-400" />;
     if (id.includes('flash')) return <Zap className="w-4 h-4 text-amber-400" />;

@@ -158,7 +158,7 @@ export const NiximaWordmark: React.FC<NiximaWordmarkProps> = ({
   );
 };
 
-const BRAND_TOKEN_REGEX = /\b(Nixima(?:\s+AI|-0\.[12](?:\s+(?:Pro|Coder|Flash|Flagship))?|\s+ID|\s+Credits)?|NIXIMA(?:\s+AI|-0\.[12]|\s+ID)?)\b|(Ніксіма(?:\s+ШІ)?)/gi;
+const BRAND_TOKEN_REGEX = /\b(Nixima(?:\s+AI|-0\.[12]O?(?:\s+(?:Pro|Coder|Flash|Flagship|Omni))?|\s+Omni|\s+ID|\s+Credits)?|NIXIMA(?:\s+AI|-0\.[12]O?|\s+ID)?)\b|(Ніксіма(?:\s+ШІ)?)/gi;
 
 export interface RenderBrandOptions {
   keyPrefix?: string;
@@ -166,7 +166,7 @@ export interface RenderBrandOptions {
 }
 
 /**
- * Scans any text string for "Nixima", "Nixima AI", "Nixima-0.2", "Nixima ID", etc.
+ * Scans any text string for "Nixima", "Nixima AI", "Nixima-0.2", "Nixima-0.2O", "Nixima ID", etc.
  * and elevates matching brand occurrences into the custom geometric brand typeface with metallic luster.
  */
 export function renderWithNiximaBrand(
@@ -200,12 +200,19 @@ export function renderWithNiximaBrand(
       );
     }
 
-    if (/^Nixima-0\.[12](?:\s+(?:Pro|Coder|Flash|Flagship))?$/i.test(part)) {
+    if (/^Nixima-0\.[12]O?(?:\s+(?:Pro|Coder|Flash|Flagship|Omni))?$/i.test(part) || /^Nixima\s+Omni$/i.test(part)) {
       const suffix = part.replace(/^Nixima/i, '');
+      const isOmni = /Omni|0\.2O/i.test(part);
       return (
         <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline font-nixima font-extrabold tracking-tight select-none">
           <span className="nixima-wordmark-sheen drop-shadow-[0_1px_4px_rgba(255,255,255,0.22)]">Nixima</span>
-          <span className="font-mono text-[0.85em] font-medium text-zinc-300 ml-0.5">{suffix}</span>
+          {isOmni ? (
+            <span className="font-mono text-[0.85em] font-semibold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 ml-0.5 drop-shadow-[0_0_8px_rgba(34,211,238,0.3)]">
+              {suffix}
+            </span>
+          ) : (
+            <span className="font-mono text-[0.85em] font-medium text-zinc-300 ml-0.5">{suffix}</span>
+          )}
         </span>
       );
     }

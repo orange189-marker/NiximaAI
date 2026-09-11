@@ -2,6 +2,34 @@ import { ModelOption, SearchMode } from '../types/chat';
 
 export const NIXIMA_MODELS: ModelOption[] = [
   {
+    id: 'nixima-0.2-omni',
+    name: 'Nixima-0.2O',
+    shortName: '0.2O Omni',
+    badge: 'OMNI ALL-IN-ONE',
+    description: 'Sovereign frontier all-in-one multimodal intelligence combining deep epistemic reasoning, production systems engineering, live web search synthesis, and ultra-high throughput with zero manual toggles required.',
+    contextWindow: '1,000,000 tokens',
+    latency: '~18 ms / token',
+    strengths: ['Omni Sovereign Intelligence', 'Autonomous Reasoning & Web Grounding', 'Zero Manual Toggles Required', '1M Context Adaptive Throughput'],
+    parameters: 'Omni Sovereign Multi-Expert Core',
+    isOmni: true,
+    openRouterModel: 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+    fallbackModels: [
+      'openrouter/free',
+      'nvidia/nemotron-3.5-lightning:free',
+      'cohere/north-mini-code:free'
+    ],
+    creditMultiplier: 1.8,
+    baseCreditCost: 8,
+    searchOptimization: {
+      recommendedMode: 'standard',
+      badge: 'AUTONOMOUS OMNI SEARCH',
+      role: 'Self-directing web synthesis across news, academic, and code registries',
+      searchThroughput: 'Adaptive (~90ms)',
+      searchStrengths: ['Autonomous triggering on demand', 'Unified reasoning & web grounding', 'Instantaneous source distillation'],
+      searchRating: '99.5%'
+    }
+  },
+  {
     id: 'nixima-0.2',
     name: 'Nixima-0.2',
     shortName: '0.2 Default',
@@ -108,7 +136,7 @@ export const NIXIMA_MODELS: ModelOption[] = [
   }
 ];
 
-export const DEFAULT_MODEL = NIXIMA_MODELS[0];
+export const DEFAULT_MODEL = NIXIMA_MODELS.find(m => m.id === 'nixima-0.2') || NIXIMA_MODELS[0];
 export const MODELS = NIXIMA_MODELS;
 
 // Helper to look up recommended model for a given search mode
@@ -129,12 +157,14 @@ export function getModelById(id: string): ModelOption {
   const directMatch = NIXIMA_MODELS.find(m => m.id === id);
   if (directMatch) return directMatch;
 
-  // Legacy 0.1 mappings
+  // Legacy mappings
   const legacyMap: Record<string, string> = {
     'nixima-0.1': 'nixima-0.2',
     'nixima-0.1-reasoning': 'nixima-0.2-pro',
     'nixima-0.1-coder': 'nixima-0.2-coder',
     'nixima-0.1-flash': 'nixima-0.2-flash',
+    'nixima-0.2-o': 'nixima-0.2-omni',
+    'nixima-omni': 'nixima-0.2-omni',
   };
 
   const mappedId = legacyMap[id];
