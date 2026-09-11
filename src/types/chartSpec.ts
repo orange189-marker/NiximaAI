@@ -46,6 +46,12 @@ export interface NiximaChartSpec {
   functionParams?: FunctionPlotParams;
   // For demographic age pyramids
   pyramidData?: PyramidCohort[];
+  // Customization & styling overrides
+  accentColor?: string; // e.g. 'orange', '#f97316', 'cyan', 'purple', etc.
+  chartSize?: 'compact' | 'normal' | 'large';
+  scale?: number; // scale multiplier e.g. 0.8 to 1.5
+  showGrid?: boolean;
+  showValues?: boolean;
   // Raw source
   sourceDescription?: string;
 }
@@ -171,6 +177,11 @@ function normalizeChartSpec(raw: any): NiximaChartSpec | null {
     datasets,
     functionParams,
     pyramidData,
+    accentColor: raw.accentColor || raw.color,
+    chartSize: raw.chartSize || (raw.size === 'small' ? 'compact' : raw.size === 'big' || raw.size === 'large' ? 'large' : undefined),
+    scale: typeof raw.scale === 'number' ? raw.scale : undefined,
+    showGrid: raw.showGrid !== undefined ? Boolean(raw.showGrid) : undefined,
+    showValues: raw.showValues !== undefined ? Boolean(raw.showValues) : undefined,
     sourceDescription: raw.sourceDescription ? String(raw.sourceDescription) : undefined,
   };
 }

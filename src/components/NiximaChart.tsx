@@ -13,19 +13,33 @@ import {
   Activity, 
   Layers,
   ArrowRight,
-  Info
+  Info,
+  Sliders,
+  Palette,
+  Send,
+  RotateCcw,
+  Zap
 } from 'lucide-react';
 import { NiximaChartSpec, ChartType, PyramidCohort } from '../types/chartSpec';
 import { useLanguage } from '../context/LanguageContext';
-import { playCompletionChime } from '../utils/sound';
+import { playCompletionChime, playTypingTick } from '../utils/sound';
 
 interface NiximaChartProps {
   spec: NiximaChartSpec;
   rawCode?: string;
   className?: string;
+  onActionPrompt?: (prompt: string) => void;
 }
 
-export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, className = '' }) => {
+type ColorPreset = 'orange' | 'cyan' | 'purple' | 'emerald' | 'amber' | 'rose';
+type SizePreset = 'compact' | 'normal' | 'large';
+
+export const NiximaChart: React.FC<NiximaChartProps> = ({ 
+  spec, 
+  rawCode, 
+  className = '',
+  onActionPrompt 
+}) => {
   const { language } = useLanguage();
   const [activeType, setActiveType] = useState<ChartType>(spec.type);
   const [viewMode, setViewMode] = useState<'chart' | 'table'>('chart');
@@ -33,11 +47,113 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
   const [copiedSpec, setCopiedSpec] = useState(false);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [mathHoverX, setMathHoverX] = useState<number | null>(null);
+  const [showCustomizer, setShowCustomizer] = useState(false);
+  const [customPromptText, setCustomPromptText] = useState('');
+
+  // 1. Dynamic Color Customization
+  const initialColor = (spec.accentColor?.toLowerCase() || 'cyan') as ColorPreset;
+  const [selectedColor, setSelectedColor] = useState<ColorPreset>(
+    ['orange', 'cyan', 'purple', 'emerald', 'amber', 'rose'].includes(initialColor) ? initialColor : 'cyan'
+  );
+
+  // 2. Dynamic Sizing & Scale Customization
+  const [selectedSize, setSelectedSize] = useState<SizePreset>(spec.chartSize || 'normal');
+
+  // 3. Live Mathematical Function Sliders
+  const initialSlope = spec.functionParams?.slope ?? 2;
+  const initialIntercept = spec.functionParams?.intercept ?? 1;
+  const [mathSlope, setMathSlope] = useState<number>(initialSlope);
+  const [mathIntercept, setMathIntercept] = useState<number>(initialIntercept);
+
   const svgRef = useRef<SVGSVGElement>(null);
 
+  // Palette theme configuration
+  const themes = {
+    orange: {
+      name: 'Orange',
+      solid: '#f97316',
+      stroke: '#f97316',
+      glow: 'rgba(249, 115, 22, 0.6)',
+      gradStart: '#ea580c',
+      gradEnd: '#fbbf24',
+      bgPill: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
+      fillGradId: 'grad-orange-fill',
+      strokeGradId: 'grad-orange-stroke',
+    },
+    cyan: {
+      name: 'Cyan',
+      solid: '#38bdf8',
+      stroke: '#38bdf8',
+      glow: 'rgba(56, 189, 248, 0.6)',
+      gradStart: '#0284c7',
+      gradEnd: '#38bdf8',
+      bgPill: 'bg-cyan-500/10 text-cyan-400 border-cyan-500/20',
+      fillGradId: 'grad-cyan-fill',
+      strokeGradId: 'grad-cyan-stroke',
+    },
+    purple: {
+      name: 'Purple',
+      solid: '#a855f7',
+      stroke: '#a855f7',
+      glow: 'rgba(168, 85, 247, 0.6)',
+      gradStart: '#7e22ce',
+      gradEnd: '#c084fc',
+      bgPill: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+      fillGradId: 'grad-purple-fill',
+      strokeGradId: 'grad-purple-stroke',
+    },
+    emerald: {
+      name: 'Emerald',
+      solid: '#10b981',
+      stroke: '#10b981',
+      glow: 'rgba(16, 185, 129, 0.6)',
+      gradStart: '#047857',
+      gradEnd: '#34d399',
+      bgPill: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+      fillGradId: 'grad-emerald-fill',
+      strokeGradId: 'grad-emerald-stroke',
+    },
+    amber: {
+      name: 'Amber',
+      solid: '#f59e0b',
+      stroke: '#f59e0b',
+      glow: 'rgba(245, 158, 11, 0.6)',
+      gradStart: '#b45309',
+      gradEnd: '#fbbf24',
+      bgPill: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+      fillGradId: 'grad-amber-fill',
+      strokeGradId: 'grad-amber-stroke',
+    },
+    rose: {
+      name: 'Rose',
+      solid: '#f43f5e',
+      stroke: '#f43f5e',
+      glow: 'rgba(244, 63, 94, 0.6)',
+      gradStart: '#be123c',
+      gradEnd: '#fb7185',
+      bgPill: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+      fillGradId: 'grad-rose-fill',
+      strokeGradId: 'grad-rose-stroke',
+    },
+  };
+
+  const activeTheme = themes[selectedColor] || themes.cyan;
+
   const handleCopySpec = () => {
-    const textToCopy = rawCode || JSON.stringify(spec, null, 2);
-    navigator.clipboard.writeText(textToCopy);
+    const updatedSpec = {
+      ...spec,
+      accentColor: selectedColor,
+      chartSize: selectedSize,
+      ...(activeType === 'function' ? {
+        functionParams: {
+          ...spec.functionParams,
+          slope: mathSlope,
+          intercept: mathIntercept,
+          equation: `f(x) = ${mathSlope}x ${mathIntercept >= 0 ? '+ ' + mathIntercept : '- ' + Math.abs(mathIntercept)}`
+        }
+      } : {})
+    };
+    navigator.clipboard.writeText(JSON.stringify(updatedSpec, null, 2));
     setCopiedSpec(true);
     playCompletionChime();
     setTimeout(() => setCopiedSpec(false), 2000);
@@ -59,14 +175,12 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
     playCompletionChime();
   };
 
-  // Color palette for multiple series
-  const defaultColors = [
-    { stroke: '#38bdf8', fill: 'url(#gradient-cyan)', solid: '#38bdf8' }, // Sky/Cyan
-    { stroke: '#a855f7', fill: 'url(#gradient-purple)', solid: '#a855f7' }, // Purple
-    { stroke: '#10b981', fill: 'url(#gradient-emerald)', solid: '#10b981' }, // Emerald
-    { stroke: '#f59e0b', fill: 'url(#gradient-amber)', solid: '#f59e0b' }, // Amber
-    { stroke: '#ec4899', fill: 'url(#gradient-pink)', solid: '#ec4899' }, // Pink
-  ];
+  const handleSendPromptAdjustment = (promptText: string) => {
+    if (!promptText.trim() || !onActionPrompt) return;
+    onActionPrompt(promptText.trim());
+    setCustomPromptText('');
+    playTypingTick();
+  };
 
   // Primary dataset extraction
   const labels = spec.labels || [];
@@ -86,9 +200,8 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
     });
     if (min === Infinity) min = 0;
     if (max === -Infinity) max = 100;
-    // Anchor to zero if positive
     const adjustedMin = min > 0 ? 0 : min;
-    const adjustedMax = max === 0 ? 10 : max * 1.1; // 10% headroom
+    const adjustedMax = max === 0 ? 10 : max * 1.1;
     return { minValue: adjustedMin, maxValue: adjustedMax };
   }, [datasets]);
 
@@ -104,62 +217,52 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
     return formatted;
   };
 
+  // Sizing definitions
+  const sizeConfig = {
+    compact: { svgHeight: 220, pyramidRowH: 'h-4', pyramidMaxW: 'max-w-[130px]', labelSize: 'text-[9px]' },
+    normal: { svgHeight: 280, pyramidRowH: 'h-5', pyramidMaxW: 'max-w-[190px]', labelSize: 'text-[10px]' },
+    large: { svgHeight: 380, pyramidRowH: 'h-7', pyramidMaxW: 'max-w-[270px]', labelSize: 'text-xs' },
+  }[selectedSize];
+
   // -------------------------------------------------------------
-  // RENDERER 1: MATHEMATICAL FUNCTION PLOTTER
+  // RENDERER 1: MATHEMATICAL FUNCTION PLOTTER (WITH LIVE SLIDERS)
   // -------------------------------------------------------------
   const renderFunctionPlot = () => {
     const width = 600;
-    const height = 340;
+    const height = sizeConfig.svgHeight;
     const padding = 45;
 
-    // Parse slope and intercept if linear: f(x) = mx + b
     const fnParams = spec.functionParams || { equation: 'f(x) = 2x + 1' };
-    let slope = fnParams.slope;
-    let intercept = fnParams.intercept;
-
-    if (slope === undefined || intercept === undefined) {
-      // Try to parse from equation string: e.g. "f(x) = 2x + 1" or "y = -0.5x - 4"
-      const eq = (fnParams.equation || '').replace(/\s+/g, '');
-      const match = eq.match(/(?:f\(x\)|y)=?([+-]?\d*\.?\d*)x([+-]\d*\.?\d*)?/i);
-      if (match) {
-        const mStr = match[1];
-        slope = mStr === '' || mStr === '+' ? 1 : mStr === '-' ? -1 : parseFloat(mStr);
-        intercept = match[2] ? parseFloat(match[2]) : 0;
-      } else {
-        slope = 2;
-        intercept = 1;
-      }
-    }
+    const slope = mathSlope;
+    const intercept = mathIntercept;
 
     const xMin = fnParams.xRange?.[0] ?? -10;
     const xMax = fnParams.xRange?.[1] ?? 10;
     const yMin = fnParams.yRange?.[0] ?? -10;
     const yMax = fnParams.yRange?.[1] ?? 10;
 
-    // Coordinate transforms
     const toSvgX = (x: number) => padding + ((x - xMin) / (xMax - xMin)) * (width - 2 * padding);
     const toSvgY = (y: number) => height - padding - ((y - yMin) / (yMax - yMin)) * (height - 2 * padding);
-
     const fromSvgX = (svgX: number) => xMin + ((svgX - padding) / (width - 2 * padding)) * (xMax - xMin);
 
     const originX = toSvgX(0);
     const originY = toSvgY(0);
 
-    // Compute line endpoints clipped to xMin, xMax
     const p1x = xMin;
     const p1y = slope * p1x + intercept;
     const p2x = xMax;
     const p2y = slope * p2x + intercept;
 
-    // Root (x-intercept): y = 0 => x = -b / m
     const rootX = slope !== 0 ? -intercept / slope : null;
 
-    // Interactive hover evaluation
     const currentX = mathHoverX !== null ? mathHoverX : 2;
     const currentY = slope * currentX + intercept;
 
+    const displayEquation = `f(x) = ${slope === 1 ? '' : slope === -1 ? '-' : slope}x ${intercept > 0 ? '+ ' + intercept : intercept < 0 ? '- ' + Math.abs(intercept) : ''}`;
+
     return (
       <div className="space-y-4">
+        {/* SVG Cartesian Canvas */}
         <div className="relative w-full overflow-hidden rounded-xl bg-zinc-950/80 border border-zinc-800 p-2 select-none">
           <svg
             ref={svgRef}
@@ -177,9 +280,9 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
               <pattern id="grid-pattern" width="25" height="25" patternUnits="userSpaceOnUse">
                 <path d="M 25 0 L 0 0 0 25" fill="none" stroke="rgba(255, 255, 255, 0.05)" strokeWidth="1" />
               </pattern>
-              <linearGradient id="math-line-grad" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#38bdf8" />
-                <stop offset="100%" stopColor="#a855f7" />
+              <linearGradient id={activeTheme.strokeGradId} x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor={activeTheme.gradStart} />
+                <stop offset="100%" stopColor={activeTheme.gradEnd} />
               </linearGradient>
             </defs>
 
@@ -218,63 +321,122 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
               y1={toSvgY(p1y)}
               x2={toSvgX(p2x)}
               y2={toSvgY(p2y)}
-              stroke="url(#math-line-grad)"
-              strokeWidth="3"
+              stroke={`url(#${activeTheme.strokeGradId})`}
+              strokeWidth="3.5"
               strokeLinecap="round"
-              className="filter drop-shadow-[0_0_8px_rgba(56,189,248,0.5)]"
+              style={{ filter: `drop-shadow(0 0 8px ${activeTheme.glow})` }}
             />
 
-            {/* Key Points: Y-Intercept (0, b) */}
-            <circle cx={toSvgX(0)} cy={toSvgY(intercept)} r="4.5" fill="#38bdf8" stroke="#ffffff" strokeWidth="1.5" />
+            {/* Y-Intercept Point */}
+            <circle cx={toSvgX(0)} cy={toSvgY(intercept)} r="5" fill={activeTheme.solid} stroke="#ffffff" strokeWidth="1.5" />
 
-            {/* Key Points: X-Intercept (Root) */}
+            {/* X-Intercept Point */}
             {rootX !== null && rootX >= xMin && rootX <= xMax && (
-              <circle cx={toSvgX(rootX)} cy={toSvgY(0)} r="4.5" fill="#a855f7" stroke="#ffffff" strokeWidth="1.5" />
+              <circle cx={toSvgX(rootX)} cy={toSvgY(0)} r="5" fill="#a855f7" stroke="#ffffff" strokeWidth="1.5" />
             )}
 
-            {/* Active Hover Crosshair & Indicator Point */}
+            {/* Hover Indicator */}
             {mathHoverX !== null && (
               <g>
-                <line x1={toSvgX(currentX)} y1={padding} x2={toSvgX(currentX)} y2={height - padding} stroke="#38bdf8" strokeWidth="1" strokeDasharray="3 3" opacity="0.6" />
-                <line x1={padding} y1={toSvgY(currentY)} x2={width - padding} y2={toSvgY(currentY)} stroke="#38bdf8" strokeWidth="1" strokeDasharray="3 3" opacity="0.6" />
-                <circle cx={toSvgX(currentX)} cy={toSvgY(currentY)} r="6" fill="#38bdf8" stroke="#ffffff" strokeWidth="2" className="animate-pulse" />
+                <line x1={toSvgX(currentX)} y1={padding} x2={toSvgX(currentX)} y2={height - padding} stroke={activeTheme.solid} strokeWidth="1" strokeDasharray="3 3" opacity="0.6" />
+                <line x1={padding} y1={toSvgY(currentY)} x2={width - padding} y2={toSvgY(currentY)} stroke={activeTheme.solid} strokeWidth="1" strokeDasharray="3 3" opacity="0.6" />
+                <circle cx={toSvgX(currentX)} cy={toSvgY(currentY)} r="6" fill={activeTheme.solid} stroke="#ffffff" strokeWidth="2" />
               </g>
             )}
           </svg>
 
-          {/* Interactive Floating Hover Pill */}
-          <div className="absolute top-4 right-4 bg-zinc-900/90 backdrop-blur-md border border-zinc-700/80 px-3 py-2 rounded-xl text-xs font-mono shadow-xl space-y-1">
-            <div className="flex items-center gap-2 text-cyan-400 font-bold">
-              <Activity className="w-3.5 h-3.5" />
-              <span>Point Coordinates</span>
+          {/* Coordinate Pill */}
+          <div className="absolute top-3 right-3 bg-zinc-900/90 backdrop-blur-md border border-zinc-700/80 px-3 py-1.5 rounded-xl text-xs font-mono shadow-xl space-y-0.5">
+            <div className="flex items-center gap-1.5 font-bold" style={{ color: activeTheme.solid }}>
+              <Activity className="w-3 h-3" />
+              <span>(x, y)</span>
             </div>
             <div className="text-zinc-200">
-              x = <span className="text-white font-bold">{currentX.toFixed(2)}</span>
-            </div>
-            <div className="text-zinc-200">
-              y = <span className="text-white font-bold">{currentY.toFixed(2)}</span>
+              x: <strong className="text-white">{currentX.toFixed(2)}</strong> | y: <strong className="text-white">{currentY.toFixed(2)}</strong>
             </div>
           </div>
         </div>
 
-        {/* Function Telemetry & Formula Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs font-mono">
-          <div className="p-2.5 rounded-xl bg-zinc-900/70 border border-zinc-800 space-y-0.5">
-            <span className="text-[10px] text-zinc-400 uppercase tracking-wider">Equation</span>
-            <div className="text-sm font-bold text-white tracking-tight">{fnParams.equation}</div>
+        {/* Live Interactive Parameter Sliders (Slope & Intercept) */}
+        <div className="p-3.5 rounded-xl bg-zinc-900/70 border border-zinc-800 space-y-3 font-mono text-xs">
+          <div className="flex items-center justify-between">
+            <span className="font-bold text-white uppercase tracking-wider flex items-center gap-1.5 text-[11px]">
+              <Sliders className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Interactive Parameter Tuning</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => {
+                setMathSlope(initialSlope);
+                setMathIntercept(initialIntercept);
+              }}
+              className="text-[10px] text-zinc-400 hover:text-white flex items-center gap-1 cursor-pointer transition-colors"
+              title="Reset parameters to initial equation"
+            >
+              <RotateCcw className="w-3 h-3" />
+              <span>Reset</span>
+            </button>
           </div>
-          <div className="p-2.5 rounded-xl bg-zinc-900/70 border border-zinc-800 space-y-0.5">
-            <span className="text-[10px] text-zinc-400 uppercase tracking-wider">Slope (m)</span>
-            <div className="text-sm font-bold text-cyan-400">
-              {slope >= 0 ? `+${slope.toFixed(2)}` : slope.toFixed(2)}
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Slope Slider */}
+            <div className="space-y-1">
+              <div className="flex justify-between text-[11px]">
+                <span className="text-zinc-400">Slope (m):</span>
+                <span className="text-white font-bold" style={{ color: activeTheme.solid }}>
+                  {mathSlope >= 0 ? `+${mathSlope.toFixed(2)}` : mathSlope.toFixed(2)}
+                </span>
+              </div>
+              <input
+                type="range"
+                min="-5"
+                max="5"
+                step="0.25"
+                value={mathSlope}
+                onChange={(e) => setMathSlope(parseFloat(e.target.value))}
+                className="w-full accent-orange-500 h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+              />
+            </div>
+
+            {/* Y-Intercept Slider */}
+            <div className="space-y-1">
+              <div className="flex justify-between text-[11px]">
+                <span className="text-zinc-400">Y-Intercept (b):</span>
+                <span className="text-white font-bold text-purple-400">
+                  {mathIntercept >= 0 ? `+${mathIntercept.toFixed(2)}` : mathIntercept.toFixed(2)}
+                </span>
+              </div>
+              <input
+                type="range"
+                min="-8"
+                max="8"
+                step="0.5"
+                value={mathIntercept}
+                onChange={(e) => setMathIntercept(parseFloat(e.target.value))}
+                className="w-full accent-purple-500 h-1.5 bg-zinc-800 rounded-lg appearance-none cursor-pointer"
+              />
             </div>
           </div>
-          <div className="p-2.5 rounded-xl bg-zinc-900/70 border border-zinc-800 space-y-0.5">
+        </div>
+
+        {/* Telemetry Summary Cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 text-xs font-mono">
+          <div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-0.5">
+            <span className="text-[10px] text-zinc-400 uppercase tracking-wider">Formula</span>
+            <div className="text-xs sm:text-sm font-bold text-white tracking-tight truncate">{displayEquation}</div>
+          </div>
+          <div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-0.5">
+            <span className="text-[10px] text-zinc-400 uppercase tracking-wider">Slope (m)</span>
+            <div className="text-sm font-bold" style={{ color: activeTheme.solid }}>
+              {mathSlope >= 0 ? `+${mathSlope.toFixed(2)}` : mathSlope.toFixed(2)}
+            </div>
+          </div>
+          <div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-0.5">
             <span className="text-[10px] text-zinc-400 uppercase tracking-wider">Y-Intercept (0, b)</span>
             <div className="text-sm font-bold text-purple-400">(0, {intercept.toFixed(2)})</div>
           </div>
-          <div className="p-2.5 rounded-xl bg-zinc-900/70 border border-zinc-800 space-y-0.5">
-            <span className="text-[10px] text-zinc-400 uppercase tracking-wider">Root (x-intercept)</span>
+          <div className="p-2.5 rounded-xl bg-zinc-900/60 border border-zinc-800 space-y-0.5">
+            <span className="text-[10px] text-zinc-400 uppercase tracking-wider">Root (x-int)</span>
             <div className="text-sm font-bold text-emerald-400">
               {rootX !== null ? `(${rootX.toFixed(2)}, 0)` : 'None'}
             </div>
@@ -285,7 +447,7 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
   };
 
   // -------------------------------------------------------------
-  // RENDERER 2: DEMOGRAPHIC POPULATION PYRAMID
+  // RENDERER 2: DEMOGRAPHIC POPULATION PYRAMID (WITH RESIZING)
   // -------------------------------------------------------------
   const renderPopulationPyramid = () => {
     const cohorts: PyramidCohort[] = spec.pyramidData || [
@@ -309,8 +471,8 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
       <div className="space-y-4">
         {/* Pyramid Legend */}
         <div className="flex items-center justify-between text-xs font-mono px-2">
-          <div className="flex items-center gap-2 text-cyan-400 font-bold">
-            <span className="w-3 h-3 rounded-sm bg-cyan-500 shadow-[0_0_8px_rgba(6,182,212,0.6)]" />
+          <div className="flex items-center gap-2 font-bold" style={{ color: activeTheme.solid }}>
+            <span className="w-3 h-3 rounded-sm shadow-sm" style={{ backgroundColor: activeTheme.solid }} />
             <span>MALE ({((totalMale / grandTotal) * 100).toFixed(1)}%)</span>
           </div>
           <span className="text-[11px] text-zinc-400 uppercase tracking-widest font-semibold">AGE COHORT</span>
@@ -321,7 +483,7 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
         </div>
 
         {/* Pyramid Horizontal Rows */}
-        <div className="space-y-1.5 p-3 rounded-xl bg-zinc-950/80 border border-zinc-800">
+        <div className="space-y-1.5 p-3 sm:p-4 rounded-xl bg-zinc-950/80 border border-zinc-800 transition-all duration-300">
           {cohorts.map((c, idx) => {
             const maleWidth = (c.male / maxCohortVal) * 100;
             const femaleWidth = (c.female / maxCohortVal) * 100;
@@ -332,17 +494,21 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
                 key={c.ageCohort}
                 onMouseEnter={() => setHoveredIndex(idx)}
                 onMouseLeave={() => setHoveredIndex(null)}
-                className={`flex items-center gap-2 py-1 px-2 rounded-lg transition-all duration-150 cursor-pointer ${
+                className={`flex items-center gap-2 py-0.5 px-2 rounded-lg transition-all duration-150 cursor-pointer ${
                   isHovered ? 'bg-zinc-800/80' : 'hover:bg-zinc-900/50'
                 }`}
               >
-                {/* Male Bar (Grows from Right to Left) */}
+                {/* Male Bar (Left) */}
                 <div className="flex-1 flex justify-end items-center gap-2">
-                  <span className="text-[10px] font-mono text-zinc-400 font-medium">{c.male}</span>
-                  <div className="w-full max-w-[160px] sm:max-w-[200px] h-5 bg-zinc-900 rounded overflow-hidden flex justify-end">
+                  <span className={`${sizeConfig.labelSize} font-mono text-zinc-400 font-medium`}>{c.male}</span>
+                  <div className={`w-full ${sizeConfig.pyramidMaxW} ${sizeConfig.pyramidRowH} bg-zinc-900 rounded overflow-hidden flex justify-end transition-all duration-300`}>
                     <div
-                      style={{ width: `${maleWidth}%` }}
-                      className="h-full bg-gradient-to-l from-cyan-400 to-blue-600 rounded-l transition-all duration-300"
+                      style={{ 
+                        width: `${maleWidth}%`,
+                        backgroundColor: activeTheme.solid,
+                        filter: isHovered ? `drop-shadow(0 0 8px ${activeTheme.glow})` : undefined
+                      }}
+                      className="h-full rounded-l transition-all duration-300"
                     />
                   </div>
                 </div>
@@ -352,15 +518,15 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
                   {c.ageCohort}
                 </div>
 
-                {/* Female Bar (Grows from Left to Right) */}
+                {/* Female Bar (Right) */}
                 <div className="flex-1 flex justify-start items-center gap-2">
-                  <div className="w-full max-w-[160px] sm:max-w-[200px] h-5 bg-zinc-900 rounded overflow-hidden flex justify-start">
+                  <div className={`w-full ${sizeConfig.pyramidMaxW} ${sizeConfig.pyramidRowH} bg-zinc-900 rounded overflow-hidden flex justify-start transition-all duration-300`}>
                     <div
                       style={{ width: `${femaleWidth}%` }}
                       className="h-full bg-gradient-to-r from-purple-400 to-pink-600 rounded-r transition-all duration-300"
                     />
                   </div>
-                  <span className="text-[10px] font-mono text-zinc-400 font-medium">{c.female}</span>
+                  <span className={`${sizeConfig.labelSize} font-mono text-zinc-400 font-medium`}>{c.female}</span>
                 </div>
               </div>
             );
@@ -370,8 +536,8 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
         {/* Pyramid Demographics Telemetry */}
         <div className="p-3 rounded-xl bg-zinc-900/50 border border-zinc-800 flex items-center justify-between text-xs font-mono text-zinc-400">
           <div className="flex items-center gap-1.5">
-            <Info className="w-4 h-4 text-cyan-400" />
-            <span>Demographic Structure: <strong className="text-white">Constrictive / Modern Transition</strong></span>
+            <Info className="w-4 h-4" style={{ color: activeTheme.solid }} />
+            <span>Demographic Structure: <strong className="text-white">Constrictive / Aging Transition</strong></span>
           </div>
           <div>
             Sex Ratio: <strong className="text-white">{(totalMale / totalFemale).toFixed(3)} M/F</strong>
@@ -382,13 +548,12 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
   };
 
   // -------------------------------------------------------------
-  // RENDERER 3: BAR / HORIZONTAL BAR CHART (e.g. GDP Rankings)
+  // RENDERER 3: BAR / HORIZONTAL BAR CHART (WITH ACCENT COLOR)
   // -------------------------------------------------------------
   const renderBarChart = (isHorizontal: boolean = false) => {
     if (isHorizontal) {
-      // Horizontal Bar layout (Perfect for ranked lists like World GDP)
       return (
-        <div className="space-y-2 p-3 rounded-xl bg-zinc-950/80 border border-zinc-800">
+        <div className="space-y-2 p-3 sm:p-4 rounded-xl bg-zinc-950/80 border border-zinc-800 transition-all">
           {labels.map((label, idx) => {
             const val = primaryData[idx] ?? 0;
             const percentage = maxValue > 0 ? (val / maxValue) * 100 : 0;
@@ -408,12 +573,16 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
                     <span className="text-zinc-500 font-bold w-5">{idx + 1}.</span>
                     <span className="text-white font-semibold">{label}</span>
                   </div>
-                  <span className="text-cyan-400 font-bold">{formatVal(val)}</span>
+                  <span className="font-bold" style={{ color: activeTheme.solid }}>{formatVal(val)}</span>
                 </div>
                 <div className="w-full h-3.5 bg-zinc-900 rounded-full overflow-hidden p-0.5 border border-zinc-800/80">
                   <div
-                    style={{ width: `${Math.max(percentage, 2)}%` }}
-                    className="h-full rounded-full bg-gradient-to-r from-blue-600 via-cyan-400 to-teal-300 transition-all duration-500 shadow-[0_0_12px_rgba(56,189,248,0.3)]"
+                    style={{ 
+                      width: `${Math.max(percentage, 2)}%`,
+                      backgroundColor: activeTheme.solid,
+                      boxShadow: isHovered ? `0 0 12px ${activeTheme.glow}` : undefined
+                    }}
+                    className="h-full rounded-full transition-all duration-500"
                   />
                 </div>
               </div>
@@ -423,9 +592,8 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
       );
     }
 
-    // Vertical Bar Chart
     const svgWidth = 600;
-    const svgHeight = 280;
+    const svgHeight = sizeConfig.svgHeight;
     const paddingLeft = 50;
     const paddingBottom = 40;
     const paddingTop = 20;
@@ -433,7 +601,7 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
 
     const chartWidth = svgWidth - paddingLeft - paddingRight;
     const chartHeight = svgHeight - paddingTop - paddingBottom;
-    const barWidth = Math.min(36, (chartWidth / labels.length) * 0.65);
+    const barWidth = Math.min(42, (chartWidth / labels.length) * 0.65);
 
     return (
       <div className="relative w-full overflow-hidden rounded-xl bg-zinc-950/80 border border-zinc-800 p-2">
@@ -443,9 +611,9 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
           className="w-full h-auto select-none"
         >
           <defs>
-            <linearGradient id="bar-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#38bdf8" />
-              <stop offset="100%" stopColor="#1d4ed8" />
+            <linearGradient id={activeTheme.fillGradId} x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor={activeTheme.solid} />
+              <stop offset="100%" stopColor={activeTheme.gradStart} />
             </linearGradient>
           </defs>
 
@@ -484,7 +652,8 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
                   width={barWidth}
                   height={barHeight}
                   rx="4"
-                  fill={isHovered ? '#67e8f9' : 'url(#bar-grad)'}
+                  fill={`url(#${activeTheme.fillGradId})`}
+                  style={{ filter: isHovered ? `drop-shadow(0 0 10px ${activeTheme.glow})` : undefined }}
                   className="transition-all duration-200"
                 />
                 <text
@@ -503,11 +672,10 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
           })}
         </svg>
 
-        {/* Hover Tooltip */}
         {hoveredIndex !== null && labels[hoveredIndex] && (
           <div className="absolute top-4 right-4 bg-zinc-900/90 backdrop-blur-md border border-zinc-700/80 px-3 py-1.5 rounded-xl text-xs font-mono shadow-xl flex items-center gap-2">
             <span className="text-zinc-400">{labels[hoveredIndex]}:</span>
-            <strong className="text-cyan-400">{formatVal(primaryData[hoveredIndex] ?? 0)}</strong>
+            <strong style={{ color: activeTheme.solid }}>{formatVal(primaryData[hoveredIndex] ?? 0)}</strong>
           </div>
         )}
       </div>
@@ -515,11 +683,11 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
   };
 
   // -------------------------------------------------------------
-  // RENDERER 4: LINE & AREA CHART (e.g. Population 1960-2020)
+  // RENDERER 4: LINE & AREA CHART (WITH ACCENT COLOR)
   // -------------------------------------------------------------
   const renderLineAreaChart = (isArea: boolean = true) => {
     const svgWidth = 600;
-    const svgHeight = 280;
+    const svgHeight = sizeConfig.svgHeight;
     const paddingLeft = 50;
     const paddingBottom = 40;
     const paddingTop = 25;
@@ -528,7 +696,6 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
     const chartWidth = svgWidth - paddingLeft - paddingRight;
     const chartHeight = svgHeight - paddingTop - paddingBottom;
 
-    // Generate path points
     const points = labels.map((_label, idx) => {
       const val = primaryData[idx] ?? 0;
       const x = paddingLeft + (idx / Math.max(labels.length - 1, 1)) * chartWidth;
@@ -536,7 +703,6 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
       return { x, y, val };
     });
 
-    // Smooth Bézier curve string
     const linePath = points.reduce((acc, pt, i, arr) => {
       if (i === 0) return `M ${pt.x},${pt.y}`;
       const prev = arr[i - 1];
@@ -544,7 +710,6 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
       return `${acc} C ${cx},${prev.y} ${cx},${pt.y} ${pt.x},${pt.y}`;
     }, '');
 
-    // Closed Area path
     const areaPath = `${linePath} L ${points[points.length - 1]?.x || 0},${paddingTop + chartHeight} L ${points[0]?.x || 0},${paddingTop + chartHeight} Z`;
 
     return (
@@ -555,15 +720,14 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
           className="w-full h-auto select-none"
         >
           <defs>
-            <linearGradient id="line-area-grad" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#38bdf8" stopOpacity="0.45" />
-              <stop offset="85%" stopColor="#38bdf8" stopOpacity="0.02" />
-              <stop offset="100%" stopColor="#38bdf8" stopOpacity="0" />
+            <linearGradient id={activeTheme.fillGradId} x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stopColor={activeTheme.solid} stopOpacity="0.45" />
+              <stop offset="85%" stopColor={activeTheme.solid} stopOpacity="0.02" />
+              <stop offset="100%" stopColor={activeTheme.solid} stopOpacity="0" />
             </linearGradient>
-            <linearGradient id="line-stroke-grad" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#38bdf8" />
-              <stop offset="50%" stopColor="#818cf8" />
-              <stop offset="100%" stopColor="#c084fc" />
+            <linearGradient id={activeTheme.strokeGradId} x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={activeTheme.solid} />
+              <stop offset="100%" stopColor={activeTheme.gradEnd} />
             </linearGradient>
           </defs>
 
@@ -583,17 +747,17 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
 
           {/* Area Fill */}
           {isArea && (
-            <path d={areaPath} fill="url(#line-area-grad)" />
+            <path d={areaPath} fill={`url(#${activeTheme.fillGradId})`} />
           )}
 
           {/* Line Stroke */}
           <path
             d={linePath}
             fill="none"
-            stroke="url(#line-stroke-grad)"
-            strokeWidth="3"
+            stroke={`url(#${activeTheme.strokeGradId})`}
+            strokeWidth="3.5"
             strokeLinecap="round"
-            className="filter drop-shadow-[0_0_8px_rgba(56,189,248,0.4)]"
+            style={{ filter: `drop-shadow(0 0 10px ${activeTheme.glow})` }}
           />
 
           {/* Data Points */}
@@ -610,7 +774,7 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
                   cx={pt.x}
                   cy={pt.y}
                   r={isHovered ? 6.5 : 4}
-                  fill={isHovered ? '#ffffff' : '#38bdf8'}
+                  fill={isHovered ? '#ffffff' : activeTheme.solid}
                   stroke="#09090b"
                   strokeWidth="2"
                   className="transition-all duration-150"
@@ -631,11 +795,10 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
           })}
         </svg>
 
-        {/* Floating Tooltip */}
         {hoveredIndex !== null && labels[hoveredIndex] && (
           <div className="absolute top-4 right-4 bg-zinc-900/90 backdrop-blur-md border border-zinc-700/80 px-3 py-1.5 rounded-xl text-xs font-mono shadow-xl flex items-center gap-2">
             <span className="text-zinc-400">{labels[hoveredIndex]}:</span>
-            <strong className="text-cyan-400">{formatVal(primaryData[hoveredIndex] ?? 0)}</strong>
+            <strong style={{ color: activeTheme.solid }}>{formatVal(primaryData[hoveredIndex] ?? 0)}</strong>
           </div>
         )}
       </div>
@@ -643,7 +806,7 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
   };
 
   // -------------------------------------------------------------
-  // RENDERER 5: EMBEDDED DATA TABLE VIEW
+  // RENDERER 5: RAW DATA TABLE
   // -------------------------------------------------------------
   const renderDataTable = () => {
     return (
@@ -652,7 +815,7 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
           <thead className="bg-zinc-900 border-b border-zinc-800 text-zinc-400 uppercase tracking-wider">
             <tr>
               <th className="py-2.5 px-3">#</th>
-              <th className="py-2.5 px-3">{spec.xAxisLabel || 'Label / Category'}</th>
+              <th className="py-2.5 px-3">{spec.xAxisLabel || 'Category / Dimension'}</th>
               <th className="py-2.5 px-3 text-right">{spec.yAxisLabel || 'Value'}</th>
             </tr>
           </thead>
@@ -661,7 +824,7 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
               <tr key={idx} className="hover:bg-zinc-900/50 transition-colors">
                 <td className="py-2 px-3 text-zinc-500">{idx + 1}</td>
                 <td className="py-2 px-3 font-semibold text-white">{label}</td>
-                <td className="py-2 px-3 text-right font-mono text-cyan-400">
+                <td className="py-2 px-3 text-right font-mono" style={{ color: activeTheme.solid }}>
                   {formatVal(primaryData[idx] ?? 0)}
                 </td>
               </tr>
@@ -683,6 +846,9 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
             </span>
             <span className="text-[10px] font-mono text-zinc-400 uppercase">
               {activeType}
+            </span>
+            <span className={`px-2 py-0.5 rounded-full text-[9px] font-mono font-bold uppercase ${activeTheme.bgPill}`}>
+              {activeTheme.name}
             </span>
           </div>
           <h3 className="text-sm sm:text-base font-bold text-white tracking-tight">
@@ -715,7 +881,7 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
                 type="button"
                 onClick={() => setActiveType('bar')}
                 className={`p-1 rounded text-xs transition-colors cursor-pointer ${
-                  activeType === 'bar' || activeType === 'horizontal-bar' ? 'text-cyan-400 bg-zinc-800' : 'text-zinc-400 hover:text-white'
+                  activeType === 'bar' || activeType === 'horizontal-bar' ? 'text-white bg-zinc-800' : 'text-zinc-400 hover:text-white'
                 }`}
                 title="Bar Chart"
               >
@@ -725,7 +891,7 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
                 type="button"
                 onClick={() => setActiveType('line')}
                 className={`p-1 rounded text-xs transition-colors cursor-pointer ${
-                  activeType === 'line' ? 'text-cyan-400 bg-zinc-800' : 'text-zinc-400 hover:text-white'
+                  activeType === 'line' ? 'text-white bg-zinc-800' : 'text-zinc-400 hover:text-white'
                 }`}
                 title="Line Chart"
               >
@@ -735,7 +901,7 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
                 type="button"
                 onClick={() => setActiveType('area')}
                 className={`p-1 rounded text-xs transition-colors cursor-pointer ${
-                  activeType === 'area' ? 'text-cyan-400 bg-zinc-800' : 'text-zinc-400 hover:text-white'
+                  activeType === 'area' ? 'text-white bg-zinc-800' : 'text-zinc-400 hover:text-white'
                 }`}
                 title="Area Chart"
               >
@@ -743,6 +909,19 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
               </button>
             </div>
           )}
+
+          {/* Customize Drawer Toggle */}
+          <button
+            type="button"
+            onClick={() => setShowCustomizer(!showCustomizer)}
+            className={`p-1.5 rounded-lg transition-colors cursor-pointer flex items-center gap-1 text-xs font-mono border-l border-zinc-800 pl-2 ${
+              showCustomizer ? 'bg-zinc-800 text-white font-bold' : 'text-zinc-400 hover:text-white'
+            }`}
+            title="Interactive Customization (Color & Size)"
+          >
+            <Palette className="w-3.5 h-3.5" style={{ color: activeTheme.solid }} />
+            <span className="hidden sm:inline">Tune</span>
+          </button>
 
           {/* Utility Tools */}
           <div className="flex items-center gap-0.5 border-l border-zinc-800 pl-1.5">
@@ -773,6 +952,121 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({ spec, rawCode, classNa
           </div>
         </div>
       </div>
+
+      {/* INTERACTIVE CUSTOMIZER DRAWER */}
+      {showCustomizer && (
+        <div className="p-3.5 sm:p-4 bg-zinc-950/95 border-b border-zinc-800/90 text-xs font-mono space-y-3 animate-fade-in">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            {/* 1. Color Palette Switcher */}
+            <div className="space-y-1.5">
+              <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold flex items-center gap-1">
+                <Palette className="w-3 h-3 text-cyan-400" />
+                <span>Color Palette</span>
+              </span>
+              <div className="flex items-center gap-2">
+                {(['orange', 'cyan', 'purple', 'emerald', 'amber', 'rose'] as ColorPreset[]).map((col) => {
+                  const t = themes[col];
+                  const isSelected = selectedColor === col;
+                  return (
+                    <button
+                      key={col}
+                      type="button"
+                      onClick={() => {
+                        setSelectedColor(col);
+                        playTypingTick();
+                      }}
+                      className={`w-6 h-6 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                        isSelected ? 'ring-2 ring-white scale-110 shadow-lg' : 'opacity-75 hover:opacity-100 hover:scale-105'
+                      }`}
+                      style={{ backgroundColor: t.solid }}
+                      title={`Theme: ${t.name}`}
+                    >
+                      {isSelected && <Check className="w-3 h-3 text-white stroke-[3]" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 2. Sizing / Height Switcher */}
+            <div className="space-y-1.5">
+              <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold">
+                Sizing & Scale
+              </span>
+              <div className="flex items-center gap-1 bg-zinc-900 p-0.5 rounded-lg border border-zinc-800">
+                {[
+                  { id: 'compact', label: 'Compact' },
+                  { id: 'normal', label: 'Default' },
+                  { id: 'large', label: 'Large (Bigger)' },
+                ].map((s) => (
+                  <button
+                    key={s.id}
+                    type="button"
+                    onClick={() => {
+                      setSelectedSize(s.id as SizePreset);
+                      playTypingTick();
+                    }}
+                    className={`px-2.5 py-1 rounded-md text-[11px] font-medium transition-all cursor-pointer ${
+                      selectedSize === s.id
+                        ? 'bg-white text-black font-bold shadow'
+                        : 'text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* 3. Conversational AI Quick Action Chips */}
+          <div className="pt-2 border-t border-zinc-900 space-y-2">
+            <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold flex items-center gap-1">
+              <Sparkles className="w-3 h-3 text-amber-400" />
+              <span>Ask AI to Modify This Graph:</span>
+            </span>
+
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { label: '🍊 Change line to orange', prompt: `Please regenerate the chart "${spec.title}" with a vibrant orange theme and line.` },
+                { label: '🏛️ Make pyramid bigger', prompt: `Please expand the demographic pyramid "${spec.title}" with a larger scale, higher resolution, and deeper cohort brackets.` },
+                { label: '📈 Project forward 10 years', prompt: `Please extend the time series in "${spec.title}" with forward projections for the next 10 years.` },
+                { label: '📊 Rank highest to lowest', prompt: `Please re-sort and rank the data in "${spec.title}" in descending order from highest to lowest.` },
+              ].map((chip, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleSendPromptAdjustment(chip.prompt)}
+                  className="px-2.5 py-1 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white text-[11px] transition-all flex items-center gap-1 cursor-pointer"
+                >
+                  <span>{chip.label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Inline Custom Modification Prompt Input */}
+            <div className="flex items-center gap-2 pt-1">
+              <input
+                type="text"
+                value={customPromptText}
+                onChange={(e) => setCustomPromptText(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSendPromptAdjustment(customPromptText)}
+                placeholder={language === 'uk' ? 'Наприклад: "зроби лінію оранжевою", "додай дані за 2030 рік"...' : 'e.g. "change line to orange", "make pyramid larger", "add year 2030"...'}
+                className="flex-1 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded-lg text-white text-xs placeholder-zinc-500 focus:outline-none focus:border-zinc-600 font-mono"
+              />
+              <button
+                type="button"
+                onClick={() => handleSendPromptAdjustment(customPromptText)}
+                disabled={!customPromptText.trim()}
+                className="px-3 py-1.5 rounded-lg bg-white text-black font-bold text-xs hover:bg-zinc-200 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1 cursor-pointer"
+              >
+                <span>Ask AI</span>
+                <Send className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Chart Body */}
       <div className="p-3.5 sm:p-5">

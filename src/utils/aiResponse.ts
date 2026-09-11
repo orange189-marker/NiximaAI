@@ -79,6 +79,184 @@ How can I assist your engineering, research, or creative tasks today?`
     };
   }
 
+  // --- CONVERSATIONAL CHART CUSTOMIZATION & ADJUSTMENT TRIGGERS ---
+
+  // Customization: Line to Orange / Orange Theme
+  if (lower.includes('orange') || lower.includes('помаранч') || lower.includes('оранжев')) {
+    const isLinearOrChart = lower.includes('linear') || lower.includes('line') || lower.includes('ліні') || 
+                           lower.includes('графік') || lower.includes('graph') || lower.includes('plot') ||
+                           lower.includes('chart') || lower.includes('color') || lower.includes('колір') || lower.includes('змін');
+    if (isLinearOrChart) {
+      return {
+        thinking: `1. Parsing conversational request to restyle visualization with signature Orange theme (#f97316).
+2. Setting accentColor to "orange" to match Nixima brand styling and high-contrast dark mode optics.
+3. Recalculating vector line gradients and coordinate root highlighting in Cartesian space.`,
+        response: `I have updated the visualization with the signature **Nixima Orange** theme (\`#f97316\`), accentuating the vector slope trajectory and coordinate intercepts:
+
+\`\`\`chart
+{
+  "type": "function",
+  "title": "Mathematical Linear Graph f(x) = 2x + 1 (Orange Theme)",
+  "subtitle": "Cartesian coordinate plotting with dynamic slope & root telemetry in Nixima Orange",
+  "equation": "f(x) = 2x + 1",
+  "slope": 2,
+  "intercept": 1,
+  "xRange": [-10, 10],
+  "yRange": [-10, 10],
+  "accentColor": "orange",
+  "chartSize": "normal"
+}
+\`\`\`
+
+### Stylistic & Mathematical Telemetry:
+- **Vector Theme**: **Nixima Orange** (\`#f97316\`) with luminous gradient glow.
+- **Slope ($m = +2$)**: Gradient reflects steep positive ascent.
+- **Root**: Real root at $x = -0.5$, crossing the horizontal axis at $(-0.5, 0)$.
+- **Y-Intercept**: Point $(0, 1)$ highlighted on the vertical axis.
+
+> **Interactive Customization:** Click the **Tune** (sliders) button above the chart to adjust the slope and intercept in real time, or choose from 6 instant color palettes!`
+      };
+    }
+  }
+
+  // Customization: Make Demographic Pyramid Bigger / Larger
+  if ((lower.includes('pyramid') || lower.includes('пірамід')) && 
+      (lower.includes('big') || lower.includes('larg') || lower.includes('більш') || lower.includes('expand') || lower.includes('збільш') || lower.includes('розшир'))) {
+    return {
+      thinking: `1. Receiving operator request to expand demographic pyramid scale and resolution.
+2. Setting chartSize to "large" (rendering with taller cohort bars, expanded max-width of 270px, and larger typography).
+3. Providing deep 11-cohort demographic breakdown including centenary bracket (90+).
+4. Applying vibrant purple/orange high-definition palette.`,
+      response: `Here is the **Expanded Large-Scale Demographic Population Pyramid**, rendered with higher resolution, taller cohort bars, and an expanded 11-tier age breakdown:
+
+\`\`\`chart
+{
+  "type": "pyramid",
+  "title": "Expanded Demographic Age Pyramid (High Resolution)",
+  "subtitle": "Bilateral male vs. female population cohort distribution (%) at expanded scale",
+  "chartSize": "large",
+  "accentColor": "purple",
+  "pyramidData": [
+    { "ageCohort": "90+", "male": 0.6, "female": 1.2 },
+    { "ageCohort": "80-89", "male": 2.1, "female": 3.4 },
+    { "ageCohort": "70-79", "male": 4.5, "female": 5.8 },
+    { "ageCohort": "60-69", "male": 6.8, "female": 7.4 },
+    { "ageCohort": "50-59", "male": 8.5, "female": 8.7 },
+    { "ageCohort": "40-49", "male": 9.4, "female": 9.2 },
+    { "ageCohort": "30-39", "male": 10.1, "female": 9.8 },
+    { "ageCohort": "20-29", "male": 10.5, "female": 10.1 },
+    { "ageCohort": "10-19", "male": 9.6, "female": 9.1 },
+    { "ageCohort": "5-9", "male": 8.9, "female": 8.4 },
+    { "ageCohort": "0-4", "male": 8.5, "female": 8.1 }
+  ]
+}
+\`\`\`
+
+### Deep Cohort Structural Analysis:
+- **Expanded Scale**: Taller row bars and wider horizontal span allow effortless comparison between adjacent brackets.
+- **Top Inversion (Centenary & 80+)**: Female longevity advantage is starkly visible in the $90+$ and $80-89$ cohorts (2:1 female-to-male ratio).
+- **Core Productive Bulge**: Age brackets $20-49$ comprise the demographic spine, providing high economic productivity with manageable dependency load.`
+    };
+  }
+
+  // Customization: Make Demographic Pyramid Smaller / Compact
+  if ((lower.includes('pyramid') || lower.includes('пірамід')) && 
+      (lower.includes('small') || lower.includes('compact') || lower.includes('менш') || lower.includes('зменш'))) {
+    return {
+      thinking: `1. Formatting demographic pyramid into compact presentation profile.
+2. Setting chartSize to "compact" for space-efficient embedding.`,
+      response: `Here is the demographic pyramid rendered in **Compact Mode** for streamlined visual inspection:
+
+\`\`\`chart
+{
+  "type": "pyramid",
+  "title": "Demographic Age Pyramid (Compact)",
+  "subtitle": "Male vs. Female cohort balance (%)",
+  "chartSize": "compact",
+  "accentColor": "cyan",
+  "pyramidData": [
+    { "ageCohort": "80+", "male": 1.8, "female": 2.5 },
+    { "ageCohort": "70-79", "male": 3.2, "female": 4.1 },
+    { "ageCohort": "60-69", "male": 5.6, "female": 6.2 },
+    { "ageCohort": "50-59", "male": 7.8, "female": 8.1 },
+    { "ageCohort": "40-49", "male": 8.9, "female": 8.8 },
+    { "ageCohort": "30-39", "male": 9.7, "female": 9.4 },
+    { "ageCohort": "20-29", "male": 10.2, "female": 9.8 },
+    { "ageCohort": "10-19", "male": 9.8, "female": 9.3 },
+    { "ageCohort": "0-9", "male": 9.4, "female": 8.9 }
+  ]
+}
+\`\`\`
+
+The compact profile optimizes screen real estate while retaining cohort symmetry.`
+    };
+  }
+
+  // Customization: Project Population Forward 10 Years
+  if (lower.includes('project forward') || lower.includes('10 years') || lower.includes('прогноз на 10') || 
+      lower.includes('forward projection') || (lower.includes('прогноз') && (lower.includes('населенн') || lower.includes('population') || lower.includes('років')))) {
+    return {
+      thinking: `1. Loading UN Population medium-fertility projection models for 2026–2036.
+2. Extending time-series data with milestone projections: 2026 (8.15B), 2030 (8.52B), and 2035 (8.88B).
+3. Highlighting deceleration in global net growth rate.`,
+      response: `Here is the extended **World Population Trajectory with a 10-Year Forward Projection** through 2035, based on UN medium-fertility forecast models:
+
+\`\`\`chart
+{
+  "type": "area",
+  "title": "World Population Trajectory & 10-Year Forward Projection",
+  "subtitle": "Historical census data extended with UN demographic forecasts (in Billions)",
+  "unit": "B",
+  "xAxisLabel": "Year",
+  "yAxisLabel": "Total Population (Billions)",
+  "accentColor": "emerald",
+  "labels": ["1960", "1975", "1990", "2005", "2020", "2026 (Now)", "2030 (Proj.)", "2035 (Proj.)"],
+  "data": [3.03, 4.07, 5.33, 6.54, 7.84, 8.15, 8.52, 8.88]
+}
+\`\`\`
+
+### 10-Year Forward Projections Analysis:
+- **2030 Milestone ($8.52\\text{ B}$)**: Global population is projected to cross 8.5 billion by 2030, driven primarily by growth in Sub-Saharan Africa and Central Asia.
+- **2035 Projection ($8.88\\text{ B}$)**: Approaching 8.9 billion mid-decade, though global annual growth rates will have compressed below $0.75\\%$ annually.
+- **Peak Demographics**: Current projections suggest peak human population (~$10.3\\text{ B}$) will occur in the late 2080s before stabilizing.`
+    };
+  }
+
+  // Customization: Rank Highest to Lowest
+  if (lower.includes('rank highest') || lower.includes('descending order') || lower.includes('highest to lowest') || 
+      lower.includes('відсортуй') || lower.includes('за спаданням')) {
+    return {
+      thinking: `1. Re-sorting dataset elements in descending order.
+2. Recalculating rank indexing and bar distribution.`,
+      response: `Here is the data sorted in **strict descending order from highest to lowest**:
+
+\`\`\`chart
+{
+  "type": "horizontal-bar",
+  "title": "Global GDP Rankings (Strict Descending Order)",
+  "subtitle": "Ranked from largest to smallest nominal GDP (Trillions USD)",
+  "unit": "$T",
+  "accentColor": "amber",
+  "labels": [
+    "United States 🇺🇸",
+    "China 🇨🇳",
+    "Germany 🇩🇪",
+    "Japan 🇯🇵",
+    "India 🇮🇳",
+    "United Kingdom 🇬🇧",
+    "France 🇫🇷",
+    "Italy 🇮🇹",
+    "Brazil 🇧🇷",
+    "Canada 🇨🇦"
+  ],
+  "data": [28.78, 18.53, 4.59, 4.11, 3.94, 3.50, 3.13, 2.33, 2.33, 2.24]
+}
+\`\`\`
+
+The dataset has been ordered from highest ($28.78T) to lowest ($2.24T) with rank indices preserved.`
+    };
+  }
+
   // 1. GDP Economic Rankings Chart
   if (lower.includes('gdp') || lower.includes('ввп')) {
     return {

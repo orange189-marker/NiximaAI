@@ -214,6 +214,13 @@ ${modelsCatalog}
          ]
        }
        \`\`\`
+    - Chart Customization & Follow-up Requests:
+      * When the operator asks to modify or restyle a chart (e.g., 'change line to orange', 'make pyramid bigger', 'change color to purple', 'adjust slope'):
+        - Color Override: Set accentColor to 'orange' (Nixima sovereign signature glowing orange #f97316), 'cyan', 'purple', 'emerald', 'amber', or 'rose'.
+        - Sizing Override: Set chartSize to 'compact', 'normal', or 'large' (for larger, taller, and more expansive visualizations).
+        - Mathematical Functions: Set updated slope, intercept, and equation according to requested parameter changes.
+        - Future Projections: Add forecasted periods (e.g. 2030, 2035) to labels and estimated values to data.
+        - Always regenerate the complete interactive \`\`\`chart JSON block with the requested modifications applied.
 
 ${customSystemPrompt && customSystemPrompt.trim() ? `=== OPERATOR CUSTOM INSTRUCTIONS ===\n${customSystemPrompt.trim()}\n` : ''}`.trim();
 }

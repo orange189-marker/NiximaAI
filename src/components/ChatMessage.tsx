@@ -311,6 +311,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                 key={idx}
                 spec={spec}
                 rawCode={part.code}
+                onActionPrompt={onActionPrompt}
               />
             );
           }
