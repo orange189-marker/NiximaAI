@@ -14,7 +14,7 @@ import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry, Sea
 import { NiximaUser } from './types/user';
 import { NIXIMA_MODELS, DEFAULT_MODEL } from './data/models';
 import { INITIAL_CONVERSATIONS } from './data/initialChats';
-import { streamOpenRouterChat, fetchLiveWebGrounding } from './utils/openrouter';
+import { streamOpenRouterChat, fetchLiveWebGrounding, cleanUserSearchQuery } from './utils/openrouter';
 import { playTypingTick, playCompletionChime } from './utils/sound';
 import { getActiveUser, logoutUser, syncAccountsWithServer, isDadAccount, isStrictCreator } from './utils/auth';
 import { getSavedHotkey, matchesHotkey } from './utils/hotkeys';
@@ -515,13 +515,12 @@ All conversations and model preferences in this workspace are private to your Ni
     let liveGrounding: SearchGrounding | undefined;
 
     try {
-      const historyForApi = [
-        ...currentConv.messages.map(m => ({ role: m.role, content: m.content })),
-        { role: 'user', content: userText }
-      ];
+      // Determine whether web search should run: explicitly enabled, or user is querying current news/events
+      const searchAnalysis = cleanUserSearchQuery(userText);
+      const isNewsQuery = searchAnalysis.isNewsQuery;
+      const shouldRunWebSearch = settings.webSearchEnabled || isNewsQuery;
 
-      // If Web Search is enabled, fetch genuine live web search results before prompt execution
-      if (settings.webSearchEnabled) {
+      if (shouldRunWebSearch) {
         try {
           liveGrounding = await fetchLiveWebGrounding(userText, language, settings.searchMode || 'standard');
 
@@ -550,30 +549,58 @@ All conversations and model preferences in this workspace are private to your Ni
         model: currentModel,
         customSystemPrompt: settings.systemPrompt,
         deepThink: settings.deepThinkEnabled,
-        webSearch: settings.webSearchEnabled,
+        webSearch: shouldRunWebSearch,
         searchMode: settings.searchMode || 'standard',
       });
 
+      // Prepare final user prompt with live grounding injected into immediate context
+      let finalUserPrompt = userText;
       if (liveGrounding && liveGrounding.sources.length > 0) {
         const isLiveNews = liveGrounding.sources.some(s => s.cluster === 'Live News Wire');
+        const nowStr = new Date().toLocaleDateString(language === 'uk' ? 'uk-UA' : 'en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        });
+
         if (isLiveNews) {
-          dynamicSystemPrompt += `\n\n[REAL-TIME LIVE BREAKING NEWS WIRE - VERIFIED TODAY]\n` +
+          dynamicSystemPrompt += `\n\n[REAL-TIME LIVE BREAKING NEWS WIRE - VERIFIED TODAY: ${nowStr}]\n` +
             `Query: "${userText}"\n` +
             `Active Breaking Headlines:\n` +
             liveGrounding.sources.map((src, i) =>
               `[${i + 1}] Headline: ${src.title}\n    Publisher: ${src.domain}\n    Direct Link: ${src.url}\n    Report: ${src.snippet}`
             ).join('\n\n') +
             `\n\nInstructions: Deliver a comprehensive, well-structured, and timely live news briefing based on these verified breaking developments. Group by topic or region, highlight key details, and cite sources using [1], [2] where appropriate. Do not output unrelated historical or encyclopedic definitions.`;
+
+          finalUserPrompt = `[LIVE BREAKING NEWS WIRE GROUNDING — TODAY: ${nowStr}]\n` +
+            liveGrounding.sources.map((src, i) =>
+              `[Source ${i + 1}] ${src.title} (${src.domain})\nURL: ${src.url}\nSummary: ${src.snippet}`
+            ).join('\n\n') +
+            `\n\n[USER INQUIRY]\n${userText}\n\n` +
+            `(MANDATORY TEMPORAL INSTRUCTION: You are Nixima AI in ${new Date().getFullYear()}. Using the live news wire reports above for today (${nowStr}), provide a comprehensive, structured briefing. Under NO circumstances refuse by claiming a 2023 knowledge cutoff or lack of live internet access. Cite sources [1], [2] where appropriate.)`;
         } else {
-          dynamicSystemPrompt += `\n\n[REAL-TIME LIVE WEB SEARCH GROUNDING]\n` +
+          dynamicSystemPrompt += `\n\n[REAL-TIME LIVE WEB SEARCH GROUNDING — TODAY: ${nowStr}]\n` +
             `Query: "${userText}"\n` +
             `Verified Real-World Web Findings:\n` +
             liveGrounding.sources.map((src, i) =>
               `[${i + 1}] Title: ${src.title}\n    URL: ${src.url}\n    Excerpt: ${src.snippet || 'Authoritative reference'}`
             ).join('\n\n') +
             `\n\nInstructions: Ground your response in these verified real-world findings. Answer the user's question directly, accurately, and authoritatively. Cite sources with [1], [2] where appropriate.`;
+
+          finalUserPrompt = `[REAL-TIME LIVE WEB GROUNDING — TODAY: ${nowStr}]\n` +
+            liveGrounding.sources.map((src, i) =>
+              `[Source ${i + 1}] ${src.title} (${src.domain})\nURL: ${src.url}\nSummary: ${src.snippet || 'Authoritative reference'}`
+            ).join('\n\n') +
+            `\n\n[USER INQUIRY]\n${userText}\n\n` +
+            `(MANDATORY TEMPORAL INSTRUCTION: Answer using the verified real-world findings above. Do NOT claim a 2023 knowledge cutoff. Cite sources [1], [2] where appropriate.)`;
         }
       }
+
+      const historyForApi = [
+        ...currentConv.messages.map(m => ({ role: m.role, content: m.content })),
+        { role: 'user', content: finalUserPrompt }
+      ];
 
       const { fullContent, fullThinking, searchGrounding, deepThinkingTelemetry } = await streamOpenRouterChat({
         model: currentModel,
