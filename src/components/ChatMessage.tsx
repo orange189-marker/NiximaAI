@@ -36,6 +36,7 @@ import { NiximaChart } from './NiximaChart';
 import { parseChartSpec } from '../types/chartSpec';
 import { parseDynamicThinkingSteps } from '../utils/openrouter';
 import { LinkPill } from './LinkPill';
+import { SearchActionFeed } from './SearchActionFeed';
 
 interface ChatMessageProps {
   message: Message;
@@ -59,8 +60,6 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   const [copied, setCopied] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isThinkingOpen, setIsThinkingOpen] = useState(false);
-  const [isSourcesOpen, setIsSourcesOpen] = useState(false);
-  const [selectedCluster, setSelectedCluster] = useState<string>('All');
   const [thinkingViewMode, setThinkingViewMode] = useState<'steps' | 'raw'>('steps');
   const [expandedStepIndex, setExpandedStepIndex] = useState<number | null>(null);
   const [copiedThinking, setCopiedThinking] = useState(false);
@@ -574,7 +573,6 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             key={i}
             type="button"
             onClick={() => {
-              setIsSourcesOpen(true);
               setHighlightedSourceIdx(sourceIdx);
               setTimeout(() => setHighlightedSourceIdx(null), 3000);
             }}
@@ -664,154 +662,14 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             </div>
           ) : (
             <div className="space-y-3">
-              {/* SEARCH V2 / SEARCH V2 MEGA GROUNDING BAR & SOURCES DRAWER (Website Native Design) */}
-              {!isUser && message.searchGrounding && message.searchGrounding.sources.length > 0 && (() => {
-                const isMega = message.searchGrounding.searchMode === 'mega';
-                const isFast = message.searchGrounding.searchMode === 'fast';
-                const displayedSources = (selectedCluster === 'All' || !selectedCluster)
-                  ? message.searchGrounding.sources
-                  : message.searchGrounding.sources.filter(s => (s.cluster || '').toLowerCase().includes(selectedCluster.toLowerCase()));
-
-                return (
-                  <div className="rounded-xl border border-zinc-800 bg-[#0e0e13]/90 backdrop-blur-md overflow-hidden text-xs shadow-lg animate-fade-in">
-                    {/* Grounding Header Bar */}
-                    <div 
-                      onClick={() => setIsSourcesOpen(!isSourcesOpen)}
-                      className="w-full px-3.5 py-2.5 flex items-center justify-between text-zinc-300 hover:text-white transition-colors cursor-pointer select-none bg-zinc-900/70 border-b border-zinc-800"
-                    >
-                      <div className="flex items-center gap-2 flex-wrap">
-                        {isFast ? (
-                          <Zap className="w-3.5 h-3.5 text-amber-400" />
-                        ) : (
-                          <Globe className="w-3.5 h-3.5 text-zinc-300" />
-                        )}
-                        {isMega ? (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-600 text-zinc-100 font-mono text-[10px] font-bold">
-                            <span>Search V2</span>
-                            <span className="px-1 py-0.2 rounded bg-zinc-700 text-[9px] text-zinc-200 border border-zinc-600">
-                              MEGA
-                            </span>
-                          </span>
-                        ) : isFast ? (
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-800 border border-amber-500/40 text-zinc-100 font-mono text-[10px] font-bold">
-                            <span>Search V2</span>
-                            <span className="px-1 py-0.2 rounded bg-amber-950/80 text-[9px] text-amber-300 border border-amber-600/50">
-                              FAST
-                            </span>
-                          </span>
-                        ) : (
-                          <span className="px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 font-mono text-[10px] font-semibold">
-                            {t.chatMessage.searchV2Grounded}
-                          </span>
-                        )}
-                        <span className="text-zinc-300 text-[11px] font-mono truncate max-w-[180px] sm:max-w-[280px]">
-                          "{message.searchGrounding.query}"
-                        </span>
-                        {isMega && message.searchGrounding.pagesCrawled ? (
-                          <span className="text-zinc-400 text-[10px] font-mono hidden sm:inline">
-                            • {message.searchGrounding.pagesCrawled}+ pages crawled across {message.searchGrounding.browserInputs?.length || 5} browser inputs
-                          </span>
-                        ) : isFast ? (
-                          <span className="text-amber-400/90 text-[10px] font-mono hidden sm:inline">
-                            • {t.chatMessage.fastLatency(message.searchGrounding.searchTimeMs || 42)}
-                          </span>
-                        ) : (
-                          <span className="text-zinc-500 text-[10px] font-mono hidden sm:inline">
-                            • {t.chatMessage.searchLatency(message.searchGrounding.searchTimeMs || 135)}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-zinc-400 hover:text-zinc-200 font-mono font-medium flex items-center gap-1">
-                          <span>{isSourcesOpen ? t.chatMessage.hideSources : t.chatMessage.inspectSources(message.searchGrounding.sources.length)}</span>
-                          {isSourcesOpen ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Sources Cards Grid */}
-                    {isSourcesOpen && (
-                      <div className="p-3 bg-black/50 border-t border-zinc-800 space-y-2.5 animate-fade-in">
-                        {/* Cluster Filter Buttons for Mega Mode */}
-                        {isMega && message.searchGrounding.clusters && message.searchGrounding.clusters.length > 0 && (
-                          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
-                            {message.searchGrounding.clusters.map((c, cIdx) => (
-                              <button
-                                key={cIdx}
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedCluster(c.name);
-                                }}
-                                className={`px-2.5 py-1 rounded-md text-[10px] font-mono transition-colors cursor-pointer select-none whitespace-nowrap ${
-                                  selectedCluster === c.name
-                                    ? 'bg-zinc-700 text-white font-semibold border border-zinc-500 shadow-sm'
-                                    : 'bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800'
-                                }`}
-                              >
-                                {c.name} ({c.count})
-                              </button>
-                            ))}
-                          </div>
-                        )}
-
-                        <div className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 font-semibold flex items-center justify-between">
-                          <span>{t.chatMessage.verifiedSources}</span>
-                          <span className="text-zinc-500">{displayedSources.length} sources displayed</span>
-                        </div>
-
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
-                          {displayedSources.map((src, sIdx) => {
-                            const isHighlighted = highlightedSourceIdx === sIdx;
-                            return (
-                              <a
-                                key={sIdx}
-                                href={src.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className={`p-2.5 rounded-lg border transition-all duration-200 group flex flex-col justify-between cursor-pointer ${
-                                  isHighlighted 
-                                    ? 'bg-zinc-800 border-zinc-500 ring-1 ring-zinc-400/40 shadow-lg scale-[1.02]' 
-                                    : 'bg-zinc-900/80 hover:bg-zinc-850 border-zinc-800 hover:border-zinc-700'
-                                }`}
-                              >
-                                <div className="space-y-1">
-                                  <div className="flex items-center justify-between gap-1 text-[10px] font-mono">
-                                    <span className="text-zinc-300 font-semibold flex items-center gap-1 truncate">
-                                      <Globe className="w-2.5 h-2.5 text-zinc-400 flex-shrink-0" />
-                                      <span className="truncate">{src.domain || 'web.mesh'}</span>
-                                    </span>
-                                    <div className="flex items-center gap-1">
-                                      {src.cluster && (
-                                        <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-[9px] text-zinc-400 font-mono">
-                                          {src.cluster}
-                                        </span>
-                                      )}
-                                      <span className="text-zinc-500 font-bold">[{sIdx + 1}]</span>
-                                    </div>
-                                  </div>
-                                  <div className="text-xs font-medium text-zinc-200 group-hover:text-white line-clamp-2 leading-snug">
-                                    {src.title}
-                                  </div>
-                                  {src.snippet && (
-                                    <div className="text-[11px] text-zinc-400 line-clamp-2 leading-tight italic">
-                                      "{src.snippet}"
-                                    </div>
-                                  )}
-                                </div>
-                                <div className="pt-2 mt-1 flex items-center justify-end text-[10px] text-zinc-500 group-hover:text-zinc-300 transition-colors font-mono">
-                                  <span className="flex items-center gap-0.5">Visit Source <ExternalLink className="w-2.5 h-2.5 ml-0.5" /></span>
-                                </div>
-                              </a>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                );
-              })()}
+              {/* SEARCH V2 / SEARCH V2 MEGA TOOL ACTION FEED & REASONING (Website Native Design) */}
+              {!isUser && message.searchGrounding && (
+                <SearchActionFeed 
+                  searchGrounding={message.searchGrounding}
+                  isStreaming={message.isStreaming}
+                  highlightedSourceIdx={highlightedSourceIdx}
+                />
+              )}
 
               {/* DEEPTHINKING V2 COGNITIVE TELEMETRY STATION (Website Native Design - Dynamic Steps Formulated by AI) */}
               {!isUser && message.thinking && (message.deepThinkingTelemetry || message.isStreaming) && (

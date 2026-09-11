@@ -225,6 +225,21 @@ export interface Translations {
     queriedMesh: (query: string) => string;
     searchLatency: (ms: number) => string;
     fastLatency: (ms: number) => string;
+    searchActionRadar: string;
+    aiObservationReaction: string;
+    extractedEvidence: string;
+    consensusVerified: string;
+    visitSource: string;
+    searchActionsTelemetry: (websitesCount: number, actionsCount: number) => string;
+    hideSearchActions: string;
+    inspectSearchActions: (count: number) => string;
+    stepDispatchQuery: string;
+    stepInspectWebsite: string;
+    stepCrossReference: string;
+    stepExtractData: string;
+    stepSynthesize: string;
+    activeScanning: string;
+    relevanceMatch: (pct: number) => string;
   };
 
   table: {
@@ -621,6 +636,21 @@ export const translations: Record<Language, Translations> = {
       queriedMesh: (query: string) => `Query: "${query}"`,
       searchLatency: (ms: number) => `Retrieved in ${ms}ms via Nixima Web Mesh`,
       fastLatency: (ms: number) => `Instant retrieval in ${ms}ms via Lightning Mesh`,
+      searchActionRadar: 'Search V2 Tool Actions & Live Reasoning',
+      aiObservationReaction: 'AI Observation & Live Reaction',
+      extractedEvidence: 'Extracted Evidence & Key Datapoints',
+      consensusVerified: 'Consensus Verified across Sources',
+      visitSource: 'Visit Site',
+      searchActionsTelemetry: (websitesCount: number, actionsCount: number) => `${websitesCount} Websites Inspected • ${actionsCount} Reasoning Steps`,
+      hideSearchActions: 'Hide Search Actions',
+      inspectSearchActions: (count: number) => `Inspect Search Actions (${count})`,
+      stepDispatchQuery: 'Dispatch Targeted Query',
+      stepInspectWebsite: 'Inspect & Read Website',
+      stepCrossReference: 'Cross-Reference & Validate',
+      stepExtractData: 'Extract Authoritative Facts',
+      stepSynthesize: 'Multi-Source Synthesis & Consensus',
+      activeScanning: 'Inspecting website content in real time...',
+      relevanceMatch: (pct: number) => `${pct}% Match`,
     },
 
     table: {
@@ -1100,6 +1130,21 @@ export const translations: Record<Language, Translations> = {
       queriedMesh: (query: string) => `Запит: "${query}"`,
       searchLatency: (ms: number) => `Отримано за ${ms}мс через Nixima Web Mesh`,
       fastLatency: (ms: number) => `Миттєве отримання за ${ms}мс через Lightning Mesh`,
+      searchActionRadar: 'Дії та жива аргументація інструменту Search V2',
+      aiObservationReaction: 'Спостереження та жива реакція ШІ',
+      extractedEvidence: 'Вилучені факти та дані з сайту',
+      consensusVerified: 'Консенсус підтверджено між джерелами',
+      visitSource: 'Відвідати сайт',
+      searchActionsTelemetry: (websitesCount: number, actionsCount: number) => `Оглянуто ${websitesCount} сайтів • ${actionsCount} кроків міркування`,
+      hideSearchActions: 'Сховати дії пошуку',
+      inspectSearchActions: (count: number) => `Оглянути дії пошуку (${count})`,
+      stepDispatchQuery: 'Формування та надсилання запиту',
+      stepInspectWebsite: 'Огляд та читання веб-сайту',
+      stepCrossReference: 'Перехресна верифікація та порівняння',
+      stepExtractData: 'Вилучення ключових фактів',
+      stepSynthesize: 'Синтез кількох джерел та консенсус',
+      activeScanning: 'Огляд вмісту веб-сайту в реальному часі...',
+      relevanceMatch: (pct: number) => `${pct}% Відповідність`,
     },
 
     table: {

@@ -14,7 +14,7 @@ import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry, Sea
 import { NiximaUser } from './types/user';
 import { NIXIMA_MODELS, DEFAULT_MODEL } from './data/models';
 import { INITIAL_CONVERSATIONS } from './data/initialChats';
-import { streamOpenRouterChat } from './utils/openrouter';
+import { streamOpenRouterChat, generateDefaultGrounding } from './utils/openrouter';
 import { playTypingTick, playCompletionChime } from './utils/sound';
 import { getActiveUser, logoutUser, syncAccountsWithServer, isDadAccount, isStrictCreator } from './utils/auth';
 import { getSavedHotkey, matchesHotkey } from './utils/hotkeys';
@@ -456,11 +456,16 @@ All conversations and model preferences in this workspace are private to your Ni
     const newTitle = isFirstMessage ? (userText.length > 28 ? userText.slice(0, 28) + '...' : userText) : currentConv.title;
 
     const aiMessageId = 'ai-' + Date.now();
+    const initialGrounding = settings.webSearchEnabled
+      ? generateDefaultGrounding(userText, settings.searchMode || 'standard')
+      : undefined;
+
     const aiMessagePlaceholder: Message = {
       id: aiMessageId,
       role: 'assistant',
       content: '',
       thinking: '',
+      searchGrounding: initialGrounding,
       timestamp: Date.now(),
       model: currentModel.name,
       isStreaming: true,

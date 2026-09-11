@@ -44,6 +44,19 @@ export interface SearchSource {
   relevanceScore?: number;
 }
 
+export interface SearchActionStep {
+  stepNumber: number;
+  actionType: 'query' | 'visit' | 'evaluate' | 'extract' | 'synthesize';
+  title: string;
+  targetUrl?: string;
+  targetDomain?: string;
+  reasoning: string; // The AI's live observation, thought & reaction on that specific website
+  extractedSnippet?: string; // What data was retrieved from the page
+  relevanceScore?: number; // e.g. 98 (%)
+  status: 'completed' | 'in_progress' | 'verified';
+  latencyMs?: number;
+}
+
 export interface SearchGrounding {
   query: string;
   sources: SearchSource[];
@@ -53,6 +66,8 @@ export interface SearchGrounding {
   clusters?: { name: string; count: number }[];
   pagesCrawled?: number;
   browserInputs?: string[];
+  searchActions?: SearchActionStep[];
+  consensusScore?: number;
 }
 
 export interface DynamicThinkingStep {
