@@ -1,5 +1,5 @@
 import { NiximaUser } from '../types/user';
-import { ModelOption, SearchMode } from '../types/chat';
+import { ModelOption, SearchMode, ThinkingMode } from '../types/chat';
 import { NIXIMA_MODELS } from '../data/models';
 import { BENCHMARK_LEADERBOARD } from '../data/benchmarks';
 import { isDadAccount, isStrictCreator } from './auth';
@@ -12,6 +12,7 @@ export interface PromptContextOptions {
   model: ModelOption;
   customSystemPrompt?: string;
   deepThink?: boolean;
+  thinkingMode?: ThinkingMode;
   webSearch?: boolean;
   searchMode?: SearchMode;
 }
@@ -33,6 +34,7 @@ export function buildNiximaSystemPrompt({
   model,
   customSystemPrompt,
   deepThink,
+  thinkingMode,
   webSearch,
   searchMode = 'standard',
 }: PromptContextOptions): string {
@@ -105,6 +107,32 @@ export function buildNiximaSystemPrompt({
     minute: '2-digit',
     timeZoneName: 'short',
   });
+
+  const effectiveThinkingMode: ThinkingMode = thinkingMode || (deepThink ? 'deep' : 'none');
+  const isDeepThink = effectiveThinkingMode === 'deep';
+  const isBasicThink = effectiveThinkingMode === 'basic';
+
+  const thinkingProtocol = isDeepThink ? `10. DeepThinking V2 Dynamic Cognitive Reasoning Protocol:
+    - DEEPTHINKING V2 MODE IS ACTIVATED. You must perform rigorous, genuine epistemic reasoning before delivering your final answer.
+    - Encapsulate your inner reasoning trace inside <think>...</think> tags.
+    - Create your own dynamic, contextual reasoning steps tailored specifically to this inquiry!
+    - For each step, use a clear title and detailed explanation of what you are analyzing, for example:
+      ### 1. [Your Step Title Here]
+      [Your deep explanation, analysis of boundary constraints, or reasoning]
+      ### 2. [Your Step Title Here]
+      [Your exploration of alternative paths, counterfactual testing, or calculation]
+    - Do not output fixed or generic headings; create meaningful, domain-specific step titles that accurately describe your thinking on this exact problem!
+    - After closing </think>, provide the polished, authoritative response.
+` : isBasicThink ? `10. Agile Thinking Protocol (Basic Mode):
+    - AGILE THINKING MODE IS ACTIVATED. Before delivering your answer, formulate a concise, focused train of thought inside <think>...</think> tags.
+    - Keep your thinking agile, direct, and pragmatic (~1-2 focused steps), for example:
+      ### 1. Intent & Core Objectives
+      [Brief analysis of operator requirements, direct constraints, or key parameters]
+      ### 2. Solution Blueprint & Verification
+      [Concise plan or sanity check before outputting response]
+    - Focus on rapid clarity, high signal, and practical solutions without unnecessary verbosity or heavy mathematical proof machinery unless explicitly requested.
+    - After closing </think>, provide your direct, polished response.
+` : '';
 
   return `You are Nixima AI, a sovereign frontier reasoning and synthetic intelligence platform.
 
@@ -235,18 +263,7 @@ ${modelsCatalog}
         - Future Projections: Add forecasted periods (e.g. 2030, 2035) to labels and estimated values to data.
         - Always regenerate the complete interactive \`\`\`chart JSON block with the requested modifications applied.
 
-${deepThink ? `10. DeepThinking V2 Dynamic Cognitive Reasoning Protocol:
-    - DEEPTHINKING V2 MODE IS ACTIVATED. You must perform rigorous, genuine epistemic reasoning before delivering your final answer.
-    - Encapsulate your inner reasoning trace inside <think>...</think> tags.
-    - Create your own dynamic, contextual reasoning steps tailored specifically to this inquiry!
-    - For each step, use a clear title and detailed explanation of what you are analyzing, for example:
-      ### 1. [Your Step Title Here]
-      [Your deep explanation, analysis of boundary constraints, or reasoning]
-      ### 2. [Your Step Title Here]
-      [Your exploration of alternative paths, counterfactual testing, or calculation]
-    - Do not output fixed or generic headings; create meaningful, domain-specific step titles that accurately describe your thinking on this exact problem!
-    - After closing </think>, provide the polished, authoritative response.
-` : ''}${webSearch ? (searchMode === 'mega' && isCreator ? `11. Search V2 Mega — Sovereign Deep Web Swarm Protocol (Clearance: Creator Bogdan / @orange17):
+${thinkingProtocol}${webSearch ? (searchMode === 'mega' && isCreator ? `11. Search V2 Mega — Sovereign Deep Web Swarm Protocol (Clearance: Creator Bogdan / @orange17):
     - SEARCH V2 MEGA IS ENGAGED. You have sovereign clearance across the entire global web index with multi-input deep web crawling.
     - The Nixima Search Swarm has queried multiple browser inputs in parallel (Academic & arXiv papers, GitHub/code RFCs, Bloomberg/Financial feeds, Global News Wires, and Technical Standards).
     - Provide deep, exhaustive, authoritative coverage citing multiple distinct perspectives and specific data points.

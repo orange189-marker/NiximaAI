@@ -17,7 +17,7 @@ import {
   ChevronDown,
   Check
 } from 'lucide-react';
-import { ModelOption, SearchMode } from '../types/chat';
+import { ModelOption, SearchMode, ThinkingMode } from '../types/chat';
 import { getRecommendedModelForSearchMode } from '../data/models';
 import { NiximaIdLogo } from './NiximaIdLogo';
 import { useLanguage } from '../context/LanguageContext';
@@ -32,7 +32,9 @@ interface ChatInputProps {
   onStopGeneration?: () => void;
   currentModel: ModelOption;
   deepThink: boolean;
+  thinkingMode?: ThinkingMode;
   onToggleDeepThink: () => void;
+  onChangeThinkingMode?: (mode: ThinkingMode) => void;
   webSearch: boolean;
   onToggleWebSearch: () => void;
   onSelectSearchMode?: (mode: SearchMode) => void;
@@ -51,7 +53,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onStopGeneration,
   currentModel,
   deepThink,
+  thinkingMode = 'none',
   onToggleDeepThink,
+  onChangeThinkingMode,
   webSearch,
   onToggleWebSearch,
   onSelectSearchMode,
@@ -68,13 +72,18 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isSearchPopoverOpen, setIsSearchPopoverOpen] = useState(false);
+  const [isThinkingPopoverOpen, setIsThinkingPopoverOpen] = useState(false);
   const [autoSyncSearchModel, setAutoSyncSearchModel] = useState(true);
   const searchMenuRef = useRef<HTMLDivElement>(null);
+  const thinkingMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (searchMenuRef.current && !searchMenuRef.current.contains(event.target as Node)) {
         setIsSearchPopoverOpen(false);
+      }
+      if (thinkingMenuRef.current && !thinkingMenuRef.current.contains(event.target as Node)) {
+        setIsThinkingPopoverOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -158,8 +167,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   ];
 
   const estimated = useMemo(() => {
-    return calculateEstimatedCost(input, currentModel, isOmni ? true : deepThink);
-  }, [input, currentModel, deepThink, isOmni]);
+    return calculateEstimatedCost(input, currentModel, isOmni ? false : deepThink, isOmni ? undefined : thinkingMode);
+  }, [input, currentModel, deepThink, isOmni, thinkingMode]);
 
   const hasCredits = (userCredits ?? 1000) >= (currentModel.baseCreditCost || 2);
   const canSubmit = (input.trim().length > 0 || attachedFiles.length > 0) && !isLoading && hasCredits;
@@ -244,23 +253,163 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 <>
                   <div className="hidden md:block h-3.5 w-[1px] bg-zinc-800 mx-0.5 flex-shrink-0" />
 
-                  {/* DeepThinking V2 Mode Toggle (Website Design) */}
-                  <button
-                    type="button"
-                    onClick={onToggleDeepThink}
-                    className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-full text-xs font-mono transition-all duration-150 border cursor-pointer select-none flex-shrink-0 ${
-                      deepThink 
-                        ? 'bg-zinc-800 text-white font-semibold border-zinc-600 shadow-inner-light scale-[1.02]' 
-                        : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-850/80'
-                    }`}
-                    title={t.chatInput.deepThinkTooltip}
-                  >
-                    <BrainCircuit className={`w-3.5 h-3.5 ${deepThink ? 'text-zinc-200' : 'text-zinc-400'}`} />
-                    <span className="tracking-tight whitespace-nowrap">{t.chatInput.deepThink}</span>
-                    {deepThink && (
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-zinc-300 ml-0.5 flex-shrink-0" />
+                  {/* Thinking Engine Control (Basic Thinking vs DeepThinking V2) */}
+                  <div className="relative flex items-center flex-shrink-0 z-30" ref={thinkingMenuRef}>
+                    <div
+                      className={`flex items-center rounded-full text-xs font-mono transition-all duration-150 border select-none ${
+                        thinkingMode === 'basic'
+                          ? 'bg-zinc-800 text-white font-semibold border-cyan-600/50 shadow-inner-light scale-[1.02]'
+                          : thinkingMode === 'deep' || deepThink
+                          ? 'bg-zinc-800 text-white font-semibold border-zinc-500 shadow-inner-light scale-[1.02]'
+                          : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-850/80'
+                      }`}
+                    >
+                      <button
+                        type="button"
+                        onClick={onToggleDeepThink}
+                        className="flex items-center gap-1.5 pl-2.5 sm:pl-3 pr-1 py-1.5 cursor-pointer"
+                        title={
+                          thinkingMode === 'basic'
+                            ? t.chatInput.basicThinkingTooltip
+                            : thinkingMode === 'deep' || deepThink
+                            ? t.chatInput.deepThinkTooltip
+                            : t.chatInput.thinkingEngineTitle
+                        }
+                      >
+                        <BrainCircuit className={`w-3.5 h-3.5 flex-shrink-0 ${
+                          thinkingMode === 'basic'
+                            ? 'text-cyan-400'
+                            : thinkingMode === 'deep' || deepThink
+                            ? 'text-zinc-200'
+                            : 'text-zinc-400'
+                        }`} />
+                        <span className="tracking-tight whitespace-nowrap">
+                          {thinkingMode === 'basic' ? t.chatInput.basicThinking : t.chatInput.deepThink}
+                        </span>
+                        {thinkingMode === 'basic' && (
+                          <span className="px-1.5 py-0.2 rounded bg-cyan-950/80 text-[9px] font-mono font-bold tracking-wider text-cyan-300 border border-cyan-600/50 whitespace-nowrap flex-shrink-0">
+                            BASIC
+                          </span>
+                        )}
+                        {(thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic')) && (
+                          <span className="px-1.5 py-0.2 rounded bg-zinc-700 text-[9px] font-mono font-bold tracking-wider text-zinc-100 border border-zinc-600 whitespace-nowrap flex-shrink-0">
+                            DEEP
+                          </span>
+                        )}
+                        {(thinkingMode === 'basic' || thinkingMode === 'deep' || deepThink) && (
+                          <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ml-0.5 flex-shrink-0 ${
+                            thinkingMode === 'basic' ? 'bg-cyan-400' : 'bg-white'
+                          }`} />
+                        )}
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setIsThinkingPopoverOpen(!isThinkingPopoverOpen);
+                        }}
+                        className="pr-2 pl-0.5 py-1.5 text-zinc-400 hover:text-white cursor-pointer transition-colors"
+                        title={t.chatInput.thinkingEngineTitle}
+                      >
+                        <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isThinkingPopoverOpen ? 'rotate-180 text-white' : ''}`} />
+                      </button>
+                    </div>
+
+                    {/* Thinking Engine Selection Popover Panel */}
+                    {isThinkingPopoverOpen && (
+                      <div className="absolute bottom-full mb-3 left-0 w-80 max-w-[calc(100vw-2rem)] rounded-2xl bg-[#121215] border border-zinc-700/90 shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-3 z-[100] animate-fade-in backdrop-blur-2xl">
+                        <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
+                          <div className="flex items-center gap-1.5">
+                            <BrainCircuit className="w-4 h-4 text-zinc-300" />
+                            <span className="text-xs font-semibold text-white font-mono uppercase tracking-wider">
+                              {t.chatInput.thinkingEngineTitle}
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => setIsThinkingPopoverOpen(false)}
+                            className="p-1 rounded text-zinc-400 hover:text-white cursor-pointer"
+                            title="Close"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+
+                        <p className="text-[11px] text-zinc-400 mt-1 mb-2 font-mono">
+                          {t.chatInput.thinkingEngineSubtitle}
+                        </p>
+
+                        <div className="space-y-1.5">
+                          {/* 1. Basic Thinking */}
+                          <div 
+                            onClick={() => {
+                              onChangeThinkingMode?.('basic');
+                              setIsThinkingPopoverOpen(false);
+                            }}
+                            className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
+                              thinkingMode === 'basic'
+                                ? 'bg-zinc-850/90 border-cyan-600/70 shadow-sm' 
+                                : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className="p-1 rounded-md bg-cyan-950/60 border border-cyan-800/60 text-cyan-300">
+                                  <Sparkles className="w-3.5 h-3.5" />
+                                </div>
+                                <span className="font-semibold text-xs text-white font-mono">{t.chatInput.basicThinking}</span>
+                                <span className="px-1.5 py-0.2 rounded bg-cyan-950/80 border border-cyan-600/40 text-[9px] font-mono font-bold text-cyan-300">
+                                  AGILE
+                                </span>
+                              </div>
+                              {thinkingMode === 'basic' && (
+                                <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center">
+                                  <Check className="w-3 h-3 stroke-[3]" />
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-zinc-400 mt-1">
+                              {t.chatInput.basicThinkingDesc}
+                            </p>
+                          </div>
+
+                          {/* 2. DeepThinking V2 */}
+                          <div 
+                            onClick={() => {
+                              onChangeThinkingMode?.('deep');
+                              setIsThinkingPopoverOpen(false);
+                            }}
+                            className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
+                              thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic')
+                                ? 'bg-zinc-850/90 border-zinc-500 shadow-sm' 
+                                : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
+                                  <BrainCircuit className="w-3.5 h-3.5" />
+                                </div>
+                                <span className="font-semibold text-xs text-white font-mono">{t.chatInput.deepThink}</span>
+                                <span className="px-1.5 py-0.2 rounded bg-zinc-700 text-[9px] font-mono font-bold text-zinc-200 border border-zinc-600">
+                                  L3 PROOF
+                                </span>
+                              </div>
+                              {(thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic')) && (
+                                <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center">
+                                  <Check className="w-3 h-3 stroke-[3]" />
+                                </div>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-zinc-400 mt-1">
+                              {t.chatInput.deepThinkingDesc}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
                     )}
-                  </button>
+                  </div>
 
               {/* Search V2 Engine Control (Fast, Standard, Mega + Model Pairing) */}
               <div className="relative flex items-center flex-shrink-0 z-30" ref={searchMenuRef}>

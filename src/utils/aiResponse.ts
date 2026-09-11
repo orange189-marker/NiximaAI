@@ -1,4 +1,4 @@
-import { ModelOption, SearchGrounding, DeepThinkingTelemetry, SearchMode } from '../types/chat';
+import { ModelOption, SearchGrounding, DeepThinkingTelemetry, SearchMode, ThinkingMode } from '../types/chat';
 import { isCjkRequested, sanitizeModelOutput } from './textSanitizer';
 import { generateDefaultGrounding, computeDeepThinkingTelemetry } from './openrouter';
 
@@ -6,6 +6,7 @@ interface GenerateResponseOptions {
   prompt: string;
   model: ModelOption;
   deepThink: boolean;
+  thinkingMode?: ThinkingMode;
   webSearch?: boolean;
   searchMode?: SearchMode;
   history: { role: string; content: string }[];
@@ -20,12 +21,15 @@ interface AIResponseResult {
 
 export function generateNiximaResponse(options: GenerateResponseOptions): AIResponseResult {
   const allowCjk = isCjkRequested(options.prompt);
-  const raw = generateRawNiximaResponse(options);
-  const sanitizedThinking = options.deepThink ? sanitizeModelOutput(raw.thinking, { allowCjk }) : '';
+  const effectiveMode: ThinkingMode = options.thinkingMode || (options.deepThink ? 'deep' : 'none');
+  const allowThinking = effectiveMode !== 'none';
+
+  const raw = generateRawNiximaResponse({ ...options, thinkingMode: effectiveMode });
+  const sanitizedThinking = allowThinking ? sanitizeModelOutput(raw.thinking, { allowCjk }) : '';
   const sanitizedResponse = sanitizeModelOutput(raw.response, { allowCjk });
 
-  const deepThinkingTelemetry = (options.deepThink && sanitizedThinking.length > 20)
-    ? computeDeepThinkingTelemetry(sanitizedThinking)
+  const deepThinkingTelemetry = (allowThinking && sanitizedThinking.length > 20)
+    ? computeDeepThinkingTelemetry(sanitizedThinking, undefined, effectiveMode)
     : undefined;
 
   const searchGrounding = options.webSearch
@@ -43,13 +47,15 @@ export function generateNiximaResponse(options: GenerateResponseOptions): AIResp
 function generateRawNiximaResponse({
   prompt,
   model,
-  deepThink
+  deepThink,
+  thinkingMode,
 }: GenerateResponseOptions): AIResponseResult {
   const lower = prompt.toLowerCase();
+  const effectiveMode: ThinkingMode = thinkingMode || (deepThink ? 'deep' : 'none');
 
-  // Thinking trace generation strictly gated by deepThink
+  // Thinking trace generation gated by thinkingMode
   let thinking = '';
-  if (deepThink) {
+  if (effectiveMode === 'deep') {
     thinking = `### 1. Problem Space Decomposition & Invariants
 - Semantic decomposition of prompt: "${prompt.slice(0, 60)}..."
 - Identified domain boundary conditions, operator clearance, and temporal context (Year 2026).
@@ -62,6 +68,13 @@ function generateRawNiximaResponse({
 
 ### 3. Epistemic Synthesis & Definitive Delivery
 - Assembling structured, authoritative response with maximal engineering rigor.`;
+  } else if (effectiveMode === 'basic') {
+    thinking = `### 1. Intent Analysis & Core Objective
+- Dissecting query requirements: "${prompt.slice(0, 50)}..."
+- Outlining key constraints, operator context, and pragmatic execution path.
+
+### 2. Rapid Solution Blueprint
+- Formulating direct, structured synthesis with immediate technical clarity.`;
   } else {
     thinking = '';
   }

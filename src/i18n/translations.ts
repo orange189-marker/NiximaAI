@@ -161,6 +161,12 @@ export interface Translations {
     };
     deepThink: string;
     deepThinkTooltip: string;
+    basicThinking: string;
+    basicThinkingTooltip: string;
+    thinkingEngineTitle: string;
+    thinkingEngineSubtitle: string;
+    basicThinkingDesc: string;
+    deepThinkingDesc: string;
     omniBadge: string;
     omniTooltip: string;
     search: string;
@@ -215,6 +221,9 @@ export interface Translations {
     branchChat: string;
     downloadMessage: string;
     deepThinkingV2: string;
+    basicThinking: string;
+    agileSynthesis: string;
+    agileStages: (count: number) => string;
     epistemicVerification: string;
     stagesVerified: (count: number) => string;
     copyThoughtTrace: string;
@@ -574,6 +583,12 @@ export const translations: Record<Language, Translations> = {
       },
       deepThink: 'DeepThinking V2',
       deepThinkTooltip: 'DeepThinking V2: Activate multi-stage epistemic reasoning & proof verification',
+      basicThinking: 'Thinking',
+      basicThinkingTooltip: 'Thinking: Agile reasoning & prompt analysis',
+      thinkingEngineTitle: 'Thinking Engine',
+      thinkingEngineSubtitle: 'Select cognitive reasoning depth & latency',
+      basicThinkingDesc: 'Agile thought process (~1-2 steps) for general reasoning and code without heavy latency.',
+      deepThinkingDesc: 'Rigorous multi-stage epistemic deduction, boundary proof & counterfactual testing.',
       omniBadge: '0.2O Omni Autonomous',
       omniTooltip: 'Nixima-0.2O Omni: All-in-one sovereign model. DeepThinking reasoning and real-time WebSearch trigger autonomously on demand.',
       search: 'Search V2',
@@ -628,6 +643,9 @@ export const translations: Record<Language, Translations> = {
       branchChat: 'Branch chat from here',
       downloadMessage: 'Download response (.md)',
       deepThinkingV2: 'DeepThinking V2',
+      basicThinking: 'Thinking',
+      agileSynthesis: 'Agile Synthesis',
+      agileStages: (count: number) => `${count} ${count === 1 ? 'Agile Step' : 'Agile Steps'}`,
       epistemicVerification: 'L3 Epistemic Proof',
       stagesVerified: (count: number) => `${count} Reasoning Stages Verified`,
       copyThoughtTrace: 'Copy trace',
@@ -1076,6 +1094,12 @@ export const translations: Record<Language, Translations> = {
       },
       deepThink: 'DeepThinking V2',
       deepThinkTooltip: 'DeepThinking V2: Багатокрокове епістемічне міркування та верифікація логіки',
+      basicThinking: 'Міркування',
+      basicThinkingTooltip: 'Міркування: Швидкий попередній аналіз перед відповіддю',
+      thinkingEngineTitle: 'Рушій міркування',
+      thinkingEngineSubtitle: 'Оберіть глибину міркувань та швидкість',
+      basicThinkingDesc: 'Швидкий аналіз (1-2 кроки) для повсякденних завдань і коду без затримок.',
+      deepThinkingDesc: 'Багатокрокове епістемічне міркування, верифікація доведень та логіка.',
       omniBadge: '0.2O Omni Автономний',
       omniTooltip: 'Nixima-0.2O Omni: Суверенна модель «все-в-одному». DeepThinking міркування та живий пошук активуються автономно за потребою.',
       search: 'Search V2',
@@ -1130,6 +1154,9 @@ export const translations: Record<Language, Translations> = {
       branchChat: 'Створити гілку звідси',
       downloadMessage: 'Завантажити відповідь (.md)',
       deepThinkingV2: 'DeepThinking V2',
+      basicThinking: 'Міркування',
+      agileSynthesis: 'Швидкий аналіз',
+      agileStages: (count: number) => `Аналіз у ${count} ${count === 1 ? 'крок' : count < 5 ? 'кроки' : 'кроків'}`,
       epistemicVerification: 'L3 Епістемічний доказ',
       stagesVerified: (count: number) => `Верифіковано ${count} етапів міркування`,
       copyThoughtTrace: 'Копіювати ланцюжок',

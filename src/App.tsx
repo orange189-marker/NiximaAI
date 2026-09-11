@@ -10,7 +10,7 @@ import { VipWelcomeModal } from './components/VipWelcomeModal';
 import { BenchmarksModal } from './components/BenchmarksModal';
 import { ReleaseAnnouncementModal } from './components/ReleaseAnnouncementModal';
 import { AuthPortal } from './components/AuthPortal';
-import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry, SearchMode } from './types/chat';
+import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry, SearchMode, ThinkingMode } from './types/chat';
 import { NiximaUser } from './types/user';
 import { NIXIMA_MODELS, DEFAULT_MODEL } from './data/models';
 import { INITIAL_CONVERSATIONS } from './data/initialChats';
@@ -66,41 +66,68 @@ export function shouldOmniSearch(query: string): boolean {
 }
 
 /**
- * Evaluates whether Nixima-0.2O (Omni) should autonomously invoke DeepThinking reasoning
+ * Evaluates whether Nixima-0.2O (Omni) should autonomously invoke Basic Thinking, DeepThinking, or no thinking.
+ * Prevents always triggering heavy DeepThinking overhead for everyday inquiries.
  */
-export function shouldOmniThink(query: string): boolean {
+export function getOmniThinkingDecision(query: string): ThinkingMode {
   const trimmed = query.trim().toLowerCase();
 
-  // 1. Explicit thinking or reasoning commands
+  // 1. Trivial or minimal greetings / short acknowledgements -> 'none' (zero latency overhead)
   if (
-    /(?:think(?:\s+deeply|\s+step\s+by\s+step|\s+carefully)?|reason|chain\s+of\s+thought|step\s+by\s+step|derive|deduce|prove|verify\s+logically|break\s+it\s+down)/i.test(trimmed) ||
-    /(?:подумай|порозмірковуй|глибоко\s+подумай|покроково|ланцюжок\s+думок|доведи|виведи|обґрунтуй|поясни\s+логіку|розпиши\s+кроки)/i.test(trimmed)
+    /^(?:hi|hello|hey|greetings|howdy|sup|yo|привіт|вітаю|добрий\s+(?:день|ранок|вечір)|дякую|thanks|thank\s+you|ок|ok|good|bye|бувай)\b/i.test(trimmed) &&
+    trimmed.length < 35
   ) {
-    return true;
+    return 'none';
   }
 
-  // 2. Math, algorithmic or logic problems
+  // 2. High-intensity logic, mathematical derivations, algorithmic complexity, or explicit deep reasoning requests -> 'deep'
+  if (
+    /(?:think\s+deeply|deep\s+think|step\s+by\s+step|formal\s+proof|derive|deduce|rigorous|chain\s+of\s+thought|verify\s+logically|prove\b|break\s+it\s+down\s+deeply)/i.test(trimmed) ||
+    /(?:глибоко\s+подумай|подумай\s+глибоко|покроково|ланцюжок\s+думок|доведи|виведи|строге\s+доведення|обґрунтуй\s+детально)/i.test(trimmed)
+  ) {
+    return 'deep';
+  }
+
   if (
     /(?:algorithm|complexity|o\(n\)|dynamic\s+programming|dijkstra|binary\s+tree|graph\s+traversal|matrix\s+multiplication|eigenvalue|derivative|integral|differential|theorem|axioms?|proof\b|puzzle|riddle|logician)/i.test(trimmed) ||
     /(?:алгоритм|складність|дерево|граф|матриц|похідна|інтеграл|диференціал|теорем|аксіом|доведення|головоломк|загадк|мудрец)/i.test(trimmed)
   ) {
-    return true;
+    return 'deep';
   }
 
-  // 3. Systems architecture, concurrency, and security
   if (
-    /(?:architecture|concurrency|mutex|deadlock|race\s+condition|microservices|distributed\s+system|memory\s+leak|refactor|design\s+pattern)/i.test(trimmed) ||
-    /(?:архітектур|асинхрон|паралелізм|дедлок|гонка\s+станів|патерн|рефакторинг)/i.test(trimmed)
+    /(?:architecture|concurrency|mutex|deadlock|race\s+condition|microservices|distributed\s+system|memory\s+leak|kernel|compiler|refactor)/i.test(trimmed) ||
+    /(?:архітектур|асинхрон|паралелізм|дедлок|гонка\s+станів|мікросервіс|розподілен|витік\s+пам'яті|компілятор)/i.test(trimmed)
   ) {
-    return true;
+    return 'deep';
   }
 
-  // 4. Substantial multi-part analytical queries
-  if (query.length > 280 && (query.includes('?') || query.includes(':'))) {
-    return true;
+  // 3. Substantial multi-part analytical queries (>300 chars with multiple questions or structure) -> 'deep'
+  if (query.length > 300 && ((query.match(/\?/g) || []).length >= 2 || query.includes('\n-') || query.includes('1.'))) {
+    return 'deep';
   }
 
-  return false;
+  // 4. General explanations, coding tasks, comparisons, planning, troubleshooting, non-trivial questions -> 'basic'
+  if (
+    /(?:think|reason|explain|why|how|what\s+is\s+the\s+difference|compare|plan|analyze|suggest|solve|debug|implement|write|code|create|guide|troubleshoot)/i.test(trimmed) ||
+    /(?:подумай|поясни|чому|як|в\s+чому\s+різниця|порівняй|сплануй|проаналізуй|порадь|виріши|задебаж|реалізуй|напиши|код|створи|інструкція)/i.test(trimmed)
+  ) {
+    return 'basic';
+  }
+
+  // If query is moderate length (>60 chars) or asks a question, benefit from basic agile thought process
+  if (query.length > 60 || query.includes('?')) {
+    return 'basic';
+  }
+
+  return 'none';
+}
+
+/**
+ * Backward-compatible helper to check if any thinking mode is active for Omni
+ */
+export function shouldOmniThink(query: string): boolean {
+  return getOmniThinkingDecision(query) !== 'none';
 }
 
 const AppContent: React.FC = () => {
@@ -594,10 +621,13 @@ All conversations and model preferences in this workspace are private to your Ni
         ? shouldOmniSearch(userText)
         : (settings.webSearchEnabled || isNewsQuery);
 
-      // Determine whether deep thinking should run: explicitly enabled, or Omni autonomous
-      const effectiveDeepThink = isOmni
-        ? shouldOmniThink(userText)
-        : settings.deepThinkEnabled;
+      // Determine thinking mode: Omni autonomous (none, basic, deep) or user settings
+      const omniThinkingDecision = isOmni ? getOmniThinkingDecision(userText) : 'none';
+      const effectiveThinkingMode: ThinkingMode = isOmni
+        ? omniThinkingDecision
+        : (settings.thinkingMode || (settings.deepThinkEnabled ? 'deep' : 'none'));
+      const effectiveDeepThink = effectiveThinkingMode === 'deep';
+      const isThinkingActive = effectiveThinkingMode !== 'none';
 
       if (shouldRunWebSearch) {
         try {
@@ -628,6 +658,7 @@ All conversations and model preferences in this workspace are private to your Ni
         model: currentModel,
         customSystemPrompt: settings.systemPrompt,
         deepThink: effectiveDeepThink,
+        thinkingMode: effectiveThinkingMode,
         webSearch: shouldRunWebSearch,
         searchMode: settings.searchMode || 'standard',
       });
@@ -690,6 +721,7 @@ All conversations and model preferences in this workspace are private to your Ni
         maxTokens: settings.maxTokens,
         antiGlitchFilter: settings.antiGlitchFilter !== false,
         deepThink: effectiveDeepThink,
+        thinkingMode: effectiveThinkingMode,
         webSearch: shouldRunWebSearch,
         searchMode: settings.searchMode || 'standard',
         initialSearchGrounding: liveGrounding,
@@ -711,12 +743,16 @@ All conversations and model preferences in this workspace are private to your Ni
             scrollToBottom();
           },
           onThinking: (thinkingChunk) => {
-            if (!effectiveDeepThink && !isOmni) return;
+            if (!isThinkingActive && !isOmni) return;
             setConversations(prev => prev.map(c => {
               if (c.id === targetConvId) {
                 return {
                   ...c,
-                  messages: c.messages.map(m => m.id === aiMessageId ? { ...m, thinking: thinkingChunk } : m)
+                  messages: c.messages.map(m => m.id === aiMessageId ? { 
+                    ...m, 
+                    thinking: thinkingChunk,
+                    thinkingMode: effectiveThinkingMode,
+                  } : m)
                 };
               }
               return c;
@@ -760,7 +796,7 @@ All conversations and model preferences in this workspace are private to your Ni
         creditsSpent: actualSpent,
       };
 
-      const hasThinkingToDisplay = (effectiveDeepThink || isOmni) && fullThinking.trim().length > 0;
+      const hasThinkingToDisplay = (isThinkingActive || isOmni) && fullThinking.trim().length > 0;
 
       setConversations(prev => prev.map(c => {
         if (c.id === targetConvId) {
@@ -770,6 +806,7 @@ All conversations and model preferences in this workspace are private to your Ni
               ...m, 
               content: fullContent,
               thinking: hasThinkingToDisplay ? (fullThinking || undefined) : undefined,
+              thinkingMode: hasThinkingToDisplay ? effectiveThinkingMode : undefined,
               searchGrounding,
               deepThinkingTelemetry: hasThinkingToDisplay ? deepThinkingTelemetry : undefined,
               isStreaming: false,
@@ -800,11 +837,12 @@ All conversations and model preferences in this workspace are private to your Ni
           prompt: userText,
           model: currentModel,
           deepThink: effectiveDeepThink,
+          thinkingMode: effectiveThinkingMode,
           webSearch: shouldRunWebSearch,
           searchMode: settings.searchMode || 'standard',
           history: historyForApi
         });
-        const hasFallbackThinking = (effectiveDeepThink || isOmni) && (fallback.thinking || '').trim().length > 0;
+        const hasFallbackThinking = (isThinkingActive || isOmni) && (fallback.thinking || '').trim().length > 0;
         setConversations(prev => prev.map(c => {
           if (c.id === targetConvId) {
             return {
@@ -812,10 +850,12 @@ All conversations and model preferences in this workspace are private to your Ni
               messages: c.messages.map(m => m.id === aiMessageId ? {
                 ...m,
                 content: fallback.response,
-                thinking: hasFallbackThinking ? (fallback.thinking || undefined) : undefined,
+                thinking: hasFallbackThinking ? fallback.thinking : undefined,
+                thinkingMode: hasFallbackThinking ? effectiveThinkingMode : undefined,
                 searchGrounding: liveGrounding || fallback.searchGrounding,
                 deepThinkingTelemetry: hasFallbackThinking ? fallback.deepThinkingTelemetry : undefined,
                 isStreaming: false,
+                telemetry: fallback.telemetry
               } : m)
             };
           }
@@ -935,8 +975,26 @@ All conversations and model preferences in this workspace are private to your Ni
           isLoading={isLoading}
           onStopGeneration={handleStopGeneration}
           currentModel={currentModel}
-          deepThink={settings.deepThinkEnabled}
-          onToggleDeepThink={() => setSettings(s => ({ ...s, deepThinkEnabled: !s.deepThinkEnabled }))}
+          deepThink={settings.thinkingMode === 'deep' || settings.deepThinkEnabled}
+          thinkingMode={settings.thinkingMode || (settings.deepThinkEnabled ? 'deep' : 'none')}
+          onToggleDeepThink={() => {
+            setSettings(prev => {
+              const current = prev.thinkingMode || (prev.deepThinkEnabled ? 'deep' : 'none');
+              const next: ThinkingMode = current === 'none' ? 'basic' : current === 'basic' ? 'deep' : 'none';
+              return {
+                ...prev,
+                thinkingMode: next,
+                deepThinkEnabled: next === 'deep',
+              };
+            });
+          }}
+          onChangeThinkingMode={(mode: ThinkingMode) => {
+            setSettings(prev => ({
+              ...prev,
+              thinkingMode: mode,
+              deepThinkEnabled: mode === 'deep',
+            }));
+          }}
           webSearch={settings.webSearchEnabled}
           onToggleWebSearch={() => {
             setSettings(prev => {

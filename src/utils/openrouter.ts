@@ -10,12 +10,17 @@ export const getSystemApiKey = (): string => {
 
 export interface StreamCallbacks {
   onToken: (token: string) => void;
-  onThinking: (thinking: string) => void;
+  onThinkingToken?: (token: string) => void;
+  onSearchGrounding?: (grounding: SearchGrounding) => void;
+  onSearchActionStep?: (step: SearchActionStep) => void;
+  onTelemetry?: (telemetry: DeepThinkingTelemetry) => void;
+  onComplete?: (fullContent: string, fullThinking?: string, searchGrounding?: SearchGrounding) => void;
+  onError?: (error: Error) => void;
 }
 
 export interface StreamChatParams {
   model: ModelOption;
-  messages: { role: string; content: string }[];
+  messages: { role: 'user' | 'assistant' | 'system'; content: string }[];
   systemPrompt?: string;
   temperature?: number;
   topP?: number;
@@ -24,6 +29,7 @@ export interface StreamChatParams {
   signal?: AbortSignal;
   antiGlitchFilter?: boolean;
   deepThink?: boolean;
+  thinkingMode?: ThinkingMode;
   webSearch?: boolean;
   searchMode?: SearchMode;
   initialSearchGrounding?: SearchGrounding;
@@ -872,13 +878,18 @@ export function parseDynamicThinkingSteps(thinking: string): DynamicThinkingStep
 /**
  * Computes deep thinking telemetry metadata based on dynamic AI thinking steps
  */
-export function computeDeepThinkingTelemetry(thinking: string, durationMs?: number): DeepThinkingTelemetry {
+export function computeDeepThinkingTelemetry(
+  thinking: string, 
+  durationMs?: number,
+  mode: ThinkingMode = 'deep'
+): DeepThinkingTelemetry {
   const dynamicSteps = parseDynamicThinkingSteps(thinking);
   return {
     stepsCount: dynamicSteps.length > 0 ? dynamicSteps.length : 1,
-    durationMs: durationMs || Math.min(Math.round(thinking.length * 12), 4800),
-    epistemicDepth: 'Frontier L3 Epistemic Proof',
+    durationMs: durationMs || Math.min(Math.round(thinking.length * (mode === 'basic' ? 8 : 12)), 4800),
+    epistemicDepth: mode === 'basic' ? 'Agile Cognitive Synthesis' : 'Frontier L3 Epistemic Proof',
     dynamicSteps,
+    mode,
   };
 }
 
@@ -896,12 +907,19 @@ export async function streamOpenRouterChat({
   signal,
   antiGlitchFilter = true,
   deepThink = false,
+  thinkingMode,
   webSearch = false,
   searchMode = 'standard',
   initialSearchGrounding,
 }: StreamChatParams): Promise<StreamChatResult> {
   const activeKey = getSystemApiKey();
-  const allowThinking = Boolean(deepThink || model.isOmni);
+  const effectiveThinkingMode: ThinkingMode = thinkingMode || (deepThink ? 'deep' : 'none');
+  const allowThinking = Boolean(
+    effectiveThinkingMode === 'basic' || 
+    effectiveThinkingMode === 'deep' || 
+    deepThink || 
+    model.isOmni
+  );
 
   // Determine if the conversation legitimately requests CJK characters
   const contextForCjk = messages.map(m => m.content).join('\n');
@@ -1089,13 +1107,18 @@ export async function streamOpenRouterChat({
           searchGrounding = generateDefaultGrounding(userPrompt, searchMode);
         }
 
-        const deepThinkingTelemetry = (deepThink && sanitizedThinking.trim().length > 0)
-          ? computeDeepThinkingTelemetry(sanitizedThinking)
+        const allowThinkingReturn = (allowThinking && sanitizedThinking.trim().length > 0);
+        const deepThinkingTelemetry = allowThinkingReturn
+          ? computeDeepThinkingTelemetry(
+              sanitizedThinking, 
+              undefined, 
+              effectiveThinkingMode !== 'none' ? effectiveThinkingMode : (model.isOmni ? 'basic' : 'deep')
+            )
           : undefined;
 
         return { 
           fullContent: finalContent, 
-          fullThinking: deepThink ? sanitizedThinking : '',
+          fullThinking: allowThinking ? sanitizedThinking : '',
           searchGrounding,
           deepThinkingTelemetry,
         };

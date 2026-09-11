@@ -672,23 +672,28 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                 />
               )}
 
-              {/* DEEPTHINKING V2 COGNITIVE TELEMETRY STATION (Website Native Design - Dynamic Steps Formulated by AI) */}
-              {!isUser && message.thinking && (message.deepThinkingTelemetry || message.isStreaming) && (
+              {/* DEEPTHINKING V2 / BASIC THINKING COGNITIVE TELEMETRY STATION */}
+              {!isUser && message.thinking && (message.deepThinkingTelemetry || message.isStreaming) && (() => {
+                const isBasicThinking = message.deepThinkingTelemetry?.mode === 'basic' || message.thinkingMode === 'basic';
+                return (
                 <div className="rounded-xl border border-zinc-800 bg-[#0e0e13]/90 backdrop-blur-md overflow-hidden text-xs shadow-lg animate-fade-in">
                   <div
                     onClick={() => setIsThinkingOpen(!isThinkingOpen)}
                     className="w-full px-3.5 py-2.5 flex items-center justify-between text-zinc-300 hover:text-white transition-colors cursor-pointer select-none bg-zinc-900/70 border-b border-zinc-800"
                   >
                     <div className="flex items-center gap-2.5 flex-wrap">
-                      <BrainCircuit className="w-4 h-4 text-zinc-300" />
+                      <BrainCircuit className={`w-4 h-4 ${isBasicThinking ? 'text-cyan-400' : 'text-zinc-300'}`} />
                       <span className="font-mono text-xs font-bold text-white tracking-tight">
-                        {t.chatMessage.deepThinkingV2}
+                        {isBasicThinking ? t.chatMessage.basicThinking : t.chatMessage.deepThinkingV2}
                       </span>
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300 font-mono font-medium">
-                        {t.chatMessage.stagesVerified(dynamicSteps.length || 3)}
+                        {isBasicThinking 
+                          ? t.chatMessage.agileStages(dynamicSteps.length || 1)
+                          : t.chatMessage.stagesVerified(dynamicSteps.length || 3)
+                        }
                       </span>
                       <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded bg-zinc-850 border border-zinc-700 text-[10px] text-zinc-300 font-mono">
-                        {message.deepThinkingTelemetry?.epistemicDepth || t.chatMessage.epistemicVerification}
+                        {message.deepThinkingTelemetry?.epistemicDepth || (isBasicThinking ? t.chatMessage.agileSynthesis : t.chatMessage.epistemicVerification)}
                       </span>
                       {message.isStreaming && !message.content && (
                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300 font-mono">
@@ -821,7 +826,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                     </div>
                   )}
                 </div>
-              )}
+                );
+              })()}
 
               {/* Main content */}
               <div className="text-zinc-200">

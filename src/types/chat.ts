@@ -71,6 +71,8 @@ export interface SearchGrounding {
   consensusScore?: number;
 }
 
+export type ThinkingMode = 'none' | 'basic' | 'deep';
+
 export interface DynamicThinkingStep {
   stepNumber: number;
   title: string;
@@ -84,6 +86,7 @@ export interface DeepThinkingTelemetry {
   epistemicDepth?: string; // e.g. "Frontier L3 Epistemic Proof"
   dynamicSteps?: DynamicThinkingStep[];
   phases?: string[];
+  mode?: ThinkingMode;
 }
 
 export interface Message {
@@ -91,6 +94,7 @@ export interface Message {
   role: 'user' | 'assistant' | 'system';
   content: string;
   thinking?: string;
+  thinkingMode?: ThinkingMode;
   deepThinkingTelemetry?: DeepThinkingTelemetry;
   searchGrounding?: SearchGrounding;
   isThinkingExpanded?: boolean;
@@ -118,6 +122,7 @@ export interface UserSettings {
   systemPrompt: string;
   personaTone: 'architect' | 'cyberpunk' | 'academic' | 'executive';
   deepThinkEnabled: boolean;
+  thinkingMode?: ThinkingMode;
   webSearchEnabled: boolean;
   searchMode?: SearchMode;
   autoSyncSearchModel?: boolean;

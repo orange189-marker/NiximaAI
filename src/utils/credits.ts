@@ -1,5 +1,5 @@
 import { NiximaUser } from '../types/user';
-import { ModelOption } from '../types/chat';
+import { ModelOption, ThinkingMode } from '../types/chat';
 import { getAllUsers, saveUsers, setActiveUser, getActiveUser, isDadAccount } from './auth';
 
 export const DEFAULT_INITIAL_CREDITS = 1000;
@@ -90,7 +90,8 @@ export function getUserCredits(user?: NiximaUser | null): number {
 export function calculateEstimatedCost(
   prompt: string,
   model: ModelOption,
-  deepThink: boolean
+  deepThink: boolean,
+  thinkingMode?: ThinkingMode
 ): { minCost: number; maxCost: number; isHardPrompt: boolean } {
   const modelMult = model.creditMultiplier || 1.0;
   const baseMin = model.baseCreditCost || 5;
@@ -98,11 +99,14 @@ export function calculateEstimatedCost(
   const cleanPrompt = prompt.trim();
   const inputLen = cleanPrompt.length;
 
+  const isThinkingActive = Boolean(thinkingMode === 'basic' || thinkingMode === 'deep' || deepThink);
+  const isDeep = thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic');
+
   // Detect if the prompt is computationally "hard"
   const hasCode = /```|function|def\s+|class\s+|SELECT\s+|import\s+/i.test(cleanPrompt);
   const hasMath = /\\frac|\\int|\\sum|\\partial|\$|equation|proof|theorem/i.test(cleanPrompt);
   const isLong = inputLen > 350;
-  const isHardPrompt = hasCode || hasMath || isLong || deepThink || model.id.includes('reasoning');
+  const isHardPrompt = hasCode || hasMath || isLong || isThinkingActive || model.id.includes('reasoning');
 
   // Input weight
   const inputWeight = Math.max(1, Math.ceil(inputLen / 50));
@@ -111,9 +115,12 @@ export function calculateEstimatedCost(
   let estimatedMin = Math.round(baseMin + inputWeight * 0.8 * modelMult);
   let estimatedMax = Math.round(estimatedMin + (isHardPrompt ? 15 : 6) * modelMult);
 
-  if (deepThink) {
+  if (isDeep) {
     estimatedMin = Math.round(estimatedMin * 1.5);
     estimatedMax = Math.round(estimatedMax * 1.8);
+  } else if (thinkingMode === 'basic') {
+    estimatedMin = Math.round(estimatedMin * 1.2);
+    estimatedMax = Math.round(estimatedMax * 1.35);
   }
 
   return {
