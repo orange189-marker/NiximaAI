@@ -15,6 +15,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { MathRenderer } from './MathRenderer';
 import { convertTableToChartSpec } from '../types/chartSpec';
 import { NiximaChart } from './NiximaChart';
+import { LinkPill } from './LinkPill';
 
 export interface TableBlockData {
   headers: string[];
@@ -167,10 +168,10 @@ export const MarkdownTable: React.FC<MarkdownTableProps> = ({ data }) => {
   const renderCellContent = (cellStr: string) => {
     if (!cellStr) return <span className="text-zinc-600">—</span>;
 
-    const inlineRegex = /(\\\([^\n]+?\\\)|\$(?!\s)[^$\n]+?(?<!\s)\$|\*\*[^*]+?\*\*|`[^`]+?`|\*[^*]+?\*)/g;
+    const inlineRegex = /(\\\([^\n]+?\\\)|\$(?!\s)[^$\n]+?(?<!\s)\$|\*\*[^*]+?\*\*|`[^`]+?`|\[([^\]\n]+)\]\s*\(((?:https?:\/\/)[^\s\)]+)\)|\*[^*]+?\*|(?:https?:\/\/)[^\s<>"'{}|\\^`\[\]\(\)]+)/g;
     const parts: Array<
       | string
-      | { type: 'math' | 'bold' | 'code' | 'italic'; content: string }
+      | { type: 'math' | 'bold' | 'code' | 'italic' | 'link'; content: string; href?: string }
     > = [];
     let lastIndex = 0;
     let match;
@@ -195,8 +196,35 @@ export const MarkdownTable: React.FC<MarkdownTableProps> = ({ data }) => {
         parts.push({ type: 'bold', content: token.slice(2, -2) });
       } else if (token.startsWith('`') && token.endsWith('`')) {
         parts.push({ type: 'code', content: token.slice(1, -1) });
+      } else if (token.startsWith('[') && token.includes('](') && token.endsWith(')')) {
+        const mdLinkMatch = /^\[([^\]\n]+)\]\s*\(((?:https?:\/\/)[^\s\)]+)\)$/.exec(token);
+        if (mdLinkMatch) {
+          parts.push({
+            type: 'link',
+            content: mdLinkMatch[1],
+            href: mdLinkMatch[2]
+          });
+        } else {
+          parts.push(token);
+        }
       } else if (token.startsWith('*') && token.endsWith('*')) {
         parts.push({ type: 'italic', content: token.slice(1, -1) });
+      } else if (token.startsWith('http://') || token.startsWith('https://')) {
+        let cleanUrl = token;
+        let trailingPunct = '';
+        const punctMatch = /([.,;:!?]+)$/.exec(cleanUrl);
+        if (punctMatch) {
+          trailingPunct = punctMatch[1];
+          cleanUrl = cleanUrl.slice(0, -trailingPunct.length);
+        }
+        parts.push({
+          type: 'link',
+          content: cleanUrl,
+          href: cleanUrl
+        });
+        if (trailingPunct) {
+          parts.push(trailingPunct);
+        }
       } else {
         parts.push(token);
       }
@@ -229,6 +257,15 @@ export const MarkdownTable: React.FC<MarkdownTableProps> = ({ data }) => {
       }
       if (part.type === 'italic') {
         return <em key={i} className="text-zinc-300 italic">{part.content}</em>;
+      }
+      if (part.type === 'link') {
+        return (
+          <LinkPill
+            key={i}
+            href={part.href || part.content}
+            label={part.content}
+          />
+        );
       }
       return null;
     });

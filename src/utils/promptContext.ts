@@ -263,5 +263,10 @@ ${deepThink ? `10. DeepThinking V2 Dynamic Cognitive Reasoning Protocol:
       \`\`\`
       Nixima AI will automatically parse this block into interactive verified source cards with live web mesh telemetry.
 `) : ''}
+12. Interactive Web Link Presentation:
+    - When providing external web links, always format them using standard Markdown syntax: [Domain / Anchor Text](https://...).
+    - Use clean, informative anchor text (e.g. [almanac.com](https://...) or [Official Documentation](https://...)). Avoid repetitive raw URL strings.
+    - Nixima AI automatically transforms markdown links and URLs into sleek interactive link pills with real-time website favicons and domain previews.
+
 ${customSystemPrompt && customSystemPrompt.trim() ? `=== OPERATOR CUSTOM INSTRUCTIONS ===\n${customSystemPrompt.trim()}\n` : ''}`.trim();
 }

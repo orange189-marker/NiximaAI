@@ -34,6 +34,7 @@ import { playCompletionChime } from '../utils/sound';
 import { NiximaChart } from './NiximaChart';
 import { parseChartSpec } from '../types/chartSpec';
 import { parseDynamicThinkingSteps } from '../utils/openrouter';
+import { LinkPill } from './LinkPill';
 
 interface ChatMessageProps {
   message: Message;
@@ -399,13 +400,13 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
       // Headers
       if (line.startsWith('### ')) {
-        return <h3 key={lIdx} className="text-base font-bold text-white pt-2 pb-1 font-mono tracking-tight">{line.slice(4)}</h3>;
+        return <h3 key={lIdx} className="text-base font-bold text-white pt-2 pb-1 font-mono tracking-tight">{formatInline(line.slice(4))}</h3>;
       }
       if (line.startsWith('## ')) {
-        return <h2 key={lIdx} className="text-lg font-bold text-white pt-3 pb-1 tracking-tight">{line.slice(3)}</h2>;
+        return <h2 key={lIdx} className="text-lg font-bold text-white pt-3 pb-1 tracking-tight">{formatInline(line.slice(3))}</h2>;
       }
       if (line.startsWith('# ')) {
-        return <h1 key={lIdx} className="text-xl font-black text-white pt-3 pb-1 tracking-tight">{line.slice(2)}</h1>;
+        return <h1 key={lIdx} className="text-xl font-black text-white pt-3 pb-1 tracking-tight">{formatInline(line.slice(2))}</h1>;
       }
 
       // Blockquotes
@@ -454,18 +455,20 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   };
 
   const formatInline = (str: string) => {
-    // Regex matching:
+    // Regex matching in priority order:
     // 1. \( ... \) explicit LaTeX inline math
     // 2. $ ... $ standard inline math
     // 3. ** ... ** bold text
     // 4. ` ... ` inline code
-    // 5. * ... * italic text
+    // 5. [text](https://...) markdown links
     // 6. [1], [2] citation references
-    const inlineRegex = /(\\\([^\n]+?\\\)|\$(?!\s)[^$\n]+?(?<!\s)\$|\*\*[^*]+?\*\*|`[^`]+?`|\*[^*]+?\*|\[\d+\])/g;
+    // 7. * ... * italic text
+    // 8. https://... bare web URLs
+    const inlineRegex = /(\\\([^\n]+?\\\)|\$(?!\s)[^$\n]+?(?<!\s)\$|\*\*[^*]+?\*\*|`[^`]+?`|\[([^\]\n]+)\]\s*\(((?:https?:\/\/)[^\s\)]+)\)|\[\d+\]|\*[^*]+?\*|(?:https?:\/\/)[^\s<>"'{}|\\^`\[\]\(\)]+)/g;
 
     const parts: Array<
       | string
-      | { type: 'math' | 'bold' | 'code' | 'italic' | 'citation'; content: string }
+      | { type: 'math' | 'bold' | 'code' | 'italic' | 'citation' | 'link'; content: string; href?: string }
     > = [];
     let lastIndex = 0;
     let match;
@@ -490,10 +493,37 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
         parts.push({ type: 'bold', content: token.slice(2, -2) });
       } else if (token.startsWith('`') && token.endsWith('`')) {
         parts.push({ type: 'code', content: token.slice(1, -1) });
-      } else if (token.startsWith('*') && token.endsWith('*')) {
-        parts.push({ type: 'italic', content: token.slice(1, -1) });
+      } else if (token.startsWith('[') && token.includes('](') && token.endsWith(')')) {
+        const mdLinkMatch = /^\[([^\]\n]+)\]\s*\(((?:https?:\/\/)[^\s\)]+)\)$/.exec(token);
+        if (mdLinkMatch) {
+          parts.push({
+            type: 'link',
+            content: mdLinkMatch[1],
+            href: mdLinkMatch[2]
+          });
+        } else {
+          parts.push(token);
+        }
       } else if (/^\[\d+\]$/.test(token)) {
         parts.push({ type: 'citation', content: token.slice(1, -1) });
+      } else if (token.startsWith('*') && token.endsWith('*')) {
+        parts.push({ type: 'italic', content: token.slice(1, -1) });
+      } else if (token.startsWith('http://') || token.startsWith('https://')) {
+        let cleanUrl = token;
+        let trailingPunct = '';
+        const punctMatch = /([.,;:!?]+)$/.exec(cleanUrl);
+        if (punctMatch) {
+          trailingPunct = punctMatch[1];
+          cleanUrl = cleanUrl.slice(0, -trailingPunct.length);
+        }
+        parts.push({
+          type: 'link',
+          content: cleanUrl,
+          href: cleanUrl
+        });
+        if (trailingPunct) {
+          parts.push(trailingPunct);
+        }
       } else {
         parts.push(token);
       }
@@ -526,6 +556,15 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
       }
       if (part.type === 'italic') {
         return <em key={i} className="text-zinc-300 italic">{part.content}</em>;
+      }
+      if (part.type === 'link') {
+        return (
+          <LinkPill
+            key={i}
+            href={part.href || part.content}
+            label={part.content}
+          />
+        );
       }
       if (part.type === 'citation') {
         const sourceIdx = parseInt(part.content, 10) - 1;
