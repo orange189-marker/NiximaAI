@@ -15,6 +15,7 @@ import { ModelOption } from '../types/chat';
 import { NIXIMA_MODELS } from '../data/models';
 import { useLanguage } from '../context/LanguageContext';
 import { renderWithNiximaBrand } from './NiximaWordmark';
+import { ModelIcon } from './ModelIcon';
 
 interface ReleaseAnnouncementCardProps {
   currentModel: ModelOption;
@@ -45,20 +46,8 @@ export const ReleaseAnnouncementCard: React.FC<ReleaseAnnouncementCardProps> = (
     localStorage.removeItem(DISMISS_KEY);
   };
 
-  const getModelIcon = (id: string) => {
-    if (id.includes('omni')) {
-      return <Sparkles className="w-4 h-4 text-cyan-400" />;
-    }
-    if (id.includes('pro') || id.includes('reasoning')) {
-      return <BrainCircuit className="w-4 h-4 text-purple-400" />;
-    }
-    if (id.includes('coder')) {
-      return <Terminal className="w-4 h-4 text-emerald-400" />;
-    }
-    if (id.includes('flash')) {
-      return <Zap className="w-4 h-4 text-amber-400" />;
-    }
-    return <Sparkles className="w-4 h-4 text-white" />;
+  const getModelIcon = (id: string, size: 'xs' | 'sm' | 'md' = 'sm') => {
+    return <ModelIcon modelId={id} size={size} />;
   };
 
   // If dismissed, render a subtle compact teaser pill that can be clicked to restore
@@ -149,9 +138,7 @@ export const ReleaseAnnouncementCard: React.FC<ReleaseAnnouncementCardProps> = (
             >
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <div className="p-1.5 rounded-lg bg-zinc-800/90 border border-zinc-700/60 flex items-center justify-center">
-                    {getModelIcon(model.id)}
-                  </div>
+                  {getModelIcon(model.id, 'sm')}
                   <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-bold uppercase tracking-wider ${
                     isSelected ? 'bg-white text-black' : 'bg-zinc-800 text-zinc-400'
                   }`}>

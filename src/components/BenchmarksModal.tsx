@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { NIXIMA_MODELS } from '../data/models';
 import { ModelOption } from '../types/chat';
+import { ModelIcon } from './ModelIcon';
 import { BENCHMARK_LEADERBOARD, BENCHMARK_SUITES } from '../data/benchmarks';
 import { BenchmarkSuite, ModelBenchmarkResult } from '../types/benchmark';
 import { MathRenderer } from './MathRenderer';
@@ -85,12 +86,8 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
     return { text: 'text-zinc-100', border: 'border-zinc-700', bg: 'bg-zinc-800/60', glow: '' };
   };
 
-  const getModelIcon = (id: string) => {
-    if (id.includes('omni')) return <Sparkles className="w-4 h-4 text-cyan-400" />;
-    if (id.includes('pro') || id.includes('reasoning')) return <BrainCircuit className="w-4 h-4 text-purple-400" />;
-    if (id.includes('coder')) return <Terminal className="w-4 h-4 text-emerald-400" />;
-    if (id.includes('flash')) return <Zap className="w-4 h-4 text-amber-400" />;
-    return <Sparkles className="w-4 h-4 text-zinc-200" />;
+  const getModelIcon = (id: string, size: 'xs' | 'sm' | 'md' | 'lg' = 'sm') => {
+    return <ModelIcon modelId={id} size={size} />;
   };
 
   // Run live arena test
@@ -807,7 +804,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                   <div>
                     <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
                       <div className="flex items-center gap-2">
-                        {getModelIcon(arenaModelA)}
+                        {getModelIcon(arenaModelA, 'md')}
                         <span className="font-bold text-xs text-white">
                           {renderWithNiximaBrand(NIXIMA_MODELS.find(m => m.id === arenaModelA)?.name || '')}
                         </span>
@@ -842,7 +839,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                   <div>
                     <div className="flex items-center justify-between pb-2 border-b border-zinc-800">
                       <div className="flex items-center gap-2">
-                        {getModelIcon(arenaModelB)}
+                        {getModelIcon(arenaModelB, 'md')}
                         <span className="font-bold text-xs text-white">
                           {renderWithNiximaBrand(NIXIMA_MODELS.find(m => m.id === arenaModelB)?.name || '')}
                         </span>

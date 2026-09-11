@@ -19,6 +19,7 @@ import {
 import { ModelOption, SearchMode } from '../types/chat';
 import { NIXIMA_MODELS, getRecommendedModelForSearchMode } from '../data/models';
 import { NiximaIdLogo } from './NiximaIdLogo';
+import { ModelIcon } from './ModelIcon';
 import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotkeys';
 import { useLanguage } from '../context/LanguageContext';
 import { CountryFlag } from './CountryFlag';
@@ -85,12 +86,8 @@ export const Header: React.FC<HeaderProps> = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const getModelIcon = (id: string) => {
-    if (id.includes('omni')) return <Sparkles className="w-4 h-4 text-cyan-400" />;
-    if (id.includes('pro') || id.includes('reasoning')) return <BrainCircuit className="w-4 h-4 text-purple-400" />;
-    if (id.includes('coder')) return <Terminal className="w-4 h-4 text-emerald-400" />;
-    if (id.includes('flash')) return <Zap className="w-4 h-4 text-amber-400" />;
-    return <Sparkles className="w-4 h-4 text-white" />;
+  const getModelIcon = (id: string, size: 'xs' | 'sm' | 'md' = 'sm') => {
+    return <ModelIcon modelId={id} size={size} />;
   };
 
   return (

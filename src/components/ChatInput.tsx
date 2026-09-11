@@ -20,6 +20,7 @@ import {
 import { ModelOption, SearchMode, ThinkingMode } from '../types/chat';
 import { getRecommendedModelForSearchMode } from '../data/models';
 import { NiximaIdLogo } from './NiximaIdLogo';
+import { ModelIcon } from './ModelIcon';
 import { useLanguage } from '../context/LanguageContext';
 import { calculateEstimatedCost } from '../utils/credits';
 import { NiximaCreditLogo } from './NiximaCreditLogo';
@@ -260,7 +261,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 border border-zinc-800 text-[11px] text-zinc-300 shadow-inner-light select-none mr-0.5 flex-shrink-0"
                 title={`${t.header.sovereignEngine}: ${currentModel.name}`}
               >
-                <NiximaIdLogo size={13} glow={false} />
+                <ModelIcon modelId={currentModel.id} size="xs" />
                 <span className="font-medium truncate max-w-[110px]">{renderWithNiximaBrand(currentModel.shortName)}</span>
               </div>
 

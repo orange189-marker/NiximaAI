@@ -20,6 +20,7 @@ import {
 import { Conversation } from '../types/chat';
 import { NiximaUser } from '../types/user';
 import { NiximaIdLogo } from './NiximaIdLogo';
+import { ModelIcon } from './ModelIcon';
 import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotkeys';
 import { HotkeyCustomizerModal } from './HotkeyCustomizerModal';
 import { useLanguage } from '../context/LanguageContext';
@@ -145,7 +146,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {conv.pinned ? (
             <Pin className="w-3.5 h-3.5 text-white flex-shrink-0 fill-white" />
           ) : (
-            <MessageSquare className={`w-3.5 h-3.5 flex-shrink-0 ${isActive ? 'text-white' : 'text-zinc-500 group-hover:text-zinc-400'}`} />
+            <ModelIcon modelId={conv.modelId || 'nixima-0.2'} size="xs" />
           )}
 
           {isEditing ? (

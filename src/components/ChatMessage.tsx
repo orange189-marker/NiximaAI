@@ -29,6 +29,7 @@ import {
 import { Message, NiximaArtifact } from '../types/chat';
 import { MarkdownTable, TableBlockData } from './MarkdownTable';
 import { NiximaIdLogo } from './NiximaIdLogo';
+import { ModelIcon } from './ModelIcon';
 import { useLanguage } from '../context/LanguageContext';
 import { MathRenderer } from './MathRenderer';
 import { CreditTelemetryPill } from './AnimatedCredits';
@@ -645,11 +646,12 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               <User className="w-4 h-4" />
             </div>
           ) : (
-            <div className={`relative w-8 h-8 rounded-lg bg-zinc-950 border border-zinc-700/80 flex items-center justify-center text-white shadow-glow-subtle transition-all ${
-              message.isStreaming ? 'border-white/60 shadow-[0_0_15px_rgba(255,255,255,0.35)] ring-1 ring-white/30' : ''
-            }`}>
-              <NiximaIdLogo size={18} animated={message.isStreaming} glow={false} />
-            </div>
+            <ModelIcon
+              modelId={message.model || activeModelName || 'nixima-0.2'}
+              size="md"
+              animated={message.isStreaming}
+              className={message.isStreaming ? 'ring-1 ring-white/40 shadow-glow-subtle' : ''}
+            />
           )}
         </div>
 

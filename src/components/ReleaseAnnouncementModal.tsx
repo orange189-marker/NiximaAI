@@ -19,6 +19,7 @@ import { ModelOption } from '../types/chat';
 import { NIXIMA_MODELS } from '../data/models';
 import { useLanguage } from '../context/LanguageContext';
 import { NiximaIdLogo } from './NiximaIdLogo';
+import { ModelIcon } from './ModelIcon';
 import { renderWithNiximaBrand } from './NiximaWordmark';
 
 interface ReleaseAnnouncementModalProps {
@@ -50,20 +51,8 @@ export const ReleaseAnnouncementModal: React.FC<ReleaseAnnouncementModalProps> =
 
   if (!isOpen) return null;
 
-  const getModelIcon = (id: string) => {
-    if (id.includes('omni')) {
-      return <Sparkles className="w-5 h-5 text-cyan-400" />;
-    }
-    if (id.includes('pro') || id.includes('reasoning')) {
-      return <BrainCircuit className="w-5 h-5 text-purple-400" />;
-    }
-    if (id.includes('coder')) {
-      return <Terminal className="w-5 h-5 text-emerald-400" />;
-    }
-    if (id.includes('flash')) {
-      return <Zap className="w-5 h-5 text-amber-400" />;
-    }
-    return <Sparkles className="w-5 h-5 text-white" />;
+  const getModelIcon = (id: string, size: 'xs' | 'sm' | 'md' = 'sm') => {
+    return <ModelIcon modelId={id} size={size} />;
   };
 
   const primaryModels = NIXIMA_MODELS.filter(m => m.id.startsWith('nixima-0.2'));
@@ -193,9 +182,7 @@ export const ReleaseAnnouncementModal: React.FC<ReleaseAnnouncementModalProps> =
                       {/* Top bar */}
                       <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2.5">
-                          <div className="p-2 rounded-xl bg-zinc-800 border border-zinc-700">
-                            {getModelIcon(model.id)}
-                          </div>
+                          {getModelIcon(model.id, 'md')}
                           <div>
                             <div className="font-bold text-sm sm:text-base text-white tracking-tight flex items-center gap-2">
                               <span>{renderWithNiximaBrand(modelTr.name || model.name)}</span>
