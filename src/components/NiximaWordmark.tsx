@@ -200,19 +200,15 @@ export function renderWithNiximaBrand(
       );
     }
 
-    // Nixima-0.2O or Nixima-0.2O Omni or Nixima Omni
-    if (/^Nixima-0\.[12]O(?:\s+(?:Omni|\(Omni\)))?$/i.test(part) || /^Nixima\s+Omni$/i.test(part)) {
+    // Nixima-0.2O or Nixima-0.2O Omni
+    if (/^Nixima-0\.[12]O(?:\s+(?:Omni|\(Omni\)))?$/i.test(part)) {
       const hasOmniWord = /Omni/i.test(part);
       const isParenOmni = /\(Omni\)/i.test(part);
       return (
         <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline font-nixima font-extrabold tracking-tight select-none">
           <span className="nixima-wordmark-sheen drop-shadow-[0_1px_4px_rgba(255,255,255,0.22)]">Nixima</span>
-          <span className="font-mono text-[0.85em] font-medium text-zinc-400 ml-0.5">-0.2</span>
-          <span 
-            className="font-nixima font-black text-[1.18em] text-cyan-300 ml-[1.5px] leading-none drop-shadow-[0_0_8px_rgba(34,211,238,0.85)] inline-block align-baseline"
-            title="Omni"
-          >
-            O
+          <span className="font-mono text-[0.85em] font-medium text-zinc-300 ml-0.5">
+            -0.2<span className="font-sans font-bold text-cyan-400 ml-[0.5px]" title="Omni">O</span>
           </span>
           {hasOmniWord && (
             <span className="font-mono text-[0.8em] font-semibold text-cyan-400 ml-1">
@@ -223,18 +219,24 @@ export function renderWithNiximaBrand(
       );
     }
 
+    // Nixima Omni (standalone without 0.2)
+    if (/^Nixima\s+Omni$/i.test(part)) {
+      return (
+        <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline font-nixima font-extrabold tracking-tight select-none">
+          <span className="nixima-wordmark-sheen drop-shadow-[0_1px_4px_rgba(255,255,255,0.22)]">Nixima</span>
+          <span className="font-mono text-[0.85em] font-semibold text-cyan-400 ml-1">Omni</span>
+        </span>
+      );
+    }
+
     // Standalone 0.2O or 0.2O Omni
     if (/^0\.2O(?:\s+(?:Omni|\(Omni\)))?$/i.test(part)) {
       const hasOmniWord = /Omni/i.test(part);
       const isParenOmni = /\(Omni\)/i.test(part);
       return (
-        <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline font-nixima select-none">
-          <span className="font-mono text-[0.88em] font-medium text-zinc-400">0.2</span>
-          <span 
-            className="font-nixima font-black text-[1.18em] text-cyan-300 ml-[1.5px] leading-none drop-shadow-[0_0_8px_rgba(34,211,238,0.85)] inline-block align-baseline"
-            title="Omni"
-          >
-            O
+        <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline select-none">
+          <span className="font-mono text-[0.88em] font-medium text-zinc-300">
+            0.2<span className="font-sans font-bold text-cyan-400 ml-[0.5px]" title="Omni">O</span>
           </span>
           {hasOmniWord && (
             <span className="font-mono text-[0.85em] font-semibold text-cyan-400 ml-1">
