@@ -122,7 +122,7 @@ export const ReleaseAnnouncementModal: React.FC<ReleaseAnnouncementModalProps> =
               {t.releaseAnnouncement.keyHighlightsTitle}
             </h3>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <div className="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/90 space-y-2">
                 <div className="flex items-center gap-2 text-white font-semibold text-xs sm:text-sm">
                   <Cpu className="w-4 h-4 text-cyan-400" />
@@ -150,6 +150,16 @@ export const ReleaseAnnouncementModal: React.FC<ReleaseAnnouncementModalProps> =
                 </div>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
                   {t.releaseAnnouncement.highlight3Desc}
+                </p>
+              </div>
+
+              <div className="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/90 space-y-2">
+                <div className="flex items-center gap-2 text-white font-semibold text-xs sm:text-sm">
+                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <span>{t.releaseAnnouncement.highlight4Title}</span>
+                </div>
+                <p className="text-[11px] text-zinc-400 leading-relaxed">
+                  {t.releaseAnnouncement.highlight4Desc}
                 </p>
               </div>
             </div>

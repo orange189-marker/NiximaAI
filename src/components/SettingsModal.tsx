@@ -17,6 +17,7 @@ import {
   Flame, 
   FileText,
   ShieldAlert,
+  ShieldCheck,
   Zap,
   Keyboard,
   Globe,
@@ -580,6 +581,37 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Token Purity & Anti-Glitch Guard (Nixima-0.2 Zero-Drift) */}
+              <div className="p-3.5 rounded-xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-between">
+                <div className="space-y-1 pr-4">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">
+                      {t.settings.antiGlitchTitle}
+                    </span>
+                    <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      NIXIMA 0.2
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-400 leading-relaxed">
+                    {t.settings.antiGlitchDesc}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onUpdateSettings({ antiGlitchFilter: settings.antiGlitchFilter === false ? true : false })}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                    settings.antiGlitchFilter !== false ? 'bg-emerald-500' : 'bg-zinc-800'
+                  }`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
+                      settings.antiGlitchFilter !== false ? 'translate-x-5' : 'translate-x-0'
+                    }`}
+                  />
+                </button>
               </div>
             </div>
           )}

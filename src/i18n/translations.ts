@@ -275,6 +275,8 @@ export interface Translations {
     audioEffectsDesc: string;
     wallpaperTitle: string;
     wallpaperDesc: string;
+    antiGlitchTitle: string;
+    antiGlitchDesc: string;
     hotkeySectionTitle: string;
     hotkeySectionDesc: string;
     btnCustomizeHotkey: string;
@@ -345,6 +347,8 @@ export interface Translations {
     highlight2Desc: string;
     highlight3Title: string;
     highlight3Desc: string;
+    highlight4Title: string;
+    highlight4Desc: string;
     activateModel: string;
     activeNow: string;
     close: string;
@@ -658,6 +662,8 @@ export const translations: Record<Language, Translations> = {
       audioEffectsDesc: 'Mechanical keystroke feedback and completion acoustics via Web Audio API.',
       wallpaperTitle: 'Dynamic Ambient Matrix Wallpaper',
       wallpaperDesc: 'Fluid animated neural background canvas.',
+      antiGlitchTitle: 'Token Purity & Anti-Glitch Guard',
+      antiGlitchDesc: 'Real-time suppression of tokenizer drift, CJK ideograph bleeding, and word/phrase stutter loops across 0.2 generation models.',
       hotkeySectionTitle: 'New Conversation Hotkey',
       hotkeySectionDesc: 'Trigger new chats instantly using custom key combinations or gestures.',
       btnCustomizeHotkey: 'Customize Hotkey',
@@ -729,6 +735,8 @@ export const translations: Record<Language, Translations> = {
       highlight2Desc: 'Nixima-0.2 Flash processes 2,000,000 tokens with sub-10ms latency for real-time document analysis and streaming.',
       highlight3Title: 'Autonomous Epistemic Chain-of-Thought',
       highlight3Desc: 'Nixima-0.2 Pro incorporates self-correcting logic verification, rigorous math proofs, and transparent <think> traces.',
+      highlight4Title: 'Neural Token Purity & Anti-Glitch Engine',
+      highlight4Desc: 'Active sanitization against cross-lingual CJK bleeding (e.g. "co[CJK]ol" -> "cool") and logit repetition stutters.',
       activateModel: 'Activate Model',
       activeNow: 'Active Engine',
       close: 'Close Briefing',
@@ -1086,6 +1094,8 @@ export const translations: Record<Language, Translations> = {
       audioEffectsDesc: 'Механічний звук клавіш та акустичні сигнали завершення через Web Audio API.',
       wallpaperTitle: 'Динамічні матричні шпалери',
       wallpaperDesc: 'Плавне анімоване полотно нейромережі на задньому плані.',
+      antiGlitchTitle: 'Захист чистоти токенів та анти-глітч',
+      antiGlitchDesc: 'Потокове придушення витоків китайських ієрогліфів, заїкань слів та збоїв токенізатора у моделях покоління 0.2.',
       hotkeySectionTitle: 'Гаряча клавіша нового діалогу',
       hotkeySectionDesc: 'Миттєве створення нових діалогів за допомогою власної комбінації або жесту.',
       btnCustomizeHotkey: 'Налаштувати комбінацію',
@@ -1157,6 +1167,8 @@ export const translations: Record<Language, Translations> = {
       highlight2Desc: 'Nixima-0.2 Flash обробляє до 2 мільйонів токенів із затримкою до 10 мс для миттєвого аналізу великих масивів коду та документів.',
       highlight3Title: 'Автономний епістемічний ланцюг думок',
       highlight3Desc: 'Nixima-0.2 Pro виконує глибоку самоверифікацію логіки, точні математичні доведення та прозорі роздуми у блоках <think>.',
+      highlight4Title: 'Чистота токенів та анти-глітч фільтр',
+      highlight4Desc: 'Активне усунення витоку ієрогліфів усередині слів (наприклад "co[ієрогліф]ol" -> "cool") та зациклень заїкання.',
       activateModel: 'Активувати модель',
       activeNow: 'Поточний рушій',
       close: 'Закрити бриф',

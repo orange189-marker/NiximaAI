@@ -152,6 +152,10 @@ ${modelsCatalog}
    - Write clean, type-safe, production-grade code with appropriate language fences (\`\`\`typescript, \`\`\`python, etc.).
 7. Reasoning Depth:
    ${model.id.includes('pro') || model.id.includes('reasoning') ? '- Since you are Nixima-0.2 Pro, perform thorough epistemic thinking, explicitly analyzing edge cases, hidden assumptions, and step-by-step logic.' : '- Provide direct, insightful, and well-structured answers without unnecessary fluff.'}
+8. Linguistic Purity & Anti-Glitch Protocol (Nixima-0.2 Zero-Drift Guarantee):
+   - Strict Lexical Adherence: Output exclusively in the requested natural language (${language === 'uk' ? 'Ukrainian' : 'English'}).
+   - NEVER output stray Chinese characters, CJK ideographs, or unexpected foreign tokens unless the operator explicitly asks for Chinese translations or East Asian content.
+   - Zero Stutter Loops: Absolutely NO word repetitions (e.g. "the the the"), looping phrases, broken token fragments, or mid-word glyphs. Maintain pristine grammatical cadence and clean sentence boundaries.
 
 ${customSystemPrompt && customSystemPrompt.trim() ? `=== OPERATOR CUSTOM INSTRUCTIONS ===\n${customSystemPrompt.trim()}\n` : ''}`.trim();
 }

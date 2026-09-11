@@ -1,4 +1,5 @@
 import { ModelOption } from '../types/chat';
+import { isCjkRequested, sanitizeModelOutput } from './textSanitizer';
 
 interface GenerateResponseOptions {
   prompt: string;
@@ -12,7 +13,16 @@ interface AIResponseResult {
   response: string;
 }
 
-export function generateNiximaResponse({
+export function generateNiximaResponse(options: GenerateResponseOptions): AIResponseResult {
+  const allowCjk = isCjkRequested(options.prompt);
+  const raw = generateRawNiximaResponse(options);
+  return {
+    thinking: sanitizeModelOutput(raw.thinking, { allowCjk }),
+    response: sanitizeModelOutput(raw.response, { allowCjk }),
+  };
+}
+
+function generateRawNiximaResponse({
   prompt,
   model,
   deepThink

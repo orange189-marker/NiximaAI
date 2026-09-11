@@ -1,4 +1,5 @@
 import { ModelOption } from '../types/chat';
+import { isCjkRequested, sanitizeModelOutput, sanitizeTokenStream } from './textSanitizer';
 
 // Pre-configured system key inserted directly into the runtime
 const BUILTIN_SYSTEM_KEY = atob('c2stb3ItdjEtZjc1NWEzZDcyMTVjMDYzYzA3ZWFiZmJmZWQ2MWE4YzNlMjBiMDQzZTcyY2MxNGYxOTQzMDc5YjczYzIwY2M4OQ==');
@@ -21,6 +22,7 @@ export interface StreamChatParams {
   maxTokens?: number;
   callbacks: StreamCallbacks;
   signal?: AbortSignal;
+  antiGlitchFilter?: boolean;
 }
 
 /**
@@ -35,8 +37,13 @@ export async function streamOpenRouterChat({
   maxTokens = 4096,
   callbacks,
   signal,
+  antiGlitchFilter = true,
 }: StreamChatParams): Promise<{ fullContent: string; fullThinking: string }> {
   const activeKey = getSystemApiKey();
+
+  // Determine if the conversation legitimately requests CJK characters
+  const contextForCjk = messages.map(m => m.content).join('\n');
+  const allowCjk = isCjkRequested(contextForCjk);
 
   // Determine primary model and fallbacks
   const primarySlug = model.openRouterModel || 'openrouter/free';
@@ -57,7 +64,7 @@ export async function streamOpenRouterChat({
   } else {
     formattedMessages.push({
       role: 'system',
-      content: `Identity: You are Nixima AI, operating on ${model.name}. Deliver accurate, direct, and high-quality responses. When presenting comparisons, rankings, structured metrics, or tabular datasets, format them as standard Markdown tables (| Col 1 | Col 2 |\\n|---|---|) so they render as rich interactive data tables.`
+      content: `Identity: You are Nixima AI, operating on ${model.name}. Deliver accurate, direct, and high-quality responses. Maintain strict lexical purity in the user's language. Never output stray Chinese ideographs, token stutters, or repetition loops. When presenting comparisons, rankings, structured metrics, or tabular datasets, format them as standard Markdown tables (| Col 1 | Col 2 |\\n|---|---|) so they render as rich interactive data tables.`
     });
   }
 
@@ -140,7 +147,7 @@ export async function streamOpenRouterChat({
                   const parts = text.split('<think>');
                   if (parts[0]) {
                     fullContent += parts[0];
-                    callbacks.onToken(fullContent);
+                    callbacks.onToken(antiGlitchFilter ? sanitizeTokenStream(fullContent, allowCjk) : fullContent);
                   }
                   if (parts[1]) {
                     fullThinking += parts[1];
@@ -158,7 +165,7 @@ export async function streamOpenRouterChat({
                   }
                   if (parts[1]) {
                     fullContent += parts[1];
-                    callbacks.onToken(fullContent);
+                    callbacks.onToken(antiGlitchFilter ? sanitizeTokenStream(fullContent, allowCjk) : fullContent);
                   }
                   continue;
                 }
@@ -168,7 +175,7 @@ export async function streamOpenRouterChat({
                   callbacks.onThinking(fullThinking);
                 } else {
                   fullContent += text;
-                  callbacks.onToken(fullContent);
+                  callbacks.onToken(antiGlitchFilter ? sanitizeTokenStream(fullContent, allowCjk) : fullContent);
                 }
               }
             } catch (err) {
@@ -178,9 +185,16 @@ export async function streamOpenRouterChat({
         }
       }
 
-      // If we got content, return successfully
+      // If we got content, return successfully with full token sanitization applied
       if (fullContent.trim() || fullThinking.trim()) {
-        return { fullContent, fullThinking };
+        const sanitizedContent = antiGlitchFilter
+          ? sanitizeModelOutput(fullContent, { allowCjk })
+          : fullContent;
+        const sanitizedThinking = antiGlitchFilter
+          ? sanitizeModelOutput(fullThinking, { allowCjk })
+          : fullThinking;
+
+        return { fullContent: sanitizedContent, fullThinking: sanitizedThinking };
       }
     } catch (e: any) {
       if (e.name === 'AbortError') {

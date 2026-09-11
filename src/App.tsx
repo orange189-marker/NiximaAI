@@ -67,6 +67,7 @@ const AppContent: React.FC = () => {
       soundEnabled: true,
       streamSpeed: 'fast',
       themeContrast: 'titanium',
+      antiGlitchFilter: true,
     };
   });
 
@@ -505,6 +506,7 @@ All conversations and model preferences in this workspace are private to your Ni
         temperature: settings.temperature,
         topP: settings.topP,
         maxTokens: settings.maxTokens,
+        antiGlitchFilter: settings.antiGlitchFilter !== false,
         callbacks: {
           onToken: (contentChunk) => {
             tokenTickCount++;

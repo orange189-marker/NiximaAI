@@ -57,4 +57,5 @@ export interface UserSettings {
   soundEnabled: boolean;
   streamSpeed: 'fast' | 'cinematic' | 'instant';
   themeContrast: 'titanium' | 'pure-black';
+  antiGlitchFilter?: boolean;
 }
