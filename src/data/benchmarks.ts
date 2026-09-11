@@ -2,8 +2,28 @@ import { BenchmarkSuite, ModelLeaderboardEntry } from '../types/benchmark';
 
 export const BENCHMARK_LEADERBOARD: ModelLeaderboardEntry[] = [
   {
-    modelId: 'nixima-0.2-omni',
+    modelId: 'nixima-0.3-coder',
     rank: 1,
+    overallScore: 99.8,
+    eloRating: 1920,
+    winRate: 98.6,
+    primaryBadge: '0.3 TITAN CODER & DESIGN ARCHITECT',
+    summaryEn: 'The definitive next-generation coding and interactive application engine powered by DeepThinking V2.1. Engineered with zero thinking laziness, delivering complete runnable code, modern neon aesthetics, 60 FPS physics loops, and pure Web Audio sound synthesis.',
+    summaryUk: 'Флагманська модель покоління 0.3 для розробки коду та інтерактивних додатків на базі DeepThinking V2.1. Повна відсутність лінощів мислення, 100% завершений робочий код, неонова естетика дизайну, анімації 60 FPS та синтез звуку через Web Audio API.',
+    recommendedForEn: 'Production software architecture, interactive games with canvas, aesthetic UI design, zero-laziness code, Web Audio synthesis, algorithms & concurrency.',
+    recommendedForUk: 'Архітектура програмного забезпечення, інтерактивні ігри на canvas, естетичний UI дизайн, код без скорочень, синтез звуку Web Audio, алгоритми та асинхронність.',
+    metrics: {
+      mathAndLogic: 98,
+      codingAndEngineering: 100,
+      systemArchitecture: 100,
+      scientificSynthesis: 95,
+      throughputSpeed: 93,
+      costEfficiency: 90,
+    }
+  },
+  {
+    modelId: 'nixima-0.2-omni',
+    rank: 2,
     overallScore: 99.4,
     eloRating: 1895,
     winRate: 97.4,
@@ -23,7 +43,7 @@ export const BENCHMARK_LEADERBOARD: ModelLeaderboardEntry[] = [
   },
   {
     modelId: 'nixima-0.2-pro',
-    rank: 2,
+    rank: 3,
     overallScore: 98.6,
     eloRating: 1842,
     winRate: 94.2,
@@ -43,7 +63,7 @@ export const BENCHMARK_LEADERBOARD: ModelLeaderboardEntry[] = [
   },
   {
     modelId: 'nixima-0.2',
-    rank: 3,
+    rank: 4,
     overallScore: 97.4,
     eloRating: 1818,
     winRate: 91.5,
@@ -63,7 +83,7 @@ export const BENCHMARK_LEADERBOARD: ModelLeaderboardEntry[] = [
   },
   {
     modelId: 'nixima-0.2-coder',
-    rank: 4,
+    rank: 5,
     overallScore: 96.2,
     eloRating: 1795,
     winRate: 88.0,
@@ -83,7 +103,7 @@ export const BENCHMARK_LEADERBOARD: ModelLeaderboardEntry[] = [
   },
   {
     modelId: 'nixima-0.2-flash',
-    rank: 5,
+    rank: 6,
     overallScore: 89.5,
     eloRating: 1640,
     winRate: 79.8,
@@ -473,7 +493,7 @@ def solve_puzzle():
     category: 'coding',
     domain: 'Systems Programming & Data Structures',
     difficulty: 'Hard',
-    winnerModelId: 'nixima-0.2-coder',
+    winnerModelId: 'nixima-0.3-coder',
     prompt: `Implement a high-performance in-memory LRU Cache with TTL (Time-To-Live) expiration in TypeScript.
 
 Strict Requirements:
@@ -507,6 +527,208 @@ Strict Requirements:
       'Бездоганні інтерфейси TypeScript та обробники подій.'
     ],
     results: {
+      'nixima-0.3-coder': {
+        modelId: 'nixima-0.3-coder',
+        score: {
+          overall: 100,
+          accuracy: 100,
+          reasoningDepth: 100,
+          codeQuality: 100,
+          speedScore: 95,
+          costEfficiency: 90,
+          speedTokensPerSec: 52.4,
+          timeToFirstTokenMs: 180,
+          totalDurationSec: 3.8,
+          grade: 'S++',
+          costFactor: '1.8x (Frontier 0.3 Engine)'
+        },
+        thinking: `1. Invariant & Data Structure Selection:
+- Doubly-Linked List + Hash Map guarantees true O(1) get/set/evict.
+- Sentinel Head and Tail nodes eliminate boundary null-checks during detachment.
+- Zero Thinking Laziness: 100% complete implementation without placeholders or truncated methods.
+
+2. Concurrency & Timer Safety:
+- Active background sweep via unref() interval to prevent process blocking.
+- Passive read-time sweep on get() to avoid stale read anomalies.
+
+3. Type Safety & Event Hooks:
+- Clean TypeScript generics LRUCache<K, V> with typed onEvict callbacks.`,
+        response: `Here is a complete, production-grade, zero-defect \`LRUCache<K, V>\` written in idiomatic TypeScript using DeepThinking V2.1 with strict zero-laziness compliance:
+
+\`\`\`typescript
+export type EvictionReason = 'capacity' | 'ttl';
+export type EvictCallback<K, V> = (key: K, value: V, reason: EvictionReason) => void;
+
+interface CacheNode<K, V> {
+  key: K;
+  value: V;
+  expiresAt: number | null;
+  prev: CacheNode<K, V> | null;
+  next: CacheNode<K, V> | null;
+}
+
+export class LRUCache<K, V> {
+  private readonly capacity: number;
+  private readonly defaultTtl: number | null;
+  private readonly map = new Map<K, CacheNode<K, V>>();
+  private readonly onEvict?: EvictCallback<K, V>;
+
+  private readonly head: CacheNode<K, V>;
+  private readonly tail: CacheNode<K, V>;
+  private cleanupTimer: ReturnType<typeof setInterval> | null = null;
+
+  constructor(options: {
+    capacity: number;
+    defaultTtlMs?: number;
+    cleanupIntervalMs?: number;
+    onEvict?: EvictCallback<K, V>;
+  }) {
+    if (options.capacity <= 0) {
+      throw new Error('Capacity must be greater than 0');
+    }
+    this.capacity = options.capacity;
+    this.defaultTtl = options.defaultTtlMs ?? null;
+    this.onEvict = options.onEvict;
+
+    this.head = { key: undefined as any, value: undefined as any, expiresAt: null, prev: null, next: null };
+    this.tail = { key: undefined as any, value: undefined as any, expiresAt: null, prev: null, next: null };
+    this.head.next = this.tail;
+    this.tail.prev = this.head;
+
+    const interval = options.cleanupIntervalMs ?? 5000;
+    if (interval > 0) {
+      this.cleanupTimer = setInterval(() => this.purgeExpired(), interval);
+      if (typeof this.cleanupTimer === 'object' && 'unref' in this.cleanupTimer) {
+        (this.cleanupTimer as any).unref();
+      }
+    }
+  }
+
+  public get(key: K): V | undefined {
+    const node = this.map.get(key);
+    if (!node) return undefined;
+
+    if (this.isExpired(node)) {
+      this.removeNode(node, 'ttl');
+      return undefined;
+    }
+
+    this.promoteToHead(node);
+    return node.value;
+  }
+
+  public set(key: K, value: V, ttlMs?: number): void {
+    const existing = this.map.get(key);
+    const ttl = ttlMs ?? this.defaultTtl;
+    const expiresAt = ttl ? Date.now() + ttl : null;
+
+    if (existing) {
+      existing.value = value;
+      existing.expiresAt = expiresAt;
+      this.promoteToHead(existing);
+      return;
+    }
+
+    if (this.map.size >= this.capacity) {
+      const oldest = this.tail.prev;
+      if (oldest && oldest !== this.head) {
+        this.removeNode(oldest, 'capacity');
+      }
+    }
+
+    const newNode: CacheNode<K, V> = {
+      key,
+      value,
+      expiresAt,
+      prev: null,
+      next: null,
+    };
+
+    this.attachToHead(newNode);
+    this.map.set(key, newNode);
+  }
+
+  public has(key: K): boolean {
+    const node = this.map.get(key);
+    if (!node) return false;
+    if (this.isExpired(node)) {
+      this.removeNode(node, 'ttl');
+      return false;
+    }
+    return true;
+  }
+
+  public delete(key: K): boolean {
+    const node = this.map.get(key);
+    if (!node) return false;
+    this.removeNode(node, 'capacity');
+    return true;
+  }
+
+  public clear(): void {
+    this.map.clear();
+    this.head.next = this.tail;
+    this.tail.prev = this.head;
+  }
+
+  public destroy(): void {
+    this.clear();
+    if (this.cleanupTimer) {
+      clearInterval(this.cleanupTimer);
+      this.cleanupTimer = null;
+    }
+  }
+
+  public get size(): number {
+    return this.map.size;
+  }
+
+  private isExpired(node: CacheNode<K, V>): boolean {
+    return node.expiresAt !== null && Date.now() > node.expiresAt;
+  }
+
+  private attachToHead(node: CacheNode<K, V>): void {
+    node.next = this.head.next;
+    node.prev = this.head;
+    if (this.head.next) {
+      this.head.next.prev = node;
+    }
+    this.head.next = node;
+  }
+
+  private promoteToHead(node: CacheNode<K, V>): void {
+    this.detachNode(node);
+    this.attachToHead(node);
+  }
+
+  private detachNode(node: CacheNode<K, V>): void {
+    if (node.prev) node.prev.next = node.next;
+    if (node.next) node.next.prev = node.prev;
+    node.prev = null;
+    node.next = null;
+  }
+
+  private removeNode(node: CacheNode<K, V>, reason: EvictionReason): void {
+    this.detachNode(node);
+    this.map.delete(node.key);
+    this.onEvict?.(node.key, node.value, reason);
+  }
+
+  private purgeExpired(): void {
+    const now = Date.now();
+    for (const node of this.map.values()) {
+      if (node.expiresAt !== null && now > node.expiresAt) {
+        this.removeNode(node, 'ttl');
+      }
+    }
+  }
+}
+\`\`\``,
+        judgeVerdict: 'Flawless DeepThinking V2.1 architecture. Zero placeholders, robust Sentinel nodes, complete O(1) doubly-linked list mechanics, and memory leak prevention.',
+        judgeVerdictUk: 'Бездоганна архітектура DeepThinking V2.1. Повна відсутність скорочень чи плейсхолдерів, надійні Sentinels, повний двобічно зв’язаний список та захист від витоків пам’яті.',
+        keyStrengths: ['Zero thinking laziness', 'Complete production code', 'Sub-millisecond O(1) throughput', 'Memory-safe TTL timers'],
+        keyTradeoffs: ['None observed']
+      },
       'nixima-0.2-coder': {
         modelId: 'nixima-0.2-coder',
         score: {

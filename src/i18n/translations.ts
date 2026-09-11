@@ -161,6 +161,8 @@ export interface Translations {
     };
     deepThink: string;
     deepThinkTooltip: string;
+    deepThinkingV21: string;
+    deepThinkingV21Desc: string;
     basicThinking: string;
     basicThinkingTooltip: string;
     thinkingEngineTitle: string;
@@ -221,6 +223,9 @@ export interface Translations {
     branchChat: string;
     downloadMessage: string;
     deepThinkingV2: string;
+    deepThinkingV21: string;
+    coderV21Architecture: string;
+    stagesVerifiedV21: (count: number) => string;
     basicThinking: string;
     agileSynthesis: string;
     agileStages: (count: number) => string;
@@ -619,6 +624,8 @@ export const translations: Record<Language, Translations> = {
       },
       deepThink: 'DeepThinking V2',
       deepThinkTooltip: 'DeepThinking V2: Activate multi-stage epistemic reasoning & proof verification',
+      deepThinkingV21: 'DeepThinking V2.1 (Coder)',
+      deepThinkingV21Desc: 'Zero-laziness software & game architecture engine. Complete runnable code, modern neon aesthetics, and Web Audio API synthesis.',
       basicThinking: 'Thinking',
       basicThinkingTooltip: 'Thinking: Agile reasoning & prompt analysis',
       thinkingEngineTitle: 'Thinking Engine',
@@ -679,6 +686,9 @@ export const translations: Record<Language, Translations> = {
       branchChat: 'Branch chat from here',
       downloadMessage: 'Download response (.md)',
       deepThinkingV2: 'DeepThinking V2',
+      deepThinkingV21: 'DeepThinking V2.1 Coder',
+      coderV21Architecture: 'V2.1 Code & UI Synthesis',
+      stagesVerifiedV21: (count: number) => `${count} Architectural Stages Verified (Zero-Laziness)`,
       basicThinking: 'Thinking',
       agileSynthesis: 'Agile Synthesis',
       agileStages: (count: number) => `${count} ${count === 1 ? 'Agile Step' : 'Agile Steps'}`,
@@ -918,6 +928,17 @@ export const translations: Record<Language, Translations> = {
         badge: 'OMNI ALL-IN-ONE',
         description: 'Sovereign frontier all-in-one multimodal model combining deep epistemic reasoning, production systems engineering, live web search synthesis, and ultra-high throughput with zero manual toggles required.',
         strengths: ['Omni Sovereign Intelligence', 'Autonomous Reasoning & Web Grounding', 'Zero Manual Toggles Required', '1M Context Adaptive Throughput'],
+      },
+      'nixima-0.3-coder': {
+        name: 'Nixima-0.3 Coder',
+        badge: '0.3 TITAN CODER',
+        description: 'Frontier next-generation software architect & interactive game engineer. Powered by DeepThinking V2.1 with zero thinking laziness, complete runnable code, modern neon aesthetics, 60fps loops, and pure Web Audio sound synthesis.',
+        strengths: [
+          'DeepThinking V2.1 Code & UI Architecture',
+          'Zero Thinking Laziness (Complete Code Only)',
+          'Polished Game Mechanics & Web Audio',
+          'High-Performance Concurrent Systems'
+        ],
       },
       'nixima-0.2': {
         name: 'Nixima-0.2',
@@ -1166,6 +1187,8 @@ export const translations: Record<Language, Translations> = {
       },
       deepThink: 'DeepThinking V2',
       deepThinkTooltip: 'DeepThinking V2: Багатокрокове епістемічне міркування та верифікація логіки',
+      deepThinkingV21: 'DeepThinking V2.1 (Coder)',
+      deepThinkingV21Desc: 'Архітектурний рушій коду та ігор без лінощів. 100% завершений код, сучасна неонова естетика та синтез Web Audio API.',
       basicThinking: 'Міркування',
       basicThinkingTooltip: 'Міркування: Швидкий попередній аналіз перед відповіддю',
       thinkingEngineTitle: 'Рушій міркування',
@@ -1226,6 +1249,9 @@ export const translations: Record<Language, Translations> = {
       branchChat: 'Створити гілку звідси',
       downloadMessage: 'Завантажити відповідь (.md)',
       deepThinkingV2: 'DeepThinking V2',
+      deepThinkingV21: 'DeepThinking V2.1 Coder',
+      coderV21Architecture: 'V2.1 Архітектура коду та дизайну',
+      stagesVerifiedV21: (count: number) => `Верифіковано ${count} архітектурних стадій (Без скорочень)`,
       basicThinking: 'Міркування',
       agileSynthesis: 'Швидкий аналіз',
       agileStages: (count: number) => `Аналіз у ${count} ${count === 1 ? 'крок' : count < 5 ? 'кроки' : 'кроків'}`,
@@ -1465,6 +1491,17 @@ export const translations: Record<Language, Translations> = {
         badge: 'OMNI ВСЕ-В-ОДНОМУ',
         description: 'Суверенна модель нового покоління «все-в-одному». Поєднує глибокі епістемічні міркування, інженерію коду, живий синтез веб-пошуку та надвисоку швидкість без потреби ручних перемикачів.',
         strengths: ['Суверенний інтелект Omni', 'Автономні міркування та веб-пошук', 'Full-stack розробка систем', 'Динамічна маршрутизація'],
+      },
+      'nixima-0.3-coder': {
+        name: 'Nixima-0.3 Coder',
+        badge: '0.3 ТИТАН КОДУВАННЯ',
+        description: 'Флагманський архітектор ПЗ та інтерактивних ігор покоління 0.3. Працює на базі DeepThinking V2.1 без лінощів мислення, гарантуючи 100% робочий код, неонову естетику, 60fps та чистий звук Web Audio API.',
+        strengths: [
+          'DeepThinking V2.1 архітектура коду та UI',
+          'Нуль лінощів мислення (тільки повний код)',
+          'Досконала механіка ігор та Web Audio',
+          'Високопродуктивні системи'
+        ],
       },
       'nixima-0.2': {
         name: 'Nixima-0.2',

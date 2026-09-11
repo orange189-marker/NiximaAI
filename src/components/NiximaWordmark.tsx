@@ -158,7 +158,7 @@ export const NiximaWordmark: React.FC<NiximaWordmarkProps> = ({
   );
 };
 
-const BRAND_TOKEN_REGEX = /(?:\b(Nixima(?:\s+AI|-0\.[12]O?(?:\s+(?:Pro|Coder|Flash|Flagship|Omni|\(Omni\)))?|\s+Omni|\s+ID|\s+Credits)?|NIXIMA(?:\s+AI|-0\.[12]O?|\s+ID)?|0\.2O(?:\s+(?:Omni|\(Omni\)))?)(?:\b|(?<=\)))|(Ніксіма(?:\s+ШІ)?\b))/gi;
+const BRAND_TOKEN_REGEX = /(?:\b(Nixima(?:\s+AI|-0\.[1-3]O?(?:\s+(?:Pro|Coder|Flash|Flagship|Omni|\(Omni\)))?|\s+Omni|\s+ID|\s+Credits)?|NIXIMA(?:\s+AI|-0\.[1-3]O?|\s+ID)?|0\.2O(?:\s+(?:Omni|\(Omni\)))?|0\.3(?:\s+Coder)?)(?:\b|(?<=\)))|(Ніксіма(?:\s+ШІ)?\b))/gi;
 
 export interface RenderBrandOptions {
   keyPrefix?: string;
@@ -166,7 +166,7 @@ export interface RenderBrandOptions {
 }
 
 /**
- * Scans any text string for "Nixima", "Nixima AI", "Nixima-0.2", "Nixima-0.2O", "0.2O Omni", "Nixima ID", etc.
+ * Scans any text string for "Nixima", "Nixima AI", "Nixima-0.2", "Nixima-0.2O", "0.2O Omni", "Nixima-0.3 Coder", "Nixima ID", etc.
  * and elevates matching brand occurrences into the custom geometric brand typeface with metallic luster.
  */
 export function renderWithNiximaBrand(
@@ -174,7 +174,7 @@ export function renderWithNiximaBrand(
   options?: RenderBrandOptions
 ): React.ReactNode {
   if (!text || typeof text !== 'string') return text;
-  if (!/Nixima|Ніксіма|0\.2O/i.test(text)) return text;
+  if (!/Nixima|Ніксіма|0\.[23]/i.test(text)) return text;
 
   const keyPrefix = options?.keyPrefix || 'nb';
   const parts = text.split(BRAND_TOKEN_REGEX);
@@ -196,6 +196,31 @@ export function renderWithNiximaBrand(
         <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline font-nixima font-extrabold tracking-tight select-none">
           <span className="nixima-wordmark-sheen drop-shadow-[0_1px_4px_rgba(255,255,255,0.22)]">Ніксіма</span>
           <span className="font-mono text-[0.8em] font-semibold text-zinc-300 ml-1 px-1 py-0.2 rounded bg-zinc-800/80 border border-zinc-700/60 align-baseline">ШІ</span>
+        </span>
+      );
+    }
+
+    // Nixima-0.3 Coder (or other 0.3 models)
+    if (/^Nixima-0\.3(?:\s+Coder)?$/i.test(part)) {
+      const isCoder = /Coder/i.test(part);
+      return (
+        <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline font-nixima font-extrabold tracking-tight select-none">
+          <span className="nixima-wordmark-sheen drop-shadow-[0_1px_4px_rgba(255,255,255,0.22)]">Nixima</span>
+          <span className="font-mono text-[0.85em] font-medium text-zinc-300 ml-0.5">
+            -0.3{isCoder && <span className="text-emerald-400 font-semibold ml-1">Coder</span>}
+          </span>
+        </span>
+      );
+    }
+
+    // Standalone 0.3 Coder or 0.3
+    if (/^0\.3(?:\s+Coder)?$/i.test(part)) {
+      const isCoder = /Coder/i.test(part);
+      return (
+        <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline select-none">
+          <span className="font-mono text-[0.88em] font-medium text-zinc-300">
+            0.3{isCoder && <span className="text-emerald-400 font-semibold ml-1">Coder</span>}
+          </span>
         </span>
       );
     }
@@ -247,8 +272,8 @@ export function renderWithNiximaBrand(
       );
     }
 
-    // Other Nixima-0.2 models (Pro, Coder, Flash, Flagship, or default)
-    if (/^Nixima-0\.[12](?:\s+(?:Pro|Coder|Flash|Flagship))?$/i.test(part)) {
+    // Other Nixima models (Pro, Coder, Flash, Flagship, or default)
+    if (/^Nixima-0\.[1-3](?:\s+(?:Pro|Coder|Flash|Flagship))?$/i.test(part)) {
       const suffix = part.replace(/^Nixima/i, '');
       return (
         <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline font-nixima font-extrabold tracking-tight select-none">

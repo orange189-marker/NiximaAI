@@ -30,6 +30,38 @@ export const NIXIMA_MODELS: ModelOption[] = [
     }
   },
   {
+    id: 'nixima-0.3-coder',
+    name: 'Nixima-0.3 Coder',
+    shortName: '0.3 Coder',
+    badge: '0.3 TITAN CODER',
+    description: 'Frontier next-generation software architect & interactive game engineer. Powered by DeepThinking V2.1 with zero thinking laziness, complete runnable code, modern neon aesthetics, 60fps loops, and pure Web Audio sound synthesis.',
+    contextWindow: '1,500,000 tokens',
+    latency: '~20 ms / token',
+    strengths: [
+      'DeepThinking V2.1 Code & UI Architecture',
+      'Zero Thinking Laziness (Complete Code Only)',
+      'Polished Game Mechanics & Web Audio',
+      'High-Performance Concurrent Systems'
+    ],
+    parameters: 'Frontier 0.3 Code & Design Engine (DeepThinking V2.1)',
+    openRouterModel: 'cohere/north-mini-code:free',
+    fallbackModels: [
+      'openrouter/free',
+      'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+      'deepseek/deepseek-r1:free'
+    ],
+    creditMultiplier: 1.8,
+    baseCreditCost: 8,
+    searchOptimization: {
+      recommendedMode: 'standard',
+      badge: 'ARCH & CODE SEARCH',
+      role: 'Optimal for Systems Architecture, Game Design & API Registries',
+      searchThroughput: 'High-Precision Code (~90ms)',
+      searchStrengths: ['Real-time API specifications & packages', 'Game loops & canvas optimization', 'Clean zero-defect refactoring'],
+      searchRating: '99.8%'
+    }
+  },
+  {
     id: 'nixima-0.2',
     name: 'Nixima-0.2',
     shortName: '0.2 Default',

@@ -679,32 +679,52 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                 />
               )}
 
-              {/* DEEPTHINKING V2 / BASIC THINKING COGNITIVE TELEMETRY STATION */}
+              {/* DEEPTHINKING V2 / V2.1 / BASIC THINKING COGNITIVE TELEMETRY STATION */}
               {!isUser && message.thinking && (message.deepThinkingTelemetry || message.isStreaming) && (() => {
                 const isBasicThinking = message.deepThinkingTelemetry?.mode === 'basic' || message.thinkingMode === 'basic';
+                const is03Coder = (message.model && message.model.toLowerCase().includes('0.3')) || (activeModelName && activeModelName.toLowerCase().includes('0.3'));
+                const isDeepV21 = is03Coder && !isBasicThinking;
                 return (
-                <div className="rounded-xl border border-zinc-800 bg-[#0e0e13]/90 backdrop-blur-md overflow-hidden text-xs shadow-lg animate-fade-in">
+                <div className={`rounded-xl border bg-[#0e0e13]/90 backdrop-blur-md overflow-hidden text-xs shadow-lg animate-fade-in ${
+                  isDeepV21 ? 'border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.12)]' : 'border-zinc-800'
+                }`}>
                   <div
                     onClick={() => setIsThinkingOpen(!isThinkingOpen)}
-                    className="w-full px-3.5 py-2.5 flex items-center justify-between text-zinc-300 hover:text-white transition-colors cursor-pointer select-none bg-zinc-900/70 border-b border-zinc-800"
+                    className={`w-full px-3.5 py-2.5 flex items-center justify-between text-zinc-300 hover:text-white transition-colors cursor-pointer select-none border-b ${
+                      isDeepV21 ? 'bg-emerald-950/20 border-emerald-900/40' : 'bg-zinc-900/70 border-zinc-800'
+                    }`}
                   >
                     <div className="flex items-center gap-2.5 flex-wrap">
-                      <BrainCircuit className={`w-4 h-4 ${isBasicThinking ? 'text-cyan-400' : 'text-zinc-300'}`} />
-                      <span className="font-mono text-xs font-bold text-white tracking-tight">
-                        {isBasicThinking ? t.chatMessage.basicThinking : t.chatMessage.deepThinkingV2}
+                      <BrainCircuit className={`w-4 h-4 ${isDeepV21 ? 'text-emerald-400' : isBasicThinking ? 'text-cyan-400' : 'text-zinc-300'}`} />
+                      <span className={`font-mono text-xs font-bold tracking-tight ${isDeepV21 ? 'text-emerald-300' : 'text-white'}`}>
+                        {isDeepV21 ? t.chatMessage.deepThinkingV21 : isBasicThinking ? t.chatMessage.basicThinking : t.chatMessage.deepThinkingV2}
                       </span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300 font-mono font-medium">
-                        {isBasicThinking 
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[10px] font-mono font-medium ${
+                        isDeepV21 ? 'bg-emerald-950/60 border-emerald-700/60 text-emerald-300' : 'bg-zinc-800 border-zinc-700 text-zinc-300'
+                      }`}>
+                        {isDeepV21
+                          ? t.chatMessage.stagesVerifiedV21(dynamicSteps.length || 3)
+                          : isBasicThinking 
                           ? t.chatMessage.agileStages(dynamicSteps.length || 1)
                           : t.chatMessage.stagesVerified(dynamicSteps.length || 3)
                         }
                       </span>
-                      <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded bg-zinc-850 border border-zinc-700 text-[10px] text-zinc-300 font-mono">
-                        {message.deepThinkingTelemetry?.epistemicDepth || (isBasicThinking ? t.chatMessage.agileSynthesis : t.chatMessage.epistemicVerification)}
+                      <span className={`hidden sm:inline-flex items-center px-2 py-0.5 rounded border text-[10px] font-mono ${
+                        isDeepV21 ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-400' : 'bg-zinc-850 border-zinc-700 text-zinc-300'
+                      }`}>
+                        {message.deepThinkingTelemetry?.epistemicDepth || (
+                          isDeepV21 
+                            ? t.chatMessage.coderV21Architecture
+                            : isBasicThinking 
+                            ? t.chatMessage.agileSynthesis 
+                            : t.chatMessage.epistemicVerification
+                        )}
                       </span>
                       {message.isStreaming && !message.content && (
-                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-zinc-800 border border-zinc-700 text-[10px] text-zinc-300 font-mono">
-                          <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 animate-ping" />
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] font-mono ${
+                          isDeepV21 ? 'bg-emerald-950/60 border-emerald-700/60 text-emerald-300' : 'bg-zinc-800 border-zinc-700 text-zinc-300'
+                        }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full animate-ping ${isDeepV21 ? 'bg-emerald-400' : 'bg-zinc-400'}`} />
                           <span>{t.chatMessage.generatingTrace}</span>
                         </span>
                       )}

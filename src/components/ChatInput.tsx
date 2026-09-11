@@ -158,6 +158,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   const isOmni = currentModel.isOmni || currentModel.id === 'nixima-0.2-omni';
+  const is03Coder = currentModel.id === 'nixima-0.3-coder' || currentModel.name.toLowerCase().includes('0.3');
 
   const modifiers = [
     { label: t.chatInput.modifiers.concise.label, icon: <Zap className="w-3 h-3 text-amber-400" />, prompt: t.chatInput.modifiers.concise.prompt },
@@ -260,7 +261,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                         thinkingMode === 'basic'
                           ? 'bg-zinc-800 text-white font-semibold border-cyan-600/50 shadow-inner-light scale-[1.02]'
                           : thinkingMode === 'deep' || deepThink
-                          ? 'bg-zinc-800 text-white font-semibold border-zinc-500 shadow-inner-light scale-[1.02]'
+                          ? (is03Coder
+                              ? 'bg-zinc-800 text-white font-semibold border-emerald-600/50 shadow-[0_0_15px_rgba(16,185,129,0.2)] scale-[1.02]'
+                              : 'bg-zinc-800 text-white font-semibold border-zinc-500 shadow-inner-light scale-[1.02]')
                           : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-850/80'
                       }`}
                     >
@@ -272,7 +275,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                           thinkingMode === 'basic'
                             ? t.chatInput.basicThinkingTooltip
                             : thinkingMode === 'deep' || deepThink
-                            ? t.chatInput.deepThinkTooltip
+                            ? (is03Coder ? t.chatInput.deepThinkingV21Desc : t.chatInput.deepThinkTooltip)
                             : t.chatInput.thinkingEngineTitle
                         }
                       >
@@ -280,11 +283,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                           thinkingMode === 'basic'
                             ? 'text-cyan-400'
                             : thinkingMode === 'deep' || deepThink
-                            ? 'text-zinc-200'
+                            ? (is03Coder ? 'text-emerald-400' : 'text-zinc-200')
                             : 'text-zinc-400'
                         }`} />
                         <span className="tracking-tight whitespace-nowrap">
-                          {thinkingMode === 'basic' ? t.chatInput.basicThinking : t.chatInput.deepThink}
+                          {thinkingMode === 'basic' 
+                            ? t.chatInput.basicThinking 
+                            : (is03Coder && (thinkingMode === 'deep' || deepThink) ? t.chatInput.deepThinkingV21 : t.chatInput.deepThink)
+                          }
                         </span>
                         {thinkingMode === 'basic' && (
                           <span className="px-1.5 py-0.2 rounded bg-cyan-950/80 text-[9px] font-mono font-bold tracking-wider text-cyan-300 border border-cyan-600/50 whitespace-nowrap flex-shrink-0">
@@ -292,13 +298,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                           </span>
                         )}
                         {(thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic')) && (
-                          <span className="px-1.5 py-0.2 rounded bg-zinc-700 text-[9px] font-mono font-bold tracking-wider text-zinc-100 border border-zinc-600 whitespace-nowrap flex-shrink-0">
-                            DEEP
+                          <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-bold tracking-wider border whitespace-nowrap flex-shrink-0 ${
+                            is03Coder
+                              ? 'bg-emerald-950/80 text-emerald-300 border-emerald-600/50'
+                              : 'bg-zinc-700 text-zinc-100 border border-zinc-600'
+                          }`}>
+                            {is03Coder ? 'V2.1' : 'DEEP'}
                           </span>
                         )}
                         {(thinkingMode === 'basic' || thinkingMode === 'deep' || deepThink) && (
                           <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ml-0.5 flex-shrink-0 ${
-                            thinkingMode === 'basic' ? 'bg-cyan-400' : 'bg-white'
+                            thinkingMode === 'basic' ? 'bg-cyan-400' : is03Coder ? 'bg-emerald-400' : 'bg-white'
                           }`} />
                         )}
                       </button>
@@ -374,7 +384,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                             </p>
                           </div>
 
-                          {/* 2. DeepThinking V2 */}
+                          {/* 2. DeepThinking V2 / V2.1 */}
                           <div 
                             onClick={() => {
                               onChangeThinkingMode?.('deep');
@@ -382,18 +392,28 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                             }}
                             className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
                               thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic')
-                                ? 'bg-zinc-850/90 border-zinc-500 shadow-sm' 
+                                ? (is03Coder ? 'bg-zinc-850/90 border-emerald-600/70 shadow-sm' : 'bg-zinc-850/90 border-zinc-500 shadow-sm')
                                 : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
                             }`}
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
+                                <div className={`p-1 rounded-md border ${
+                                  is03Coder 
+                                    ? 'bg-emerald-950/60 border-emerald-800/60 text-emerald-300' 
+                                    : 'bg-zinc-800 border-zinc-700 text-zinc-200'
+                                }`}>
                                   <BrainCircuit className="w-3.5 h-3.5" />
                                 </div>
-                                <span className="font-semibold text-xs text-white font-mono">{t.chatInput.deepThink}</span>
-                                <span className="px-1.5 py-0.2 rounded bg-zinc-700 text-[9px] font-mono font-bold text-zinc-200 border border-zinc-600">
-                                  L3 PROOF
+                                <span className="font-semibold text-xs text-white font-mono">
+                                  {is03Coder ? t.chatInput.deepThinkingV21 : t.chatInput.deepThink}
+                                </span>
+                                <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-bold border ${
+                                  is03Coder 
+                                    ? 'bg-emerald-950/80 text-emerald-300 border-emerald-600/50' 
+                                    : 'bg-zinc-700 text-zinc-200 border border-zinc-600'
+                                }`}>
+                                  {is03Coder ? 'V2.1 CODER' : 'L3 PROOF'}
                                 </span>
                               </div>
                               {(thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic')) && (
@@ -403,7 +423,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                               )}
                             </div>
                             <p className="text-[11px] text-zinc-400 mt-1">
-                              {t.chatInput.deepThinkingDesc}
+                              {is03Coder ? t.chatInput.deepThinkingV21Desc : t.chatInput.deepThinkingDesc}
                             </p>
                           </div>
                         </div>
