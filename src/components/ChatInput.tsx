@@ -245,9 +245,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           />
 
           {/* High-Tech Capability Toolbar (Bottom Dock) */}
-          <div className="flex flex-wrap items-center justify-between px-3.5 sm:px-4 py-2 bg-black/30 border-t border-white/[0.06] gap-x-2 gap-y-2 min-w-0">
+          <div className="flex items-center justify-between px-3 sm:px-4 py-2 bg-black/30 border-t border-white/[0.06] gap-2 min-w-0">
             {/* Left Controls: Brain & Capability Switches */}
-            <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap min-w-0 py-0.5">
+            <div className="flex items-center gap-1 sm:gap-1.5 min-w-0 py-0.5">
               {/* Context Attachment Button */}
               <button
                 type="button"
@@ -257,15 +257,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               >
                 <Paperclip className="w-4 h-4" />
               </button>
-
-              {/* Active Model Indicator Chip (Desktop) */}
-              <div 
-                className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900/80 border border-zinc-800/80 text-[11px] text-zinc-300 shadow-inner-light select-none mr-0.5 flex-shrink-0"
-                title={`${t.header.sovereignEngine}: ${currentModel.name}`}
-              >
-                <ModelIcon modelId={currentModel.id} size="xs" />
-                <span className="font-medium truncate max-w-[110px]">{renderWithNiximaBrand(currentModel.shortName)}</span>
-              </div>
 
               {!isOmni && (
                 <>
@@ -764,11 +755,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                       glow={infiniteOutput}
                       className={`flex-shrink-0 transition-all duration-300 ${infiniteOutput ? 'scale-110' : 'scale-100 opacity-75'}`}
                     />
-                    <span className="tracking-tight whitespace-nowrap hidden lg:inline">
-                      {t.chatInput.infiniteOutput}
-                    </span>
-                    <span className="tracking-tight whitespace-nowrap lg:hidden">
-                      {t.chatInput.infiniteOutputShort || (language === 'uk' ? 'Безліміт' : 'Infinite')}
+                    <span className="tracking-tight whitespace-nowrap hidden sm:inline">
+                      {language === 'uk' ? 'Безліміт' : (t.chatInput.infiniteOutputShort || 'Infinite')}
                     </span>
                     {infiniteOutput ? (
                       <span className="px-1.5 py-0.2 rounded bg-amber-950/80 text-[9px] font-mono font-bold tracking-wider text-amber-300 border border-amber-500/50 whitespace-nowrap flex-shrink-0 transition-all duration-300 animate-check-pop">
@@ -825,8 +813,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 <span className="tabular-nums font-medium whitespace-nowrap inline-flex items-center gap-1">
                   {userCredits === Infinity ? (
                     <>
-                      <span className="font-semibold text-amber-200">0 CR</span>
-                      <span className="hidden xl:inline text-amber-400/80 font-normal">Creator</span>
+                      <span className="font-semibold text-amber-200">Creator</span>
                       <InfinitySymbol size={10} className="inline-block text-amber-300" />
                     </>
                   ) : (
@@ -842,7 +829,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               </button>
 
               {input.length > 0 && (
-                <span className="hidden lg:inline-flex items-center px-2 py-1 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[10.5px] font-mono text-zinc-500 select-none whitespace-nowrap flex-shrink-0 tabular-nums">
+                <span className="hidden xl:inline-flex items-center px-2 py-1 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[10.5px] font-mono text-zinc-500 select-none whitespace-nowrap flex-shrink-0 tabular-nums">
                   {input.length} {t.chatInput.chars}
                 </span>
               )}
