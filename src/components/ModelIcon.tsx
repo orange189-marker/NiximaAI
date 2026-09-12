@@ -36,79 +36,151 @@ function resolveSizePx(size: ModelIconSize): number {
 
 /**
  * Model Icon themes with bespoke vector glyphs tailored to each engine's personality:
- * - 0.2O Omni: Multimodal Sovereign Core (Interconnected orbital rings & central diamond star)
- * - 0.3 Coder: Cyber Titan Code Architect (Matrix terminal brackets, glowing silicon diamond & 0.3 pip)
- * - 0.2 Pro: Quantum Epistemic Dialectic (Dual-synapse neural dialectic core with counter-example nodes)
- * - 0.2 Flagship: Sovereign Synthetic Platinum (Faceted titanium crown star with SRA rotary geometry)
- * - 0.2 Coder: Systems Developer (High-concurrency logic CPU chip & terminal glyphs)
- * - 0.2 Flash: Hyper-Throughput Plasma (Dual lightning velocity surges & sub-millisecond core)
+ * --- Generation 0.3 (Next-Gen Sovereign Frontier Fleet) ---
+ * - 0.3 Prime: Violet-Platinum Hexagonal Quantum Rotary Attention (QRA-v3) 8-Point Star
+ * - 0.3 UltraPro: Royal Fuchsia UltraThinking V2.0 Triple-Node Dialectic Lattice
+ * - 0.3O Omni: Tri-Axial Gyroscopic Orbital Swarm & Multimodal Sovereign Diamond
+ * - 0.3 Titan Coder: Cyber Emerald Shield & DeepThinking V2.1 Terminal Brackets
+ * - 0.3 HyperFlash: Sub-4ms Intersecting Dual Hyper-Tachyon Kinetic Velocity Plasma
+ * --- Generation 0.2 (Sovereign Classic Fleet) ---
+ * - 0.2O Omni: Dual Orbital Ellipses & Central Diamond Star
+ * - 0.2 Pro: Dual-Synapse Neural Dialectic Core
+ * - 0.2 Coder: Silicon Systems Architecture CPU Chip
+ * - 0.2 Flash: High-Voltage Solar Velocity Surge
+ * - 0.2 Flagship: Faceted Titanium Crown Star & Outer Facet
  */
 function getModelTheme(id: string): ModelTheme {
   const norm = (id || '').toLowerCase();
 
-  // 1. NIXIMA 0.2O OMNI
-  if (norm.includes('omni')) {
+  // =========================================================================
+  // GENERATION 0.3 — NEXT-GEN SOVEREIGN FRONTIER FLEET
+  // =========================================================================
+
+  // 1. NIXIMA 0.3 PRO (ULTRATHINKING V2.0 SOVEREIGN REASONER)
+  if (norm.includes('0.3') && (norm.includes('pro') || norm.includes('ultra') || norm.includes('reasoning'))) {
     return {
-      name: 'Omni',
-      containerBg: 'bg-gradient-to-br from-cyan-950/90 via-[#061826]/90 to-[#020b12]/95',
-      borderClass: 'border-cyan-500/50 hover:border-cyan-400/80',
-      glowClass: 'shadow-[0_0_12px_rgba(6,182,212,0.3)]',
-      accentColor: '#06b6d4',
+      name: '0.3 UltraPro',
+      containerBg: 'bg-gradient-to-br from-fuchsia-950/90 via-[#23092e]/90 to-[#0e0214]/95',
+      borderClass: 'border-fuchsia-500/60 hover:border-fuchsia-400/90',
+      glowClass: 'shadow-[0_0_16px_rgba(217,70,239,0.38)]',
+      accentColor: '#d946ef',
       renderGlyph: (s, animated) => (
         <svg viewBox="0 0 24 24" width={s} height={s} fill="none" className="overflow-visible">
           <defs>
-            <linearGradient id="omni-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#67e8f9" />
-              <stop offset="50%" stopColor="#06b6d4" />
-              <stop offset="100%" stopColor="#0284c7" />
+            <linearGradient id="ultra03-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#f5d0fe" />
+              <stop offset="50%" stopColor="#d946ef" />
+              <stop offset="100%" stopColor="#9333ea" />
             </linearGradient>
-            <radialGradient id="omni-core" cx="12" cy="12" r="4" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stopColor="#a5f3fc" />
-              <stop offset="100%" stopColor="#0891b2" />
+            <radialGradient id="ultra03-core" cx="12" cy="12" r="5" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="40%" stopColor="#f0abfc" />
+              <stop offset="100%" stopColor="#c026d3" />
             </radialGradient>
           </defs>
-          {/* Orbital Ellipse 1 */}
-          <ellipse
-            cx="12"
-            cy="12"
-            rx="8.5"
-            ry="3.5"
-            transform="rotate(-30 12 12)"
-            stroke="url(#omni-grad)"
-            strokeWidth="1.3"
-            strokeDasharray="2 1"
-            className={animated ? 'animate-spin opacity-85' : 'opacity-75'}
-            style={animated ? { animationDuration: '6s' } : undefined}
-          />
-          {/* Orbital Ellipse 2 */}
-          <ellipse
-            cx="12"
-            cy="12"
-            rx="8.5"
-            ry="3.5"
-            transform="rotate(45 12 12)"
-            stroke="#38bdf8"
-            strokeWidth="1.2"
-            opacity="0.6"
-          />
-          {/* Central Sovereign Omni Diamond */}
+          {/* Epistemic Lattice Diamond Perimeter */}
           <path
-            d="M12 5.5L14.5 12L12 18.5L9.5 12Z"
-            fill="url(#omni-core)"
-            filter="drop-shadow(0 0 4px rgba(6,182,212,0.8))"
+            d="M12 2.2L21.5 12L12 21.8L2.5 12Z"
+            stroke="url(#ultra03-grad)"
+            strokeWidth="1.2"
+            strokeOpacity="0.45"
           />
-          <circle cx="12" cy="12" r="1.8" fill="#ffffff" />
-          {/* Four Guiding Micro-Nodes */}
-          <circle cx="12" cy="3" r="1" fill="#67e8f9" />
-          <circle cx="21" cy="12" r="1" fill="#38bdf8" />
-          <circle cx="12" cy="21" r="1" fill="#0284c7" />
-          <circle cx="3" cy="12" r="1" fill="#06b6d4" />
+          {/* Triple-Node Dialectic Struggle Tensor Lines */}
+          <line x1="12" y1="6" x2="6.5" y2="16.5" stroke="#f0abfc" strokeWidth="1.2" strokeDasharray="1.5 1" opacity="0.8" />
+          <line x1="12" y1="6" x2="17.5" y2="16.5" stroke="#f0abfc" strokeWidth="1.2" strokeDasharray="1.5 1" opacity="0.8" />
+          <line x1="6.5" y1="16.5" x2="17.5" y2="16.5" stroke="#f0abfc" strokeWidth="1.2" strokeDasharray="1.5 1" opacity="0.8" />
+          {/* Tri-Node Quantum Dialectic Spheres */}
+          <circle cx="12" cy="6" r="1.4" fill="#fdf4ff" stroke="#d946ef" strokeWidth="0.8" />
+          <circle cx="6.5" cy="16.5" r="1.4" fill="#fdf4ff" stroke="#d946ef" strokeWidth="0.8" />
+          <circle cx="17.5" cy="16.5" r="1.4" fill="#fdf4ff" stroke="#d946ef" strokeWidth="0.8" />
+          {/* UltraThinking V2.0 Quantum Falsification Core */}
+          <polygon
+            points="12,9.2 14.8,12 12,14.8 9.2,12"
+            fill="url(#ultra03-core)"
+            filter="drop-shadow(0 0 6px rgba(217,70,239,0.95))"
+            className={animated ? 'animate-pulse' : ''}
+          />
+          <circle cx="12" cy="12" r="1.2" fill="#ffffff" />
         </svg>
       )
     };
   }
 
-  // 2. NIXIMA 0.3 CODER (TITAN)
+  // 2. NIXIMA 0.3O OMNI (OMNI SOVEREIGN V2 MULTIMODAL SWARM)
+  if (norm.includes('0.3') && norm.includes('omni')) {
+    return {
+      name: '0.3O Omni',
+      containerBg: 'bg-gradient-to-br from-cyan-950/90 via-[#072438]/90 to-[#020e18]/95',
+      borderClass: 'border-cyan-400/60 hover:border-cyan-300/90',
+      glowClass: 'shadow-[0_0_16px_rgba(6,182,212,0.4)]',
+      accentColor: '#22d3ee',
+      renderGlyph: (s, animated) => (
+        <svg viewBox="0 0 24 24" width={s} height={s} fill="none" className="overflow-visible">
+          <defs>
+            <linearGradient id="omni03-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#a5f3fc" />
+              <stop offset="50%" stopColor="#22d3ee" />
+              <stop offset="100%" stopColor="#0284c7" />
+            </linearGradient>
+            <radialGradient id="omni03-core" cx="12" cy="12" r="4.5" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="50%" stopColor="#67e8f9" />
+              <stop offset="100%" stopColor="#0891b2" />
+            </radialGradient>
+          </defs>
+          {/* Gyroscopic Orbital Ring 1 (Horizontal Tilt) */}
+          <ellipse
+            cx="12"
+            cy="12"
+            rx="9"
+            ry="3.5"
+            stroke="url(#omni03-grad)"
+            strokeWidth="1.3"
+            strokeDasharray="2 1"
+            className={animated ? 'animate-spin opacity-85' : 'opacity-80'}
+            style={animated ? { animationDuration: '7s' } : undefined}
+          />
+          {/* Gyroscopic Orbital Ring 2 (+55 deg Tilt) */}
+          <ellipse
+            cx="12"
+            cy="12"
+            rx="9"
+            ry="3.5"
+            transform="rotate(55 12 12)"
+            stroke="#38bdf8"
+            strokeWidth="1.2"
+            opacity="0.75"
+          />
+          {/* Gyroscopic Orbital Ring 3 (-55 deg Tilt) */}
+          <ellipse
+            cx="12"
+            cy="12"
+            rx="9"
+            ry="3.5"
+            transform="rotate(-55 12 12)"
+            stroke="#818cf8"
+            strokeWidth="1.1"
+            opacity="0.65"
+          />
+          {/* Central Sovereign Omni V2 Diamond */}
+          <path
+            d="M12 5L15 12L12 19L9 12Z"
+            fill="url(#omni03-core)"
+            filter="drop-shadow(0 0 5px rgba(6,182,212,0.9))"
+            className={animated ? 'animate-pulse' : ''}
+          />
+          <circle cx="12" cy="12" r="1.8" fill="#ffffff" />
+          {/* Swarm Navigation Pips */}
+          <circle cx="12" cy="2.5" r="1" fill="#a5f3fc" />
+          <circle cx="21.5" cy="12" r="1" fill="#38bdf8" />
+          <circle cx="12" cy="21.5" r="1" fill="#0284c7" />
+          <circle cx="2.5" cy="12" r="1" fill="#22d3ee" />
+        </svg>
+      )
+    };
+  }
+
+  // 3. NIXIMA 0.3 CODER (TITAN CODER & DEEPTHINKING V2.1)
   if (norm.includes('0.3') && norm.includes('coder')) {
     return {
       name: '0.3 Titan Coder',
@@ -163,7 +235,162 @@ function getModelTheme(id: string): ModelTheme {
     };
   }
 
-  // 3. NIXIMA 0.2 PRO (ULTRA REASONING PRO)
+  // 4. NIXIMA 0.3 FLASH (HYPERFLASH SUB-4MS & HYPERSTREAM V2)
+  if (norm.includes('0.3') && norm.includes('flash')) {
+    return {
+      name: '0.3 HyperFlash',
+      containerBg: 'bg-gradient-to-br from-amber-950/90 via-[#311603]/90 to-[#120601]/95',
+      borderClass: 'border-amber-400/60 hover:border-amber-300/90',
+      glowClass: 'shadow-[0_0_16px_rgba(245,158,11,0.45)]',
+      accentColor: '#fbbf24',
+      renderGlyph: (s, animated) => (
+        <svg viewBox="0 0 24 24" width={s} height={s} fill="none" className="overflow-visible">
+          <defs>
+            <linearGradient id="flash03-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#fef08a" />
+              <stop offset="50%" stopColor="#f59e0b" />
+              <stop offset="100%" stopColor="#ea580c" />
+            </linearGradient>
+          </defs>
+          {/* Outer Kinetic Warp Ring */}
+          <circle
+            cx="12"
+            cy="12"
+            r="9.5"
+            stroke="url(#flash03-grad)"
+            strokeWidth="1.1"
+            strokeDasharray="3 1.5"
+            opacity="0.4"
+            className={animated ? 'animate-spin' : ''}
+            style={animated ? { animationDuration: '4s' } : undefined}
+          />
+          {/* Dual Intersecting Hyper-Tachyon Velocity Bolts */}
+          <path
+            d="M13.5 2.2L5.5 12.5H12L9.5 21.8L19.5 10H13L14.5 2.2Z"
+            fill="url(#flash03-grad)"
+            filter="drop-shadow(0 0 6px rgba(245,158,11,0.95))"
+            className={animated ? 'animate-pulse' : ''}
+          />
+          {/* White-Hot Core Tachyon Filament */}
+          <path
+            d="M13 5L8 12H12L10.5 17.8L16.5 10.5H12.5L13.5 5Z"
+            fill="#ffffff"
+            opacity="0.85"
+          />
+          {/* Sub-4ms Kinetic Sparks */}
+          <circle cx="19" cy="5" r="1.1" fill="#fef08a" />
+          <circle cx="4.5" cy="18" r="1" fill="#fb923c" />
+        </svg>
+      )
+    };
+  }
+
+  // 5. NIXIMA 0.3 PRIME (FLAGSHIP SOVEREIGN QRA-V3)
+  if (norm === 'nixima-0.3' || (norm.includes('0.3') && !norm.includes('0.2'))) {
+    return {
+      name: '0.3 Prime',
+      containerBg: 'bg-gradient-to-br from-indigo-950/90 via-[#13112c]/90 to-[#070614]/95',
+      borderClass: 'border-indigo-500/60 hover:border-indigo-400/90',
+      glowClass: 'shadow-[0_0_16px_rgba(129,140,248,0.38)]',
+      accentColor: '#818cf8',
+      renderGlyph: (s, animated) => (
+        <svg viewBox="0 0 24 24" width={s} height={s} fill="none" className="overflow-visible">
+          <defs>
+            <linearGradient id="prime03-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="35%" stopColor="#c7d2fe" />
+              <stop offset="70%" stopColor="#818cf8" />
+              <stop offset="100%" stopColor="#a855f7" />
+            </linearGradient>
+          </defs>
+          {/* Outer Precision Hexagonal Quantum Lattice */}
+          <path
+            d="M12 2.5L20 7.2V16.8L12 21.5L4 16.8V7.2L12 2.5Z"
+            stroke="url(#prime03-grad)"
+            strokeWidth="1.2"
+            strokeOpacity="0.5"
+          />
+          {/* Quantum Rotary Attention (QRA-v3) 8-Point Sovereign Star */}
+          <path
+            d="M12 4.5L13.8 9.5L18.8 9.8L15 13.2L16.2 18.2L12 15.5L7.8 18.2L9 13.2L5.2 9.8L10.2 9.5Z"
+            fill="url(#prime03-grad)"
+            filter="drop-shadow(0 0 5px rgba(129,140,248,0.85))"
+            className={animated ? 'animate-pulse' : ''}
+          />
+          {/* Central Quantum Luminescent Core */}
+          <circle cx="12" cy="12" r="1.8" fill="#ffffff" />
+          {/* Satellite Micro-Nodes */}
+          <circle cx="12" cy="3.5" r="0.9" fill="#c7d2fe" />
+          <circle cx="19" cy="16" r="0.9" fill="#818cf8" />
+          <circle cx="5" cy="16" r="0.9" fill="#a855f7" />
+        </svg>
+      )
+    };
+  }
+
+  // =========================================================================
+  // GENERATION 0.2 — SOVEREIGN CLASSIC FLEET
+  // =========================================================================
+
+  // 6. NIXIMA 0.2O OMNI
+  if (norm.includes('omni')) {
+    return {
+      name: '0.2O Omni',
+      containerBg: 'bg-gradient-to-br from-cyan-950/90 via-[#061826]/90 to-[#020b12]/95',
+      borderClass: 'border-cyan-500/50 hover:border-cyan-400/80',
+      glowClass: 'shadow-[0_0_12px_rgba(6,182,212,0.3)]',
+      accentColor: '#06b6d4',
+      renderGlyph: (s, animated) => (
+        <svg viewBox="0 0 24 24" width={s} height={s} fill="none" className="overflow-visible">
+          <defs>
+            <linearGradient id="omni02-grad" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#67e8f9" />
+              <stop offset="50%" stopColor="#06b6d4" />
+              <stop offset="100%" stopColor="#0284c7" />
+            </linearGradient>
+            <radialGradient id="omni02-core" cx="12" cy="12" r="4" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#a5f3fc" />
+              <stop offset="100%" stopColor="#0891b2" />
+            </radialGradient>
+          </defs>
+          <ellipse
+            cx="12"
+            cy="12"
+            rx="8.5"
+            ry="3.5"
+            transform="rotate(-30 12 12)"
+            stroke="url(#omni02-grad)"
+            strokeWidth="1.3"
+            strokeDasharray="2 1"
+            className={animated ? 'animate-spin opacity-85' : 'opacity-75'}
+            style={animated ? { animationDuration: '6s' } : undefined}
+          />
+          <ellipse
+            cx="12"
+            cy="12"
+            rx="8.5"
+            ry="3.5"
+            transform="rotate(45 12 12)"
+            stroke="#38bdf8"
+            strokeWidth="1.2"
+            opacity="0.6"
+          />
+          <path
+            d="M12 5.5L14.5 12L12 18.5L9.5 12Z"
+            fill="url(#omni02-core)"
+            filter="drop-shadow(0 0 4px rgba(6,182,212,0.8))"
+          />
+          <circle cx="12" cy="12" r="1.8" fill="#ffffff" />
+          <circle cx="12" cy="3" r="1" fill="#67e8f9" />
+          <circle cx="21" cy="12" r="1" fill="#38bdf8" />
+          <circle cx="12" cy="21" r="1" fill="#0284c7" />
+          <circle cx="3" cy="12" r="1" fill="#06b6d4" />
+        </svg>
+      )
+    };
+  }
+
+  // 7. NIXIMA 0.2 PRO (ULTRA REASONING PRO)
   if (norm.includes('pro') || norm.includes('reasoning')) {
     return {
       name: '0.2 Pro',
@@ -218,7 +445,7 @@ function getModelTheme(id: string): ModelTheme {
     };
   }
 
-  // 4. NIXIMA 0.2 CODER (SYSTEMS DEV)
+  // 8. NIXIMA 0.2 CODER (SYSTEMS DEV)
   if (norm.includes('coder')) {
     return {
       name: '0.2 Coder',
@@ -255,7 +482,7 @@ function getModelTheme(id: string): ModelTheme {
     };
   }
 
-  // 5. NIXIMA 0.2 FLASH (HYPER SPEED)
+  // 9. NIXIMA 0.2 FLASH (HYPER SPEED)
   if (norm.includes('flash')) {
     return {
       name: '0.2 Flash',
@@ -290,7 +517,7 @@ function getModelTheme(id: string): ModelTheme {
     };
   }
 
-  // 6. NIXIMA 0.2 (FLAGSHIP DEFAULT)
+  // 10. NIXIMA 0.2 (FLAGSHIP DEFAULT)
   return {
     name: '0.2 Flagship',
     containerBg: 'bg-gradient-to-br from-zinc-800/90 via-[#18181b]/95 to-[#09090b]/98',

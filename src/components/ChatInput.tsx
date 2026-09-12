@@ -452,12 +452,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                             </p>
                           </div>
 
-                          {/* 3. UltraThinking V1.0 (Pinnacle Epistemic Struggle for Nixima-0.2 Pro) */}
+                          {/* 3. UltraThinking V2.0 / V1.0 (Pinnacle Epistemic Struggle for Nixima Pro) */}
                           <div 
                             onClick={() => {
                               onChangeThinkingMode?.('ultra');
-                              if (currentModel.id !== 'nixima-0.2-pro' && onSelectModel) {
-                                const proModel = NIXIMA_MODELS.find(m => m.id === 'nixima-0.2-pro');
+                              const isProModel = currentModel.id === 'nixima-0.3-pro' || currentModel.id === 'nixima-0.2-pro';
+                              if (!isProModel && onSelectModel) {
+                                const proModel = NIXIMA_MODELS.find(m => m.id === 'nixima-0.3-pro') || NIXIMA_MODELS.find(m => m.id === 'nixima-0.2-pro');
                                 if (proModel) onSelectModel(proModel);
                               }
                               setIsThinkingPopoverOpen(false);
@@ -474,10 +475,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                                   <BrainCircuit className="w-3.5 h-3.5 text-purple-300 animate-pulse" />
                                 </div>
                                 <span className="font-semibold text-xs text-white font-mono">
-                                  {t.chatInput.ultraThinkingV1}
+                                  {currentModel.id === 'nixima-0.3-pro' ? 'UltraThinking V2.0' : t.chatInput.ultraThinkingV1}
                                 </span>
                                 <span className="px-1.5 py-0.2 rounded bg-purple-950/90 text-[9px] font-mono font-bold text-purple-300 border border-purple-500/60">
-                                  ULTRA V1.0
+                                  {currentModel.id === 'nixima-0.3-pro' ? 'ULTRA V2.0' : 'ULTRA V1.0'}
                                 </span>
                               </div>
                               {thinkingMode === 'ultra' && (

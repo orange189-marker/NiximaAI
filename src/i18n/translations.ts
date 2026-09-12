@@ -1003,11 +1003,38 @@ export const translations: Record<Language, Translations> = {
     },
 
     models: {
-      'nixima-0.2-omni': {
-        name: 'Nixima-0.2O',
-        badge: 'OMNI ALL-IN-ONE',
-        description: 'Sovereign frontier all-in-one multimodal model combining deep epistemic reasoning, production systems engineering, live web search synthesis, and ultra-high throughput with zero manual toggles required.',
-        strengths: ['Omni Sovereign Intelligence', 'Autonomous Reasoning & Web Grounding', 'Zero Manual Toggles Required', '1M Context Adaptive Throughput'],
+      'nixima-0.3': {
+        name: 'Nixima-0.3',
+        badge: '0.3 PRIME FLAGSHIP',
+        description: 'Next-generation sovereign flagship general synthetic intelligence. Features Quantum Rotary Attention (QRA-v3), multi-perspective dialectic synthesis, 2,000,000 continuous context, and zero-hallucination semantic anchoring.',
+        strengths: [
+          'Quantum Rotary Attention (QRA-v3)',
+          'Multi-Perspective Dialectic Synthesis',
+          'Zero-Hallucination Semantic Grounding',
+          '2M Token Continuous Coherence'
+        ],
+      },
+      'nixima-0.3-pro': {
+        name: 'Nixima-0.3 UltraPro',
+        badge: 'ULTRATHINKING V2.0',
+        description: 'The pinnacle of high-order synthetic reasoning powered by UltraThinking V2.0. Relentless dialectical quantum struggle, multi-hypothesis theorem trees, counter-example falsification, and rigorous mathematical proofs across a 2.5M context window.',
+        strengths: [
+          'UltraThinking V2.0 Quantum Dialectic',
+          'Multi-Branch Hypothesis Falsification Trees',
+          'Adversarial Counter-Example Proofs',
+          'Formal Epistemic Logic & Theorems'
+        ],
+      },
+      'nixima-0.3-omni': {
+        name: 'Nixima-0.3O',
+        badge: 'OMNI SOVEREIGN V2',
+        description: 'Autonomous all-in-one multimodal synthetic intelligence combining instant epistemic reasoning, production systems engineering, and live 7-cluster web synthesis with zero manual toggles. Massive 3M context with adaptive hyper-throughput.',
+        strengths: [
+          'Omni Sovereign Swarm Core V2',
+          'Autonomous Zero-Toggle Adaptation',
+          'Instantaneous 7-Cluster Web Synthesis',
+          '3M Massive Context Window'
+        ],
       },
       'nixima-0.3-coder': {
         name: 'Nixima-0.3 Coder',
@@ -1019,6 +1046,23 @@ export const translations: Record<Language, Translations> = {
           'Polished Game Mechanics & Web Audio',
           'High-Performance Concurrent Systems'
         ],
+      },
+      'nixima-0.3-flash': {
+        name: 'Nixima-0.3 Flash',
+        badge: 'HYPERSTREAM V2',
+        description: 'Sub-4ms hyperstream latency coupled with a colossal 5,000,000 token context window. Instantaneous multi-document ingestion, rapid synthesis, and continuous token flow at unparalleled speed and cost-efficiency.',
+        strengths: [
+          'Sub-4ms Hyperstream Latency',
+          '5,000,000 Token Colossal Context',
+          'Instantaneous Multi-Doc Ingestion',
+          'Ultra-Low Credit Cost Multiplier'
+        ],
+      },
+      'nixima-0.2-omni': {
+        name: 'Nixima-0.2O',
+        badge: 'OMNI ALL-IN-ONE',
+        description: 'Sovereign frontier all-in-one multimodal model combining deep epistemic reasoning, production systems engineering, live web search synthesis, and ultra-high throughput with zero manual toggles required.',
+        strengths: ['Omni Sovereign Intelligence', 'Autonomous Reasoning & Web Grounding', 'Zero Manual Toggles Required', '1M Context Adaptive Throughput'],
       },
       'nixima-0.2': {
         name: 'Nixima-0.2',
@@ -1622,11 +1666,38 @@ export const translations: Record<Language, Translations> = {
     },
 
     models: {
-      'nixima-0.2-omni': {
-        name: 'Nixima-0.2O',
-        badge: 'OMNI ВСЕ-В-ОДНОМУ',
-        description: 'Суверенна модель нового покоління «все-в-одному». Поєднує глибокі епістемічні міркування, інженерію коду, живий синтез веб-пошуку та надвисоку швидкість без потреби ручних перемикачів.',
-        strengths: ['Суверенний інтелект Omni', 'Автономні міркування та веб-пошук', 'Full-stack розробка систем', 'Динамічна маршрутизація'],
+      'nixima-0.3': {
+        name: 'Nixima-0.3',
+        badge: '0.3 ПРАЙМ ФЛАГМАН',
+        description: 'Суверенний флагман загального синтетичного інтелекту нового покоління. Оснащений Quantum Rotary Attention (QRA-v3), синтезом багатовимірних діалектичних перспектив, 2M контекстом та семантичним якорінням без галюцинацій.',
+        strengths: [
+          'Quantum Rotary Attention (QRA-v3)',
+          'Багатовимірний діалектичний синтез',
+          'Семантичне якоріння без галюцинацій',
+          '2M токенів безперервної зв’язності'
+        ],
+      },
+      'nixima-0.3-pro': {
+        name: 'Nixima-0.3 UltraPro',
+        badge: 'ULTRATHINKING V2.0',
+        description: 'Вершина синтетичного мислення найвищого порядку на базі UltraThinking V2.0. Виснажлива квантова діалектична боротьба, багаторівневі дерева теорем, фальсифікація контраргументами та суворі доведення у 2.5M контексті.',
+        strengths: [
+          'UltraThinking V2.0 квантова діалектика',
+          'Дерева фальсифікації гіпотез',
+          'Змагальні контраргументи та докази',
+          'Формальна епістемічна логіка'
+        ],
+      },
+      'nixima-0.3-omni': {
+        name: 'Nixima-0.3O',
+        badge: 'OMNI СУВЕРЕН V2',
+        description: 'Автономний мультимодальний інтелект нового покоління «все-в-одному». Поєднує миттєві епістемічні міркування, інженерію систем та живий синтез 7 кластерів вебу без ручних перемикачів. Колосальний 3M контекст.',
+        strengths: [
+          'Omni Sovereign Swarm Core V2',
+          'Автономна адаптація без перемикачів',
+          'Миттєвий синтез 7 кластерів вебу',
+          '3M колосальний контекст'
+        ],
       },
       'nixima-0.3-coder': {
         name: 'Nixima-0.3 Coder',
@@ -1638,6 +1709,23 @@ export const translations: Record<Language, Translations> = {
           'Досконала механіка ігор та Web Audio',
           'Високопродуктивні системи'
         ],
+      },
+      'nixima-0.3-flash': {
+        name: 'Nixima-0.3 Flash',
+        badge: 'HYPERSTREAM V2',
+        description: 'Суб-4мс надшвидка затримка генерації у поєднанні з колосальним вікном контексту на 5 000 000 токенів. Миттєве завантаження великих корпусів даних та блискавична генерація за мінімальної вартості.',
+        strengths: [
+          'Суб-4мс затримка Hyperstream',
+          'Колосальний контекст 5 000 000 токенів',
+          'Миттєвий аналіз мульти-документів',
+          'Надвисока енергоефективність та низька вартість'
+        ],
+      },
+      'nixima-0.2-omni': {
+        name: 'Nixima-0.2O',
+        badge: 'OMNI ВСЕ-В-ОДНОМУ',
+        description: 'Суверенна модель нового покоління «все-в-одному». Поєднує глибокі епістемічні міркування, інженерію коду, живий синтез веб-пошуку та надвисоку швидкість без потреби ручних перемикачів.',
+        strengths: ['Суверенний інтелект Omni', 'Автономні міркування та веб-пошук', 'Full-stack розробка систем', 'Динамічна маршрутизація'],
       },
       'nixima-0.2': {
         name: 'Nixima-0.2',

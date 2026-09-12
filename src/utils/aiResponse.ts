@@ -55,29 +55,29 @@ function generateRawNiximaResponse({
 
   // Thinking trace generation gated by thinkingMode
   let thinking = '';
-  if (effectiveMode === 'ultra') {
+  if (effectiveMode === 'ultra' || model.id === 'nixima-0.3-pro') {
     thinking = `### 1. Epistemic Axiom Deconstruction & Core Constraint Mapping
 - Deep intellectual struggle initiated on: "${prompt.slice(0, 60)}..."
-- Challenging default baseline assumptions; dissecting subtle ambiguities and hidden premises.
-- Establishing formal logical bounds, invariant constraints, and dimensional verification.
+- Challenging baseline assumptions; dissecting subtle ambiguities and latent epistemic constraints.
+- Establishing formal logical bounds, invariant conditions, and 2.5M continuous context anchoring.
 
-### 2. Multi-Branch Dialectical Hypotheses (H1 vs H2 vs H3)
-- Developing Branch H1: Direct reductionist deduction under standard axiomatic models.
-- Developing Branch H2: Non-linear systemic perspective with adversarial counter-assumptions.
-- Developing Branch H3: Asymptotic boundary stress-test under extreme conditions.
-- Mapping theoretical divergence, cognitive friction, and trade-off matrices between candidate paths.
+### 2. Multi-Branch Dialectical Hypotheses (H1 vs H2 vs H3) & Divergent Exploration
+- Branch H1: Direct axiomatic deduction under standard formal paradigms.
+- Branch H2: Non-linear dialectical tension with adversarial counter-premises.
+- Branch H3: Asymptotic boundary stress-testing under extreme pathological conditions.
+- Mapping epistemic divergence matrices, cognitive friction, and trade-off topologies between branches.
 
 ### 3. Adversarial Red-Teaming, Falsification & Counter-Example Search
-- Aggressively probing leading hypotheses for theoretical fragility, edge case collapse, and second-order failures.
-- Discovered and resolved potential degenerate states and boundary discrepancies.
-- Verified absence of cognitive shortcuts or reasoning laziness.
+- Aggressively probing candidate hypotheses for theoretical fragility, edge case collapse, and second-order failures.
+- Constructed adversarial counter-examples to falsify non-robust assumptions.
+- Survived rigorous dialectical elimination; zero reasoning laziness verified.
 
-### 4. Mathematical Rigor & Invariant Soundness Proof
-- Formally verifying symbolic consistency, logical flow, and mathematical soundness.
-- Establishing invariant proofs: all claims corroborated with 99.98% epistemic certainty.
+### 4. Formal Mathematical Soundness, Invariant Proofs & Algorithmic Rigor
+- Formally verifying symbolic consistency, logical transitions, and mathematical derivations.
+- Establishing formal theorem invariants: all assertions verified with 99.99% epistemic certainty.
 
 ### 5. Sovereign Dialectical Synthesis & Definitive Ground Truth
-- Synthesizing resolution from the dialectical struggle into a definitive, world-class response.`;
+- Forging the battle-tested synthesis resolving all preceding dialectical tensions with uncompromising clarity.`;
   } else if (effectiveMode === 'deep') {
     if (model.id === 'nixima-0.3-coder') {
       thinking = `### 1. Game Mechanics & State Machine Invariants
@@ -93,6 +93,40 @@ function generateRawNiximaResponse({
 ### 3. Zero-Laziness Verification & Full Implementation Audit
 - Auditing codebase for zero placeholders: NO "// code goes here", NO missing functions.
 - 100% complete, self-contained, runnable code verified for immediate execution in Nixima Canvas Studio.`;
+    } else if (model.id === 'nixima-0.3') {
+      thinking = `### 1. Quantum Rotary Attention (QRA-v3) Tensor Matrix Analysis
+- Semantic deconstruction of prompt: "${prompt.slice(0, 60)}..."
+- Deploying QRA-v3 multi-headed rotary embeddings across 2,000,000 continuous context tokens.
+- Zero-hallucination semantic anchoring initialized against verified knowledge graph.
+
+### 2. Multi-Perspective Dialectic Synthesis & Cognitive Friction Audit
+- Activating dual synthesis streams to contrast conventional perspectives with frontier paradigms.
+- Resolving cognitive friction and stress-testing domain edge cases with mathematical rigor.
+
+### 3. Sovereign Prime Epistemic Delivery
+- Formulating structured, world-class flagship response with pristine linguistic purity.`;
+    } else if (model.id === 'nixima-0.3-omni') {
+      thinking = `### 1. Autonomous Multimodal Swarm Core Telemetry & Routing
+- Dynamic semantic parsing: "${prompt.slice(0, 60)}..."
+- Engaging 0.3O Omni Sovereign Swarm Core across 3,000,000 token context window with zero manual toggles.
+- Harmonizing multi-modal reasoning, systems architecture, and live knowledge grounding.
+
+### 2. Live 7-Cluster Knowledge Mesh & Cross-Domain Synthesis
+- Cross-referencing findings across News Wires, Academic RFCs, Code Repositories, and Technical Standards.
+- Autonomous fact distillation: eliminating conflicting source data with 99.8% consensus verification.
+
+### 3. Unified Multimodal Synthesis & Delivery
+- Assembling authoritative, high-throughput sovereign response.`;
+    } else if (model.id === 'nixima-0.3-flash') {
+      thinking = `### 1. HyperStream V2 Sub-4ms Stream Pipeline Allocation
+- Lightning parsing of query: "${prompt.slice(0, 60)}..."
+- Allocating high-throughput sub-4ms kinetic execution stream across 5,000,000 token colossal window.
+
+### 2. Instantaneous Cross-Verification & Fact Distillation
+- Rapid multi-document token vectorization and zero-latency synthesis verification.
+
+### 3. Hyper-Throughput Delivery
+- Instantaneous emission of crystalline, razor-sharp response.`;
     } else {
       thinking = `### 1. Problem Space Decomposition & Invariants
 - Semantic decomposition of prompt: "${prompt.slice(0, 60)}..."
@@ -149,19 +183,21 @@ function generateRawNiximaResponse({
       day: 'numeric',
     });
 
+    const modelGen = model.generation || (model.id.includes('0.3') ? '0.3' : '0.2');
+
     if (isUk) {
       return {
         thinking: `1. Аналіз запиту оператора щодо часового горизонту та зрізу знань.
-2. Підтвердження сучасної архітектури Nixima 0.2 (${now.getFullYear()} рік) без застарілих обмежень 2023 року.
+2. Підтвердження сучасної архітектури Nixima ${modelGen} (${now.getFullYear()} рік) без застарілих обмежень 2023 року.
 3. Огляд інтеграції інструменту Search V3 для живого огляду веб-ресурсів (мін. 20 сайтів) та новинних стрічок у реальному часі.`,
         response: `### Часова архітектура та актуальність знань Nixima AI
 
-**Nixima AI не має застарілого зрізу знань 2023 чи 2024 року.** Модель функціонує на базі суверенної архітектури покоління **0.2**, синхронізована з реальним часом (**${dateStr}**) та має прямий доступ до світової мережі через систему **Search V3** (мінімум 20 сайтів у базовому режимі, 50–80 у Search V3 Mega).
+**Nixima AI не має застарілого зрізу знань 2023 чи 2024 року.** Модель функціонує на базі суверенної архітектури покоління **${modelGen}**, синхронізована з реальним часом (**${dateStr}**) та має прямий доступ до світової мережі через систему **Search V3** (мінімум 20 сайтів у базовому режимі, 50–80 у Search V3 Mega).
 
 | Параметр | Стан системи |
 | :--- | :--- |
 | **Поточна дата** | **${dateStr}** (${now.getFullYear()} рік) |
-| **Базова архітектура** | \`${model.name}\` (Покоління 0.2) |
+| **Базова архітектура** | \`${model.name}\` (Покоління ${modelGen}) |
 | **Живий веб-пошук** | **Search V3** (Standard 20+, Fast 20, Mega Swarm 50–80) |
 | **Оперативні стрічки новин** | Світові та українські новинні агентства у реальному часі |
 
@@ -174,16 +210,16 @@ function generateRawNiximaResponse({
 
     return {
       thinking: `1. Analyzing operator inquiry regarding knowledge cutoff and temporal baseline.
-2. Confirming modern 0.2 generation architecture operating in ${now.getFullYear()} with zero legacy 2023 cutoff constraints.
+2. Confirming modern ${modelGen} generation architecture operating in ${now.getFullYear()} with zero legacy 2023 cutoff constraints.
 3. Outlining Search V3 live web mesh integration (min 20 websites, 50-80 Mega) for real-time news wires and verifiable citations.`,
       response: `### Temporal Architecture & Knowledge Grounding in Nixima AI
 
-**Nixima AI does not operate on a legacy 2023 or 2024 knowledge cutoff.** Operating on the sovereign **${model.name}** (0.2 Generation), Nixima is anchored in the present (**${dateStr}**) and equipped with **Search V3 Real-Time Web Grounding** (minimum 20 websites scanned, and 50–80 websites in Search V3 Mega).
+**Nixima AI does not operate on a legacy 2023 or 2024 knowledge cutoff.** Operating on the sovereign **${model.name}** (${modelGen} Generation), Nixima is anchored in the present (**${dateStr}**) and equipped with **Search V3 Real-Time Web Grounding** (minimum 20 websites scanned, and 50–80 websites in Search V3 Mega).
 
 | Parameter | Platform Specification |
 | :--- | :--- |
 | **Current Date** | **${dateStr}** (${now.getFullYear()}) |
-| **Knowledge Baseline** | 0.2 Generation (Continuously ground-referenced) |
+| **Knowledge Baseline** | ${modelGen} Generation (Continuously ground-referenced) |
 | **Live Web Browsing** | **Search V3** (Standard 20+, Fast 20, Mega Swarm 50–80) |
 | **News Wire Retrieval** | Real-time international news wire feeds |
 
