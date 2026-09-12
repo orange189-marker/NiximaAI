@@ -144,9 +144,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     let md = `# Nixima AI Conversation Archive\n\n*Exported on ${new Date().toLocaleString()}*\n\n---\n\n`;
     conversations.forEach((conv, idx) => {
       md += `## ${idx + 1}. ${conv.title}\n`;
-      md += `*Model: ${conv.model} | Created: ${new Date(conv.createdAt).toLocaleString()}*\n\n`;
+      md += `*Model: ${conv.modelId || 'Nixima AI'} | Created: ${new Date(conv.createdAt).toLocaleString()}*\n\n`;
       conv.messages.forEach((msg) => {
-        const role = msg.sender === 'user' ? 'Operator' : 'Nixima AI';
+        const role = msg.role === 'user' ? 'Operator' : 'Nixima AI';
         md += `### [${role}] - ${new Date(msg.timestamp).toLocaleTimeString()}\n\n${msg.content}\n\n`;
       });
       md += `---\n\n`;

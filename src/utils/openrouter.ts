@@ -1,4 +1,13 @@
-import { ModelOption, SearchGrounding, SearchSource, SearchActionStep, DeepThinkingTelemetry, SearchMode } from '../types/chat';
+import { 
+  ModelOption, 
+  SearchGrounding, 
+  SearchSource, 
+  SearchActionStep, 
+  DeepThinkingTelemetry, 
+  SearchMode, 
+  ThinkingMode, 
+  DynamicThinkingStep 
+} from '../types/chat';
 import { isCjkRequested, sanitizeModelOutput, sanitizeTokenStream } from './textSanitizer';
 
 // Pre-configured system key inserted directly into the runtime
@@ -10,6 +19,7 @@ export const getSystemApiKey = (): string => {
 
 export interface StreamCallbacks {
   onToken: (token: string) => void;
+  onThinking?: (thinking: string) => void;
   onThinkingToken?: (token: string) => void;
   onSearchGrounding?: (grounding: SearchGrounding) => void;
   onSearchActionStep?: (step: SearchActionStep) => void;
@@ -1117,12 +1127,13 @@ export async function streamOpenRouterChat({
   let fallbacks = model.fallbackModels || [
     'openrouter/free',
     'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
-    'nvidia/nemotron-3.5-lightning:free'
+    'cohere/north-mini-code:free',
+    'poolside/laguna-s-2.1:free'
   ];
 
   // Dynamic search engine optimization: prioritize the best engine candidate for active search mode
   if (webSearch && searchMode === 'fast') {
-    const fastCandidate = 'nvidia/nemotron-3.5-lightning:free';
+    const fastCandidate = 'poolside/laguna-s-2.1:free';
     if (primarySlug !== fastCandidate && fallbacks.includes(fastCandidate)) {
       fallbacks = [primarySlug, ...fallbacks.filter(f => f !== fastCandidate && f !== primarySlug)];
       primarySlug = fastCandidate;
@@ -1151,54 +1162,65 @@ export async function streamOpenRouterChat({
     });
   }
 
-  // Include conversation messages
-  formattedMessages.push(...messages);
+  // Include conversation messages (ensuring no empty content reaches upstream providers)
+  formattedMessages.push(...messages.filter(m => m.content && m.content.trim().length > 0));
 
   let lastError: Error | null = null;
 
   for (const candidateModel of candidates) {
+    const candidateCtrl = new AbortController();
+    let candidateTimeout: any = setTimeout(() => {
+      candidateCtrl.abort(new Error(`Model ${candidateModel} connection timed out after 12s`));
+    }, 12000);
+
+    const onParentAbort = () => candidateCtrl.abort(signal?.reason);
+    if (signal) {
+      if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+      signal.addEventListener('abort', onParentAbort, { once: true });
+    }
+
     try {
-        const requestPayload: any = {
-          model: candidateModel,
-          messages: formattedMessages,
-          temperature,
-          top_p: topP,
-          stream: true,
+      const requestPayload: any = {
+        model: candidateModel,
+        messages: formattedMessages,
+        temperature,
+        top_p: topP,
+        stream: true,
+      };
+
+      // When infinite output is enabled for the creator, omit max_tokens so OpenRouter and upstream providers
+      // stream up to their maximum model context limit without any 4096-token ceiling.
+      if (!infiniteOutput) {
+        requestPayload.max_tokens = maxTokens;
+      }
+
+      // Configure reasoning effort based on thinking mode
+      if (effectiveThinkingMode === 'ultra') {
+        requestPayload.reasoning = {
+          effort: 'high',
+          max_tokens: infiniteOutput ? 16000 : 8192,
         };
+      } else if (effectiveThinkingMode === 'deep') {
+        requestPayload.reasoning = {
+          effort: 'medium',
+        };
+      } else if (effectiveThinkingMode === 'basic') {
+        requestPayload.reasoning = {
+          effort: 'low',
+        };
+      }
 
-        // When infinite output is enabled for the creator, omit max_tokens so OpenRouter and upstream providers
-        // stream up to their maximum model context limit without any 4096-token ceiling.
-        if (!infiniteOutput) {
-          requestPayload.max_tokens = maxTokens;
-        }
-
-        // Configure reasoning effort based on thinking mode
-        if (effectiveThinkingMode === 'ultra') {
-          requestPayload.reasoning = {
-            effort: 'high',
-            max_tokens: infiniteOutput ? 16000 : 8192,
-          };
-        } else if (effectiveThinkingMode === 'deep') {
-          requestPayload.reasoning = {
-            effort: 'medium',
-          };
-        } else if (effectiveThinkingMode === 'basic') {
-          requestPayload.reasoning = {
-            effort: 'low',
-          };
-        }
-
-        const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${activeKey}`,
-            'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'https://nixima.ai',
-            'X-Title': 'Nixima AI',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(requestPayload),
-          signal,
-        });
+      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${activeKey}`,
+          'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'https://nixima.ai',
+          'X-Title': 'Nixima AI',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestPayload),
+        signal: candidateCtrl.signal,
+      });
 
       if (!response.ok) {
         const errorText = await response.text();
@@ -1217,10 +1239,17 @@ export async function streamOpenRouterChat({
       let fullContent = '';
       let fullThinking = '';
       let isInsideThinkingTag = false;
+      let hasStreamError = false;
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
+
+        // Reset stream idle timeout whenever active data packets arrive
+        clearTimeout(candidateTimeout);
+        candidateTimeout = setTimeout(() => {
+          candidateCtrl.abort(new Error(`Model ${candidateModel} stream stalled after 20s`));
+        }, 20000);
 
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split('\n');
@@ -1234,13 +1263,23 @@ export async function streamOpenRouterChat({
           if (trimmed.startsWith('data: ')) {
             try {
               const json = JSON.parse(trimmed.slice(6));
+
+              // Detect in-stream errors (e.g. 502 ResourceExhausted or provider failure)
+              if (json.error) {
+                const errMsg = json.error.message || JSON.stringify(json.error);
+                console.warn(`[Nixima Core] Model ${candidateModel} emitted in-stream error: ${errMsg}. Failing over...`);
+                lastError = new Error(errMsg);
+                hasStreamError = true;
+                break;
+              }
+
               const delta = json.choices?.[0]?.delta;
               if (!delta) continue;
 
               // Handle reasoning field if returned by model (gated by allowThinking)
               if (delta.reasoning && allowThinking) {
                 fullThinking += delta.reasoning;
-                callbacks.onThinking(fullThinking);
+                callbacks.onThinking?.(fullThinking);
               }
 
               // Handle standard content tokens
@@ -1257,7 +1296,7 @@ export async function streamOpenRouterChat({
                   }
                   if (parts[1] && allowThinking) {
                     fullThinking += parts[1];
-                    callbacks.onThinking(fullThinking);
+                    callbacks.onThinking?.(fullThinking);
                   }
                   continue;
                 }
@@ -1267,7 +1306,7 @@ export async function streamOpenRouterChat({
                   const parts = text.split('</think>');
                   if (parts[0] && allowThinking) {
                     fullThinking += parts[0];
-                    callbacks.onThinking(fullThinking);
+                    callbacks.onThinking?.(fullThinking);
                   }
                   if (parts[1]) {
                     fullContent += parts[1];
@@ -1280,7 +1319,7 @@ export async function streamOpenRouterChat({
                   // If thinking is disabled, drop thought tokens so they never surface
                   if (allowThinking) {
                     fullThinking += text;
-                    callbacks.onThinking(fullThinking);
+                    callbacks.onThinking?.(fullThinking);
                   }
                 } else {
                   fullContent += text;
@@ -1292,6 +1331,14 @@ export async function streamOpenRouterChat({
             }
           }
         }
+
+        if (hasStreamError) {
+          break;
+        }
+      }
+
+      if (hasStreamError) {
+        continue; // Proceed to fallback candidate
       }
 
       // If we got content, return successfully with full token sanitization applied
@@ -1332,11 +1379,16 @@ export async function streamOpenRouterChat({
         };
       }
     } catch (e: any) {
-      if (e.name === 'AbortError') {
+      if (signal?.aborted || (e.name === 'AbortError' && signal?.aborted)) {
         throw e;
       }
       lastError = e;
       console.warn(`[Nixima Core] Failed streaming from ${candidateModel}:`, e.message);
+    } finally {
+      clearTimeout(candidateTimeout);
+      if (signal) {
+        signal.removeEventListener('abort', onParentAbort);
+      }
     }
   }
 

@@ -3,10 +3,12 @@ export interface BenchmarkScore {
   accuracy: number; // 0 - 100
   reasoningDepth: number; // 0 - 100
   codeQuality?: number; // 0 - 100
+  speedScore?: number;
+  costEfficiency?: number;
   speedTokensPerSec: number;
   timeToFirstTokenMs: number;
   totalDurationSec: number;
-  grade: 'S+' | 'S' | 'A+' | 'A' | 'B+' | 'B';
+  grade: 'S++' | 'S+' | 'S' | 'A+' | 'A' | 'B+' | 'B';
   costFactor: string;
 }
 

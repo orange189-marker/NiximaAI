@@ -114,7 +114,7 @@ export function getAllUsers(): NiximaUser[] {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        let users = parsed.map((u: NiximaUser) => {
+        let users: NiximaUser[] = parsed.map((u: NiximaUser): NiximaUser => {
           const email = (u.email || '').toLowerCase();
           const handle = (u.handle || '').toLowerCase();
           const isCreator = email === 'orange17@nixima.ai' || handle === 'orange17' || u.isCreator === true;

@@ -110,6 +110,7 @@ export function buildNiximaSystemPrompt({
     timeZoneName: 'short',
   });
 
+  const effectiveThinkingMode: ThinkingMode = thinkingMode || (deepThink ? 'deep' : 'none');
   const isUltraThink = effectiveThinkingMode === 'ultra' || model.id === 'nixima-0.3-pro';
   const isDeepThink = effectiveThinkingMode === 'deep' && model.id !== 'nixima-0.3-pro';
   const isBasicThink = effectiveThinkingMode === 'basic' && model.id !== 'nixima-0.3-pro';

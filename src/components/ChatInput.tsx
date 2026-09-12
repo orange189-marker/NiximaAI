@@ -18,7 +18,7 @@ import {
   Check
 } from 'lucide-react';
 import { ModelOption, SearchMode, ThinkingMode } from '../types/chat';
-import { getRecommendedModelForSearchMode } from '../data/models';
+import { getRecommendedModelForSearchMode, NIXIMA_MODELS } from '../data/models';
 import { NiximaIdLogo } from './NiximaIdLogo';
 import { ModelIcon } from './ModelIcon';
 import { useLanguage } from '../context/LanguageContext';

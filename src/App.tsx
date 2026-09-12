@@ -11,7 +11,7 @@ import { BenchmarksModal } from './components/BenchmarksModal';
 import { ReleaseAnnouncementModal } from './components/ReleaseAnnouncementModal';
 import { AuthPortal } from './components/AuthPortal';
 import { NiximaCanvas } from './components/NiximaCanvas';
-import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry, SearchMode, ThinkingMode, NiximaArtifact } from './types/chat';
+import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry, SearchMode, ThinkingMode, NiximaArtifact, SearchGrounding } from './types/chat';
 import { NiximaUser } from './types/user';
 import { NIXIMA_MODELS, DEFAULT_MODEL } from './data/models';
 import { INITIAL_CONVERSATIONS } from './data/initialChats';
@@ -679,24 +679,31 @@ All conversations and model preferences in this workspace are private to your Ni
     let tokenTickCount = 0;
     let liveGrounding: SearchGrounding | undefined;
 
+    const isOmni = Boolean(currentModel.isOmni || currentModel.id === 'nixima-0.2-omni' || currentModel.id === 'nixima-0.3-omni');
+
+    // Determine whether web search should run: explicitly enabled, current news/events, or Omni autonomous
+    const searchAnalysis = cleanUserSearchQuery(userText);
+    const isNewsQuery = searchAnalysis.isNewsQuery;
+    const shouldRunWebSearch = isOmni
+      ? shouldOmniSearch(userText)
+      : (settings.webSearchEnabled || isNewsQuery);
+
+    // Determine thinking mode: Omni autonomous (none, basic, deep) or user settings
+    const omniThinkingDecision = isOmni ? getOmniThinkingDecision(userText) : 'none';
+    const effectiveThinkingMode: ThinkingMode = isOmni
+      ? omniThinkingDecision
+      : (settings.thinkingMode || (settings.deepThinkEnabled ? 'deep' : 'none'));
+    const effectiveDeepThink = effectiveThinkingMode === 'deep' || effectiveThinkingMode === 'ultra';
+    const isThinkingActive = effectiveThinkingMode !== 'none';
+
+    let historyForApi: { role: 'user' | 'assistant' | 'system'; content: string }[] = [
+      ...currentConv.messages
+        .filter(m => m.content && m.content.trim().length > 0)
+        .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content.trim() })),
+      { role: 'user', content: userText }
+    ];
+
     try {
-      const isOmni = currentModel.isOmni || currentModel.id === 'nixima-0.2-omni';
-
-      // Determine whether web search should run: explicitly enabled, current news/events, or Omni autonomous
-      const searchAnalysis = cleanUserSearchQuery(userText);
-      const isNewsQuery = searchAnalysis.isNewsQuery;
-      const shouldRunWebSearch = isOmni
-        ? shouldOmniSearch(userText)
-        : (settings.webSearchEnabled || isNewsQuery);
-
-      // Determine thinking mode: Omni autonomous (none, basic, deep) or user settings
-      const omniThinkingDecision = isOmni ? getOmniThinkingDecision(userText) : 'none';
-      const effectiveThinkingMode: ThinkingMode = isOmni
-        ? omniThinkingDecision
-        : (settings.thinkingMode || (settings.deepThinkEnabled ? 'deep' : 'none'));
-      const effectiveDeepThink = effectiveThinkingMode === 'deep' || effectiveThinkingMode === 'ultra';
-      const isThinkingActive = effectiveThinkingMode !== 'none';
-
       if (shouldRunWebSearch) {
         try {
           liveGrounding = await fetchLiveWebGrounding(userText, language, settings.searchMode || 'standard');
@@ -780,8 +787,10 @@ All conversations and model preferences in this workspace are private to your Ni
         }
       }
 
-      const historyForApi = [
-        ...currentConv.messages.map(m => ({ role: m.role, content: m.content })),
+      historyForApi = [
+        ...currentConv.messages
+          .filter(m => m.content && m.content.trim().length > 0)
+          .map(m => ({ role: m.role as 'user' | 'assistant', content: m.content.trim() })),
         { role: 'user', content: finalUserPrompt }
       ];
 
@@ -933,34 +942,63 @@ All conversations and model preferences in this workspace are private to your Ni
         }));
       } else {
         console.warn('OpenRouter streaming error, failing over to local Nixima engine:', err);
-        const fallback = generateNiximaResponse({
-          prompt: userText,
-          model: currentModel,
-          deepThink: effectiveDeepThink,
-          thinkingMode: effectiveThinkingMode,
-          webSearch: shouldRunWebSearch,
-          searchMode: settings.searchMode || 'standard',
-          history: historyForApi
-        });
-        const hasFallbackThinking = (isThinkingActive || isOmni) && (fallback.thinking || '').trim().length > 0;
-        setConversations(prev => prev.map(c => {
-          if (c.id === targetConvId) {
-            return {
-              ...c,
-              messages: c.messages.map(m => m.id === aiMessageId ? {
-                ...m,
-                content: fallback.response,
-                thinking: hasFallbackThinking ? fallback.thinking : undefined,
-                thinkingMode: hasFallbackThinking ? effectiveThinkingMode : undefined,
-                searchGrounding: liveGrounding || fallback.searchGrounding,
-                deepThinkingTelemetry: hasFallbackThinking ? fallback.deepThinkingTelemetry : undefined,
-                isStreaming: false,
-                telemetry: fallback.telemetry
-              } : m)
-            };
-          }
-          return c;
-        }));
+        try {
+          const fallback = generateNiximaResponse({
+            prompt: userText,
+            model: currentModel,
+            deepThink: effectiveDeepThink,
+            thinkingMode: effectiveThinkingMode,
+            webSearch: shouldRunWebSearch,
+            searchMode: settings.searchMode || 'standard',
+            history: historyForApi
+          });
+          const hasFallbackThinking = (isThinkingActive || isOmni) && (fallback.thinking || '').trim().length > 0;
+          const estTokens = Math.round(fallback.response.length / 4);
+          const durationMs = Math.round(performance.now() - startTime);
+          const fallbackTelemetry: MessageTelemetry = {
+            tokens: estTokens,
+            durationMs,
+            tokensPerSec: Math.round((estTokens / (durationMs / 1000 || 1))) || 40,
+            model: currentModel.name,
+            creditsSpent: 0,
+          };
+
+          setConversations(prev => prev.map(c => {
+            if (c.id === targetConvId) {
+              return {
+                ...c,
+                messages: c.messages.map(m => m.id === aiMessageId ? {
+                  ...m,
+                  content: fallback.response,
+                  thinking: hasFallbackThinking ? fallback.thinking : undefined,
+                  thinkingMode: hasFallbackThinking ? effectiveThinkingMode : undefined,
+                  searchGrounding: liveGrounding || fallback.searchGrounding,
+                  deepThinkingTelemetry: hasFallbackThinking ? fallback.deepThinkingTelemetry : undefined,
+                  isStreaming: false,
+                  telemetry: fallbackTelemetry
+                } : m)
+              };
+            }
+            return c;
+          }));
+        } catch (fallbackErr) {
+          console.error('[Nixima Core] Fallback generation error:', fallbackErr);
+          setConversations(prev => prev.map(c => {
+            if (c.id === targetConvId) {
+              return {
+                ...c,
+                messages: c.messages.map(m => m.id === aiMessageId ? {
+                  ...m,
+                  content: language === 'uk'
+                    ? 'Вибачте, виникла тимчасова помилка з’єднання з моделлю. Будь ласка, спробуйте ще раз.'
+                    : 'A temporary connection error occurred with the model service. Please try again.',
+                  isStreaming: false
+                } : m)
+              };
+            }
+            return c;
+          }));
+        }
       }
     } finally {
       setIsLoading(false);
