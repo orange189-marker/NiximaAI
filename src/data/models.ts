@@ -21,11 +21,12 @@ export const NIXIMA_MODELS: ModelOption[] = [
     parameters: 'Frontier 0.3 Prime Sovereign Core (QRA-v3)',
     generation: '0.3',
     isFlagship: true,
-    openRouterModel: 'openrouter/free',
+    openRouterModel: 'nvidia/nemotron-3-super-120b-a12b:free',
     fallbackModels: [
       'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
       'cohere/north-mini-code:free',
-      'poolside/laguna-s-2.1:free'
+      'liquid/lfm-2.5-2.6b:free',
+      'nvidia/nemotron-3.5-lightning:free'
     ],
     creditMultiplier: 1.2,
     baseCreditCost: 6,
@@ -54,11 +55,11 @@ export const NIXIMA_MODELS: ModelOption[] = [
     ],
     parameters: 'Frontier 0.3 UltraPro Sovereign Engine (UltraThinking V2.0)',
     generation: '0.3',
-    openRouterModel: 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+    openRouterModel: 'nvidia/nemotron-3-super-120b-a12b:free',
     fallbackModels: [
-      'openrouter/free',
+      'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
       'cohere/north-mini-code:free',
-      'poolside/laguna-s-2.1:free'
+      'liquid/lfm-2.5-2.6b:free'
     ],
     creditMultiplier: 2.8,
     baseCreditCost: 14,
@@ -90,9 +91,9 @@ export const NIXIMA_MODELS: ModelOption[] = [
     isOmni: true,
     openRouterModel: 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
     fallbackModels: [
-      'openrouter/free',
+      'nvidia/nemotron-3-super-120b-a12b:free',
       'cohere/north-mini-code:free',
-      'poolside/laguna-s-2.1:free'
+      'liquid/lfm-2.5-2.6b:free'
     ],
     creditMultiplier: 2.0,
     baseCreditCost: 10,
@@ -123,9 +124,9 @@ export const NIXIMA_MODELS: ModelOption[] = [
     generation: '0.3',
     openRouterModel: 'cohere/north-mini-code:free',
     fallbackModels: [
-      'openrouter/free',
+      'nvidia/nemotron-3-super-120b-a12b:free',
       'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
-      'poolside/laguna-s-2.1:free'
+      'liquid/lfm-2.5-2.6b:free'
     ],
     creditMultiplier: 1.8,
     baseCreditCost: 8,
@@ -154,11 +155,11 @@ export const NIXIMA_MODELS: ModelOption[] = [
     ],
     parameters: 'Frontier 0.3 Hyper-Stream Core (5M Context)',
     generation: '0.3',
-    openRouterModel: 'poolside/laguna-s-2.1:free',
+    openRouterModel: 'nvidia/nemotron-3.5-lightning:free',
     fallbackModels: [
-      'openrouter/free',
+      'liquid/lfm-2.5-2.6b:free',
       'cohere/north-mini-code:free',
-      'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free'
+      'nvidia/nemotron-3-super-120b-a12b:free'
     ],
     creditMultiplier: 0.6,
     baseCreditCost: 3,
@@ -189,7 +190,7 @@ export const NIXIMA_MODELS: ModelOption[] = [
     isOmni: true,
     openRouterModel: 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
     fallbackModels: [
-      'openrouter/free',
+      'nvidia/nemotron-3-super-120b-a12b:free',
       'nvidia/nemotron-3.5-lightning:free',
       'cohere/north-mini-code:free'
     ],
@@ -216,10 +217,11 @@ export const NIXIMA_MODELS: ModelOption[] = [
     parameters: 'Frontier 0.2 Ensemble',
     generation: '0.2',
     isFlagship: true,
-    openRouterModel: 'openrouter/free',
+    openRouterModel: 'nvidia/nemotron-3-super-120b-a12b:free',
     fallbackModels: [
       'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
-      'nvidia/nemotron-3.5-lightning:free'
+      'nvidia/nemotron-3.5-lightning:free',
+      'cohere/north-mini-code:free'
     ],
     creditMultiplier: 1.0,
     baseCreditCost: 5,
@@ -243,10 +245,11 @@ export const NIXIMA_MODELS: ModelOption[] = [
     strengths: ['UltraThinking V1.0 Dialectical Struggle', 'Multi-Branch Hypotheses & Falsification', 'Epistemic Logic & Proofs', 'Exhaustive Deep Deduction'],
     parameters: 'High-Capacity Sovereign Reasoning Engine (UltraThinking V1.0)',
     generation: '0.2',
-    openRouterModel: 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+    openRouterModel: 'nvidia/nemotron-3-super-120b-a12b:free',
     fallbackModels: [
-      'openrouter/free',
-      'nvidia/nemotron-3.5-lightning:free'
+      'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+      'nvidia/nemotron-3.5-lightning:free',
+      'liquid/lfm-2.5-2.6b:free'
     ],
     creditMultiplier: 2.5,
     baseCreditCost: 12,
@@ -272,7 +275,7 @@ export const NIXIMA_MODELS: ModelOption[] = [
     generation: '0.2',
     openRouterModel: 'cohere/north-mini-code:free',
     fallbackModels: [
-      'openrouter/free',
+      'nvidia/nemotron-3-super-120b-a12b:free',
       'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free'
     ],
     creditMultiplier: 1.5,
@@ -299,8 +302,9 @@ export const NIXIMA_MODELS: ModelOption[] = [
     generation: '0.2',
     openRouterModel: 'nvidia/nemotron-3.5-lightning:free',
     fallbackModels: [
-      'openrouter/free',
-      'cohere/north-mini-code:free'
+      'liquid/lfm-2.5-2.6b:free',
+      'cohere/north-mini-code:free',
+      'nvidia/nemotron-3-super-120b-a12b:free'
     ],
     creditMultiplier: 0.5,
     baseCreditCost: 2,

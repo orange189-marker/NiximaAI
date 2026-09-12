@@ -8,7 +8,7 @@ import {
   ThinkingMode, 
   DynamicThinkingStep 
 } from '../types/chat';
-import { isCjkRequested, sanitizeModelOutput, sanitizeTokenStream } from './textSanitizer';
+import { isCjkRequested, isPureSafetyArtifact, sanitizeModelOutput, sanitizeTokenStream } from './textSanitizer';
 
 // Pre-configured system key inserted directly into the runtime
 const BUILTIN_SYSTEM_KEY = atob('c2stb3ItdjEtZjc1NWEzZDcyMTVjMDYzYzA3ZWFiZmJmZWQ2MWE4YzNlMjBiMDQzZTcyY2MxNGYxOTQzMDc5YjczYzIwY2M4OQ==');
@@ -1123,30 +1123,44 @@ export async function streamOpenRouterChat({
   const allowCjk = isCjkRequested(contextForCjk);
 
   // Determine primary model and fallbacks with search-optimized routing
-  let primarySlug = model.openRouterModel || 'openrouter/free';
+  let primarySlug = model.openRouterModel || 'nvidia/nemotron-3-super-120b-a12b:free';
   let fallbacks = model.fallbackModels || [
-    'openrouter/free',
+    'nvidia/nemotron-3-super-120b-a12b:free',
     'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
     'cohere/north-mini-code:free',
-    'poolside/laguna-s-2.1:free'
+    'liquid/lfm-2.5-2.6b:free'
   ];
 
   // Dynamic search engine optimization: prioritize the best engine candidate for active search mode
   if (webSearch && searchMode === 'fast') {
-    const fastCandidate = 'poolside/laguna-s-2.1:free';
+    const fastCandidate = 'nvidia/nemotron-3.5-lightning:free';
     if (primarySlug !== fastCandidate && fallbacks.includes(fastCandidate)) {
       fallbacks = [primarySlug, ...fallbacks.filter(f => f !== fastCandidate && f !== primarySlug)];
       primarySlug = fastCandidate;
     }
   } else if (webSearch && searchMode === 'mega') {
-    const reasoningCandidate = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free';
+    const reasoningCandidate = 'nvidia/nemotron-3-super-120b-a12b:free';
     if (primarySlug !== reasoningCandidate && fallbacks.includes(reasoningCandidate)) {
       fallbacks = [primarySlug, ...fallbacks.filter(f => f !== reasoningCandidate && f !== primarySlug)];
       primarySlug = reasoningCandidate;
     }
   }
 
-  const candidates = [primarySlug, ...fallbacks.filter(f => f !== primarySlug)];
+  // Filter out non-conversational content moderation models and generic random free router
+  const BLOCKED_MODELS = new Set([
+    'nvidia/nemotron-3.5-content-safety:free',
+    'openrouter/free'
+  ]);
+
+  const rawCandidates = [primarySlug, ...fallbacks.filter(f => f !== primarySlug)];
+  const candidates = rawCandidates.filter(c => !BLOCKED_MODELS.has(c));
+  if (candidates.length === 0) {
+    candidates.push(
+      'nvidia/nemotron-3-super-120b-a12b:free',
+      'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+      'cohere/north-mini-code:free'
+    );
+  }
 
   // Prepare full message history with system instructions
   const formattedMessages: { role: string; content: string }[] = [];
@@ -1241,6 +1255,13 @@ export async function streamOpenRouterChat({
       let isInsideThinkingTag = false;
       let hasStreamError = false;
 
+      const emitContentToken = () => {
+        const streamed = antiGlitchFilter ? sanitizeTokenStream(fullContent, allowCjk) : fullContent;
+        if (!isPureSafetyArtifact(fullContent)) {
+          callbacks.onToken(streamed);
+        }
+      };
+
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
@@ -1292,7 +1313,7 @@ export async function streamOpenRouterChat({
                   const parts = text.split('<think>');
                   if (parts[0]) {
                     fullContent += parts[0];
-                    callbacks.onToken(antiGlitchFilter ? sanitizeTokenStream(fullContent, allowCjk) : fullContent);
+                    emitContentToken();
                   }
                   if (parts[1] && allowThinking) {
                     fullThinking += parts[1];
@@ -1310,7 +1331,7 @@ export async function streamOpenRouterChat({
                   }
                   if (parts[1]) {
                     fullContent += parts[1];
-                    callbacks.onToken(antiGlitchFilter ? sanitizeTokenStream(fullContent, allowCjk) : fullContent);
+                    emitContentToken();
                   }
                   continue;
                 }
@@ -1323,7 +1344,7 @@ export async function streamOpenRouterChat({
                   }
                 } else {
                   fullContent += text;
-                  callbacks.onToken(antiGlitchFilter ? sanitizeTokenStream(fullContent, allowCjk) : fullContent);
+                  emitContentToken();
                 }
               }
             } catch (err) {
@@ -1341,7 +1362,7 @@ export async function streamOpenRouterChat({
         continue; // Proceed to fallback candidate
       }
 
-      // If we got content, return successfully with full token sanitization applied
+      // If we got content, verify it isn't pure content safety metadata before accepting
       if (fullContent.trim() || (allowThinking && fullThinking.trim())) {
         const sanitizedContent = antiGlitchFilter
           ? sanitizeModelOutput(fullContent, { allowCjk })
@@ -1349,6 +1370,13 @@ export async function streamOpenRouterChat({
         const sanitizedThinking = (allowThinking && antiGlitchFilter)
           ? sanitizeModelOutput(fullThinking, { allowCjk })
           : (allowThinking ? fullThinking : '');
+
+        // If candidate only produced content-safety metadata or empty conversational content, fail over to next model
+        if (isPureSafetyArtifact(fullContent) || (!sanitizedContent.trim() && !sanitizedThinking.trim())) {
+          console.warn(`[Nixima Core] Model ${candidateModel} returned pure content safety artifact ("${fullContent.trim()}"). Failing over to next candidate...`);
+          lastError = new Error(`Model ${candidateModel} returned content safety tags instead of response.`);
+          continue; // Proceed to fallback candidate!
+        }
 
         let searchGrounding: SearchGrounding | undefined = initialSearchGrounding;
         let finalContent = sanitizedContent;

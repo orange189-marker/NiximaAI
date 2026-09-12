@@ -125,7 +125,29 @@ export function sanitizeModelOutput(text: string, options: SanitizeOptions = {})
   // 10. Normalize multiple contiguous spaces (except in markdown code blocks or indentations)
   sanitized = sanitized.replace(/[ \t]{3,}/g, '  ');
 
+  // 11. Strip leaked content safety & guardrail evaluation headers
+  // e.g. "User Safety: safe\nResponse Safety: safe"
+  sanitized = sanitized.replace(
+    /^\s*(?:User|Response)\s*Safety(?:\s*:\s*(?:safe|unsafe|none|neutral|unspecified|[a-z0-9_-]*)|\s*$)\r?\n?/gim,
+    ''
+  );
+
   return sanitized;
+}
+
+/**
+ * Detects if a model output consists solely of content safety metadata (e.g. from moderation models)
+ * with no actual conversational answer.
+ */
+export function isPureSafetyArtifact(text: string): boolean {
+  if (!text) return false;
+  const stripped = text
+    .replace(
+      /^\s*(?:User|Response)\s*Safety(?:\s*:\s*(?:safe|unsafe|none|neutral|unspecified|[a-z0-9_-]*)|\s*$)\r?\n?/gim,
+      ''
+    )
+    .trim();
+  return stripped.length === 0;
 }
 
 /**
