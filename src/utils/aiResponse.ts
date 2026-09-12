@@ -153,20 +153,20 @@ function generateRawNiximaResponse({
       return {
         thinking: `1. Аналіз запиту оператора щодо часового горизонту та зрізу знань.
 2. Підтвердження сучасної архітектури Nixima 0.2 (${now.getFullYear()} рік) без застарілих обмежень 2023 року.
-3. Огляд інтеграції інструменту Search V2 для живого огляду веб-ресурсів та новинних стрічок у реальному часі.`,
+3. Огляд інтеграції інструменту Search V3 для живого огляду веб-ресурсів (мін. 20 сайтів) та новинних стрічок у реальному часі.`,
         response: `### Часова архітектура та актуальність знань Nixima AI
 
-**Nixima AI не має застарілого зрізу знань 2023 чи 2024 року.** Модель функціонує на базі суверенної архітектури покоління **0.2**, синхронізована з реальним часом (**${dateStr}**) та має прямий доступ до світової мережі через систему **Search V2**.
+**Nixima AI не має застарілого зрізу знань 2023 чи 2024 року.** Модель функціонує на базі суверенної архітектури покоління **0.2**, синхронізована з реальним часом (**${dateStr}**) та має прямий доступ до світової мережі через систему **Search V3** (мінімум 20 сайтів у базовому режимі, 50–80 у Search V3 Mega).
 
 | Параметр | Стан системи |
 | :--- | :--- |
 | **Поточна дата** | **${dateStr}** (${now.getFullYear()} рік) |
 | **Базова архітектура** | \`${model.name}\` (Покоління 0.2) |
-| **Живий веб-пошук** | **Search V2** (Standard, Fast, Mega Swarm) |
+| **Живий веб-пошук** | **Search V3** (Standard 20+, Fast 20, Mega Swarm 50–80) |
 | **Оперативні стрічки новин** | Світові та українські новинні агентства у реальному часі |
 
 #### Як працює пошук актуальної інформації:
-1. **Інструмент Search V2**: Коли ви запитуєте про сьогоднішні події чи свіжі новини, Nixima в реальному часі сканує глобальні новинні стрічки (Google News Wire, Reuters, BBC, AP, Укрінформ, Суспільне).
+1. **Інструмент Search V3**: Коли ви запитуєте про сьогоднішні події чи свіжі новини, Nixima в реальному часі сканує мінімум 20 вебсайтів глобальних новинних стрічок (Google News Wire, Reuters, BBC, AP, Укрінформ, Суспільне), а в режимі Mega — від 50 до 80 сайтів.
 2. **Верифікація джерел**: Кожне повідомлення перевіряється через кілька незалежних джерел із прямими посиланнями.
 3. **Без штучних обмежень**: Модель не відповідає шаблонними відмовами щодо 2023 року, а формує чіткий та актуальний звіт на сьогодні.`
       };
@@ -175,20 +175,20 @@ function generateRawNiximaResponse({
     return {
       thinking: `1. Analyzing operator inquiry regarding knowledge cutoff and temporal baseline.
 2. Confirming modern 0.2 generation architecture operating in ${now.getFullYear()} with zero legacy 2023 cutoff constraints.
-3. Outlining Search V2 live web mesh integration for real-time news wires and verifiable citations.`,
+3. Outlining Search V3 live web mesh integration (min 20 websites, 50-80 Mega) for real-time news wires and verifiable citations.`,
       response: `### Temporal Architecture & Knowledge Grounding in Nixima AI
 
-**Nixima AI does not operate on a legacy 2023 or 2024 knowledge cutoff.** Operating on the sovereign **${model.name}** (0.2 Generation), Nixima is anchored in the present (**${dateStr}**) and equipped with **Search V2 Real-Time Web Grounding**.
+**Nixima AI does not operate on a legacy 2023 or 2024 knowledge cutoff.** Operating on the sovereign **${model.name}** (0.2 Generation), Nixima is anchored in the present (**${dateStr}**) and equipped with **Search V3 Real-Time Web Grounding** (minimum 20 websites scanned, and 50–80 websites in Search V3 Mega).
 
 | Parameter | Platform Specification |
 | :--- | :--- |
 | **Current Date** | **${dateStr}** (${now.getFullYear()}) |
 | **Knowledge Baseline** | 0.2 Generation (Continuously ground-referenced) |
-| **Live Web Browsing** | **Search V2** (Standard, Fast, Mega Swarm) |
+| **Live Web Browsing** | **Search V3** (Standard 20+, Fast 20, Mega Swarm 50–80) |
 | **News Wire Retrieval** | Real-time international news wire feeds |
 
 #### How Real-Time Web Grounding Works:
-1. **Search V2 Web Mesh**: When asking about breaking developments or today's events, Nixima queries live news wires and indexes in real time.
+1. **Search V3 Web Mesh**: When asking about breaking developments or today's events, Nixima queries live news wires and indexes in real time across a minimum of 20 websites (and 50–80 in Search V3 Mega).
 2. **Direct Source Verification**: Results are multi-sourced across authoritative global newsrooms (Reuters, AP, BBC, Bloomberg, and technical repositories) with interactive verified source cards.
 3. **Zero-Cutoff Guarantee**: Nixima does not refuse contemporary inquiries with generic legacy AI disclaimers, delivering structured, up-to-date briefings directly.`
     };
@@ -246,7 +246,7 @@ function generateRawNiximaResponse({
 
 ---
 
-> 💡 **Search V2:** Для дослідження конкретної новини, законопроєкту чи заяви, активуйте інструмент **Search V2**.`
+> 💡 **Search V3:** Для дослідження конкретної новини, законопроєкту чи заяви, активуйте інструмент **Search V3** (мін. 20 вебсайтів).`
         };
       }
 
@@ -276,7 +276,7 @@ function generateRawNiximaResponse({
 
 ---
 
-> 💡 **Tip:** To inspect any specific US news event or bill in real time, submit your query with **Search V2** enabled for live web verification.`
+> 💡 **Tip:** To inspect any specific US news event or bill in real time, submit your query with **Search V3** enabled for live multi-website verification (20+ sites).`
       };
     }
 
@@ -308,7 +308,7 @@ function generateRawNiximaResponse({
 
 ---
 
-> 💡 **Search V2:** Для детального дослідження конкретної теми, задайте уточнююче запитання з активним інструментом **Search V2**.`
+> 💡 **Search V3:** Для детального дослідження конкретної теми, задайте уточнююче запитання з активним інструментом **Search V3** (мін. 20 вебсайтів).`
       };
     }
 
@@ -339,7 +339,7 @@ function generateRawNiximaResponse({
 
 ---
 
-> 💡 **Tip:** To explore any specific breaking event, country, or technology in greater depth, submit a query with **Search V2** enabled for exhaustive, live website inspection.`
+> 💡 **Tip:** To explore any specific breaking event, country, or technology in greater depth, submit a query with **Search V3** enabled for exhaustive, live website inspection (20+ sites).`
     };
   }
 
@@ -349,7 +349,7 @@ function generateRawNiximaResponse({
     if (isUk) {
       return {
         thinking: `1. Аналіз запиту оператора щодо моделі Nixima-0.2O (Omni).
-2. Опис суверенної все-в-одному архітектури: поєднання міркувань (DeepThinking), системного кодування та пошуку (Search V2).
+2. Опис суверенної все-в-одному архітектури: поєднання міркувань (DeepThinking), системного кодування та пошуку (Search V3).
 3. Підкреслення відсутності потреби в ручних перемикачах: автономне прийняття рішень та динамічна активація.`,
         response: `### 🔮 Nixima-0.2O (Omni) — Суверенна модель «Все-в-одному»
 
@@ -357,7 +357,7 @@ function generateRawNiximaResponse({
 
 #### 🌟 Ключові інновації 0.2O:
 1. **Повна автономність (Zero Manual Toggles)**:
-   - Вам більше не потрібно вручну перемикати режими **DeepThinking V2** або **Search V2**.
+   - Вам більше не потрібно вручну перемикати режими **DeepThinking V2** або **Search V3**.
    - **Nixima-0.2O** самостійно визначає, коли потрібен глибокий математичний ланцюжок думок або коли запит вимагає перевірки фактів у живому інтернеті.
 2. **Уніфікований інтелект**:
    - Поєднує високу логіку \`0.2 Pro\`, системну інженерію \`0.2 Coder\` та надшвидку генерацію \`0.2 Flash\`.
@@ -369,7 +369,7 @@ function generateRawNiximaResponse({
 | **Клас моделі** | Суверенний мультимодальний Omni-рушій |
 | **Контекст** | **1,000,000 токенів** |
 | **Швидкість** | ~18 мс / токен (адаптивна) |
-| **Автономні інструменти** | Dynamic DeepThinking & Live Search V2 Grounding |
+| **Автономні інструменти** | Dynamic DeepThinking & Live Search V3 Grounding |
 | **Кредитний множник** | 1.8x |`
       };
     }
@@ -396,7 +396,7 @@ function generateRawNiximaResponse({
 | **Model Classification** | Sovereign Multimodal Omni Engine |
 | **Context Window** | **1,000,000 tokens** |
 | **Token Latency** | ~18 ms / token (adaptive) |
-| **Autonomous Capabilities** | Self-directing DeepThinking & Live Web Search V2 |
+| **Autonomous Capabilities** | Self-directing DeepThinking & Live Web Search V3 |
 | **Credit Multiplier** | 1.8x |`
     };
   }

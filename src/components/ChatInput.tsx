@@ -506,7 +506,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     )}
                   </div>
 
-              {/* Search V2 Engine Control (Fast, Standard, Mega + Model Pairing) */}
+              {/* Search V3 Engine Control (Fast, Standard, Mega + Model Pairing) */}
               <div className="relative flex items-center flex-shrink-0 z-30" ref={searchMenuRef}>
                 <div
                   className={`flex items-center rounded-full text-xs font-mono transition-all duration-150 border select-none ${
@@ -525,7 +525,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     className="flex items-center gap-1.5 pl-2.5 sm:pl-3 pr-1 py-1.5 cursor-pointer"
                     title={
                       webSearch
-                        ? `Search V2 ${searchMode.toUpperCase()} active • Click to cycle`
+                        ? `Search V3 ${searchMode.toUpperCase()} active • Click to cycle`
                         : t.chatInput.searchTooltip
                     }
                   >
@@ -591,7 +591,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     </p>
 
                     <div className="space-y-1.5">
-                      {/* 1. Search V2 Fast */}
+                      {/* 1. Search V3 Fast */}
                       {(() => {
                         const recFast = getRecommendedModelForSearchMode('fast');
                         const isModeActive = webSearch && searchMode === 'fast';
@@ -609,7 +609,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                                 <div className="p-1 rounded-md bg-amber-950/60 border border-amber-800/60 text-amber-300">
                                   <Zap className="w-3.5 h-3.5" />
                                 </div>
-                                <span className="font-semibold text-xs text-white font-mono">Search V2 Fast</span>
+                                <span className="font-semibold text-xs text-white font-mono">Search V3 Fast</span>
                                 <span className="px-1.5 py-0.2 rounded bg-amber-950/80 border border-amber-600/40 text-[9px] font-mono font-bold text-amber-300">
                                   &lt;50MS
                                 </span>
@@ -628,13 +628,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                                 <span>⚡ Optimal:</span>
                                 <strong className="text-zinc-200">{recFast.shortName}</strong>
                               </span>
-                              <span className="text-zinc-500">2-3 Sources</span>
+                              <span className="text-zinc-500">20 Websites Rapid</span>
                             </div>
                           </div>
                         );
                       })()}
 
-                      {/* 2. Search V2 Standard */}
+                      {/* 2. Search V3 Standard */}
                       {(() => {
                         const recStd = getRecommendedModelForSearchMode('standard');
                         const isModeActive = webSearch && searchMode === 'standard';
@@ -652,7 +652,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                                 <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
                                   <Globe className="w-3.5 h-3.5" />
                                 </div>
-                                <span className="font-semibold text-xs text-white font-mono">Search V2 Standard</span>
+                                <span className="font-semibold text-xs text-white font-mono">Search V3 Standard</span>
                                 <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-[9px] font-mono font-bold text-zinc-300">
                                   BALANCED
                                 </span>
@@ -671,13 +671,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                                 <span>🌐 Optimal:</span>
                                 <strong className="text-zinc-100">{recStd.shortName}</strong>
                               </span>
-                              <span className="text-zinc-500">4-6 Sources</span>
+                              <span className="text-zinc-500">20+ Websites Deep Grounding</span>
                             </div>
                           </div>
                         );
                       })()}
 
-                      {/* 3. Search V2 Mega (Creator Clearance) */}
+                      {/* 3. Search V3 Mega (Creator Clearance) */}
                       {isCreator && (() => {
                         const recMega = getRecommendedModelForSearchMode('mega');
                         const isModeActive = webSearch && searchMode === 'mega';
@@ -695,7 +695,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                                 <div className="p-1 rounded-md bg-zinc-800 border border-zinc-600 text-white">
                                   <BrainCircuit className="w-3.5 h-3.5" />
                                 </div>
-                                <span className="font-semibold text-xs text-white font-mono">Search V2 Mega</span>
+                                <span className="font-semibold text-xs text-white font-mono">Search V3 Mega</span>
                                 <span className="px-1.5 py-0.2 rounded bg-zinc-700 border border-zinc-600 text-[9px] font-mono font-bold text-zinc-100">
                                   CREATOR SWARM
                                 </span>
@@ -714,7 +714,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                                 <span>🧠 Optimal:</span>
                                 <strong className="text-white">{recMega.shortName}</strong>
                               </span>
-                              <span className="text-zinc-400">20+ Sources • 5 Clusters</span>
+                              <span className="text-zinc-400">50-80 Websites • 7 Clusters</span>
                             </div>
                           </div>
                         );

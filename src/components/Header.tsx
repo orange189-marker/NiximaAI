@@ -201,7 +201,7 @@ export const Header: React.FC<HeaderProps> = ({
             {webSearchEnabled && (() => {
               const rec = getRecommendedModelForSearchMode(searchMode);
               const isRec = currentModel.id === rec.id;
-              const modeLabel = searchMode === 'fast' ? 'Search V2 Fast' : searchMode === 'mega' ? 'Search V2 Mega' : 'Search V2';
+              const modeLabel = searchMode === 'fast' ? 'Search V3 Fast' : searchMode === 'mega' ? 'Search V3 Mega' : 'Search V3';
               return (
                 <div className={`mx-1 mt-2 mb-1.5 p-2 rounded-xl border flex items-center justify-between gap-2 text-xs font-mono animate-fade-in ${
                   isRec 

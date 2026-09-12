@@ -731,7 +731,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
             </div>
           ) : (
             <div className="space-y-3">
-              {/* SEARCH V2 / SEARCH V2 MEGA TOOL ACTION FEED & REASONING (Website Native Design) */}
+              {/* SEARCH V3 / SEARCH V3 MEGA TOOL ACTION FEED & REASONING (Website Native Design) */}
               {!isUser && message.searchGrounding && (
                 <SearchActionFeed 
                   searchGrounding={message.searchGrounding}

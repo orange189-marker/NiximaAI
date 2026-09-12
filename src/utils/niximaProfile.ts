@@ -105,7 +105,7 @@ export function resolveNiximaProfile(rawHandle: string): NiximaProfileData {
       neuralPrivileges: [
         'Nixima-0.3 Coder (MAX Architecture)',
         'Nixima-0.2 Pro (UltraThinking V1.0 Extended)',
-        'Search V2 Mega Swarm Protocol',
+        'Search V3 Mega Swarm Protocol',
         'Autonomous Multi-Step Infinite Execution'
       ],
       latencyRouting: '0.8ms (Direct Neural Bus Core)',
@@ -245,8 +245,8 @@ export function resolveNiximaProfile(rawHandle: string): NiximaProfileData {
       unlimitedCredits: true,
       avatarBg: 'from-emerald-500 via-teal-500 to-cyan-600 text-white',
       auraGlow: 'rgba(16, 185, 129, 0.45)',
-      bioEn: 'Central autonomous cognitive architecture powering the Nixima ecosystem. Coordinates multi-tiered reasoning (UltraThinking V1.0, Search V2 Mega Swarm, Canvas Engine).',
-      bioUk: 'Центральна автономна когнітивна архітектура екосистеми Nixima. Керує багаторівневим мисленням (UltraThinking V1.0, Search V2 Mega Swarm, Canvas Engine).',
+      bioEn: 'Central autonomous cognitive architecture powering the Nixima ecosystem. Coordinates multi-tiered reasoning (UltraThinking V1.0, Search V3 Mega Swarm, Canvas Engine).',
+      bioUk: 'Центральна автономна когнітивна архітектура екосистеми Nixima. Керує багаторівневим мисленням (UltraThinking V1.0, Search V3 Mega Swarm, Canvas Engine).',
       securityProtocols: [
         'Decentralized Peer Consensus',
         'Quantum-Proof Neural Weight Verification',
@@ -255,7 +255,7 @@ export function resolveNiximaProfile(rawHandle: string): NiximaProfileData {
       neuralPrivileges: [
         'Autonomous Multi-Model Synthesis',
         'Deep Thinking & Epistemic Proof Engine',
-        'Sovereign Web Search V2 Swarm Protocol'
+        'Sovereign Web Search V3 Swarm Protocol'
       ],
       latencyRouting: '0.0ms (Local In-Memory Bus)',
       badges: [

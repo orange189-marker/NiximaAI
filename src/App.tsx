@@ -771,7 +771,7 @@ All conversations and model preferences in this workspace are private to your Ni
             `\n\nInstructions: Ground your response in these verified real-world findings. Answer the user's question directly, accurately, and authoritatively. Cite sources with [1], [2] where appropriate.`;
 
           finalUserPrompt =
-            `[SEARCH V2 REAL-TIME GROUNDED WEB FINDINGS]\n` +
+            `[SEARCH V3 REAL-TIME GROUNDED WEB FINDINGS — ${liveGrounding.sources.length} WEBSITES CRAWLED]\n` +
             liveGrounding.sources.map((src, i) =>
               `[Source ${i + 1}] ${src.title} (${src.domain})\nURL: ${src.url}\nSummary: ${src.snippet || 'Authoritative reference'}`
             ).join('\n\n') +

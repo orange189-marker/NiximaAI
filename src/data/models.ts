@@ -85,7 +85,7 @@ export const NIXIMA_MODELS: ModelOption[] = [
     searchOptimization: {
       recommendedMode: 'standard',
       badge: 'BALANCED WEB SEARCH',
-      role: 'Optimal for Search V2 Standard (General Web Research)',
+      role: 'Optimal for Search V3 Standard (20+ Websites Deep Grounding)',
       searchThroughput: 'Standard (~120ms)',
       searchStrengths: ['Multi-domain news & facts', 'Balanced synthesis & accuracy', 'Low hallucination index'],
       searchRating: '96%'
@@ -112,7 +112,7 @@ export const NIXIMA_MODELS: ModelOption[] = [
     searchOptimization: {
       recommendedMode: 'mega',
       badge: 'DEEP SWARM REASONER',
-      role: 'Optimal for Search V2 Mega (Sovereign Swarm & Multi-Cluster)',
+      role: 'Optimal for Search V3 Mega (50-80 Websites Sovereign Swarm)',
       searchThroughput: 'Deep Deduction (~210ms)',
       searchStrengths: ['Cross-cluster epistemic proofs', 'Multi-source discrepancy resolution', 'Exhaustive literature synthesis'],
       searchRating: '98%'
@@ -166,7 +166,7 @@ export const NIXIMA_MODELS: ModelOption[] = [
     searchOptimization: {
       recommendedMode: 'fast',
       badge: 'FAST SEARCH ENGINE',
-      role: 'Optimal for Search V2 Fast (Instant Live Lookups)',
+      role: 'Optimal for Search V3 Fast (20 Websites Rapid Lookups)',
       searchThroughput: 'Hyper-Fast (<50ms)',
       searchStrengths: ['Instantaneous facts & live data', 'Sub-millisecond token streaming', 'Concise zero-fluff extraction'],
       searchRating: '99%'

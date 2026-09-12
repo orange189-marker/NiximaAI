@@ -65,8 +65,11 @@ export interface SearchGrounding {
   searchTimeMs?: number;
   indexedResultsCount?: number;
   searchMode?: SearchMode;
+  searchVersion?: 'v3';
   clusters?: { name: string; count: number }[];
   pagesCrawled?: number;
+  crawledWebsitesCount?: number;
+  minWebsitesCount?: number;
   browserInputs?: string[];
   searchActions?: SearchActionStep[];
   consensusScore?: number;

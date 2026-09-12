@@ -61,7 +61,7 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
       return parts.join('\n');
     }).join('\n\n---\n\n');
 
-    navigator.clipboard.writeText(`SEARCH TOOL ACTION & REASONING TRACE\nQuery: "${query}"\nMode: ${searchMode}\nConsensus: ${consensusScore}%\n\n` + traceText);
+    navigator.clipboard.writeText(`SEARCH V3 TOOL ACTION & REASONING TRACE\nQuery: "${query}"\nMode: ${searchMode.toUpperCase()}\nConsensus: ${consensusScore}%\nCrawled Websites: ${websiteActions.length}\n\n` + traceText);
     setCopiedTrace(true);
     setTimeout(() => setCopiedTrace(false), 2000);
   };
@@ -88,22 +88,28 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
 
           {/* Search Engine Badge */}
           {isMega ? (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-zinc-800 border border-zinc-600 text-zinc-100 font-mono text-[10.5px] font-bold shadow-inner-light flex-shrink-0">
-              <span>Search V2</span>
-              <span className="px-1 py-0.2 rounded bg-zinc-700 text-[9px] text-zinc-200 border border-zinc-600">
-                MEGA
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-zinc-850 border border-amber-500/60 text-amber-200 font-mono text-[10.5px] font-bold shadow-[0_0_12px_rgba(245,158,11,0.25)] flex-shrink-0">
+              <Sparkles className="w-3 h-3 text-amber-400 animate-pulse" />
+              <span>Search V3</span>
+              <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-[9px] text-amber-300 border border-amber-500/40 font-extrabold tracking-wider">
+                MEGA (50–80 SITES)
               </span>
             </span>
           ) : isFast ? (
             <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-zinc-800 border border-amber-500/40 text-zinc-100 font-mono text-[10.5px] font-bold shadow-inner-light flex-shrink-0">
-              <span>Search V2</span>
-              <span className="px-1 py-0.2 rounded bg-amber-950/90 text-[9px] text-amber-300 border border-amber-600/50">
-                FAST
+              <Zap className="w-3 h-3 text-amber-400" />
+              <span>Search V3</span>
+              <span className="px-1.5 py-0.2 rounded bg-amber-950/90 text-[9px] text-amber-300 border border-amber-600/50 font-bold">
+                FAST (20 SITES)
               </span>
             </span>
           ) : (
-            <span className="px-2 py-0.5 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-200 font-mono text-[10.5px] font-semibold flex-shrink-0">
-              {t.chatMessage.searchActionRadar}
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-200 font-mono text-[10.5px] font-semibold flex-shrink-0">
+              <Globe className="w-3 h-3 text-zinc-300" />
+              <span>Search V3</span>
+              <span className="px-1.5 py-0.2 rounded bg-zinc-700 text-[9px] text-zinc-300 border border-zinc-600 font-bold">
+                STANDARD (20+ SITES)
+              </span>
             </span>
           )}
 
@@ -118,6 +124,16 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
               <Layers className="w-3 h-3 text-zinc-400" />
               <span>{isStreaming && sources.length === 0 ? 'Scanning Web Index...' : t.chatMessage.searchActionsTelemetry(websiteActions.length, searchActions.length)}</span>
             </span>
+
+            {isMega ? (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-950/60 border border-amber-600/40 text-amber-300 text-[9.5px]">
+                <span>7 Clusters Active</span>
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-850 border border-zinc-800 text-zinc-400 text-[9.5px]">
+                <span>Min 20 Sites</span>
+              </span>
+            )}
 
             {sources.length > 0 && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-850 border border-zinc-800 text-emerald-400">
@@ -222,7 +238,7 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
           </div>
 
           {/* Action Step Chain Timeline */}
-          <div className="space-y-3 relative before:absolute before:top-2.5 before:bottom-2.5 before:left-3 before:w-px before:bg-zinc-800/80">
+          <div className="max-h-[520px] overflow-y-auto pr-1.5 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-zinc-900/50 space-y-3 relative before:absolute before:top-2.5 before:bottom-2.5 before:left-3 before:w-px before:bg-zinc-800/80">
             {displayedActions.map((action, idx) => {
               const isQuery = action.actionType === 'query';
               const isSynth = action.actionType === 'synthesize';
@@ -391,11 +407,22 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
           {sources.length > 0 && (
             <div className="pt-2 border-t border-zinc-850 space-y-2">
               <div className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 font-semibold flex items-center justify-between">
-                <span>{t.chatMessage.verifiedSources}</span>
-                <span className="text-zinc-500">{sources.length} sources indexed</span>
+                <span className="flex items-center gap-1.5">
+                  <span>{t.chatMessage.verifiedSources}</span>
+                  {isMega ? (
+                    <span className="px-1.5 py-0.2 rounded bg-amber-950/60 border border-amber-600/40 text-amber-300 text-[9px]">
+                      MEGA SWARM (50–80)
+                    </span>
+                  ) : (
+                    <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 text-[9px]">
+                      MIN 20 GUARANTEED
+                    </span>
+                  )}
+                </span>
+                <span className="text-zinc-500 font-mono">{sources.length} sources indexed</span>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+              <div className="max-h-72 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-zinc-900/50 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
                 {sources.map((src, sIdx) => (
                   <a
                     key={sIdx}
@@ -414,8 +441,13 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
                         <div className="text-[11px] font-medium text-zinc-200 group-hover:text-white truncate">
                           {src.title}
                         </div>
-                        <div className="text-[10px] font-mono text-zinc-500 truncate">
-                          {src.domain || 'web.mesh'}
+                        <div className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-500 truncate">
+                          <span className="truncate">{src.domain || 'web.mesh'}</span>
+                          {src.cluster && (
+                            <span className="px-1 py-0.2 rounded bg-zinc-800 text-[8.5px] text-zinc-400 border border-zinc-750 flex-shrink-0">
+                              {src.cluster}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>

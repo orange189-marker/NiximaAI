@@ -162,7 +162,7 @@ function accountsSyncPlugin(): Plugin {
       const lang = (url.searchParams.get('lang') || 'en').trim().toLowerCase();
       const isNews = url.searchParams.get('isNews') === 'true';
       const topic = (url.searchParams.get('topic') || '').trim();
-      const limit = Math.min(10, Math.max(1, parseInt(url.searchParams.get('limit') || '3', 10)));
+      const limit = Math.min(80, Math.max(1, parseInt(url.searchParams.get('limit') || '20', 10)));
       const isUk = lang === 'uk' || /[а-яіїєґ]/i.test(query) || /[а-яіїєґ]/i.test(topic);
 
       (async () => {
