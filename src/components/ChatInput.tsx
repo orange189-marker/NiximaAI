@@ -72,7 +72,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   userCredits = 1000,
   onOpenCredits,
 }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [input, setInput] = useState('');
   const [attachedFiles, setAttachedFiles] = useState<string[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
