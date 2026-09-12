@@ -158,4 +158,5 @@ export interface UserSettings {
   themeContrast: 'titanium' | 'pure-black';
   antiGlitchFilter?: boolean;
   infiniteOutputEnabled?: boolean;
+  openRouterApiKey?: string;
 }

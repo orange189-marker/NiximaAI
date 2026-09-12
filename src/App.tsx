@@ -149,10 +149,17 @@ const AppContent: React.FC = () => {
   // 2. Settings state (isolated per user)
   const [settings, setSettings] = useState<UserSettings>(() => {
     const active = getActiveUser();
+    const storedApiKey = typeof window !== 'undefined' ? (localStorage.getItem('nixima_openrouter_key') || '') : '';
     if (active) {
       const saved = localStorage.getItem(getSettingsKey(active.id));
       if (saved) {
-        try { return JSON.parse(saved); } catch (e) { /* ignore */ }
+        try {
+          const parsed = JSON.parse(saved);
+          return {
+            ...parsed,
+            openRouterApiKey: parsed.openRouterApiKey || storedApiKey || undefined,
+          };
+        } catch (e) { /* ignore */ }
       }
     }
     return {
@@ -168,6 +175,7 @@ const AppContent: React.FC = () => {
       streamSpeed: 'fast',
       themeContrast: 'titanium',
       antiGlitchFilter: true,
+      openRouterApiKey: storedApiKey || undefined,
     };
   });
 
@@ -795,6 +803,7 @@ All conversations and model preferences in this workspace are private to your Ni
       ];
 
       const { fullContent, fullThinking, searchGrounding, deepThinkingTelemetry } = await streamOpenRouterChat({
+        apiKey: settings.openRouterApiKey,
         model: currentModel,
         messages: historyForApi,
         systemPrompt: dynamicSystemPrompt,
@@ -942,16 +951,41 @@ All conversations and model preferences in this workspace are private to your Ni
         }));
       } else {
         console.warn('OpenRouter streaming error, failing over to local Nixima engine:', err);
-        try {
-          const fallback = generateNiximaResponse({
-            prompt: userText,
-            model: currentModel,
-            deepThink: effectiveDeepThink,
-            thinkingMode: effectiveThinkingMode,
-            webSearch: shouldRunWebSearch,
-            searchMode: settings.searchMode || 'standard',
-            history: historyForApi
-          });
+        const isRateLimit = Boolean(
+          err?.message?.includes('RATE_LIMIT') ||
+          err?.message?.includes('Rate limit exceeded') ||
+          err?.message?.includes('429')
+        );
+
+        if (isRateLimit) {
+          const rateLimitNotice = language === 'uk'
+            ? `⚠️ **Вичерпано добовий ліміт спільного безкоштовного ключа (50 запитів/день)**\n\nСпільний демо-ключ вичерпав добову квоту безкоштовних запитів OpenRouter, через що реальний AI тимчасово недоступний.\n\n### Як повернути справжній AI просто зараз:\n1. Отримайте власний безкоштовний ключ на [openrouter.ai/keys](https://openrouter.ai/keys) (створюється за 10 секунд, 100% безкоштовно, без карток).\n2. Натисніть **Налаштування ⚙️ → AI Рушій / API** та вставте його.\n3. Всі моделі Nixima 0.3 та 0.2 одразу почнуть відповідати наживо з персональним лімітом 1,000+ запитів на добу!`
+            : `⚠️ **OpenRouter Free Tier Daily Allocation Reached (50/50 requests for shared demo key)**\n\nThe shared demo API key has exhausted its daily free allocation on OpenRouter, causing the system to fallback to local mock responses.\n\n### How to restore real AI responses immediately:\n1. Visit [openrouter.ai/keys](https://openrouter.ai/keys) and create your free API key (takes 10 seconds, 100% free, no credit card required).\n2. Open **Settings ⚙️ → Neural Engine / API** and paste your key into the Dedicated OpenRouter Key field.\n3. All Nixima 0.3 & 0.2 models will immediately resume real inference with your own dedicated 1,000+ free daily requests!`;
+
+          setConversations(prev => prev.map(c => {
+            if (c.id === targetConvId) {
+              return {
+                ...c,
+                messages: c.messages.map(m => m.id === aiMessageId ? {
+                  ...m,
+                  content: rateLimitNotice,
+                  isStreaming: false,
+                } : m)
+              };
+            }
+            return c;
+          }));
+        } else {
+          try {
+            const fallback = generateNiximaResponse({
+              prompt: userText,
+              model: currentModel,
+              deepThink: effectiveDeepThink,
+              thinkingMode: effectiveThinkingMode,
+              webSearch: shouldRunWebSearch,
+              searchMode: settings.searchMode || 'standard',
+              history: historyForApi
+            });
           const hasFallbackThinking = (isThinkingActive || isOmni) && (fallback.thinking || '').trim().length > 0;
           const estTokens = Math.round(fallback.response.length / 4);
           const durationMs = Math.round(performance.now() - startTime);
@@ -1000,7 +1034,8 @@ All conversations and model preferences in this workspace are private to your Ni
           }));
         }
       }
-    } finally {
+    }
+  } finally {
       setIsLoading(false);
       abortControllerRef.current = null;
     }
@@ -1219,7 +1254,18 @@ All conversations and model preferences in this workspace are private to your Ni
         isOpen={isSettingsOpen}
         onClose={() => setIsSettingsOpen(false)}
         settings={settings}
-        onUpdateSettings={(updated) => setSettings(s => ({ ...s, ...updated }))}
+        onUpdateSettings={(updated) => {
+          setSettings(s => {
+            const next = { ...s, ...updated };
+            if (currentUser) {
+              localStorage.setItem(getSettingsKey(currentUser.id), JSON.stringify(next));
+            }
+            if (updated.openRouterApiKey !== undefined) {
+              localStorage.setItem('nixima_openrouter_key', updated.openRouterApiKey.trim());
+            }
+            return next;
+          });
+        }}
         onClearAllChats={handleClearAllChats}
         conversations={conversations}
         onImportConversations={handleImportConversations}

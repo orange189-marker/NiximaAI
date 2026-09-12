@@ -13,7 +13,20 @@ import { isCjkRequested, isPureSafetyArtifact, sanitizeModelOutput, sanitizeToke
 // Pre-configured system key inserted directly into the runtime
 const BUILTIN_SYSTEM_KEY = atob('c2stb3ItdjEtZjc1NWEzZDcyMTVjMDYzYzA3ZWFiZmJmZWQ2MWE4YzNlMjBiMDQzZTcyY2MxNGYxOTQzMDc5YjczYzIwY2M4OQ==');
 
-export const getSystemApiKey = (): string => {
+export const getSystemApiKey = (userCustomKey?: string): string => {
+  if (userCustomKey && userCustomKey.trim().length > 0) {
+    return userCustomKey.trim();
+  }
+  if (typeof window !== 'undefined') {
+    const fromStorage = localStorage.getItem('nixima_openrouter_key');
+    if (fromStorage && fromStorage.trim().length > 0) {
+      return fromStorage.trim();
+    }
+  }
+  const fromEnv = (import.meta as any).env?.VITE_OPENROUTER_API_KEY;
+  if (fromEnv && typeof fromEnv === 'string' && fromEnv.trim().length > 0) {
+    return fromEnv.trim();
+  }
   return BUILTIN_SYSTEM_KEY;
 };
 
@@ -29,6 +42,7 @@ export interface StreamCallbacks {
 }
 
 export interface StreamChatParams {
+  apiKey?: string;
   model: ModelOption;
   messages: { role: 'user' | 'assistant' | 'system'; content: string }[];
   systemPrompt?: string;
@@ -1107,8 +1121,9 @@ export async function streamOpenRouterChat({
   searchMode = 'standard',
   initialSearchGrounding,
   infiniteOutput = false,
+  apiKey,
 }: StreamChatParams): Promise<StreamChatResult> {
-  const activeKey = getSystemApiKey();
+  const activeKey = getSystemApiKey(apiKey);
   const effectiveThinkingMode: ThinkingMode = thinkingMode || (deepThink ? 'deep' : 'none');
   const allowThinking = Boolean(
     effectiveThinkingMode === 'basic' || 
@@ -1239,6 +1254,13 @@ export async function streamOpenRouterChat({
       if (!response.ok) {
         const errorText = await response.text();
         console.warn(`[Nixima Core] Model ${candidateModel} returned ${response.status}: ${errorText}. Attempting fallback...`);
+
+        // If the active key has exhausted its rate limit, fail fast so UI can notify the user
+        if (response.status === 429 || errorText.includes('Rate limit exceeded') || errorText.includes('rate-limited')) {
+          lastError = new Error(`RATE_LIMIT_EXCEEDED: ${errorText}`);
+          break;
+        }
+
         lastError = new Error(`HTTP ${response.status}: ${errorText}`);
         continue; // Try next candidate model
       }
