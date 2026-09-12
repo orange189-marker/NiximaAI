@@ -182,9 +182,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   return (
     <div className="w-full max-w-3xl mx-auto px-4 pb-4 pt-1">
       {/* Quick Prompt Modifiers Rail */}
-      <div className="flex items-center gap-1.5 pb-2 overflow-x-auto text-[11px] font-mono select-none scrollbar-none">
+      <div className="flex items-center gap-1.5 pb-2.5 overflow-x-auto text-[11px] font-mono select-none scrollbar-none">
         <span className="text-zinc-500 pl-1 text-[10px] uppercase tracking-wider font-semibold flex items-center gap-1 flex-shrink-0">
-          <Sparkles className="w-3 h-3 text-zinc-500" />
+          <Sparkles className="w-3 h-3 text-zinc-400" />
           <span>{t.chatInput.modifierLabel}</span>
         </span>
         {modifiers.map((m, idx) => (
@@ -192,7 +192,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             key={idx}
             type="button"
             onClick={() => applyModifier(m.prompt)}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-700 transition-all duration-150 whitespace-nowrap active:scale-95 shadow-sm"
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/60 hover:bg-zinc-800/80 text-zinc-400 hover:text-zinc-100 border border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-200 whitespace-nowrap active:scale-95 shadow-sm backdrop-blur-sm"
           >
             {m.icon}
             <span>{m.label}</span>
@@ -202,10 +202,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
       {/* Main Elevated Input Dock */}
       <div className="relative group">
-        {/* Ambient Glow Halo when focused */}
-        <div className="absolute -inset-0.5 bg-gradient-to-r from-white/[0.04] via-white/[0.12] to-white/[0.04] rounded-3xl blur-md opacity-0 group-focus-within:opacity-100 transition-opacity duration-500 pointer-events-none" />
+        {/* Ambient Atmospheric Radiance on Focus */}
+        <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/10 via-amber-500/10 to-purple-500/10 rounded-[28px] blur-xl opacity-0 group-focus-within:opacity-100 transition-all duration-700 pointer-events-none" />
 
-        <div className="relative rounded-2xl sm:rounded-3xl bg-gradient-to-b from-[#131317]/95 via-[#0e0e12]/98 to-[#0a0a0d]/98 border border-zinc-800/90 hover:border-zinc-700/80 focus-within:border-zinc-500/90 shadow-[0_15px_40px_-5px_rgba(0,0,0,0.85),inset_0_1px_0_0_rgba(255,255,255,0.08)] backdrop-blur-2xl transition-all duration-300">
+        <div className="relative rounded-2xl sm:rounded-[24px] bg-[#0c0c11]/92 border border-white/[0.09] hover:border-white/[0.15] focus-within:!border-white/35 shadow-[0_16px_48px_-8px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.02),inset_0_1px_0_0_rgba(255,255,255,0.1)] focus-within:shadow-[0_20px_60px_-10px_rgba(0,0,0,0.95),0_0_30px_rgba(255,255,255,0.06),inset_0_1px_0_0_rgba(255,255,255,0.18)] backdrop-blur-2xl transition-all duration-300 overflow-hidden">
+          {/* Subtle Top Specular Glass Highlight */}
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           
           {/* Active Attached Files Chip Strip */}
           {attachedFiles.length > 0 && (
@@ -213,14 +215,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               {attachedFiles.map((file, idx) => (
                 <span
                   key={idx}
-                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 border border-zinc-700 text-xs font-mono text-zinc-200 shadow-inner-light animate-fade-in"
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-zinc-850/90 border border-zinc-700/90 text-xs font-mono text-zinc-200 shadow-sm animate-fade-in"
                 >
                   <Paperclip className="w-3 h-3 text-zinc-400" />
                   <span>{file}</span>
                   <button
                     type="button"
                     onClick={() => removeAttachment(file)}
-                    className="hover:text-red-400 ml-0.5"
+                    className="hover:text-red-400 p-0.5 rounded transition-colors ml-0.5 cursor-pointer"
                     title="Remove attachment"
                   >
                     <X className="w-3 h-3" />
@@ -239,26 +241,26 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             placeholder={t.chatInput.placeholder}
             rows={1}
             disabled={isLoading}
-            className="w-full bg-transparent text-zinc-100 placeholder:text-zinc-500 text-sm sm:text-base px-5 sm:px-6 pt-3.5 sm:pt-4 pb-2.5 resize-none focus:outline-none max-h-48 overflow-y-auto leading-relaxed font-sans select-text scrollbar-thin scrollbar-thumb-zinc-700"
+            className="w-full bg-transparent text-zinc-100 placeholder:text-zinc-500/75 text-[15px] sm:text-base px-5 sm:px-6 pt-4 pb-3 resize-none focus:outline-none max-h-52 overflow-y-auto leading-[1.65] font-sans select-text scrollbar-thin scrollbar-thumb-zinc-700"
           />
 
           {/* High-Tech Capability Toolbar (Bottom Dock) */}
-          <div className="flex flex-wrap items-center justify-between px-3 sm:px-4 pb-2.5 pt-1.5 border-t border-white/[0.04] gap-x-2 gap-y-1.5 min-w-0">
+          <div className="flex flex-wrap items-center justify-between px-3.5 sm:px-4 py-2 bg-black/30 border-t border-white/[0.06] gap-x-2 gap-y-2 min-w-0">
             {/* Left Controls: Brain & Capability Switches */}
             <div className="flex items-center gap-1 sm:gap-1.5 flex-wrap min-w-0 py-0.5">
               {/* Context Attachment Button */}
               <button
                 type="button"
                 onClick={handleAttachMockFile}
-                className="p-1.5 rounded-lg border border-transparent text-zinc-400 hover:text-white hover:bg-zinc-800/80 hover:border-zinc-700 transition-all duration-150 flex-shrink-0 cursor-pointer"
+                className="p-2 rounded-xl border border-transparent text-zinc-400 hover:text-white hover:bg-white/[0.08] hover:border-white/[0.08] transition-all duration-150 flex-shrink-0 cursor-pointer active:scale-95"
                 title={t.chatInput.attachTooltip}
               >
-                <Paperclip className="w-3.5 h-3.5" />
+                <Paperclip className="w-4 h-4" />
               </button>
 
               {/* Active Model Indicator Chip (Desktop) */}
               <div 
-                className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 border border-zinc-800 text-[11px] text-zinc-300 shadow-inner-light select-none mr-0.5 flex-shrink-0"
+                className="hidden xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900/80 border border-zinc-800/80 text-[11px] text-zinc-300 shadow-inner-light select-none mr-0.5 flex-shrink-0"
                 title={`${t.header.sovereignEngine}: ${currentModel.name}`}
               >
                 <ModelIcon modelId={currentModel.id} size="xs" />
@@ -272,16 +274,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   {/* Thinking Engine Control (Basic Thinking vs DeepThinking V2/V2.1 vs UltraThinking V1.0) */}
                   <div className="relative flex items-center flex-shrink-0 z-30" ref={thinkingMenuRef}>
                     <div
-                      className={`flex items-center rounded-full text-xs font-mono transition-all duration-150 border select-none ${
+                      className={`flex items-center rounded-full text-xs font-mono transition-all duration-200 border select-none ${
                         thinkingMode === 'ultra'
-                          ? 'bg-purple-950/50 text-purple-200 font-semibold border-purple-500/60 shadow-[0_0_16px_rgba(168,85,247,0.3)] scale-[1.02]'
+                          ? 'bg-purple-950/40 text-purple-200 font-semibold border-purple-500/50 shadow-[0_0_14px_rgba(168,85,247,0.25)] ring-1 ring-purple-500/20'
                           : thinkingMode === 'basic'
-                          ? 'bg-zinc-800 text-white font-semibold border-cyan-600/50 shadow-inner-light scale-[1.02]'
+                          ? 'bg-cyan-950/40 text-cyan-200 font-semibold border-cyan-500/50 shadow-[0_0_12px_rgba(6,182,212,0.2)] ring-1 ring-cyan-500/20'
                           : thinkingMode === 'deep' || deepThink
                           ? (is03Coder
-                              ? 'bg-zinc-800 text-white font-semibold border-emerald-600/50 shadow-[0_0_15px_rgba(16,185,129,0.2)] scale-[1.02]'
-                              : 'bg-zinc-800 text-white font-semibold border-zinc-500 shadow-inner-light scale-[1.02]')
-                          : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-850/80'
+                              ? 'bg-emerald-950/40 text-emerald-200 font-semibold border-emerald-500/50 shadow-[0_0_14px_rgba(16,185,129,0.2)] ring-1 ring-emerald-500/20'
+                              : 'bg-zinc-800/90 text-white font-semibold border-zinc-500 shadow-inner-light')
+                          : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:border-zinc-700 hover:bg-zinc-850/80'
                       }`}
                     >
                       <button
@@ -359,7 +361,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
                     {/* Thinking Engine Selection Popover Panel */}
                     {isThinkingPopoverOpen && (
-                      <div className="absolute bottom-full mb-3 left-0 w-80 max-w-[calc(100vw-2rem)] rounded-2xl bg-[#121215] border border-zinc-700/90 shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-3 z-[100] animate-fade-in backdrop-blur-2xl">
+                      <div className="absolute bottom-full mb-3 left-0 w-80 max-w-[calc(100vw-2rem)] rounded-2xl bg-[#101014]/98 border border-zinc-700/80 shadow-[0_20px_60px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.06)] p-3.5 z-[100] animate-fade-in backdrop-blur-2xl overflow-hidden">
+                        <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                         <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
                           <div className="flex items-center gap-1.5">
                             <BrainCircuit className="w-4 h-4 text-zinc-300" />
@@ -509,14 +512,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               {/* Search V3 Engine Control (Fast, Standard, Mega + Model Pairing) */}
               <div className="relative flex items-center flex-shrink-0 z-30" ref={searchMenuRef}>
                 <div
-                  className={`flex items-center rounded-full text-xs font-mono transition-all duration-150 border select-none ${
+                  className={`flex items-center rounded-full text-xs font-mono transition-all duration-200 border select-none ${
                     webSearch 
                       ? searchMode === 'fast'
-                        ? 'bg-zinc-800 text-white font-semibold border-amber-600/50 shadow-inner-light scale-[1.02]'
+                        ? 'bg-amber-950/40 text-amber-200 font-semibold border-amber-500/50 shadow-[0_0_12px_rgba(245,158,11,0.2)] ring-1 ring-amber-500/20'
                         : (searchMode === 'mega' && isCreator)
-                        ? 'bg-zinc-800 text-white font-semibold border-zinc-500 shadow-inner-light scale-[1.02]'
-                        : 'bg-zinc-800 text-white font-semibold border-zinc-600 shadow-inner-light scale-[1.02]' 
-                      : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-white hover:border-zinc-700 hover:bg-zinc-850/80'
+                        ? 'bg-gradient-to-r from-amber-950/50 via-zinc-850 to-zinc-900 text-amber-200 font-semibold border-amber-500/60 shadow-[0_0_16px_rgba(245,158,11,0.25)] ring-1 ring-amber-500/25'
+                        : 'bg-zinc-800/90 text-white font-semibold border-zinc-500 shadow-inner-light' 
+                      : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:border-zinc-700 hover:bg-zinc-850/80'
                   }`}
                 >
                   <button
@@ -532,7 +535,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     {webSearch && searchMode === 'fast' ? (
                       <Zap className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
                     ) : (
-                      <Globe className={`w-3.5 h-3.5 flex-shrink-0 ${webSearch ? (searchMode === 'mega' && isCreator ? 'text-white' : 'text-zinc-200') : 'text-zinc-400'}`} />
+                      <Globe className={`w-3.5 h-3.5 flex-shrink-0 ${webSearch ? (searchMode === 'mega' && isCreator ? 'text-amber-300' : 'text-zinc-200') : 'text-zinc-400'}`} />
                     )}
                     <span className="tracking-tight whitespace-nowrap hidden sm:inline">{t.chatInput.search}</span>
                     <span className="tracking-tight whitespace-nowrap sm:hidden">Search</span>
@@ -542,13 +545,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                       </span>
                     )}
                     {webSearch && isCreator && searchMode === 'mega' && (
-                      <span className="px-1.5 py-0.2 rounded bg-zinc-700 text-[9px] font-mono font-bold tracking-wider text-zinc-100 border border-zinc-600 whitespace-nowrap flex-shrink-0">
+                      <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-[9px] font-mono font-bold tracking-wider text-amber-300 border border-amber-500/40 whitespace-nowrap flex-shrink-0">
                         MEGA
                       </span>
                     )}
                     {webSearch && (
                       <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ml-0.5 flex-shrink-0 ${
-                        searchMode === 'fast' ? 'bg-amber-400' : searchMode === 'mega' && isCreator ? 'bg-white' : 'bg-zinc-300'
+                        searchMode === 'fast' ? 'bg-amber-400' : searchMode === 'mega' && isCreator ? 'bg-amber-300' : 'bg-zinc-300'
                       }`} />
                     )}
                   </button>
@@ -568,7 +571,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
                 {/* Search Engine Selection Popover Panel */}
                 {isSearchPopoverOpen && (
-                  <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-0 w-80 sm:w-96 max-w-[calc(100vw-2rem)] rounded-2xl bg-[#121215] border border-zinc-700/90 shadow-[0_20px_60px_rgba(0,0,0,0.95)] p-3 z-[100] animate-fade-in backdrop-blur-2xl">
+                  <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-0 w-80 sm:w-96 max-w-[calc(100vw-2rem)] rounded-2xl bg-[#101014]/98 border border-zinc-700/80 shadow-[0_20px_60px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.06)] p-3.5 z-[100] animate-fade-in backdrop-blur-2xl overflow-hidden">
+                    <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
                     <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
                       <div className="flex items-center gap-1.5">
                         <Globe className="w-4 h-4 text-zinc-300" />
@@ -786,10 +790,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               <button
                 type="button"
                 onClick={onToggleSound}
-                className={`p-1.5 rounded-lg border transition-all duration-150 flex-shrink-0 cursor-pointer ${
+                className={`p-2 rounded-xl border transition-all duration-200 flex-shrink-0 cursor-pointer active:scale-95 ${
                   soundEnabled
-                    ? 'bg-zinc-850 border-zinc-700 text-white shadow-inner-light'
-                    : 'bg-zinc-900/80 border-zinc-800 text-zinc-500 hover:text-zinc-300 hover:border-zinc-700'
+                    ? 'bg-white/10 border-white/20 text-white shadow-[0_0_12px_rgba(255,255,255,0.08)]'
+                    : 'bg-white/[0.03] border-white/[0.06] text-zinc-500 hover:text-zinc-300 hover:border-white/[0.12] hover:bg-white/[0.06]'
                 }`}
                 title={soundEnabled ? t.chatInput.audioMute : t.chatInput.audioEnable}
               >
@@ -800,14 +804,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               <button
                 type="button"
                 onClick={onOpenCredits}
-                className={`flex items-center gap-1.5 px-2 py-1 rounded-lg text-[10.5px] font-mono border transition-all duration-300 select-none cursor-pointer whitespace-nowrap flex-shrink-0 ${
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-[11px] font-mono border backdrop-blur-sm transition-all duration-200 select-none cursor-pointer whitespace-nowrap flex-shrink-0 active:scale-95 ${
                   !hasCredits
-                    ? 'bg-red-950/40 border-red-800 text-red-300 animate-pulse'
+                    ? 'bg-red-500/15 border-red-500/50 text-red-300 shadow-[0_0_15px_rgba(239,68,68,0.2)] animate-pulse'
                     : userCredits === Infinity
-                    ? 'bg-zinc-900/90 border-zinc-700 text-zinc-100 shadow-inner-light hover:border-zinc-500'
+                    ? 'bg-amber-500/10 hover:bg-amber-500/15 border-amber-500/30 hover:border-amber-500/50 text-amber-200/90 shadow-[0_0_12px_rgba(245,158,11,0.12)]'
                     : estimated.isHardPrompt
-                    ? 'bg-zinc-900/90 border-zinc-700 text-zinc-200 hover:border-zinc-500'
-                    : 'bg-zinc-900/90 border-zinc-800/80 text-zinc-400 hover:text-zinc-200 hover:border-zinc-700'
+                    ? 'bg-white/[0.05] border-white/[0.14] text-zinc-200 hover:border-white/30'
+                    : 'bg-white/[0.03] border-white/[0.07] text-zinc-400 hover:text-zinc-200 hover:border-white/[0.16] hover:bg-white/[0.06]'
                 }`}
                 title={
                   !hasCredits
@@ -821,9 +825,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 <span className="tabular-nums font-medium whitespace-nowrap inline-flex items-center gap-1">
                   {userCredits === Infinity ? (
                     <>
-                      <span>0 CR</span>
-                      <span className="hidden xl:inline text-zinc-400 font-normal">Creator</span>
-                      <InfinitySymbol size={10} className="inline-block text-zinc-300" />
+                      <span className="font-semibold text-amber-200">0 CR</span>
+                      <span className="hidden xl:inline text-amber-400/80 font-normal">Creator</span>
+                      <InfinitySymbol size={10} className="inline-block text-amber-300" />
                     </>
                   ) : (
                     t.credits.estCost(estimated.minCost, estimated.maxCost)
@@ -831,14 +835,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 </span>
                 {userCredits !== Infinity && estimated.isHardPrompt && (
                   <span className="flex items-center gap-0.5 text-[9px] font-bold text-zinc-300 px-1 py-0.2 rounded bg-zinc-800 border border-zinc-700 whitespace-nowrap flex-shrink-0">
-                    <Flame className="w-2.5 h-2.5 text-zinc-300 fill-zinc-400" />
+                    <Flame className="w-2.5 h-2.5 text-amber-400 fill-amber-400/30" />
                     <span>DIFFICULT</span>
                   </span>
                 )}
               </button>
 
               {input.length > 0 && (
-                <span className="hidden lg:inline text-[10.5px] font-mono text-zinc-500 select-none whitespace-nowrap flex-shrink-0">
+                <span className="hidden lg:inline-flex items-center px-2 py-1 rounded-lg bg-white/[0.03] border border-white/[0.06] text-[10.5px] font-mono text-zinc-500 select-none whitespace-nowrap flex-shrink-0 tabular-nums">
                   {input.length} {t.chatInput.chars}
                 </span>
               )}
@@ -847,11 +851,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 <button
                   type="button"
                   onClick={onStopGeneration}
-                  className="relative group w-9 h-9 rounded-xl bg-white text-black flex items-center justify-center transition-all duration-150 shadow-[0_0_24px_rgba(255,255,255,0.4)] hover:bg-zinc-200 hover:scale-105 active:scale-95 cursor-pointer flex-shrink-0"
+                  className="relative group w-9 h-9 rounded-xl bg-gradient-to-b from-red-500 to-rose-600 text-white flex items-center justify-center transition-all duration-200 shadow-[0_0_24px_rgba(244,63,94,0.45)] hover:shadow-[0_0_30px_rgba(244,63,94,0.65)] hover:scale-105 active:scale-95 cursor-pointer flex-shrink-0 border border-red-400/40"
                   title={t.chatInput.stopTooltip}
                 >
-                  <span className="absolute -inset-0.5 rounded-xl bg-white/40 animate-pulse pointer-events-none" />
-                  <Square className="w-3.5 h-3.5 fill-black text-black" />
+                  <span className="absolute -inset-0.5 rounded-xl bg-rose-500/40 animate-ping opacity-60 pointer-events-none" />
+                  <Square className="w-3.5 h-3.5 fill-white text-white relative z-10" />
                 </button>
               ) : (
                 <button
@@ -860,12 +864,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   disabled={!canSubmit}
                   className={`relative group w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 flex-shrink-0 ${
                     canSubmit
-                      ? 'bg-white text-black hover:bg-zinc-100 hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(255,255,255,0.45)] ring-1 ring-white/60 cursor-pointer'
-                      : 'bg-zinc-900/90 text-zinc-600 border border-zinc-800 cursor-not-allowed'
+                      ? 'bg-gradient-to-b from-white to-zinc-200 text-black hover:scale-105 active:scale-95 shadow-[0_0_25px_rgba(255,255,255,0.45)] hover:shadow-[0_0_32px_rgba(255,255,255,0.7)] ring-1 ring-white/80 cursor-pointer overflow-hidden'
+                      : 'bg-white/[0.03] text-zinc-600 border border-white/[0.06] cursor-not-allowed'
                   }`}
                   title={canSubmit ? t.chatInput.sendTooltip : t.chatInput.placeholder}
                 >
-                  <ArrowUp className={`w-4 h-4 stroke-[2.5] transition-transform duration-150 ${
+                  {canSubmit && (
+                    <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 pointer-events-none" />
+                  )}
+                  <ArrowUp className={`w-4 h-4 stroke-[2.5] transition-transform duration-200 relative z-10 ${
                     canSubmit ? 'group-hover:-translate-y-0.5 text-black' : 'text-zinc-600'
                   }`} />
                 </button>
@@ -876,14 +883,20 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       </div>
 
       {/* Subtitle Telemetry & Keyboard Hint */}
-      <div className="mt-2 text-center text-[10.5px] text-zinc-500 font-mono tracking-tight flex items-center justify-center gap-2 select-none">
-        <span>Nixima AI Mesh</span>
-        <span>•</span>
-        <span>{t.chatInput.meshOnline}</span>
-        <span className="hidden sm:inline text-zinc-600">•</span>
-        <span className="hidden sm:inline">
+      <div className="mt-2.5 text-center text-[10.5px] text-zinc-500 font-mono tracking-tight flex items-center justify-center gap-2 select-none">
+        <span className="inline-flex items-center gap-1.5">
+          <span className="relative flex h-1.5 w-1.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+          </span>
+          <span className="text-zinc-400">Nixima AI Mesh</span>
+        </span>
+        <span className="text-zinc-700">•</span>
+        <span className="text-emerald-400/90 font-medium">{t.chatInput.meshOnline}</span>
+        <span className="hidden sm:inline text-zinc-700">•</span>
+        <span className="hidden sm:inline text-zinc-500">
           {t.chatInput.enterToSend}
-          <span className="mx-1 text-zinc-600">·</span>
+          <span className="mx-1.5 text-zinc-700">·</span>
           {t.chatInput.shiftEnterNewline}
         </span>
       </div>
