@@ -527,6 +527,13 @@ export interface Translations {
       darkNeon: string;
       mobileFriendly: string;
       refactor: string;
+      includeCodeContext: string;
+      codeContextActive: string;
+      codeAttachedBadge: (title: string, version: number, lines: number) => string;
+      showAttachedCode: string;
+      hideAttachedCode: string;
+      selectedLinesInfo: (start: number, end: number) => string;
+      surgicalEditHint: string;
     };
     exportSuite: {
       copyStandaloneHtml: string;
@@ -1240,6 +1247,14 @@ export const translations: Record<Language, Translations> = {
         darkNeon: '✨ Dark Neon Obsidian Polish',
         mobileFriendly: '📱 Mobile Touch Controls',
         refactor: '🛡️ Zero-Defect Optimization',
+        includeCodeContext: 'Include Current Code',
+        codeContextActive: 'Live Code Context Linked',
+        codeAttachedBadge: (title: string, version: number, lines: number) =>
+          `Canvas Code Attached: ${title} (v${version}, ${lines} lines)`,
+        showAttachedCode: 'Show Attached Code',
+        hideAttachedCode: 'Hide Attached Code',
+        selectedLinesInfo: (start: number, end: number) => `Targeting Lines ${start}–${end}`,
+        surgicalEditHint: 'AI directly inspects current code to add, remove, or modify lines without restarting from scratch',
       },
       exportSuite: {
         copyStandaloneHtml: 'Copy Standalone HTML',
@@ -1952,6 +1967,14 @@ export const translations: Record<Language, Translations> = {
         darkNeon: '✨ Темний неоновий стиль обсидіану',
         mobileFriendly: '📱 Сенсорне керування для смартфонів',
         refactor: '🛡️ Оптимізація без дефектів',
+        includeCodeContext: 'Включати поточний код',
+        codeContextActive: 'Поточний код прив’язано',
+        codeAttachedBadge: (title: string, version: number, lines: number) =>
+          `Прикріплено код Canvas: ${title} (v${version}, ${lines} рядків)`,
+        showAttachedCode: 'Показати код',
+        hideAttachedCode: 'Приховати код',
+        selectedLinesInfo: (start: number, end: number) => `Цільові рядки ${start}–${end}`,
+        surgicalEditHint: 'ШІ безпосередньо аналізує поточний код для точного додавання, видалення чи зміни рядків без перезапуску',
       },
       exportSuite: {
         copyStandaloneHtml: 'Скопіювати автономний HTML',

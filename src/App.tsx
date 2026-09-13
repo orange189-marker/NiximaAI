@@ -11,7 +11,7 @@ import { BenchmarksModal } from './components/BenchmarksModal';
 import { ReleaseAnnouncementModal } from './components/ReleaseAnnouncementModal';
 import { AuthPortal } from './components/AuthPortal';
 import { NiximaCanvas } from './components/NiximaCanvas';
-import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry, SearchMode, ThinkingMode, NiximaArtifact, SearchGrounding } from './types/chat';
+import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry, SearchMode, ThinkingMode, NiximaArtifact, SearchGrounding, CanvasCodeContext } from './types/chat';
 import { NiximaUser } from './types/user';
 import { NIXIMA_MODELS, DEFAULT_MODEL } from './data/models';
 import { INITIAL_CONVERSATIONS } from './data/initialChats';
@@ -20,7 +20,7 @@ import { extractArtifactsFromMessage } from './utils/artifactDetector';
 import { playTypingTick, playCompletionChime } from './utils/sound';
 import { getActiveUser, logoutUser, syncAccountsWithServer, isDadAccount, isStrictCreator } from './utils/auth';
 import { getSavedHotkey, matchesHotkey } from './utils/hotkeys';
-import { buildNiximaSystemPrompt } from './utils/promptContext';
+import { buildNiximaSystemPrompt, formatCanvasDirectivePrompt } from './utils/promptContext';
 import { generateNiximaResponse } from './utils/aiResponse';
 import { 
   getUserCredits, 
@@ -206,6 +206,7 @@ const AppContent: React.FC = () => {
   const [activeArtifact, setActiveArtifact] = useState<NiximaArtifact | null>(null);
   const [isCanvasOpen, setIsCanvasOpen] = useState(false);
   const [isCanvasMaximized, setIsCanvasMaximized] = useState(false);
+  const [isCanvasContextLinked, setIsCanvasContextLinked] = useState(true);
 
   const handleOpenArtifact = (artifact: NiximaArtifact) => {
     setActiveArtifact(prev => {
@@ -503,14 +504,31 @@ All conversations and model preferences in this workspace are private to your Ni
     setActiveId(freshId);
   };
 
-  // Handler: Send Message with Real OpenRouter Streaming
-  const handleSendMessage = async (userText: string) => {
+  // Handler: Send Message with Real OpenRouter Streaming & Live Canvas Context
+  const handleSendMessage = async (
+    userText: string,
+    canvasContextOrAttachFlag?: CanvasCodeContext | boolean
+  ) => {
     if (!userText.trim() || isLoading) return;
 
     if (!hasSufficientCredits(currentUser, currentModel)) {
       handleOpenCredits();
       return;
     }
+
+    // Determine effective canvas code context (from direct directive or linked active artifact)
+    const effectiveCanvasContext: CanvasCodeContext | undefined = (typeof canvasContextOrAttachFlag === 'object' && canvasContextOrAttachFlag !== null)
+      ? canvasContextOrAttachFlag
+      : (canvasContextOrAttachFlag === true || (canvasContextOrAttachFlag === undefined && isCanvasOpen && activeArtifact && isCanvasContextLinked))
+      ? (activeArtifact ? {
+          artifactId: activeArtifact.id,
+          title: activeArtifact.title,
+          type: activeArtifact.type,
+          language: activeArtifact.language,
+          version: activeArtifact.currentVersion || 1,
+          currentCode: activeArtifact.content,
+        } : undefined)
+      : undefined;
 
     let targetConvId = activeId;
     let currentConv = conversations.find(c => c.id === targetConvId);
@@ -534,6 +552,7 @@ All conversations and model preferences in this workspace are private to your Ni
       id: 'usr-' + Date.now(),
       role: 'user',
       content: userText,
+      canvasContext: effectiveCanvasContext,
       timestamp: Date.now(),
     };
 
@@ -664,8 +683,12 @@ All conversations and model preferences in this workspace are private to your Ni
         infiniteOutput: isInfiniteOutputActive,
       });
 
-      // Prepare final user prompt with live grounding injected into immediate context
-      let finalUserPrompt = userText;
+      // Prepare base user prompt, pairing with live Canvas code context if present
+      const basePrompt = effectiveCanvasContext
+        ? formatCanvasDirectivePrompt(userText, effectiveCanvasContext)
+        : userText;
+
+      let finalUserPrompt = basePrompt;
       if (liveGrounding && liveGrounding.sources.length > 0) {
         const isLiveNews = liveGrounding.sources.some(s => s.cluster === 'Live News Wire');
         const nowStr = new Date().toLocaleDateString(language === 'uk' ? 'uk-UA' : 'en-US', {
@@ -688,7 +711,7 @@ All conversations and model preferences in this workspace are private to your Ni
             liveGrounding.sources.map((src, i) =>
               `[Source ${i + 1}] ${src.title} (${src.domain})\nURL: ${src.url}\nSummary: ${src.snippet}`
             ).join('\n\n') +
-            `\n\n[USER INQUIRY]\n${userText}\n\n` +
+            `\n\n[USER INQUIRY]\n${basePrompt}\n\n` +
             `(MANDATORY TEMPORAL INSTRUCTION: You are Nixima AI in ${new Date().getFullYear()}. Using the live news wire reports above for today (${nowStr}), provide a comprehensive, structured briefing. Under NO circumstances refuse by claiming a 2023 knowledge cutoff or lack of live internet access. Cite sources [1], [2] where appropriate.)`;
         } else {
           dynamicSystemPrompt += `\n\n[REAL-TIME LIVE WEB SEARCH GROUNDING — TODAY: ${nowStr}]\n` +
@@ -704,7 +727,7 @@ All conversations and model preferences in this workspace are private to your Ni
             liveGrounding.sources.map((src, i) =>
               `[Source ${i + 1}] ${src.title} (${src.domain})\nURL: ${src.url}\nSummary: ${src.snippet || 'Authoritative reference'}`
             ).join('\n\n') +
-            `\n\n[USER INQUIRY]\n${userText}\n\n` +
+            `\n\n[USER INQUIRY]\n${basePrompt}\n\n` +
             `(MANDATORY TEMPORAL INSTRUCTION: Answer using the verified real-world findings above. Do NOT claim a 2023 knowledge cutoff. Cite sources [1], [2] where appropriate.)`;
         }
       }
@@ -1141,6 +1164,14 @@ All conversations and model preferences in this workspace are private to your Ni
             onToggleSound={() => setSettings(s => ({ ...s, soundEnabled: !s.soundEnabled }))}
             userCredits={getUserCredits(currentUser)}
             onOpenCredits={handleOpenCredits}
+            activeCanvasArtifact={isCanvasOpen && activeArtifact ? {
+              title: activeArtifact.title,
+              version: activeArtifact.currentVersion || 1,
+              language: activeArtifact.language,
+              lineCount: activeArtifact.content.split('\n').length,
+            } : null}
+            isCanvasContextLinked={isCanvasContextLinked}
+            onToggleCanvasContext={() => setIsCanvasContextLinked(prev => !prev)}
           />
         </div>
 

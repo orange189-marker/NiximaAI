@@ -29,7 +29,7 @@ import { InfinitySymbol } from './InfinitySymbol';
 import { renderWithNiximaBrand } from './NiximaWordmark';
 
 interface ChatInputProps {
-  onSendMessage: (message: string) => void;
+  onSendMessage: (message: string, attachCanvasContext?: boolean) => void;
   isLoading: boolean;
   onStopGeneration?: () => void;
   currentModel: ModelOption;
@@ -49,6 +49,9 @@ interface ChatInputProps {
   onToggleSound: () => void;
   userCredits?: number;
   onOpenCredits?: () => void;
+  activeCanvasArtifact?: { title: string; version: number; language: string; lineCount: number } | null;
+  isCanvasContextLinked?: boolean;
+  onToggleCanvasContext?: () => void;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -72,6 +75,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   onToggleSound,
   userCredits = 1000,
   onOpenCredits,
+  activeCanvasArtifact,
+  isCanvasContextLinked = true,
+  onToggleCanvasContext,
 }) => {
   const { t, language } = useLanguage();
   const [input, setInput] = useState('');
@@ -126,7 +132,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       setAttachedFiles([]);
     }
 
-    onSendMessage(finalMessage);
+    onSendMessage(finalMessage, Boolean(activeCanvasArtifact && isCanvasContextLinked));
     setInput('');
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -212,6 +218,41 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           {/* Subtle Top Specular Glass Highlight */}
           <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
           
+          {/* Active Canvas Code Context Chip */}
+          {activeCanvasArtifact && (
+            <div className="flex items-center gap-2 px-5 sm:px-6 pt-3.5 pb-1 flex-wrap">
+              <span
+                className={`inline-flex items-center gap-2 px-3 py-1 rounded-xl text-xs font-mono shadow-sm transition-all select-none border ${
+                  isCanvasContextLinked
+                    ? 'bg-zinc-850/90 border-zinc-700/90 text-zinc-200'
+                    : 'bg-zinc-900/60 border-zinc-800 text-zinc-500 opacity-75'
+                }`}
+              >
+                <span className={`w-1.5 h-1.5 rounded-full ${isCanvasContextLinked ? 'bg-emerald-400 animate-pulse' : 'bg-zinc-600'}`} />
+                <Code2 className="w-3.5 h-3.5 text-zinc-400" />
+                <span className="font-semibold text-zinc-100 truncate max-w-[160px] sm:max-w-[240px]">
+                  {activeCanvasArtifact.title}
+                </span>
+                <span className="text-zinc-500">v{activeCanvasArtifact.version}</span>
+                <span className="text-zinc-600">•</span>
+                <span className="text-zinc-400">{activeCanvasArtifact.lineCount} lines</span>
+
+                <button
+                  type="button"
+                  onClick={onToggleCanvasContext}
+                  className={`ml-1 text-[10px] px-1.5 py-0.5 rounded transition-colors cursor-pointer ${
+                    isCanvasContextLinked
+                      ? 'bg-emerald-950/60 text-emerald-300 border border-emerald-800/80 hover:bg-emerald-900/60'
+                      : 'bg-zinc-800 text-zinc-400 border border-zinc-700 hover:text-white'
+                  }`}
+                  title={isCanvasContextLinked ? 'Unlink Canvas code from chat prompt' : 'Link Canvas code into chat prompt'}
+                >
+                  {isCanvasContextLinked ? 'Linked' : 'Unlinked'}
+                </button>
+              </span>
+            </div>
+          )}
+
           {/* Active Attached Files Chip Strip */}
           {attachedFiles.length > 0 && (
             <div className="flex items-center gap-2 px-5 sm:px-6 pt-3.5 pb-1 flex-wrap">

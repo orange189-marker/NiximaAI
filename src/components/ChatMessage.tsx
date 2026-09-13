@@ -77,6 +77,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editText, setEditText] = useState(message.content);
   const [selectedProfileHandle, setSelectedProfileHandle] = useState<string | null>(null);
+  const [isAttachedCodeExpanded, setIsAttachedCodeExpanded] = useState(false);
 
   const dynamicSteps = (message.deepThinkingTelemetry?.dynamicSteps && message.deepThinkingTelemetry.dynamicSteps.length > 0)
     ? message.deepThinkingTelemetry.dynamicSteps
@@ -973,6 +974,52 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                           <span className="relative inline-flex rounded-full h-2 w-2 bg-white shadow-[0_0_8px_rgba(255,255,255,0.95)]" />
                         </span>
                       </span>
+                    )}
+
+                    {/* Canvas Active Code Context Attached Badge */}
+                    {isUser && message.canvasContext && (
+                      <div className="mt-2.5 rounded-xl border border-zinc-800 bg-[#0e0e12]/90 overflow-hidden font-mono text-xs shadow-sm select-none animate-fade-in">
+                        <div 
+                          onClick={() => setIsAttachedCodeExpanded(!isAttachedCodeExpanded)}
+                          className="flex items-center justify-between px-3 py-2 bg-zinc-900/60 hover:bg-zinc-850/80 transition-colors cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2 min-w-0 pr-2">
+                            <div className="p-1 rounded bg-zinc-800 border border-zinc-700 text-zinc-300 flex-shrink-0">
+                              <Layers className="w-3.5 h-3.5 text-zinc-300" />
+                            </div>
+                            <span className="font-semibold text-zinc-200 truncate text-[11px] sm:text-xs">
+                              {t.canvas.aiDirective.codeAttachedBadge(
+                                message.canvasContext.title,
+                                message.canvasContext.version,
+                                message.canvasContext.currentCode.split('\n').length
+                              )}
+                            </span>
+                            {message.canvasContext.selectedLines && (
+                              <span className="hidden sm:inline-block px-1.5 py-0.2 rounded bg-zinc-800 text-[10px] text-zinc-400 border border-zinc-700 whitespace-nowrap">
+                                {t.canvas.aiDirective.selectedLinesInfo(
+                                  message.canvasContext.selectedLines.start,
+                                  message.canvasContext.selectedLines.end
+                                )}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-1 text-zinc-400 text-[11px] flex-shrink-0">
+                            <span className="hidden sm:inline">
+                              {isAttachedCodeExpanded ? t.canvas.aiDirective.hideAttachedCode : t.canvas.aiDirective.showAttachedCode}
+                            </span>
+                            {isAttachedCodeExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
+                          </div>
+                        </div>
+
+                        {isAttachedCodeExpanded && (
+                          <div className="p-3 border-t border-zinc-800 bg-[#070709] max-h-72 overflow-y-auto">
+                            <pre className="text-[11px] leading-relaxed text-zinc-300 font-mono whitespace-pre-wrap selection:bg-zinc-700 m-0">
+                              {message.canvasContext.currentCode}
+                            </pre>
+                          </div>
+                        )}
+                      </div>
                     )}
                   </>
                 )}

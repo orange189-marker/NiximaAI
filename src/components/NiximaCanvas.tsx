@@ -32,7 +32,7 @@ import {
   ZoomIn,
   ZoomOut
 } from 'lucide-react';
-import { NiximaArtifact, ArtifactType } from '../types/chat';
+import { NiximaArtifact, ArtifactType, CanvasCodeContext } from '../types/chat';
 import { generateSandboxHtml } from '../utils/artifactDetector';
 import { playCompletionChime } from '../utils/sound';
 import { useLanguage } from '../context/LanguageContext';
@@ -123,7 +123,7 @@ interface NiximaCanvasProps {
   onClose: () => void;
   onUpdateArtifactContent?: (newContent: string) => void;
   onSelectVersion?: (version: number) => void;
-  onActionPrompt?: (prompt: string) => void;
+  onActionPrompt?: (prompt: string, context?: CanvasCodeContext) => void;
   isMaximized: boolean;
   onToggleMaximize: () => void;
 }
@@ -464,7 +464,32 @@ export const NiximaCanvas: React.FC<NiximaCanvasProps> = ({
   const handleTriggerDirective = (customPrompt?: string) => {
     const promptToSend = (customPrompt || directiveInput).trim();
     if (!promptToSend) return;
-    onActionPrompt?.(promptToSend);
+
+    // Detect highlighted line selection if active in code editor
+    let selectedLines: { start: number; end: number; text: string } | undefined;
+    if (textareaRef.current) {
+      const selStart = textareaRef.current.selectionStart;
+      const selEnd = textareaRef.current.selectionEnd;
+      if (selEnd > selStart) {
+        const before = editableCode.substring(0, selStart);
+        const selectedText = editableCode.substring(selStart, selEnd);
+        const startLine = before.split('\n').length;
+        const endLine = startLine + selectedText.split('\n').length - 1;
+        selectedLines = { start: startLine, end: endLine, text: selectedText };
+      }
+    }
+
+    const context: CanvasCodeContext = {
+      artifactId: artifact.id,
+      title: artifact.title,
+      type: artifact.type,
+      language: artifact.language,
+      version: currentVer,
+      currentCode: editableCode,
+      selectedLines,
+    };
+
+    onActionPrompt?.(promptToSend, context);
     setDirectiveInput('');
   };
 
@@ -1192,6 +1217,19 @@ export const NiximaCanvas: React.FC<NiximaCanvasProps> = ({
 
       {/* 3. In-Canvas AI Directive Bar & Quick Action Chips */}
       <div className="p-2 sm:p-2.5 bg-[#101014] border-t border-zinc-800/80 flex flex-col gap-2">
+        {/* Live Code Context Link Telemetry */}
+        <div className="flex items-center justify-between text-[10px] font-mono text-zinc-400 px-1">
+          <span className="flex items-center gap-1.5 text-zinc-300">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="font-semibold text-emerald-400">{t.canvas.aiDirective.codeContextActive}</span>
+            <span className="text-zinc-600">•</span>
+            <span className="text-zinc-400">v{currentVer} ({editableCode.split('\n').length} lines)</span>
+          </span>
+          <span className="text-zinc-500 hidden sm:inline" title={t.canvas.aiDirective.surgicalEditHint}>
+            {t.canvas.aiDirective.surgicalEditHint}
+          </span>
+        </div>
+
         {/* Natural Language AI Directive Input Bar */}
         <div className="flex items-center gap-2">
           <div className="relative flex-1 flex items-center">

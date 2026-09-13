@@ -114,6 +114,16 @@ export interface DeepThinkingTelemetry {
   mode?: ThinkingMode;
 }
 
+export interface CanvasCodeContext {
+  artifactId: string;
+  title: string;
+  type: ArtifactType;
+  language: string;
+  version: number;
+  currentCode: string;
+  selectedLines?: { start: number; end: number; text: string };
+}
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -128,6 +138,7 @@ export interface Message {
   isStreaming?: boolean;
   telemetry?: MessageTelemetry;
   artifacts?: NiximaArtifact[];
+  canvasContext?: CanvasCodeContext;
 }
 
 export interface Conversation {

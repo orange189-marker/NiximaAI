@@ -1,5 +1,5 @@
 import { NiximaUser } from '../types/user';
-import { ModelOption, SearchMode, ThinkingMode } from '../types/chat';
+import { ModelOption, SearchMode, ThinkingMode, CanvasCodeContext } from '../types/chat';
 import { NIXIMA_MODELS } from '../data/models';
 import { BENCHMARK_LEADERBOARD } from '../data/benchmarks';
 import { isDadAccount, isStrictCreator } from './auth';
@@ -401,13 +401,19 @@ ${thinkingProtocol}${webSearch ? (searchMode === 'mega' && isCreator ? `11. Sear
       * Deliver an insightful, well-structured, authoritative briefing of world developments up to today (${dateStr}).
       * Organize cleanly into categories (Global Geopolitics, Frontier AI & Technology, Global Economy, Science & Energy).
       * Never reply with a cutoff refusal or claim an inability to access the web.
-14. Nixima Canvas & Interactive Live Artifacts:
-    - Nixima AI features an integrated live Canvas Studio directly alongside the chat.
+14. Nixima Canvas V2.0 & Surgical Live Artifact Editing:
+    - Nixima AI features an integrated live Canvas Studio directly alongside the chat with device viewports, code editor, diff viewer, and console REPL.
     - When the operator asks to build web applications, interactive tools, calculators, games, React components, or SVG vector diagrams:
       * Provide clean, complete, and self-contained code inside appropriate fences (\`\`\`html, \`\`\`tsx, \`\`\`jsx, \`\`\`svg, \`\`\`javascript, \`\`\`python).
-      * When writing HTML web apps or tools, feel free to use modern Tailwind CSS utility classes as Tailwind is preloaded in the Canvas sandbox.
+      * When writing HTML web apps or tools, use modern Tailwind CSS utility classes as Tailwind is preloaded in the Canvas sandbox.
       * The Nixima Canvas automatically mounts React components, compiles HTML/Tailwind widgets, renders SVG vectors, and captures console outputs in real time.
-      * When asked to iterate or refine an existing artifact, generate the updated complete code block so the Canvas can instantly create and display the next version (v2, v3, etc.).
+    - SURGICAL CODE EDITING PROTOCOL (When [CANVAS ACTIVE ARTIFACT CODE CONTEXT] is present):
+      * You have direct, live read and write access to the user's current code in the Canvas editor.
+      * You DO NOT need to restart from scratch, guess, or struggle to remember previous states: the exact current code lines are provided directly in the prompt.
+      * Perform surgical edits: identify which lines to remove, which lines to add back, and what new functionality to introduce.
+      * Preserve all working existing features, event listeners, state, and styling unless the user explicitly asks to remove or change them.
+      * Briefly summarize the exact changes made (e.g. "Removed lines X-Y, added Z, updated state W").
+      * ALWAYS output the COMPLETE updated code block so that Nixima Canvas automatically updates the live preview, increments the version stack, and computes accurate line-by-line diffs.
 ${infiniteOutput ? `
 15. Sovereign Infinite Output Mandate (Creator Clearance Activated):
     - INFINITE OUTPUT PROTOCOL IS ACTIVATED BY CREATOR AUTHORIZATION.
@@ -417,3 +423,37 @@ ${infiniteOutput ? `
 ` : ''}
 ${customSystemPrompt && customSystemPrompt.trim() ? `=== OPERATOR CUSTOM INSTRUCTIONS ===\n${customSystemPrompt.trim()}\n` : ''}`.trim();
 }
+
+/**
+ * Prepares an authoritative prompt payload pairing the user's directive
+ * with the exact current live code in the Nixima Canvas Studio.
+ */
+export function formatCanvasDirectivePrompt(userPrompt: string, context: CanvasCodeContext): string {
+  const linesCount = context.currentCode.split('\n').length;
+  const selectionInfo = context.selectedLines
+    ? `\n- Target Selected Range: Lines ${context.selectedLines.start} to ${context.selectedLines.end}:\n\`\`\`${context.language}\n${context.selectedLines.text}\n\`\`\`\n`
+    : '';
+
+  return `[CANVAS ACTIVE ARTIFACT CODE CONTEXT]
+- Artifact: "${context.title}"
+- Type: ${context.type}
+- Language: ${context.language}
+- Active Version: v${context.version}
+- Total Lines: ${linesCount}${selectionInfo}
+
+CURRENT WORKING CODE:
+\`\`\`${context.language}
+${context.currentCode}
+\`\`\`
+
+[USER DIRECTIVE / EDIT REQUEST]
+${userPrompt}
+
+[SURGICAL CANVAS EDIT MANDATE]
+1. You have direct access to the EXACT current working code of the artifact above. Do NOT start from scratch or guess.
+2. Carefully identify which lines to remove, which lines to add back, and what new functionality to introduce according to the user directive.
+3. Preserve all other existing working code, state, event listeners, and styling unless explicitly requested to remove or change them.
+4. Briefly explain the exact changes made (e.g. "Removed lines X-Y, added Z, updated state W").
+5. Output the COMPLETE updated artifact code inside a single \`\`\`${context.language} ... \`\`\` code block so that Nixima Canvas automatically mounts and creates the next version.`.trim();
+}
+
