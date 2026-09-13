@@ -87,22 +87,55 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [isThinkingPopoverOpen, setIsThinkingPopoverOpen] = useState(false);
   const [autoSyncSearchModel, setAutoSyncSearchModel] = useState(true);
   const searchMenuRef = useRef<HTMLDivElement>(null);
+  const searchHudRef = useRef<HTMLDivElement>(null);
+  const searchPopoverRef = useRef<HTMLDivElement>(null);
+
   const thinkingMenuRef = useRef<HTMLDivElement>(null);
+  const thinkingHudRef = useRef<HTMLDivElement>(null);
+  const thinkingPopoverRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (searchMenuRef.current && !searchMenuRef.current.contains(event.target as Node)) {
-        setIsSearchPopoverOpen(false);
+      const target = event.target as Node;
+
+      if (isThinkingPopoverOpen) {
+        const inPopover = thinkingPopoverRef.current?.contains(target);
+        const inMenu = thinkingMenuRef.current?.contains(target);
+        const inHud = thinkingHudRef.current?.contains(target);
+        if (!inPopover && !inMenu && !inHud) {
+          setIsThinkingPopoverOpen(false);
+        }
       }
-      if (thinkingMenuRef.current && !thinkingMenuRef.current.contains(event.target as Node)) {
-        setIsThinkingPopoverOpen(false);
+
+      if (isSearchPopoverOpen) {
+        const inPopover = searchPopoverRef.current?.contains(target);
+        const inMenu = searchMenuRef.current?.contains(target);
+        const inHud = searchHudRef.current?.contains(target);
+        if (!inPopover && !inMenu && !inHud) {
+          setIsSearchPopoverOpen(false);
+        }
       }
     };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsThinkingPopoverOpen(false);
+        setIsSearchPopoverOpen(false);
+      }
+    };
+
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isThinkingPopoverOpen, isSearchPopoverOpen]);
 
   const handleSelectSearchMode = (mode: SearchMode, shouldPair = autoSyncSearchModel) => {
+    if (!webSearch && onToggleWebSearch) {
+      onToggleWebSearch();
+    }
     if (onSelectSearchMode) {
       onSelectSearchMode(mode);
     }
@@ -211,6 +244,325 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
       {/* Main Elevated Input Dock */}
       <div className="relative group">
+        {/* Thinking Engine Selection Popover Panel (Clean Floating Modal above input dock) */}
+        {isThinkingPopoverOpen && (
+          <div 
+            ref={thinkingPopoverRef}
+            className="absolute bottom-full mb-3 left-0 sm:left-4 w-80 max-w-[calc(100vw-2rem)] rounded-2xl bg-[#101014]/98 border border-zinc-700/80 shadow-[0_20px_60px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.06)] p-3.5 z-[100] animate-in fade-in slide-in-from-bottom-2 duration-200 backdrop-blur-2xl overflow-hidden"
+          >
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
+              <div className="flex items-center gap-1.5">
+                <BrainCircuit className="w-4 h-4 text-zinc-300" />
+                <span className="text-xs font-semibold text-white font-mono uppercase tracking-wider">
+                  {t.chatInput.thinkingEngineTitle}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsThinkingPopoverOpen(false)}
+                className="p-1 rounded text-zinc-400 hover:text-white cursor-pointer"
+                title="Close"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <p className="text-[11px] text-zinc-400 mt-1 mb-2 font-mono">
+              {t.chatInput.thinkingEngineSubtitle}
+            </p>
+
+            <div className="space-y-1.5">
+              {/* 1. Basic Thinking */}
+              <div 
+                onClick={() => {
+                  onChangeThinkingMode?.('basic');
+                  setIsThinkingPopoverOpen(false);
+                }}
+                className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
+                  thinkingMode === 'basic'
+                    ? 'bg-zinc-800/90 border-white/30 text-white shadow-sm' 
+                    : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
+                      <Sparkles className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="font-semibold text-xs text-white font-mono">{t.chatInput.basicThinking}</span>
+                    <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-[9px] font-mono font-bold text-zinc-300">
+                      AGILE
+                    </span>
+                  </div>
+                  {thinkingMode === 'basic' && (
+                    <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center">
+                      <Check className="w-3 h-3 stroke-[3]" />
+                    </div>
+                  )}
+                </div>
+                <p className="text-[11px] text-zinc-400 mt-1">
+                  {t.chatInput.basicThinkingDesc}
+                </p>
+              </div>
+
+              {/* 2. DeepThinking V2 / V2.1 */}
+              <div 
+                onClick={() => {
+                  onChangeThinkingMode?.('deep');
+                  setIsThinkingPopoverOpen(false);
+                }}
+                className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
+                  thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic' && thinkingMode !== 'ultra')
+                    ? 'bg-zinc-800/90 border-white/30 text-white shadow-sm'
+                    : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
+                      <BrainCircuit className="w-3.5 h-3.5" />
+                    </div>
+                    <span className="font-semibold text-xs text-white font-mono">
+                      {is03Coder ? t.chatInput.deepThinkingV21 : t.chatInput.deepThink}
+                    </span>
+                    <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-zinc-800 text-zinc-200 border border-zinc-700">
+                      {is03Coder ? 'V2.1 CODER' : 'L3 PROOF'}
+                    </span>
+                  </div>
+                  {(thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic' && thinkingMode !== 'ultra')) && (
+                    <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center">
+                      <Check className="w-3 h-3 stroke-[3]" />
+                    </div>
+                  )}
+                </div>
+                <p className="text-[11px] text-zinc-400 mt-1">
+                  {is03Coder ? t.chatInput.deepThinkingV21Desc : t.chatInput.deepThinkingDesc}
+                </p>
+              </div>
+
+              {/* 3. UltraThinking V2.0 / V1.0 */}
+              <div 
+                onClick={() => {
+                  onChangeThinkingMode?.('ultra');
+                  const isProModel = currentModel.id === 'nixima-0.3-pro' || currentModel.id === 'nixima-0.2-pro';
+                  if (!isProModel && onSelectModel) {
+                    const proModel = NIXIMA_MODELS.find(m => m.id === 'nixima-0.3-pro') || NIXIMA_MODELS.find(m => m.id === 'nixima-0.2-pro');
+                    if (proModel) onSelectModel(proModel);
+                  }
+                  setIsThinkingPopoverOpen(false);
+                }}
+                className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
+                  thinkingMode === 'ultra'
+                    ? 'bg-zinc-800/90 border-white/30 text-white shadow-sm' 
+                    : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
+                      <BrainCircuit className="w-3.5 h-3.5 text-zinc-200" />
+                    </div>
+                    <span className="font-semibold text-xs text-white font-mono">
+                      {currentModel.id === 'nixima-0.3-pro' ? 'UltraThinking V2.0' : t.chatInput.ultraThinkingV1}
+                    </span>
+                    <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-[9px] font-mono font-bold text-zinc-200 border border-zinc-700">
+                      {currentModel.id === 'nixima-0.3-pro' ? 'ULTRA V2.0' : 'ULTRA V1.0'}
+                    </span>
+                  </div>
+                  {thinkingMode === 'ultra' && (
+                    <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center">
+                      <Check className="w-3 h-3 stroke-[3]" />
+                    </div>
+                  )}
+                </div>
+                <p className="text-[11px] text-zinc-400 mt-1">
+                  {t.chatInput.ultraThinkingDesc}
+                </p>
+                {currentModel.id !== 'nixima-0.3-pro' && currentModel.id !== 'nixima-0.2-pro' && (
+                  <div className="mt-1.5 text-[10px] font-mono text-zinc-400 flex items-center gap-1">
+                    <span>⚡ {language === 'uk' ? 'Підключає та оптимізує Nixima-0.3 UltraPro' : 'Auto-pairs with Nixima-0.3 UltraPro'}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Search Engine Selection Popover Panel (Clean Floating Modal above input dock) */}
+        {isSearchPopoverOpen && (
+          <div 
+            ref={searchPopoverRef}
+            className="absolute bottom-full mb-3 left-0 sm:left-24 w-80 sm:w-96 max-w-[calc(100vw-2rem)] rounded-2xl bg-[#101014]/98 border border-zinc-700/80 shadow-[0_20px_60px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.06)] p-3.5 z-[100] animate-in fade-in slide-in-from-bottom-2 duration-200 backdrop-blur-2xl overflow-hidden"
+          >
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
+              <div className="flex items-center gap-1.5">
+                <Globe className="w-4 h-4 text-zinc-300" />
+                <span className="text-xs font-semibold text-white font-mono uppercase tracking-wider">
+                  {t.chatInput.searchEngineTitle}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsSearchPopoverOpen(false)}
+                className="p-1 rounded text-zinc-400 hover:text-white cursor-pointer"
+                title="Close"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+
+            <p className="text-[11px] text-zinc-400 mt-1 mb-2 font-mono">
+              {t.chatInput.searchEngineSubtitle}
+            </p>
+
+            <div className="space-y-1.5">
+              {/* 1. Search V3 Fast */}
+              {(() => {
+                const recFast = getRecommendedModelForSearchMode('fast');
+                const isModeActive = webSearch && searchMode === 'fast';
+                return (
+                  <div 
+                    onClick={() => handleSelectSearchMode('fast')}
+                    className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
+                      isModeActive 
+                        ? 'bg-zinc-850/90 border-white/30 text-white shadow-sm' 
+                        : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
+                          <Zap className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="font-semibold text-xs text-white font-mono">Search V3 Fast</span>
+                        <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-[9px] font-mono font-bold text-zinc-300">
+                          &lt;50MS
+                        </span>
+                      </div>
+                      {isModeActive && (
+                        <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-zinc-400 mt-1">
+                      {t.chatInput.searchFastDesc}
+                    </p>
+                    <div className="mt-1.5 pt-1.5 border-t border-zinc-800/60 flex items-center justify-between text-[10px] font-mono text-zinc-400">
+                      <span className="flex items-center gap-1 text-zinc-300">
+                        <span>⚡ Optimal:</span>
+                        <strong className="text-zinc-100">{recFast.shortName}</strong>
+                      </span>
+                      <span className="text-zinc-500">20 Websites Rapid</span>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* 2. Search V3 Standard */}
+              {(() => {
+                const recStd = getRecommendedModelForSearchMode('standard');
+                const isModeActive = webSearch && searchMode === 'standard';
+                return (
+                  <div 
+                    onClick={() => handleSelectSearchMode('standard')}
+                    className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
+                      isModeActive 
+                        ? 'bg-zinc-850/90 border-white/30 text-white shadow-sm' 
+                        : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
+                          <Globe className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="font-semibold text-xs text-white font-mono">Search V3 Standard</span>
+                        <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-[9px] font-mono font-bold text-zinc-300">
+                          BALANCED
+                        </span>
+                      </div>
+                      {isModeActive && (
+                        <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-zinc-400 mt-1">
+                      {t.chatInput.searchStandardDesc}
+                    </p>
+                    <div className="mt-1.5 pt-1.5 border-t border-zinc-800/60 flex items-center justify-between text-[10px] font-mono text-zinc-400">
+                      <span className="flex items-center gap-1 text-zinc-300">
+                        <span>🌐 Optimal:</span>
+                        <strong className="text-zinc-100">{recStd.shortName}</strong>
+                      </span>
+                      <span className="text-zinc-500">20+ Websites Deep Grounding</span>
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* 3. Search V3 Mega (Creator Clearance) */}
+              {isCreator && (() => {
+                const recMega = getRecommendedModelForSearchMode('mega');
+                const isModeActive = webSearch && searchMode === 'mega';
+                return (
+                  <div 
+                    onClick={() => handleSelectSearchMode('mega')}
+                    className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
+                      isModeActive 
+                        ? 'bg-zinc-850/90 border-white/30 text-white shadow-sm' 
+                        : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
+                          <BrainCircuit className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="font-semibold text-xs text-white font-mono">Search V3 Mega</span>
+                        <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-[9px] font-mono font-bold text-zinc-300">
+                          CREATOR SWARM
+                        </span>
+                      </div>
+                      {isModeActive && (
+                        <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        </div>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-zinc-400 mt-1">
+                      {t.chatInput.searchMegaDesc}
+                    </p>
+                    <div className="mt-1.5 pt-1.5 border-t border-zinc-800/60 flex items-center justify-between text-[10px] font-mono text-zinc-400">
+                      <span className="flex items-center gap-1 text-zinc-200">
+                        <span>🧠 Optimal:</span>
+                        <strong className="text-white">{recMega.shortName}</strong>
+                      </span>
+                      <span className="text-zinc-400">50-80 Websites • 7 Clusters</span>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Auto-Sync Model with Search Mode Toggle */}
+            <div className="mt-2.5 pt-2 border-t border-zinc-800/80 flex items-center justify-between">
+              <label className="flex items-center gap-2 text-[10.5px] font-mono text-zinc-400 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={autoSyncSearchModel}
+                  onChange={(e) => setAutoSyncSearchModel(e.target.checked)}
+                  className="rounded border-zinc-700 bg-zinc-900 text-white focus:ring-0 w-3.5 h-3.5 accent-white cursor-pointer"
+                />
+                <span>{t.chatInput.autoSyncModel}</span>
+              </label>
+            </div>
+          </div>
+        )}
+
         {/* Subtle Titanium Atmospheric Radiance on Focus */}
         <div className="absolute -inset-1 bg-white/[0.04] rounded-[28px] blur-xl opacity-0 group-focus-within:opacity-100 transition-all duration-500 pointer-events-none" />
 
@@ -290,7 +642,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             {/* Thinking Capability Indicator */}
             {isThinkingTurnedOn ? (
               <div
-                onClick={() => setIsThinkingPopoverOpen(true)}
+                ref={thinkingHudRef}
+                onClick={() => {
+                  setIsSearchPopoverOpen(false);
+                  setIsThinkingPopoverOpen(prev => !prev);
+                }}
                 className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10.5px] font-mono cursor-pointer transition-all shadow-sm flex-shrink-0 ${
                   thinkingMode === 'ultra'
                     ? 'bg-purple-950/60 border-purple-600/70 text-purple-200 hover:bg-purple-900/60 shadow-[0_0_12px_rgba(168,85,247,0.25)]'
@@ -333,7 +689,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             {/* Search Capability Indicator */}
             {webSearch ? (
               <div
-                onClick={() => setIsSearchPopoverOpen(true)}
+                ref={searchHudRef}
+                onClick={() => {
+                  setIsThinkingPopoverOpen(false);
+                  setIsSearchPopoverOpen(prev => !prev);
+                }}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-950/60 border border-cyan-600/70 text-cyan-200 hover:bg-cyan-900/60 text-[10.5px] font-mono cursor-pointer transition-all shadow-[0_0_12px_rgba(6,182,212,0.25)] flex-shrink-0"
                 title="Search V3 Engine Active • Click to configure"
               >
@@ -464,7 +824,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setIsThinkingPopoverOpen(!isThinkingPopoverOpen);
+                          setIsSearchPopoverOpen(false);
+                          setIsThinkingPopoverOpen(prev => !prev);
                         }}
                         className="pr-2 pl-0.5 py-1.5 text-zinc-400 hover:text-white cursor-pointer transition-colors"
                         title={t.chatInput.thinkingEngineTitle}
@@ -472,148 +833,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                         <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isThinkingPopoverOpen ? 'rotate-180 text-white' : ''}`} />
                       </button>
                     </div>
-
-                    {/* Thinking Engine Selection Popover Panel */}
-                    {isThinkingPopoverOpen && (
-                      <div className="absolute bottom-full mb-3 left-0 w-80 max-w-[calc(100vw-2rem)] rounded-2xl bg-[#101014]/98 border border-zinc-700/80 shadow-[0_20px_60px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.06)] p-3.5 z-[100] animate-fade-in backdrop-blur-2xl overflow-hidden">
-                        <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                        <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
-                          <div className="flex items-center gap-1.5">
-                            <BrainCircuit className="w-4 h-4 text-zinc-300" />
-                            <span className="text-xs font-semibold text-white font-mono uppercase tracking-wider">
-                              {t.chatInput.thinkingEngineTitle}
-                            </span>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => setIsThinkingPopoverOpen(false)}
-                            className="p-1 rounded text-zinc-400 hover:text-white cursor-pointer"
-                            title="Close"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-
-                        <p className="text-[11px] text-zinc-400 mt-1 mb-2 font-mono">
-                          {t.chatInput.thinkingEngineSubtitle}
-                        </p>
-
-                        <div className="space-y-1.5">
-                          {/* 1. Basic Thinking */}
-                          <div 
-                            onClick={() => {
-                              onChangeThinkingMode?.('basic');
-                              setIsThinkingPopoverOpen(false);
-                            }}
-                            className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
-                              thinkingMode === 'basic'
-                                ? 'bg-zinc-800/90 border-white/30 text-white shadow-sm' 
-                                : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
-                                  <Sparkles className="w-3.5 h-3.5" />
-                                </div>
-                                <span className="font-semibold text-xs text-white font-mono">{t.chatInput.basicThinking}</span>
-                                <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-[9px] font-mono font-bold text-zinc-300">
-                                  AGILE
-                                </span>
-                              </div>
-                              {thinkingMode === 'basic' && (
-                                <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center">
-                                  <Check className="w-3 h-3 stroke-[3]" />
-                                </div>
-                              )}
-                            </div>
-                            <p className="text-[11px] text-zinc-400 mt-1">
-                              {t.chatInput.basicThinkingDesc}
-                            </p>
-                          </div>
-
-                          {/* 2. DeepThinking V2 / V2.1 */}
-                          <div 
-                            onClick={() => {
-                              onChangeThinkingMode?.('deep');
-                              setIsThinkingPopoverOpen(false);
-                            }}
-                            className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
-                              thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic' && thinkingMode !== 'ultra')
-                                ? 'bg-zinc-800/90 border-white/30 text-white shadow-sm'
-                                : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
-                                  <BrainCircuit className="w-3.5 h-3.5" />
-                                </div>
-                                <span className="font-semibold text-xs text-white font-mono">
-                                  {is03Coder ? t.chatInput.deepThinkingV21 : t.chatInput.deepThink}
-                                </span>
-                                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-zinc-800 text-zinc-200 border border-zinc-700">
-                                  {is03Coder ? 'V2.1 CODER' : 'L3 PROOF'}
-                                </span>
-                              </div>
-                              {(thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic' && thinkingMode !== 'ultra')) && (
-                                <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center">
-                                  <Check className="w-3 h-3 stroke-[3]" />
-                                </div>
-                              )}
-                            </div>
-                            <p className="text-[11px] text-zinc-400 mt-1">
-                              {is03Coder ? t.chatInput.deepThinkingV21Desc : t.chatInput.deepThinkingDesc}
-                            </p>
-                          </div>
-
-                          {/* 3. UltraThinking V2.0 / V1.0 */}
-                          <div 
-                            onClick={() => {
-                              onChangeThinkingMode?.('ultra');
-                              const isProModel = currentModel.id === 'nixima-0.3-pro' || currentModel.id === 'nixima-0.2-pro';
-                              if (!isProModel && onSelectModel) {
-                                const proModel = NIXIMA_MODELS.find(m => m.id === 'nixima-0.3-pro') || NIXIMA_MODELS.find(m => m.id === 'nixima-0.2-pro');
-                                if (proModel) onSelectModel(proModel);
-                              }
-                              setIsThinkingPopoverOpen(false);
-                            }}
-                            className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
-                              thinkingMode === 'ultra'
-                                ? 'bg-zinc-800/90 border-white/30 text-white shadow-sm' 
-                                : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
-                                  <BrainCircuit className="w-3.5 h-3.5 text-zinc-200" />
-                                </div>
-                                <span className="font-semibold text-xs text-white font-mono">
-                                  {currentModel.id === 'nixima-0.3-pro' ? 'UltraThinking V2.0' : t.chatInput.ultraThinkingV1}
-                                </span>
-                                <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-[9px] font-mono font-bold text-zinc-200 border border-zinc-700">
-                                  {currentModel.id === 'nixima-0.3-pro' ? 'ULTRA V2.0' : 'ULTRA V1.0'}
-                                </span>
-                              </div>
-                              {thinkingMode === 'ultra' && (
-                                <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center">
-                                  <Check className="w-3 h-3 stroke-[3]" />
-                                </div>
-                              )}
-                            </div>
-                            <p className="text-[11px] text-zinc-400 mt-1">
-                              {t.chatInput.ultraThinkingDesc}
-                            </p>
-                            {currentModel.id !== 'nixima-0.2-pro' && (
-                              <div className="mt-1.5 text-[10px] font-mono text-zinc-400 flex items-center gap-1">
-                                <span>⚡ {language === 'uk' ? 'Підключає та оптимізує Nixima Pro' : 'Auto-pairs with Nixima Pro'}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
                   </div>
 
               {/* Search V3 Engine Control (Unified Sleek Titanium Pill) */}
@@ -659,7 +878,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setIsSearchPopoverOpen(!isSearchPopoverOpen);
+                      setIsThinkingPopoverOpen(false);
+                      setIsSearchPopoverOpen(prev => !prev);
                     }}
                     className="pr-2 pl-0.5 py-1.5 text-zinc-400 hover:text-white cursor-pointer transition-colors"
                     title={t.chatInput.searchEngineTitle}
@@ -667,177 +887,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${isSearchPopoverOpen ? 'rotate-180 text-white' : ''}`} />
                   </button>
                 </div>
-
-                {/* Search Engine Selection Popover Panel */}
-                {isSearchPopoverOpen && (
-                  <div className="absolute bottom-full mb-3 left-1/2 -translate-x-1/2 sm:translate-x-0 sm:left-0 w-80 sm:w-96 max-w-[calc(100vw-2rem)] rounded-2xl bg-[#101014]/98 border border-zinc-700/80 shadow-[0_20px_60px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.06)] p-3.5 z-[100] animate-fade-in backdrop-blur-2xl overflow-hidden">
-                    <div className="pointer-events-none absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                    <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
-                      <div className="flex items-center gap-1.5">
-                        <Globe className="w-4 h-4 text-zinc-300" />
-                        <span className="text-xs font-semibold text-white font-mono uppercase tracking-wider">
-                          {t.chatInput.searchEngineTitle}
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setIsSearchPopoverOpen(false)}
-                        className="p-1 rounded text-zinc-400 hover:text-white cursor-pointer"
-                        title="Close"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-
-                    <p className="text-[11px] text-zinc-400 mt-1 mb-2 font-mono">
-                      {t.chatInput.searchEngineSubtitle}
-                    </p>
-
-                    <div className="space-y-1.5">
-                      {/* 1. Search V3 Fast */}
-                      {(() => {
-                        const recFast = getRecommendedModelForSearchMode('fast');
-                        const isModeActive = webSearch && searchMode === 'fast';
-                        return (
-                          <div 
-                            onClick={() => handleSelectSearchMode('fast')}
-                            className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
-                              isModeActive 
-                                ? 'bg-zinc-850/90 border-white/30 text-white shadow-sm' 
-                                : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
-                                  <Zap className="w-3.5 h-3.5" />
-                                </div>
-                                <span className="font-semibold text-xs text-white font-mono">Search V3 Fast</span>
-                                <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-[9px] font-mono font-bold text-zinc-300">
-                                  &lt;50MS
-                                </span>
-                              </div>
-                              {isModeActive && (
-                                <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center">
-                                  <Check className="w-3 h-3 stroke-[3]" />
-                                </div>
-                              )}
-                            </div>
-                            <p className="text-[11px] text-zinc-400 mt-1">
-                              {t.chatInput.searchFastDesc}
-                            </p>
-                            <div className="mt-1.5 pt-1.5 border-t border-zinc-800/60 flex items-center justify-between text-[10px] font-mono text-zinc-400">
-                              <span className="flex items-center gap-1 text-zinc-300">
-                                <span>⚡ Optimal:</span>
-                                <strong className="text-zinc-100">{recFast.shortName}</strong>
-                              </span>
-                              <span className="text-zinc-500">20 Websites Rapid</span>
-                            </div>
-                          </div>
-                        );
-                      })()}
-
-                      {/* 2. Search V3 Standard */}
-                      {(() => {
-                        const recStd = getRecommendedModelForSearchMode('standard');
-                        const isModeActive = webSearch && searchMode === 'standard';
-                        return (
-                          <div 
-                            onClick={() => handleSelectSearchMode('standard')}
-                            className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
-                              isModeActive 
-                                ? 'bg-zinc-850/90 border-white/30 text-white shadow-sm' 
-                                : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
-                                  <Globe className="w-3.5 h-3.5" />
-                                </div>
-                                <span className="font-semibold text-xs text-white font-mono">Search V3 Standard</span>
-                                <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-[9px] font-mono font-bold text-zinc-300">
-                                  BALANCED
-                                </span>
-                              </div>
-                              {isModeActive && (
-                                <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center">
-                                  <Check className="w-3 h-3 stroke-[3]" />
-                                </div>
-                              )}
-                            </div>
-                            <p className="text-[11px] text-zinc-400 mt-1">
-                              {t.chatInput.searchStandardDesc}
-                            </p>
-                            <div className="mt-1.5 pt-1.5 border-t border-zinc-800/60 flex items-center justify-between text-[10px] font-mono text-zinc-400">
-                              <span className="flex items-center gap-1 text-zinc-300">
-                                <span>🌐 Optimal:</span>
-                                <strong className="text-zinc-100">{recStd.shortName}</strong>
-                              </span>
-                              <span className="text-zinc-500">20+ Websites Deep Grounding</span>
-                            </div>
-                          </div>
-                        );
-                      })()}
-
-                      {/* 3. Search V3 Mega (Creator Clearance) */}
-                      {isCreator && (() => {
-                        const recMega = getRecommendedModelForSearchMode('mega');
-                        const isModeActive = webSearch && searchMode === 'mega';
-                        return (
-                          <div 
-                            onClick={() => handleSelectSearchMode('mega')}
-                            className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
-                              isModeActive 
-                                ? 'bg-zinc-850/90 border-white/30 text-white shadow-sm' 
-                                : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
-                                <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
-                                  <BrainCircuit className="w-3.5 h-3.5" />
-                                </div>
-                                <span className="font-semibold text-xs text-white font-mono">Search V3 Mega</span>
-                                <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-[9px] font-mono font-bold text-zinc-300">
-                                  CREATOR SWARM
-                                </span>
-                              </div>
-                              {isModeActive && (
-                                <div className="w-4 h-4 rounded-full bg-white text-black flex items-center justify-center">
-                                  <Check className="w-3 h-3 stroke-[3]" />
-                                </div>
-                              )}
-                            </div>
-                            <p className="text-[11px] text-zinc-400 mt-1">
-                              {t.chatInput.searchMegaDesc}
-                            </p>
-                            <div className="mt-1.5 pt-1.5 border-t border-zinc-800/60 flex items-center justify-between text-[10px] font-mono text-zinc-400">
-                              <span className="flex items-center gap-1 text-zinc-200">
-                                <span>🧠 Optimal:</span>
-                                <strong className="text-white">{recMega.shortName}</strong>
-                              </span>
-                              <span className="text-zinc-400">50-80 Websites • 7 Clusters</span>
-                            </div>
-                          </div>
-                        );
-                      })()}
-                    </div>
-
-                    {/* Auto-Sync Model with Search Mode Toggle */}
-                    <div className="mt-2.5 pt-2 border-t border-zinc-800/80 flex items-center justify-between">
-                      <label className="flex items-center gap-2 text-[10.5px] font-mono text-zinc-400 cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={autoSyncSearchModel}
-                          onChange={(e) => setAutoSyncSearchModel(e.target.checked)}
-                          className="rounded border-zinc-700 bg-zinc-900 text-white focus:ring-0 w-3.5 h-3.5 accent-white cursor-pointer"
-                        />
-                        <span>{t.chatInput.autoSyncModel}</span>
-                      </label>
-                    </div>
-                  </div>
-                )}
               </div>
 
               {/* Omni Dual-Tool Active Indicator Badge */}
