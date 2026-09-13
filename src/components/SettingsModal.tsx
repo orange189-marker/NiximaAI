@@ -803,16 +803,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       {language === 'uk' ? 'Персональний ключ активний' : 'Custom Key Active'}
                     </span>
                   ) : (
-                    <span className="px-2 py-0.5 rounded-full bg-zinc-850 text-zinc-400 border border-zinc-800 text-[10px] font-mono font-medium">
-                      {language === 'uk' ? 'Спільний демо-ключ (50/день)' : 'Shared Demo Key (50/day)'}
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-950/40 text-emerald-400 border border-emerald-800/50 text-[10px] font-mono font-medium flex items-center gap-1.5">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                      {language === 'uk' ? 'Мульти-пул активний (Auto-Failover)' : 'Multi-Key Pool Active (Auto-Failover)'}
                     </span>
                   )}
                 </div>
 
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
                   {language === 'uk'
-                    ? 'Спільний демо-ключ має ліміт 50 запитів на добу на всіх користувачів. Підключіть власний безкоштовний ключ OpenRouter для 100% стабільності та 1,000+ щоденних запитів.'
-                    : 'The shared demo key has a global limit of 50 requests/day. Connect your own free OpenRouter key to unlock 1,000+ requests/day with zero rate-limit interruptions.'}
+                    ? 'Вбудована система підтримує пул з кількох ключів із автоматичним перемиканням при вичерпанні лімітів (429/402). Ви також можете ввести власний ключ для найвищого персонального пріоритету.'
+                    : 'The built-in engine maintains a resilient multi-key pool with automatic failover if any key encounters rate limits (429/402). You can also connect your own key for maximum individual priority.'}
                 </p>
 
                 <div className="flex items-center gap-2">

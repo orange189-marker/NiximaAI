@@ -10,24 +10,133 @@ import {
 } from '../types/chat';
 import { isCjkRequested, isPureSafetyArtifact, sanitizeModelOutput, sanitizeTokenStream } from './textSanitizer';
 
-// Pre-configured system key inserted directly into the runtime
-const BUILTIN_SYSTEM_KEY = atob('c2stb3ItdjEtZjc1NWEzZDcyMTVjMDYzYzA3ZWFiZmJmZWQ2MWE4YzNlMjBiMDQzZTcyY2MxNGYxOTQzMDc5YjczYzIwY2M4OQ==');
+// Pre-configured system keys pool inserted directly into the runtime (Base64 obfuscated)
+const BUILTIN_SYSTEM_KEYS: string[] = [
+  atob('c2stb3ItdjEtZjc1NWEzZDcyMTVjMDYzYzA3ZWFiZmJmZWQ2MWE4YzNlMjBiMDQzZTcyY2MxNGYxOTQzMDc5YjczYzIwY2M4OQ=='), // Key 1 (...20cc89)
+  atob('c2stb3ItdjEtYjgxM2YwYjgxNTUwM2IyMWM4NDg3YjAzYTQzNTQ3Yzk5MTAyMjBlODZmOGVjMTVhZGQ0OWZhODgyYTg5MDE2OQ=='), // Key 2 (...890169)
+];
 
-export const getSystemApiKey = (userCustomKey?: string): string => {
-  if (userCustomKey && userCustomKey.trim().length > 0) {
-    return userCustomKey.trim();
+const BUILTIN_SYSTEM_KEY = BUILTIN_SYSTEM_KEYS[0];
+
+interface KeyHealthRecord {
+  exhaustedUntil: number;
+  failCount: number;
+  lastReason?: string;
+}
+
+// In-memory health status map for key failover management
+const keyHealthMap = new Map<string, KeyHealthRecord>();
+
+/**
+ * Mark a key as temporarily exhausted/rate-limited with cooldown
+ */
+export function markKeyExhausted(key: string, cooldownMs: number = 5 * 60 * 1000, reason?: string) {
+  if (!key) return;
+  const existing = keyHealthMap.get(key) || { exhaustedUntil: 0, failCount: 0 };
+  const failCount = existing.failCount + 1;
+  const effectiveCooldown = Math.min(cooldownMs * failCount, 60 * 60 * 1000);
+  keyHealthMap.set(key, {
+    exhaustedUntil: Date.now() + effectiveCooldown,
+    failCount,
+    lastReason: reason,
+  });
+  console.warn(`[Nixima Key Pool] Key ending in ...${key.slice(-6)} in cooldown for ${Math.round(effectiveCooldown / 1000)}s (${reason || 'rate-limited'})`);
+}
+
+/**
+ * Reset a key's health record upon successful response
+ */
+export function markKeySuccess(key: string) {
+  if (!key) return;
+  const existing = keyHealthMap.get(key);
+  if (existing && (existing.failCount > 0 || existing.exhaustedUntil > 0)) {
+    keyHealthMap.set(key, { exhaustedUntil: 0, failCount: 0 });
+    console.log(`[Nixima Key Pool] Key ending in ...${key.slice(-6)} active & healthy`);
   }
+}
+
+/**
+ * Retrieve all configured API keys in priority order (user custom > local storage > env > builtin pool)
+ */
+export const getSystemApiKeys = (userCustomKey?: string): string[] => {
+  const keys: string[] = [];
+
+  // 1. User custom key passed explicitly
+  if (userCustomKey && userCustomKey.trim().length > 0) {
+    keys.push(userCustomKey.trim());
+  }
+
+  // 2. User custom key from localStorage
   if (typeof window !== 'undefined') {
     const fromStorage = localStorage.getItem('nixima_openrouter_key');
-    if (fromStorage && fromStorage.trim().length > 0) {
-      return fromStorage.trim();
+    if (fromStorage && fromStorage.trim().length > 0 && !keys.includes(fromStorage.trim())) {
+      keys.push(fromStorage.trim());
     }
   }
-  const fromEnv = (import.meta as any).env?.VITE_OPENROUTER_API_KEY;
-  if (fromEnv && typeof fromEnv === 'string' && fromEnv.trim().length > 0) {
-    return fromEnv.trim();
+
+  // 3. Environment variables (VITE_OPENROUTER_API_KEY, VITE_OPENROUTER_API_KEYS, VITE_OPENROUTER_API_KEY_2)
+  const envKey = (import.meta as any).env?.VITE_OPENROUTER_API_KEY;
+  if (envKey && typeof envKey === 'string') {
+    const split = envKey.split(/[,;\s]+/).map((k: string) => k.trim()).filter(Boolean);
+    for (const k of split) {
+      if (!keys.includes(k)) keys.push(k);
+    }
   }
-  return BUILTIN_SYSTEM_KEY;
+
+  const envKeys = (import.meta as any).env?.VITE_OPENROUTER_API_KEYS;
+  if (envKeys && typeof envKeys === 'string') {
+    const split = envKeys.split(/[,;\s]+/).map((k: string) => k.trim()).filter(Boolean);
+    for (const k of split) {
+      if (!keys.includes(k)) keys.push(k);
+    }
+  }
+
+  const envKey2 = (import.meta as any).env?.VITE_OPENROUTER_API_KEY_2;
+  if (envKey2 && typeof envKey2 === 'string' && envKey2.trim()) {
+    const trimmed = envKey2.trim();
+    if (!keys.includes(trimmed)) keys.push(trimmed);
+  }
+
+  // 4. Built-in system keys pool
+  for (const bk of BUILTIN_SYSTEM_KEYS) {
+    if (bk && !keys.includes(bk)) {
+      keys.push(bk);
+    }
+  }
+
+  return keys.filter(k => k.length > 10);
+};
+
+/**
+ * Returns available keys ordered by health (active keys first, followed by cooling down keys)
+ */
+export const getOrderedApiKeys = (userCustomKey?: string): string[] => {
+  const allKeys = getSystemApiKeys(userCustomKey);
+  const now = Date.now();
+
+  const healthy: string[] = [];
+  const coolingDown: { key: string; remaining: number }[] = [];
+
+  for (const key of allKeys) {
+    const record = keyHealthMap.get(key);
+    if (!record || record.exhaustedUntil <= now) {
+      healthy.push(key);
+    } else {
+      coolingDown.push({ key, remaining: record.exhaustedUntil - now });
+    }
+  }
+
+  // Sort cooling down keys so the one closest to expiry is tried first
+  coolingDown.sort((a, b) => a.remaining - b.remaining);
+
+  // Healthy keys first, then cooling down as fallback
+  const result = [...healthy, ...coolingDown.map(c => c.key)];
+  return result.length > 0 ? result : BUILTIN_SYSTEM_KEYS;
+};
+
+export const getSystemApiKey = (userCustomKey?: string): string => {
+  const ordered = getOrderedApiKeys(userCustomKey);
+  return ordered[0] || BUILTIN_SYSTEM_KEY;
 };
 
 export interface StreamCallbacks {
@@ -1208,279 +1317,315 @@ export async function streamOpenRouterChat({
   let lastError: Error | null = null;
 
   for (const candidateModel of candidates) {
-    const candidateCtrl = new AbortController();
-    const isHeavyReasoning = effectiveThinkingMode === 'ultra' || effectiveThinkingMode === 'deep';
-    const connectionTimeoutMs = isHeavyReasoning ? 25000 : 15000;
-    let candidateTimeout: any = setTimeout(() => {
-      candidateCtrl.abort(new Error(`Model ${candidateModel} connection timed out after ${Math.round(connectionTimeoutMs / 1000)}s`));
-    }, connectionTimeoutMs);
+    const availableKeys = getOrderedApiKeys(apiKey);
 
-    const onParentAbort = () => candidateCtrl.abort(signal?.reason);
-    if (signal) {
-      if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
-      signal.addEventListener('abort', onParentAbort, { once: true });
-    }
+    for (let keyIdx = 0; keyIdx < availableKeys.length; keyIdx++) {
+      const currentKey = availableKeys[keyIdx];
+      const keySuffix = currentKey.slice(-6);
 
-    try {
-      const requestPayload: any = {
-        model: candidateModel,
-        messages: formattedMessages,
-        temperature,
-        top_p: topP,
-        stream: true,
-      };
+      const candidateCtrl = new AbortController();
+      const isHeavyReasoning = effectiveThinkingMode === 'ultra' || effectiveThinkingMode === 'deep';
+      const connectionTimeoutMs = isHeavyReasoning ? 25000 : 15000;
+      let candidateTimeout: any = setTimeout(() => {
+        candidateCtrl.abort(new Error(`Model ${candidateModel} connection timed out after ${Math.round(connectionTimeoutMs / 1000)}s`));
+      }, connectionTimeoutMs);
 
-      // When infinite output is enabled for the creator, omit max_tokens so OpenRouter and upstream providers
-      // stream up to their maximum model context limit without any 4096-token ceiling.
-      if (!infiniteOutput) {
-        requestPayload.max_tokens = maxTokens;
+      const onParentAbort = () => candidateCtrl.abort(signal?.reason);
+      if (signal) {
+        if (signal.aborted) throw new DOMException('Aborted', 'AbortError');
+        signal.addEventListener('abort', onParentAbort, { once: true });
       }
 
-      // Configure reasoning effort based on thinking mode (OpenRouter strictly requires either effort OR max_tokens, never both)
-      if (effectiveThinkingMode === 'ultra') {
-        requestPayload.reasoning = {
-          effort: 'high',
+      try {
+        const requestPayload: any = {
+          model: candidateModel,
+          messages: formattedMessages,
+          temperature,
+          top_p: topP,
+          stream: true,
         };
-      } else if (effectiveThinkingMode === 'deep') {
-        requestPayload.reasoning = {
-          effort: 'medium',
-        };
-      } else if (effectiveThinkingMode === 'basic') {
-        requestPayload.reasoning = {
-          effort: 'low',
-        };
-      } else if (isOmni) {
-        requestPayload.reasoning = {
-          effort: 'medium',
-        };
-      }
 
-      let response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${activeKey}`,
-          'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'https://nixima.ai',
-          'X-Title': 'Nixima AI',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestPayload),
-        signal: candidateCtrl.signal,
-      });
-
-      if (!response.ok) {
-        let errorText = await response.text();
-        console.warn(`[Nixima Core] Model ${candidateModel} returned ${response.status}: ${errorText}. Attempting fallback...`);
-
-        // If upstream provider returned 429, log and proceed to next candidate provider
-        if (response.status === 429 || errorText.includes('Rate limit exceeded') || errorText.includes('rate-limited')) {
-          lastError = new Error(`RATE_LIMIT_EXCEEDED: ${errorText}`);
-          continue; // Try next candidate provider
+        // When infinite output is enabled for the creator, omit max_tokens so OpenRouter and upstream providers
+        // stream up to their maximum model context limit without any 4096-token ceiling.
+        if (!infiniteOutput) {
+          requestPayload.max_tokens = maxTokens;
         }
 
-        // Auto-heal: If 400 occurred due to reasoning parameter incompatibility on this model, retry immediately without reasoning payload
-        if (response.status === 400 && requestPayload.reasoning) {
-          console.warn(`[Nixima Core] Retrying ${candidateModel} without reasoning object due to upstream 400...`);
-          const retryPayload = { ...requestPayload };
-          delete retryPayload.reasoning;
-          response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${activeKey}`,
-              'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'https://nixima.ai',
-              'X-Title': 'Nixima AI',
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(retryPayload),
-            signal: candidateCtrl.signal,
-          });
+        // Configure reasoning effort based on thinking mode (OpenRouter strictly requires either effort OR max_tokens, never both)
+        if (effectiveThinkingMode === 'ultra') {
+          requestPayload.reasoning = {
+            effort: 'high',
+          };
+        } else if (effectiveThinkingMode === 'deep') {
+          requestPayload.reasoning = {
+            effort: 'medium',
+          };
+        } else if (effectiveThinkingMode === 'basic') {
+          requestPayload.reasoning = {
+            effort: 'low',
+          };
+        } else if (isOmni) {
+          requestPayload.reasoning = {
+            effort: 'medium',
+          };
+        }
 
-          if (!response.ok) {
-            errorText = await response.text();
-            lastError = new Error(`HTTP ${response.status}: ${errorText}`);
-            continue;
+        let response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${currentKey}`,
+            'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'https://nixima.ai',
+            'X-Title': 'Nixima AI',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(requestPayload),
+          signal: candidateCtrl.signal,
+        });
+
+        if (!response.ok) {
+          let errorText = await response.text();
+          console.warn(`[Nixima Core] Model ${candidateModel} (key ...${keySuffix}) returned ${response.status}: ${errorText}`);
+
+          const isRateOrQuota = 
+            response.status === 429 || 
+            response.status === 402 || 
+            response.status === 401 ||
+            /rate limit|quota|credit|insufficient|unauthorized/i.test(errorText);
+
+          if (isRateOrQuota) {
+            markKeyExhausted(currentKey, 5 * 60 * 1000, `HTTP ${response.status}: ${errorText.slice(0, 120)}`);
+            lastError = new Error(`KEY_EXHAUSTED (...${keySuffix}): ${errorText}`);
+            continue; // Try next key for this model!
           }
-        } else {
-          lastError = new Error(`HTTP ${response.status}: ${errorText}`);
-          continue; // Try next candidate model
-        }
-      }
 
-      if (!response.body) {
-        throw new Error('No response body stream received.');
-      }
+          // Auto-heal: If 400 occurred due to reasoning parameter incompatibility on this model, retry immediately without reasoning payload
+          if (response.status === 400 && requestPayload.reasoning) {
+            console.warn(`[Nixima Core] Retrying ${candidateModel} without reasoning object due to upstream 400...`);
+            const retryPayload = { ...requestPayload };
+            delete retryPayload.reasoning;
+            response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${currentKey}`,
+                'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'https://nixima.ai',
+                'X-Title': 'Nixima AI',
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(retryPayload),
+              signal: candidateCtrl.signal,
+            });
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder('utf-8');
-      let buffer = '';
-      let fullContent = '';
-      let fullThinking = '';
-      let isInsideThinkingTag = false;
-      let hasStreamError = false;
+            if (!response.ok) {
+              errorText = await response.text();
+              const retryIsRateOrQuota = 
+                response.status === 429 || 
+                response.status === 402 || 
+                response.status === 401 ||
+                /rate limit|quota|credit|insufficient|unauthorized/i.test(errorText);
 
-      const emitContentToken = () => {
-        const streamed = antiGlitchFilter ? sanitizeTokenStream(fullContent, allowCjk) : fullContent;
-        if (!isPureSafetyArtifact(fullContent)) {
-          callbacks.onToken(streamed);
-        }
-      };
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        // Reset stream idle timeout whenever active data packets arrive
-        clearTimeout(candidateTimeout);
-        candidateTimeout = setTimeout(() => {
-          candidateCtrl.abort(new Error(`Model ${candidateModel} stream stalled after 20s`));
-        }, 20000);
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          const trimmed = line.trim();
-          if (!trimmed || trimmed.startsWith(':')) continue;
-          if (trimmed === 'data: [DONE]') break;
-
-          if (trimmed.startsWith('data: ')) {
-            try {
-              const json = JSON.parse(trimmed.slice(6));
-
-              // Detect in-stream errors (e.g. 502 ResourceExhausted or provider failure)
-              if (json.error) {
-                const errMsg = json.error.message || JSON.stringify(json.error);
-                console.warn(`[Nixima Core] Model ${candidateModel} emitted in-stream error: ${errMsg}. Failing over...`);
-                lastError = new Error(errMsg);
-                hasStreamError = true;
-                break;
+              if (retryIsRateOrQuota) {
+                markKeyExhausted(currentKey, 5 * 60 * 1000, `HTTP ${response.status}: ${errorText.slice(0, 120)}`);
+                lastError = new Error(`KEY_EXHAUSTED (...${keySuffix}): ${errorText}`);
+                continue;
               }
 
-              const delta = json.choices?.[0]?.delta;
-              if (!delta) continue;
-
-              // Handle reasoning field if returned by model (gated by allowThinking)
-              if (delta.reasoning && allowThinking) {
-                fullThinking += delta.reasoning;
-                callbacks.onThinking?.(fullThinking);
-              }
-
-              // Handle standard content tokens
-              if (delta.content) {
-                const text = delta.content;
-
-                // Handle <think> tags from thinking models
-                if (text.includes('<think>')) {
-                  isInsideThinkingTag = true;
-                  const parts = text.split('<think>');
-                  if (parts[0]) {
-                    fullContent += parts[0];
-                    emitContentToken();
-                  }
-                  if (parts[1] && allowThinking) {
-                    fullThinking += parts[1];
-                    callbacks.onThinking?.(fullThinking);
-                  }
-                  continue;
-                }
-
-                if (text.includes('</think>')) {
-                  isInsideThinkingTag = false;
-                  const parts = text.split('</think>');
-                  if (parts[0] && allowThinking) {
-                    fullThinking += parts[0];
-                    callbacks.onThinking?.(fullThinking);
-                  }
-                  if (parts[1]) {
-                    fullContent += parts[1];
-                    emitContentToken();
-                  }
-                  continue;
-                }
-
-                if (isInsideThinkingTag) {
-                  // If thinking is disabled, drop thought tokens so they never surface
-                  if (allowThinking) {
-                    fullThinking += text;
-                    callbacks.onThinking?.(fullThinking);
-                  }
-                } else {
-                  fullContent += text;
-                  emitContentToken();
-                }
-              }
-            } catch (err) {
-              // Ignore single malformed chunk
+              lastError = new Error(`HTTP ${response.status}: ${errorText}`);
+              break; // Model incompatibility, try next model
             }
+          } else {
+            lastError = new Error(`HTTP ${response.status}: ${errorText}`);
+            break; // Model error (404, 503), try next model
+          }
+        }
+
+        if (!response.body) {
+          throw new Error('No response body stream received.');
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        let buffer = '';
+        let fullContent = '';
+        let fullThinking = '';
+        let isInsideThinkingTag = false;
+        let hasStreamError = false;
+        let streamErrorMessage = '';
+
+        const emitContentToken = () => {
+          const streamed = antiGlitchFilter ? sanitizeTokenStream(fullContent, allowCjk) : fullContent;
+          if (!isPureSafetyArtifact(fullContent)) {
+            callbacks.onToken(streamed);
+          }
+        };
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          // Reset stream idle timeout whenever active data packets arrive
+          clearTimeout(candidateTimeout);
+          candidateTimeout = setTimeout(() => {
+            candidateCtrl.abort(new Error(`Model ${candidateModel} stream stalled after 20s`));
+          }, 20000);
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed.startsWith(':')) continue;
+            if (trimmed === 'data: [DONE]') break;
+
+            if (trimmed.startsWith('data: ')) {
+              try {
+                const json = JSON.parse(trimmed.slice(6));
+
+                // Detect in-stream errors (e.g. 502 ResourceExhausted or provider failure)
+                if (json.error) {
+                  const errMsg = json.error.message || JSON.stringify(json.error);
+                  console.warn(`[Nixima Core] Model ${candidateModel} emitted in-stream error: ${errMsg}`);
+                  lastError = new Error(errMsg);
+                  hasStreamError = true;
+                  streamErrorMessage = errMsg;
+                  break;
+                }
+
+                const delta = json.choices?.[0]?.delta;
+                if (!delta) continue;
+
+                // Handle reasoning field if returned by model (gated by allowThinking)
+                if (delta.reasoning && allowThinking) {
+                  fullThinking += delta.reasoning;
+                  callbacks.onThinking?.(fullThinking);
+                }
+
+                // Handle standard content tokens
+                if (delta.content) {
+                  const text = delta.content;
+
+                  // Handle <think> tags from thinking models
+                  if (text.includes('<think>')) {
+                    isInsideThinkingTag = true;
+                    const parts = text.split('<think>');
+                    if (parts[0]) {
+                      fullContent += parts[0];
+                      emitContentToken();
+                    }
+                    if (parts[1] && allowThinking) {
+                      fullThinking += parts[1];
+                      callbacks.onThinking?.(fullThinking);
+                    }
+                    continue;
+                  }
+
+                  if (text.includes('</think>')) {
+                    isInsideThinkingTag = false;
+                    const parts = text.split('</think>');
+                    if (parts[0] && allowThinking) {
+                      fullThinking += parts[0];
+                      callbacks.onThinking?.(fullThinking);
+                    }
+                    if (parts[1]) {
+                      fullContent += parts[1];
+                      emitContentToken();
+                    }
+                    continue;
+                  }
+
+                  if (isInsideThinkingTag) {
+                    // If thinking is disabled, drop thought tokens so they never surface
+                    if (allowThinking) {
+                      fullThinking += text;
+                      callbacks.onThinking?.(fullThinking);
+                    }
+                  } else {
+                    fullContent += text;
+                    emitContentToken();
+                  }
+                }
+              } catch (err) {
+                // Ignore single malformed chunk
+              }
+            }
+          }
+
+          if (hasStreamError) {
+            break;
           }
         }
 
         if (hasStreamError) {
-          break;
-        }
-      }
-
-      if (hasStreamError) {
-        continue; // Proceed to fallback candidate
-      }
-
-      // If we got content, verify it isn't pure content safety metadata before accepting
-      if (fullContent.trim() || (allowThinking && fullThinking.trim())) {
-        const sanitizedContent = antiGlitchFilter
-          ? sanitizeModelOutput(fullContent, { allowCjk })
-          : fullContent;
-        const sanitizedThinking = (allowThinking && antiGlitchFilter)
-          ? sanitizeModelOutput(fullThinking, { allowCjk })
-          : (allowThinking ? fullThinking : '');
-
-        // If candidate only produced content-safety metadata or empty conversational content, fail over to next model
-        if (isPureSafetyArtifact(fullContent) || (!sanitizedContent.trim() && !sanitizedThinking.trim())) {
-          console.warn(`[Nixima Core] Model ${candidateModel} returned pure content safety artifact ("${fullContent.trim()}"). Failing over to next candidate...`);
-          lastError = new Error(`Model ${candidateModel} returned content safety tags instead of response.`);
-          continue; // Proceed to fallback candidate!
+          if (/rate limit|quota|credits|resource exhausted|429/i.test(streamErrorMessage)) {
+            markKeyExhausted(currentKey, 5 * 60 * 1000, streamErrorMessage);
+            if (fullContent) callbacks.onToken('');
+            if (fullThinking) callbacks.onThinking?.('');
+            continue; // Try next key
+          }
+          break; // Move to next model
         }
 
-        let searchGrounding: SearchGrounding | undefined = initialSearchGrounding;
-        let finalContent = sanitizedContent;
+        // If we got content, verify it isn't pure content safety metadata before accepting
+        if (fullContent.trim() || (allowThinking && fullThinking.trim())) {
+          const sanitizedContent = antiGlitchFilter
+            ? sanitizeModelOutput(fullContent, { allowCjk })
+            : fullContent;
+          const sanitizedThinking = (allowThinking && antiGlitchFilter)
+            ? sanitizeModelOutput(fullThinking, { allowCjk })
+            : (allowThinking ? fullThinking : '');
 
-        const userPrompt = messages[messages.length - 1]?.content || 'Web Inquiry';
-        const extracted = extractSearchGrounding(sanitizedContent, userPrompt, searchMode);
-        if (extracted.searchGrounding) {
-          searchGrounding = extracted.searchGrounding;
-          finalContent = extracted.cleanedContent;
-        } else if (!searchGrounding && webSearch) {
-          searchGrounding = generateDefaultGrounding(userPrompt, searchMode);
+          // If candidate only produced content-safety metadata or empty conversational content, fail over to next model
+          if (isPureSafetyArtifact(fullContent) || (!sanitizedContent.trim() && !sanitizedThinking.trim())) {
+            console.warn(`[Nixima Core] Model ${candidateModel} returned pure content safety artifact ("${fullContent.trim()}"). Failing over to next candidate...`);
+            lastError = new Error(`Model ${candidateModel} returned content safety tags instead of response.`);
+            break; // Proceed to fallback candidate model!
+          }
+
+          // Mark current key as successful and healthy
+          markKeySuccess(currentKey);
+
+          let searchGrounding: SearchGrounding | undefined = initialSearchGrounding;
+          let finalContent = sanitizedContent;
+
+          const userPrompt = messages[messages.length - 1]?.content || 'Web Inquiry';
+          const extracted = extractSearchGrounding(sanitizedContent, userPrompt, searchMode);
+          if (extracted.searchGrounding) {
+            searchGrounding = extracted.searchGrounding;
+            finalContent = extracted.cleanedContent;
+          } else if (!searchGrounding && webSearch) {
+            searchGrounding = generateDefaultGrounding(userPrompt, searchMode);
+          }
+
+          const allowThinkingReturn = (allowThinking && sanitizedThinking.trim().length > 0);
+          const deepThinkingTelemetry = allowThinkingReturn
+            ? computeDeepThinkingTelemetry(
+                sanitizedThinking, 
+                undefined, 
+                effectiveThinkingMode !== 'none' ? effectiveThinkingMode : (model.isOmni ? 'basic' : 'deep')
+              )
+            : undefined;
+
+          return { 
+            fullContent: finalContent, 
+            fullThinking: allowThinking ? sanitizedThinking : '',
+            searchGrounding,
+            deepThinkingTelemetry,
+          };
         }
-
-        const allowThinkingReturn = (allowThinking && sanitizedThinking.trim().length > 0);
-        const deepThinkingTelemetry = allowThinkingReturn
-          ? computeDeepThinkingTelemetry(
-              sanitizedThinking, 
-              undefined, 
-              effectiveThinkingMode !== 'none' ? effectiveThinkingMode : (model.isOmni ? 'basic' : 'deep')
-            )
-          : undefined;
-
-        return { 
-          fullContent: finalContent, 
-          fullThinking: allowThinking ? sanitizedThinking : '',
-          searchGrounding,
-          deepThinkingTelemetry,
-        };
-      }
-    } catch (e: any) {
-      if (signal?.aborted || (e.name === 'AbortError' && signal?.aborted)) {
-        throw e;
-      }
-      lastError = e;
-      console.warn(`[Nixima Core] Failed streaming from ${candidateModel}:`, e.message);
-    } finally {
-      clearTimeout(candidateTimeout);
-      if (signal) {
-        signal.removeEventListener('abort', onParentAbort);
+      } catch (e: any) {
+        if (signal?.aborted || (e.name === 'AbortError' && signal?.aborted)) {
+          throw e;
+        }
+        lastError = e;
+        console.warn(`[Nixima Core] Failed streaming from ${candidateModel} with key ...${keySuffix}:`, e.message);
+      } finally {
+        clearTimeout(candidateTimeout);
+        if (signal) {
+          signal.removeEventListener('abort', onParentAbort);
+        }
       }
     }
   }
 
-  throw lastError || new Error('All model endpoints were temporarily unavailable. Please try again.');
+  throw lastError || new Error('All model endpoints and API keys were temporarily unavailable. Please try again.');
 }
