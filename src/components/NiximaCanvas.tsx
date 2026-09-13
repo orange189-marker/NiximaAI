@@ -1216,41 +1216,57 @@ export const NiximaCanvas: React.FC<NiximaCanvasProps> = ({
       </div>
 
       {/* 3. In-Canvas AI Directive Bar & Quick Action Chips */}
-      <div className="p-2 sm:p-2.5 bg-[#101014] border-t border-zinc-800/80 flex flex-col gap-2">
-        {/* Live Code Context Link Telemetry */}
-        <div className="flex items-center justify-between text-[10px] font-mono text-zinc-400 px-1">
-          <span className="flex items-center gap-1.5 text-zinc-300">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="font-semibold text-emerald-400">{t.canvas.aiDirective.codeContextActive}</span>
-            <span className="text-zinc-600">•</span>
-            <span className="text-zinc-400">v{currentVer} ({editableCode.split('\n').length} lines)</span>
-          </span>
-          <span className="text-zinc-500 hidden sm:inline" title={t.canvas.aiDirective.surgicalEditHint}>
-            {t.canvas.aiDirective.surgicalEditHint}
-          </span>
+      <div className="p-2 sm:p-2.5 bg-[#0e0e12]/95 backdrop-blur-md border-t border-zinc-800/80 flex flex-col gap-2">
+        {/* Live Code Context Link Telemetry Bar */}
+        <div className="flex items-center justify-between gap-2 px-0.5 select-none text-[11px]">
+          {/* Left: Status Badges (Never wrap) */}
+          <div className="flex items-center gap-1.5 flex-nowrap min-w-0">
+            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-emerald-400 text-[10px] font-medium tracking-wide whitespace-nowrap shadow-sm flex-shrink-0">
+              <span className="relative flex h-1.5 w-1.5 flex-shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+              </span>
+              <span>{t.canvas.aiDirective.codeContextActive}</span>
+            </div>
+
+            <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-zinc-800/80 border border-zinc-750 text-zinc-400 text-[10px] font-mono whitespace-nowrap flex-shrink-0">
+              <span className="text-zinc-200 font-semibold">v{currentVer}</span>
+              <span className="text-zinc-600">•</span>
+              <span>{editableCode.split('\n').length} {t.canvas.aiDirective.linesLabel}</span>
+            </div>
+          </div>
+
+          {/* Right: Surgical Edit Capability Pill with tooltip */}
+          <div
+            className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-zinc-200 text-[10px] font-medium whitespace-nowrap transition-colors cursor-help flex-shrink-0 shadow-sm"
+            title={t.canvas.aiDirective.surgicalEditHint}
+          >
+            <Sparkles className="w-2.5 h-2.5 text-purple-400 flex-shrink-0" />
+            <span>{t.canvas.aiDirective.surgicalEditBadge}</span>
+          </div>
         </div>
 
-        {/* Natural Language AI Directive Input Bar */}
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1 flex items-center">
-            <Sparkles className="w-3.5 h-3.5 text-zinc-400 absolute left-3 pointer-events-none" />
-            <input
-              type="text"
-              value={directiveInput}
-              onChange={(e) => setDirectiveInput(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleTriggerDirective()}
-              placeholder={t.canvas.aiDirective.placeholder}
-              className="w-full pl-9 pr-3 py-1.5 bg-[#141418] border border-zinc-750 hover:border-zinc-700 focus:border-zinc-500 rounded-lg text-xs font-mono text-zinc-200 placeholder-zinc-500 focus:outline-none transition-colors"
-            />
+        {/* Natural Language AI Directive Integrated Command Bar */}
+        <div className="relative flex items-center bg-[#141418] hover:bg-[#17171d] border border-zinc-800 hover:border-zinc-700 focus-within:border-zinc-500 focus-within:ring-1 focus-within:ring-zinc-600/30 rounded-xl p-1 shadow-inner transition-all">
+          <div className="pl-2.5 pr-1.5 flex items-center justify-center text-zinc-400 pointer-events-none flex-shrink-0">
+            <Sparkles className="w-3.5 h-3.5 text-zinc-400" />
           </div>
+          <input
+            type="text"
+            value={directiveInput}
+            onChange={(e) => setDirectiveInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleTriggerDirective()}
+            placeholder={t.canvas.aiDirective.placeholder}
+            className="flex-1 min-w-0 bg-transparent py-1.5 px-1.5 text-xs text-zinc-100 placeholder-zinc-500 font-sans focus:outline-none"
+          />
           <button
             type="button"
             onClick={() => handleTriggerDirective()}
             disabled={!directiveInput.trim()}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-200 hover:bg-white text-black font-mono text-xs font-medium disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95 flex-shrink-0"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-100 hover:bg-white text-zinc-950 text-xs font-semibold disabled:opacity-25 disabled:hover:bg-zinc-100 disabled:cursor-not-allowed transition-all shadow-sm active:scale-95 flex-shrink-0"
             title={t.canvas.aiDirective.send}
           >
-            <Send className="w-3 h-3 text-black" />
+            <Send className="w-3 h-3 text-zinc-950" />
             <span className="hidden sm:inline">{t.canvas.aiDirective.send}</span>
           </button>
         </div>
@@ -1261,21 +1277,26 @@ export const NiximaCanvas: React.FC<NiximaCanvasProps> = ({
           <button
             type="button"
             onClick={handleAutoDebug}
-            className={`flex items-center gap-1 px-2.5 py-1 rounded-full border text-[11px] font-mono whitespace-nowrap transition-all ${
+            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[11px] font-mono whitespace-nowrap transition-all flex-shrink-0 shadow-sm active:scale-95 ${
               consoleLogs.some(l => l.type === 'error')
-                ? 'bg-rose-950/50 border-rose-700 text-rose-300 hover:bg-rose-900/60 shadow-sm animate-pulse'
-                : 'bg-zinc-900/90 hover:bg-zinc-800 border-zinc-800 hover:border-zinc-700 text-zinc-300 hover:text-white'
+                ? 'bg-rose-950/40 border-rose-600/70 text-rose-300 hover:bg-rose-900/50 shadow-rose-950/30 animate-pulse'
+                : 'bg-zinc-900/80 hover:bg-zinc-800/90 border-zinc-800/90 hover:border-zinc-700 text-zinc-300 hover:text-white'
             }`}
           >
-            <AlertCircle className="w-3 h-3" />
+            <AlertCircle className="w-3 h-3 text-rose-400 flex-shrink-0" />
             <span>{t.canvas.aiDirective.autoDebug}</span>
+            {consoleLogs.some(l => l.type === 'error') && (
+              <span className="px-1.5 py-0.2 rounded-full bg-rose-500/20 text-rose-300 text-[10px] font-mono font-bold">
+                {consoleLogs.filter(l => l.type === 'error').length}
+              </span>
+            )}
           </button>
 
           {/* Web Audio FX */}
           <button
             type="button"
             onClick={() => handleTriggerDirective(`Enhance this ${artifact.title} by generating and integrating procedural interactive audio sound effects using the standard HTML5 Web Audio API (synthesizer chimes on clicks, state changes, or game actions).`)}
-            className="px-2.5 py-1 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-[11px] font-mono text-zinc-300 hover:text-white whitespace-nowrap transition-colors"
+            className="px-2.5 py-1 rounded-lg bg-zinc-900/80 hover:bg-zinc-800/90 border border-zinc-800/90 hover:border-zinc-700 text-[11px] font-mono text-zinc-300 hover:text-white whitespace-nowrap transition-all shadow-sm active:scale-95 flex-shrink-0"
           >
             {t.canvas.aiDirective.soundEffects}
           </button>
@@ -1284,7 +1305,7 @@ export const NiximaCanvas: React.FC<NiximaCanvasProps> = ({
           <button
             type="button"
             onClick={() => handleTriggerDirective(`Polish this ${artifact.title} with a top-tier obsidian titanium dark theme: use deep zinc/black backgrounds, crisp specular borders, subtle glowing highlights, and micro-interactions.`)}
-            className="px-2.5 py-1 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-[11px] font-mono text-zinc-300 hover:text-white whitespace-nowrap transition-colors"
+            className="px-2.5 py-1 rounded-lg bg-zinc-900/80 hover:bg-zinc-800/90 border border-zinc-800/90 hover:border-zinc-700 text-[11px] font-mono text-zinc-300 hover:text-white whitespace-nowrap transition-all shadow-sm active:scale-95 flex-shrink-0"
           >
             {t.canvas.aiDirective.darkNeon}
           </button>
@@ -1293,7 +1314,7 @@ export const NiximaCanvas: React.FC<NiximaCanvasProps> = ({
           <button
             type="button"
             onClick={() => handleTriggerDirective(`Make this ${artifact.title} fully responsive and touch-optimized for mobile devices, with fluid flex/grid layouts and generous tap targets.`)}
-            className="px-2.5 py-1 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-[11px] font-mono text-zinc-300 hover:text-white whitespace-nowrap transition-colors"
+            className="px-2.5 py-1 rounded-lg bg-zinc-900/80 hover:bg-zinc-800/90 border border-zinc-800/90 hover:border-zinc-700 text-[11px] font-mono text-zinc-300 hover:text-white whitespace-nowrap transition-all shadow-sm active:scale-95 flex-shrink-0"
           >
             {t.canvas.aiDirective.mobileFriendly}
           </button>
@@ -1302,7 +1323,7 @@ export const NiximaCanvas: React.FC<NiximaCanvasProps> = ({
           <button
             type="button"
             onClick={() => handleTriggerDirective(`Perform a comprehensive zero-defect refactoring of this ${artifact.title}: optimize state management, add defensive error boundaries, and streamline rendering performance.`)}
-            className="px-2.5 py-1 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 text-[11px] font-mono text-zinc-300 hover:text-white whitespace-nowrap transition-colors"
+            className="px-2.5 py-1 rounded-lg bg-zinc-900/80 hover:bg-zinc-800/90 border border-zinc-800/90 hover:border-zinc-700 text-[11px] font-mono text-zinc-300 hover:text-white whitespace-nowrap transition-all shadow-sm active:scale-95 flex-shrink-0"
           >
             {t.canvas.aiDirective.refactor}
           </button>

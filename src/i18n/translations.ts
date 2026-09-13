@@ -529,11 +529,13 @@ export interface Translations {
       refactor: string;
       includeCodeContext: string;
       codeContextActive: string;
+      surgicalEditBadge: string;
+      surgicalEditHint: string;
+      linesLabel: string;
       codeAttachedBadge: (title: string, version: number, lines: number) => string;
       showAttachedCode: string;
       hideAttachedCode: string;
       selectedLinesInfo: (start: number, end: number) => string;
-      surgicalEditHint: string;
     };
     exportSuite: {
       copyStandaloneHtml: string;
@@ -1240,7 +1242,7 @@ export const translations: Record<Language, Translations> = {
       },
       aiDirective: {
         title: 'Canvas AI Directive',
-        placeholder: 'Direct Nixima AI to modify this artifact (e.g. add sound effects, refactor UI, fix logic)...',
+        placeholder: 'Ask AI to edit, improve, or add features to this code...',
         send: 'Send to AI',
         autoDebug: '⚡ Auto-Debug Console Errors',
         soundEffects: '🎵 Add Web Audio Synthesizer',
@@ -1248,13 +1250,15 @@ export const translations: Record<Language, Translations> = {
         mobileFriendly: '📱 Mobile Touch Controls',
         refactor: '🛡️ Zero-Defect Optimization',
         includeCodeContext: 'Include Current Code',
-        codeContextActive: 'Live Code Context Linked',
+        codeContextActive: 'Live Code',
+        surgicalEditBadge: 'Surgical Edits',
+        surgicalEditHint: 'AI directly inspects current code to add, remove, or modify lines without restarting from scratch',
+        linesLabel: 'lines',
         codeAttachedBadge: (title: string, version: number, lines: number) =>
           `Canvas Code Attached: ${title} (v${version}, ${lines} lines)`,
         showAttachedCode: 'Show Attached Code',
         hideAttachedCode: 'Hide Attached Code',
         selectedLinesInfo: (start: number, end: number) => `Targeting Lines ${start}–${end}`,
-        surgicalEditHint: 'AI directly inspects current code to add, remove, or modify lines without restarting from scratch',
       },
       exportSuite: {
         copyStandaloneHtml: 'Copy Standalone HTML',
@@ -1960,7 +1964,7 @@ export const translations: Record<Language, Translations> = {
       },
       aiDirective: {
         title: 'Директива Canvas AI',
-        placeholder: 'Надайте інструкцію Nixima AI для зміни цього артефакту (напр. додати звук, оновити UI, виправити логіку)...',
+        placeholder: 'Попросіть ШІ змінити код, покращити чи додати функції...',
         send: 'Надіслати AI',
         autoDebug: '⚡ Авто-дебаг помилок консолі',
         soundEffects: '🎵 Додати Web Audio синтезатор',
@@ -1968,13 +1972,15 @@ export const translations: Record<Language, Translations> = {
         mobileFriendly: '📱 Сенсорне керування для смартфонів',
         refactor: '🛡️ Оптимізація без дефектів',
         includeCodeContext: 'Включати поточний код',
-        codeContextActive: 'Поточний код прив’язано',
+        codeContextActive: 'Поточний код',
+        surgicalEditBadge: 'Точкові правки',
+        surgicalEditHint: 'ШІ безпосередньо аналізує поточний код для точного додавання, видалення чи зміни рядків без перезапуску',
+        linesLabel: 'рядків',
         codeAttachedBadge: (title: string, version: number, lines: number) =>
           `Прикріплено код Canvas: ${title} (v${version}, ${lines} рядків)`,
         showAttachedCode: 'Показати код',
         hideAttachedCode: 'Приховати код',
         selectedLinesInfo: (start: number, end: number) => `Цільові рядки ${start}–${end}`,
-        surgicalEditHint: 'ШІ безпосередньо аналізує поточний код для точного додавання, видалення чи зміни рядків без перезапуску',
       },
       exportSuite: {
         copyStandaloneHtml: 'Скопіювати автономний HTML',
