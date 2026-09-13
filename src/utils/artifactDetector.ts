@@ -147,7 +147,7 @@ export function extractArtifactsFromMessage(content: string, messageId?: string)
 export function generateSandboxHtml(artifact: NiximaArtifact): string {
   const { type, content, language } = artifact;
 
-  // Intercept console logs and errors to post to parent window
+  // Intercept console logs, errors, and enable two-way interactive REPL evaluation
   const consoleScript = `
     <script>
       (function() {
@@ -185,6 +185,26 @@ export function generateSandboxHtml(artifact: NiximaArtifact): string {
           sendToParent('error', ['Runtime Error: ' + msg + (line ? ' (Line: ' + line + ')' : '')]);
           return false;
         };
+
+        window.addEventListener('unhandledrejection', function(event) {
+          sendToParent('error', ['Unhandled Promise Rejection: ' + (event.reason ? (event.reason.message || String(event.reason)) : 'Unknown error')]);
+        });
+
+        // Listen for REPL evaluation requests from the parent Canvas Console
+        window.addEventListener('message', function(event) {
+          if (event.data && event.data.type === 'NIXIMA_CANVAS_EVAL_REQUEST' && typeof event.data.code === 'string') {
+            try {
+              const evalResult = window.eval(event.data.code);
+              sendToParent('log', ['➜ ' + (typeof evalResult === 'object' && evalResult !== null ? JSON.stringify(evalResult, null, 2) : String(evalResult))]);
+            } catch (err) {
+              sendToParent('error', ['➜ Evaluation Error: ' + (err.message || String(err))]);
+            }
+          }
+        });
+
+        window.addEventListener('DOMContentLoaded', function() {
+          sendToParent('info', ['[Nixima Canvas V2 Sandbox] Initialized.']);
+        });
       })();
     </script>
   `;
@@ -322,7 +342,7 @@ export function generateSandboxHtml(artifact: NiximaArtifact): string {
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useRef, useMemo, useCallback, createContext, useContext } = React;
+    const { useState, useEffect, useRef, useMemo, useCallback, createContext, useContext, useReducer, useId, useTransition, useDeferredValue } = React;
 
     try {
       ${reactCode}

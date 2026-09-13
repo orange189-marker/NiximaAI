@@ -483,6 +483,55 @@ export interface Translations {
       refactorCode: string;
       makeResponsive: string;
     };
+    v2Badge: string;
+    devices: {
+      desktop: string;
+      tablet: string;
+      mobile: string;
+      zoom: string;
+    };
+    editor: {
+      lineCount: string;
+      charCount: string;
+      searchPlaceholder: string;
+      replacePlaceholder: string;
+      findNext: string;
+      findPrev: string;
+      replace: string;
+      replaceAll: string;
+      matchCount: string;
+    };
+    console: {
+      replPlaceholder: string;
+      runRepl: string;
+      filterAll: string;
+      filterLogs: string;
+      filterWarns: string;
+      filterErrors: string;
+      exportLogs: string;
+    };
+    diff: {
+      compareBtn: string;
+      exitDiffBtn: string;
+      currentVersion: string;
+      previousVersion: string;
+      additions: string;
+      deletions: string;
+    };
+    aiDirective: {
+      title: string;
+      placeholder: string;
+      send: string;
+      autoDebug: string;
+      soundEffects: string;
+      darkNeon: string;
+      mobileFriendly: string;
+      refactor: string;
+    };
+    exportSuite: {
+      copyStandaloneHtml: string;
+      standaloneCopied: string;
+    };
   };
 
   niximaProfile: {
@@ -1147,6 +1196,55 @@ export const translations: Record<Language, Translations> = {
         refactorCode: 'Refactor code and improve performance',
         makeResponsive: 'Make fully mobile-responsive with fluid grid',
       },
+      v2Badge: 'CANVAS V2.0',
+      devices: {
+        desktop: 'Desktop (100%)',
+        tablet: 'Tablet (768px)',
+        mobile: 'Mobile (375px)',
+        zoom: 'Scale',
+      },
+      editor: {
+        lineCount: 'lines',
+        charCount: 'chars',
+        searchPlaceholder: 'Search in code...',
+        replacePlaceholder: 'Replace with...',
+        findNext: 'Next',
+        findPrev: 'Prev',
+        replace: 'Replace',
+        replaceAll: 'Replace All',
+        matchCount: 'matches',
+      },
+      console: {
+        replPlaceholder: 'Evaluate JS in live sandbox context (e.g. document.title, 2 + 2)...',
+        runRepl: 'Execute (Enter)',
+        filterAll: 'All',
+        filterLogs: 'Logs',
+        filterWarns: 'Warnings',
+        filterErrors: 'Errors',
+        exportLogs: 'Export Console',
+      },
+      diff: {
+        compareBtn: 'Compare Diff',
+        exitDiffBtn: 'Exit Diff',
+        currentVersion: 'Current (v{v})',
+        previousVersion: 'Previous (v{v})',
+        additions: 'added',
+        deletions: 'removed',
+      },
+      aiDirective: {
+        title: 'Canvas AI Directive',
+        placeholder: 'Direct Nixima AI to modify this artifact (e.g. add sound effects, refactor UI, fix logic)...',
+        send: 'Send to AI',
+        autoDebug: '⚡ Auto-Debug Console Errors',
+        soundEffects: '🎵 Add Web Audio Synthesizer',
+        darkNeon: '✨ Dark Neon Obsidian Polish',
+        mobileFriendly: '📱 Mobile Touch Controls',
+        refactor: '🛡️ Zero-Defect Optimization',
+      },
+      exportSuite: {
+        copyStandaloneHtml: 'Copy Standalone HTML',
+        standaloneCopied: 'Standalone HTML Copied!',
+      },
     },
 
     niximaProfile: {
@@ -1809,6 +1907,55 @@ export const translations: Record<Language, Translations> = {
         addInteractivity: 'Додай інтерактивні анімації та звук',
         refactorCode: 'Зроби рефакторинг та оптимізуй код',
         makeResponsive: 'Зроби повну мобільну адаптацію з гнучкими сітками',
+      },
+      v2Badge: 'CANVAS V2.0',
+      devices: {
+        desktop: 'Десктоп (100%)',
+        tablet: 'Планшет (768px)',
+        mobile: 'Мобільний (375px)',
+        zoom: 'Масштаб',
+      },
+      editor: {
+        lineCount: 'рядків',
+        charCount: 'симв.',
+        searchPlaceholder: 'Пошук у коді...',
+        replacePlaceholder: 'Замінити на...',
+        findNext: 'Далі',
+        findPrev: 'Назад',
+        replace: 'Замінити',
+        replaceAll: 'Замінити все',
+        matchCount: 'збігів',
+      },
+      console: {
+        replPlaceholder: 'Виконати JS у контексті пісочниці (напр. document.title, 2 + 2)...',
+        runRepl: 'Виконати (Enter)',
+        filterAll: 'Всі',
+        filterLogs: 'Логи',
+        filterWarns: 'Попередження',
+        filterErrors: 'Помилки',
+        exportLogs: 'Експорт консолі',
+      },
+      diff: {
+        compareBtn: 'Порівняти версії',
+        exitDiffBtn: 'Вийти з порівняння',
+        currentVersion: 'Поточна (v{v})',
+        previousVersion: 'Попередня (v{v})',
+        additions: 'додано',
+        deletions: 'видалено',
+      },
+      aiDirective: {
+        title: 'Директива Canvas AI',
+        placeholder: 'Надайте інструкцію Nixima AI для зміни цього артефакту (напр. додати звук, оновити UI, виправити логіку)...',
+        send: 'Надіслати AI',
+        autoDebug: '⚡ Авто-дебаг помилок консолі',
+        soundEffects: '🎵 Додати Web Audio синтезатор',
+        darkNeon: '✨ Темний неоновий стиль обсидіану',
+        mobileFriendly: '📱 Сенсорне керування для смартфонів',
+        refactor: '🛡️ Оптимізація без дефектів',
+      },
+      exportSuite: {
+        copyStandaloneHtml: 'Скопіювати автономний HTML',
+        standaloneCopied: 'Автономний HTML скопійовано!',
       },
     },
 
