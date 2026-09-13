@@ -207,7 +207,7 @@ export function renderWithNiximaBrand(
         <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline font-nixima font-extrabold tracking-tight select-none">
           <span className="nixima-wordmark-sheen drop-shadow-[0_1px_4px_rgba(255,255,255,0.22)]">Nixima</span>
           <span className="font-mono text-[0.85em] font-medium text-zinc-300 ml-0.5">
-            -0.3{isCoder && <span className="text-emerald-400 font-semibold ml-1">Coder</span>}
+            -0.3{isCoder && <span className="text-zinc-100 font-semibold ml-1">Coder</span>}
           </span>
         </span>
       );
@@ -219,7 +219,7 @@ export function renderWithNiximaBrand(
       return (
         <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline select-none">
           <span className="font-mono text-[0.88em] font-medium text-zinc-300">
-            0.3{isCoder && <span className="text-emerald-400 font-semibold ml-1">Coder</span>}
+            0.3{isCoder && <span className="text-zinc-100 font-semibold ml-1">Coder</span>}
           </span>
         </span>
       );
@@ -233,10 +233,10 @@ export function renderWithNiximaBrand(
         <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline font-nixima font-extrabold tracking-tight select-none">
           <span className="nixima-wordmark-sheen drop-shadow-[0_1px_4px_rgba(255,255,255,0.22)]">Nixima</span>
           <span className="font-mono text-[0.85em] font-medium text-zinc-300 ml-0.5">
-            -0.2<span className="font-sans font-bold text-cyan-400 ml-[0.5px]" title="Omni">O</span>
+            -0.2<span className="font-sans font-bold text-zinc-100 ml-[0.5px]" title="Omni">O</span>
           </span>
           {hasOmniWord && (
-            <span className="font-mono text-[0.8em] font-semibold text-cyan-400 ml-1">
+            <span className="font-mono text-[0.8em] font-semibold text-zinc-200 ml-1">
               {isParenOmni ? '(Omni)' : 'Omni'}
             </span>
           )}
@@ -249,7 +249,7 @@ export function renderWithNiximaBrand(
       return (
         <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline font-nixima font-extrabold tracking-tight select-none">
           <span className="nixima-wordmark-sheen drop-shadow-[0_1px_4px_rgba(255,255,255,0.22)]">Nixima</span>
-          <span className="font-mono text-[0.85em] font-semibold text-cyan-400 ml-1">Omni</span>
+          <span className="font-mono text-[0.85em] font-semibold text-zinc-200 ml-1">Omni</span>
         </span>
       );
     }
@@ -261,10 +261,10 @@ export function renderWithNiximaBrand(
       return (
         <span key={`${keyPrefix}-${idx}`} className="inline-flex items-baseline select-none">
           <span className="font-mono text-[0.88em] font-medium text-zinc-300">
-            0.2<span className="font-sans font-bold text-cyan-400 ml-[0.5px]" title="Omni">O</span>
+            0.2<span className="font-sans font-bold text-zinc-100 ml-[0.5px]" title="Omni">O</span>
           </span>
           {hasOmniWord && (
-            <span className="font-mono text-[0.85em] font-semibold text-cyan-400 ml-1">
+            <span className="font-mono text-[0.85em] font-semibold text-zinc-200 ml-1">
               {isParenOmni ? '(Omni)' : 'Omni'}
             </span>
           )}

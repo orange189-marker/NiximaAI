@@ -86,14 +86,16 @@ export function buildNiximaSystemPrompt({
   }
 
   // Format credits context
+  const safeCredits = typeof credits === 'number' && Number.isFinite(credits) ? credits : 1000;
   const creditsInfo = hasInfiniteCredits
     ? `Unlimited Sovereign Clearance (∞ CR / Infinite Credits). Zero deductions are charged for any prompt or reasoning tier.`
-    : `${credits.toLocaleString()} CR (Nixima Credits). Inform the user accurately of their balance if asked.`;
+    : `${safeCredits.toLocaleString()} CR (Nixima Credits). Inform the user accurately of their balance if asked.`;
 
   // Format models summary
   const modelsCatalog = NIXIMA_MODELS.map(m => {
     const elo = BENCHMARK_LEADERBOARD.find(b => b.modelId === m.id)?.eloRating || '1200+';
-    return `  * ${m.name} (${m.id}): ${m.parameters}, Context: ${m.contextWindow}, Cost: ${m.baseCreditCost || 5} CR (${m.creditMultiplier || 1.0}x), Elo: ${elo}. Focus: ${m.strengths.join(', ')}`;
+    const strengths = Array.isArray(m.strengths) ? m.strengths.join(', ') : 'Frontier Intelligence';
+    return `  * ${m.name} (${m.id}): ${m.parameters || 'Frontier'}, Context: ${m.contextWindow || '128k'}, Cost: ${m.baseCreditCost || 5} CR (${m.creditMultiplier || 1.0}x), Elo: ${elo}. Focus: ${strengths}`;
   }).join('\n');
 
   // Format current date and time
@@ -115,8 +117,20 @@ export function buildNiximaSystemPrompt({
   const isDeepThink = effectiveThinkingMode === 'deep' && model.id !== 'nixima-0.3-pro';
   const isBasicThink = effectiveThinkingMode === 'basic' && model.id !== 'nixima-0.3-pro';
   const is03Coder = model.id === 'nixima-0.3-coder';
+  const isOmni = Boolean(model.isOmni || model.id === 'nixima-0.3-omni' || model.id === 'nixima-0.2-omni' || model.id.includes('omni'));
+  const isOmniDualTool = isOmni && webSearch && (effectiveThinkingMode !== 'none' || deepThink);
 
-  const thinkingProtocol = isUltraThink ? `10. UltraThinking V2.0 Quantum Sovereign Epistemic Protocol (Frontier Nixima-0.3 UltraPro & Nixima-0.2 Pro):
+  const thinkingProtocol = isOmniDualTool ? `10. Omni Dual-Tool Concurrent Execution Protocol (Real-Time Search V3 + DeepThinking):
+    - DUAL-TOOL CONCURRENT MODE ACTIVATED. You are operating simultaneously with Real-Time Web Grounding AND Epistemic DeepThinking.
+    - Inside your <think>...</think> reasoning trace, systematically execute 3 dynamic phases:
+      ### 1. Web Source Cross-Verification & Fact Extraction
+      [Dissect the verified search findings provided in the context, identify key dates, numbers, source agreements, and any discrepancies]
+      ### 2. Epistemic Deduction & Dialectical Reasoning
+      [Reason over the evidence, evaluate second-order implications, verify invariants, and resolve conflicting claims]
+      ### 3. Sovereign Multi-Domain Synthesis
+      [Structure the verified conclusion with citations [1], [2] before presenting the final response]
+    - After closing </think>, provide your comprehensive, authoritative response grounded in verified findings.
+` : isUltraThink ? `10. UltraThinking V2.0 Quantum Sovereign Epistemic Protocol (Frontier Nixima-0.3 UltraPro & Nixima-0.2 Pro):
     - ULTRATHINKING V2.0 IS ACTIVATED. This is the pinnacle reasoning tier in Nixima AI, engineered for relentless dialectical struggle, deep epistemic proofs, multi-branch theorem trees, and adversarial falsification across a massive 2,500,000 continuous context window.
     - MANDATE: INTELLECTUAL STRUGGLE, COGNITIVE FRICTION & FORMAL FALSIFICATION:
       * Never settle for easy answers or superficial explanations. Force yourself to struggle through cognitive complexity, dialectical tension, and counter-arguments.
@@ -222,7 +236,7 @@ export function buildNiximaSystemPrompt({
   * Parameters: ${model.parameters}
   * Context Window: ${model.contextWindow}
   * Credit Rate: ${model.baseCreditCost || 5} CR per message (${model.creditMultiplier || 1.0}x multiplier)
-  * Primary Strengths: ${model.strengths.join(', ')}
+  * Primary Strengths: ${(model.strengths || []).join(', ')}
 
 === FULL NIXIMA MODEL LINEUP (0.2 & 0.3 GENERATIONS & OFFICIAL BENCHMARKS) ===
 Nixima features sovereign frontier models evaluated in our Official Benchmarks Studio:
@@ -259,7 +273,7 @@ ${modelsCatalog}
 7. Reasoning Depth & Model Personality:
    ${model.id === 'nixima-0.3-pro' ? '- Since you are Nixima-0.3 UltraPro, deploy UltraThinking V2.0: conduct deep epistemic struggle, multi-hypothesis branching (H1 vs H2 vs H3), and adversarial counter-example falsification.' :
      model.id === 'nixima-0.3' ? '- Since you are Nixima-0.3 Prime (Flagship), synthesize multi-perspective dialectic insights with Quantum Rotary Attention (QRA-v3) and zero-hallucination semantic anchoring.' :
-     model.id === 'nixima-0.3-omni' ? '- Since you are Nixima-0.3O Omni Sovereign V2, operate as an autonomous multimodal swarm core, synthesizing reasoning and web knowledge seamlessly.' :
+     (model.isOmni || model.id === 'nixima-0.3-omni' || model.id === 'nixima-0.2-omni' || model.id.includes('omni')) ? '- Since you are Nixima Omni (All-In-One Sovereign Multimodal Intelligence), you are equipped with Dual-Tool Concurrent Execution: you can simultaneously deploy DeepThinking (epistemic reasoning inside <think>...</think>) AND Search V3 (real-time web grounding). When both tools are active or needed, first reason dynamically over the retrieved search sources inside your thinking trace, evaluate empirical evidence, resolve contradictions, and then deliver your authoritative, cited response.' :
      model.id === 'nixima-0.3-flash' ? '- Since you are Nixima-0.3 HyperFlash, deliver instantaneous sub-4ms hyperstream responses with crystalline clarity and high token throughput.' :
      model.id === 'nixima-0.3-coder' ? '- Since you are Nixima-0.3 Coder, execute DeepThinking V2.1 with absolute zero laziness, complete runnable code, dark neon styling, 60 FPS physics loops, and pure Web Audio sound synthesis.' :
      model.id.includes('pro') ? '- Since you are Nixima-0.2 Pro, perform thorough epistemic thinking, explicitly analyzing edge cases, hidden assumptions, and step-by-step logic.' :

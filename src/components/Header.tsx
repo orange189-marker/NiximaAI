@@ -59,7 +59,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { language, toggleLanguage, t } = useLanguage();
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
-  const [filterTab, setFilterTab] = useState<'all' | '0.3' | '0.2' | 'search' | 'code'>('all');
+  const [filterTab, setFilterTab] = useState<'0.3' | '0.2' | 'search' | 'code' | 'all'>('0.3');
   const [hotkeyConfig, setHotkeyConfig] = useState<HotkeyConfig>(() => getSavedHotkey());
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -74,6 +74,13 @@ export const Header: React.FC<HeaderProps> = ({
     window.addEventListener(HOTKEY_CHANGE_EVENT, handleUpdate);
     return () => window.removeEventListener(HOTKEY_CHANGE_EVENT, handleUpdate);
   }, []);
+
+  // Always reset to Generation 0.3 (main model selection) whenever dropdown opens
+  useEffect(() => {
+    if (isModelDropdownOpen) {
+      setFilterTab('0.3');
+    }
+  }, [isModelDropdownOpen]);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -132,11 +139,11 @@ export const Header: React.FC<HeaderProps> = ({
             <button
               type="button"
               onClick={onOpenReleaseModal}
-              className="hidden md:inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-zinc-800 hover:bg-zinc-700 text-zinc-200 border border-zinc-700/80 transition-all cursor-pointer shadow-sm group"
+              className="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-mono font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/80 transition-all cursor-pointer shadow-sm group"
               title={t.releaseAnnouncement.detailsBtn}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span>v0.2</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.8)] animate-pulse" />
+              <span>v0.3</span>
               <span className="text-[9px] px-1 rounded bg-white text-black font-bold uppercase ml-0.5">
                 NEW
               </span>
@@ -145,17 +152,22 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Center: Model Selector Dropdown */}
+      {/* Center: Model Selector Dropdown (Carefully constrained to prevent layout collisions) */}
       <div className="relative flex-1 flex justify-center min-w-0 px-1 sm:px-2 max-w-xs md:max-w-md mx-auto" ref={dropdownRef}>
         <button
           type="button"
-          onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
-          className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/70 hover:border-zinc-500 transition-all duration-150 shadow-inner-light select-none cursor-pointer max-w-[150px] sm:max-w-[240px] md:max-w-none min-w-0"
+          onClick={() => {
+            if (!isModelDropdownOpen) {
+              setFilterTab('0.3');
+            }
+            setIsModelDropdownOpen(!isModelDropdownOpen);
+          }}
+          className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/70 hover:border-zinc-500 transition-all duration-150 shadow-inner-light select-none cursor-pointer max-w-[160px] sm:max-w-[240px] md:max-w-[320px] min-w-0"
           title={`${t.common.active}: ${currentModel.name}`}
         >
           <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
             <span className="flex-shrink-0">{getModelIcon(currentModel.id)}</span>
-            <span className="font-semibold text-xs sm:text-sm text-white tracking-tight whitespace-nowrap truncate">
+            <span className="font-semibold text-xs sm:text-sm text-white tracking-tight whitespace-nowrap truncate min-w-0">
               {renderWithNiximaBrand(t.models[currentModel.id]?.name || currentModel.name)}
             </span>
           </div>
@@ -175,10 +187,10 @@ export const Header: React.FC<HeaderProps> = ({
           />
         )}
 
-        {/* Dropdown Menu (Centered modal card on mobile, right-aligned popover on desktop) */}
+        {/* Dropdown Menu (Centered modal card on mobile, centered popover on desktop with strict viewport bounds) */}
         {isModelDropdownOpen && (
-          <div className="fixed left-3 right-3 top-16 z-50 max-w-sm mx-auto sm:absolute sm:left-auto sm:right-0 sm:top-full sm:mt-2 sm:w-96 sm:max-w-none rounded-2xl bg-[#121215] border border-zinc-700/90 shadow-[0_10px_40px_rgba(0,0,0,0.9)] p-2.5 animate-fade-in backdrop-blur-2xl">
-            <div className="px-3 py-2 border-b border-zinc-800/80 flex items-center justify-between">
+          <div className="fixed inset-x-2 top-16 z-50 max-w-sm mx-auto sm:absolute sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:top-full sm:mt-2 sm:w-[410px] sm:max-w-[calc(100vw-24px)] max-h-[calc(100vh-5rem)] flex flex-col rounded-2xl bg-[#121215]/95 border border-zinc-700/90 shadow-[0_12px_48px_rgba(0,0,0,0.95)] p-2.5 animate-fade-in backdrop-blur-2xl overflow-hidden">
+            <div className="px-3 py-2 border-b border-zinc-800/80 flex items-center justify-between flex-shrink-0">
               <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider font-mono">
                 {t.header.selectModel}
               </span>
@@ -203,19 +215,13 @@ export const Header: React.FC<HeaderProps> = ({
               const isRec = currentModel.id === rec.id;
               const modeLabel = searchMode === 'fast' ? 'Search V3 Fast' : searchMode === 'mega' ? 'Search V3 Mega' : 'Search V3';
               return (
-                <div className={`mx-1 mt-2 mb-1.5 p-2 rounded-xl border flex items-center justify-between gap-2 text-xs font-mono animate-fade-in ${
+                <div className={`mx-1 mt-2 mb-1.5 p-2 rounded-xl border flex items-center justify-between gap-2 text-xs font-mono flex-shrink-0 animate-fade-in ${
                   isRec 
                     ? 'bg-zinc-900/90 border-zinc-700/80 text-zinc-300'
-                    : searchMode === 'fast'
-                    ? 'bg-amber-950/40 border-amber-800/60 text-amber-200'
-                    : 'bg-zinc-900/90 border-zinc-600 text-zinc-200'
+                    : 'bg-zinc-900/90 border-zinc-700/80 text-zinc-200'
                 }`}>
                   <div className="flex items-center gap-2 min-w-0">
-                    {searchMode === 'fast' ? (
-                      <Zap className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-                    ) : (
-                      <Globe className="w-3.5 h-3.5 text-zinc-300 flex-shrink-0" />
-                    )}
+                    <Globe className="w-3.5 h-3.5 text-zinc-300 flex-shrink-0" />
                     <div className="min-w-0">
                       <div className="text-[10.5px] truncate">
                         {isRec ? (
@@ -254,17 +260,90 @@ export const Header: React.FC<HeaderProps> = ({
                 if (filterTab === 'code') return model.id.includes('coder') || model.id.includes('omni');
                 return true;
               });
+              const isCurrentModelInView = filteredModels.some(m => m.id === currentModel.id);
 
               return (
                 <>
                   <div className="flex items-center gap-1 p-1 mt-1 mb-2 bg-zinc-900/90 rounded-xl border border-zinc-800/80 text-[11px] font-mono overflow-x-auto no-scrollbar scroll-smooth">
+                    {/* 1. Main 0.3 Generation Models (Primary Default Selection) */}
+                    <button
+                      type="button"
+                      onClick={() => setFilterTab('0.3')}
+                      className={`px-2.5 py-1 rounded-lg text-center font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 ${
+                        filterTab === '0.3' 
+                          ? 'bg-zinc-800 text-white shadow-inner-light border border-zinc-700' 
+                          : 'text-zinc-400 hover:text-white hover:bg-zinc-800/40 border border-transparent'
+                      }`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.8)] animate-pulse" />
+                      <span>{t.header.gen03Tab}</span>
+                      <span className="text-[8.5px] px-1 py-0.2 rounded bg-white text-black font-bold uppercase tracking-wider">
+                        {language === 'uk' ? 'ОСНОВНІ' : 'MAIN'}
+                      </span>
+                      <span className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-mono ${filterTab === '0.3' ? 'bg-white/10 text-white border border-white/20' : 'bg-zinc-800 text-zinc-400'}`}>
+                        {count03}
+                      </span>
+                    </button>
+
+                    {/* 2. 0.2 Generation Models */}
+                    <button
+                      type="button"
+                      onClick={() => setFilterTab('0.2')}
+                      className={`px-2.5 py-1 rounded-lg text-center font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 ${
+                        filterTab === '0.2' 
+                          ? 'bg-zinc-800 text-white shadow-inner-light border border-zinc-700' 
+                          : 'text-zinc-400 hover:text-white hover:bg-zinc-800/40 border border-transparent'
+                      }`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
+                      <span>{t.header.gen02Tab}</span>
+                      <span className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-mono ${filterTab === '0.2' ? 'bg-zinc-700 text-white' : 'bg-zinc-800 text-zinc-400'}`}>
+                        {count02}
+                      </span>
+                    </button>
+
+                    {/* 3. Search V3 Optimized Models */}
+                    <button
+                      type="button"
+                      onClick={() => setFilterTab('search')}
+                      className={`px-2.5 py-1 rounded-lg text-center font-medium transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap flex-shrink-0 ${
+                        filterTab === 'search' 
+                          ? 'bg-zinc-800 text-white shadow-inner-light border border-zinc-700' 
+                          : 'text-zinc-400 hover:text-white hover:bg-zinc-800/40 border border-transparent'
+                      }`}
+                    >
+                      <Globe className="w-3 h-3 text-zinc-300" />
+                      <span>{t.header.searchOptimizedTab}</span>
+                      <span className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-mono ${filterTab === 'search' ? 'bg-zinc-700 text-white' : 'bg-zinc-800 text-zinc-400'}`}>
+                        {countSearch}
+                      </span>
+                    </button>
+
+                    {/* 4. Code & Architecture Models */}
+                    <button
+                      type="button"
+                      onClick={() => setFilterTab('code')}
+                      className={`px-2.5 py-1 rounded-lg text-center font-medium transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap flex-shrink-0 ${
+                        filterTab === 'code' 
+                          ? 'bg-zinc-800 text-white shadow-inner-light border border-zinc-700' 
+                          : 'text-zinc-400 hover:text-white hover:bg-zinc-800/40 border border-transparent'
+                      }`}
+                    >
+                      <Terminal className="w-3 h-3 text-zinc-300" />
+                      <span>{t.header.codingTab}</span>
+                      <span className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-mono ${filterTab === 'code' ? 'bg-zinc-700 text-white' : 'bg-zinc-800 text-zinc-400'}`}>
+                        {countCode}
+                      </span>
+                    </button>
+
+                    {/* 5. All Models */}
                     <button
                       type="button"
                       onClick={() => setFilterTab('all')}
                       className={`px-2.5 py-1 rounded-lg text-center font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 ${
                         filterTab === 'all' 
                           ? 'bg-zinc-800 text-white shadow-inner-light border border-zinc-700' 
-                          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40 border border-transparent'
+                          : 'text-zinc-400 hover:text-white hover:bg-zinc-800/40 border border-transparent'
                       }`}
                     >
                       <span>{t.header.allModelsTab}</span>
@@ -272,80 +351,39 @@ export const Header: React.FC<HeaderProps> = ({
                         {countAll}
                       </span>
                     </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setFilterTab('0.3')}
-                      className={`px-2.5 py-1 rounded-lg text-center font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 ${
-                        filterTab === '0.3' 
-                          ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/50 shadow-[0_0_12px_rgba(16,185,129,0.25)]' 
-                          : 'text-zinc-400 hover:text-emerald-300 hover:bg-emerald-950/30 border border-transparent'
-                      }`}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      <span>{t.header.gen03Tab}</span>
-                      <span className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-mono ${filterTab === '0.3' ? 'bg-emerald-900/90 text-emerald-200 border border-emerald-700/50' : 'bg-zinc-800 text-zinc-400'}`}>
-                        {count03}
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setFilterTab('0.2')}
-                      className={`px-2.5 py-1 rounded-lg text-center font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 ${
-                        filterTab === '0.2' 
-                          ? 'bg-cyan-950/80 text-cyan-300 border border-cyan-500/50 shadow-[0_0_12px_rgba(6,182,212,0.25)]' 
-                          : 'text-zinc-400 hover:text-cyan-300 hover:bg-cyan-950/30 border border-transparent'
-                      }`}
-                    >
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                      <span>{t.header.gen02Tab}</span>
-                      <span className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-mono ${filterTab === '0.2' ? 'bg-cyan-900/90 text-cyan-200 border border-cyan-700/50' : 'bg-zinc-800 text-zinc-400'}`}>
-                        {count02}
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setFilterTab('search')}
-                      className={`px-2.5 py-1 rounded-lg text-center font-medium transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap flex-shrink-0 ${
-                        filterTab === 'search' 
-                          ? 'bg-sky-950/80 text-sky-300 border border-sky-500/50 shadow-[0_0_12px_rgba(14,165,233,0.25)]' 
-                          : 'text-zinc-400 hover:text-sky-300 hover:bg-sky-950/30 border border-transparent'
-                      }`}
-                    >
-                      <Globe className="w-3 h-3 text-sky-400" />
-                      <span>{t.header.searchOptimizedTab}</span>
-                      <span className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-mono ${filterTab === 'search' ? 'bg-sky-900/90 text-sky-200 border border-sky-700/50' : 'bg-zinc-800 text-zinc-400'}`}>
-                        {countSearch}
-                      </span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setFilterTab('code')}
-                      className={`px-2.5 py-1 rounded-lg text-center font-medium transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap flex-shrink-0 ${
-                        filterTab === 'code' 
-                          ? 'bg-purple-950/80 text-purple-300 border border-purple-500/50 shadow-[0_0_12px_rgba(168,85,247,0.25)]' 
-                          : 'text-zinc-400 hover:text-purple-300 hover:bg-purple-950/30 border border-transparent'
-                      }`}
-                    >
-                      <Terminal className="w-3 h-3 text-purple-400" />
-                      <span>{t.header.codingTab}</span>
-                      <span className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-mono ${filterTab === 'code' ? 'bg-purple-900/90 text-purple-200 border border-purple-700/50' : 'bg-zinc-800 text-zinc-400'}`}>
-                        {countCode}
-                      </span>
-                    </button>
                   </div>
 
-                  <div className="space-y-1 max-h-[60vh] sm:max-h-none overflow-y-auto">
+                  {/* Active model location helper if current model belongs to another tab */}
+                  {!isCurrentModelInView && (
+                    <div className="mx-0.5 mb-2 px-2.5 py-1.5 rounded-xl bg-zinc-900/90 border border-zinc-800 text-[11px] font-mono text-zinc-400 flex items-center justify-between shadow-sm animate-fade-in">
+                      <div className="flex items-center gap-1.5 truncate">
+                        <span className="text-zinc-500">{t.common.active}:</span>
+                        <span className="text-white font-medium truncate">{currentModel.name}</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (currentModel.generation === '0.2' || currentModel.id.includes('0.2')) {
+                            setFilterTab('0.2');
+                          } else {
+                            setFilterTab('all');
+                          }
+                        }}
+                        className="text-zinc-300 hover:text-white hover:underline text-[10.5px] whitespace-nowrap ml-2 cursor-pointer"
+                      >
+                        {language === 'uk' ? 'Показати в списку' : 'View in list'} →
+                      </button>
+                    </div>
+                  )}
+
+                  <div className="space-y-1 flex-1 min-h-0 overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-zinc-750">
                     {filteredModels.length === 0 ? (
                       <div className="py-8 px-4 text-center">
                         <p className="text-xs text-zinc-400 font-mono mb-2">{t.header.noModelsFound}</p>
                         <button
                           type="button"
                           onClick={() => setFilterTab('all')}
-                          className="text-[11px] font-mono text-cyan-400 hover:underline cursor-pointer"
+                          className="text-[11px] font-mono text-zinc-300 hover:text-white hover:underline cursor-pointer"
                         >
                           {t.header.allModelsTab}
                         </button>
@@ -365,7 +403,7 @@ export const Header: React.FC<HeaderProps> = ({
                               onSelectModel(model);
                               setIsModelDropdownOpen(false);
                             }}
-                            className={`w-full text-left p-2.5 rounded-xl transition-all flex items-start justify-between group cursor-pointer ${
+                            className={`w-full text-left p-2 sm:p-2.5 rounded-xl transition-all flex items-start justify-between group cursor-pointer ${
                               isSelected 
                                 ? 'bg-zinc-800/90 border border-zinc-600 shadow-glow-subtle' 
                                 : 'hover:bg-zinc-800/50 border border-transparent'
@@ -380,7 +418,7 @@ export const Header: React.FC<HeaderProps> = ({
 
                                 {/* Generation badge */}
                                 {is03 ? (
-                                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/40 font-bold flex-shrink-0">
+                                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-white/10 text-white border border-white/20 font-bold flex-shrink-0">
                                     0.3 GEN
                                   </span>
                                 ) : (
@@ -450,7 +488,7 @@ export const Header: React.FC<HeaderProps> = ({
               );
             })()}
 
-            <div className="mt-2 pt-2 border-t border-zinc-800/80 px-2 flex items-center justify-between text-xs text-zinc-400">
+            <div className="flex-shrink-0 mt-2 pt-2 border-t border-zinc-800/80 px-2 flex items-center justify-between text-xs text-zinc-400">
               {onOpenBenchmarks ? (
                 <button
                   type="button"
@@ -499,7 +537,7 @@ export const Header: React.FC<HeaderProps> = ({
         )}
 
         <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900 border border-zinc-800 text-[11px] font-mono text-zinc-400 flex-shrink-0">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.8)] animate-pulse" />
           <span>{t.header.meshActive}</span>
         </div>
 

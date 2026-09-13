@@ -1,6 +1,7 @@
 import { ModelOption, SearchGrounding, DeepThinkingTelemetry, SearchMode, ThinkingMode } from '../types/chat';
 import { isCjkRequested, sanitizeModelOutput } from './textSanitizer';
 import { generateDefaultGrounding, computeDeepThinkingTelemetry } from './openrouter';
+import { isOmniModel, resolveOmniToolExecution } from './omniTools';
 
 interface GenerateResponseOptions {
   prompt: string;
@@ -21,20 +22,39 @@ interface AIResponseResult {
 
 export function generateNiximaResponse(options: GenerateResponseOptions): AIResponseResult {
   const allowCjk = isCjkRequested(options.prompt);
-  const effectiveMode: ThinkingMode = options.thinkingMode || (options.deepThink ? 'deep' : 'none');
-  const allowThinking = effectiveMode !== 'none';
+  const isOmni = isOmniModel(options.model);
+  const {
+    runWebSearch: shouldSearch,
+    effectiveThinkingMode: effectiveMode,
+    isDeepThink,
+    isThinkingActive,
+    isDualToolActive,
+  } = resolveOmniToolExecution({
+    query: options.prompt,
+    isOmni,
+    userWebSearch: options.webSearch,
+    userThinkingMode: options.thinkingMode,
+    userDeepThink: options.deepThink,
+    searchMode: options.searchMode || 'standard',
+  });
 
-  const raw = generateRawNiximaResponse({ ...options, thinkingMode: effectiveMode });
-  const sanitizedThinking = allowThinking ? sanitizeModelOutput(raw.thinking, { allowCjk }) : '';
+  const raw = generateRawNiximaResponse({
+    ...options,
+    deepThink: isDeepThink,
+    thinkingMode: effectiveMode,
+    webSearch: shouldSearch,
+  });
+
+  const sanitizedThinking = isThinkingActive ? sanitizeModelOutput(raw.thinking, { allowCjk }) : '';
   const sanitizedResponse = sanitizeModelOutput(raw.response, { allowCjk });
 
-  const deepThinkingTelemetry = (allowThinking && sanitizedThinking.length > 20)
+  const deepThinkingTelemetry = (isThinkingActive && sanitizedThinking.length > 20)
     ? computeDeepThinkingTelemetry(sanitizedThinking, undefined, effectiveMode)
     : undefined;
 
-  const searchGrounding = options.webSearch
-    ? generateDefaultGrounding(options.prompt, options.searchMode)
-    : raw.searchGrounding;
+  const searchGrounding = shouldSearch
+    ? (raw.searchGrounding || generateDefaultGrounding(options.prompt, options.searchMode))
+    : undefined;
 
   return {
     thinking: sanitizedThinking,
@@ -44,12 +64,8 @@ export function generateNiximaResponse(options: GenerateResponseOptions): AIResp
   };
 }
 
-function generateRawNiximaResponse({
-  prompt,
-  model,
-  deepThink,
-  thinkingMode,
-}: GenerateResponseOptions): AIResponseResult {
+function generateRawNiximaResponse(options: GenerateResponseOptions): AIResponseResult {
+  const { prompt, model, deepThink, thinkingMode, webSearch } = options;
   const lower = prompt.toLowerCase();
   const effectiveMode: ThinkingMode = thinkingMode || (deepThink ? 'deep' : 'none');
 
@@ -105,10 +121,24 @@ function generateRawNiximaResponse({
 
 ### 3. Sovereign Prime Epistemic Delivery
 - Formulating structured, world-class flagship response with pristine linguistic purity.`;
-    } else if (model.id === 'nixima-0.3-omni') {
-      thinking = `### 1. Autonomous Multimodal Swarm Core Telemetry & Routing
+    } else if (isOmniModel(model)) {
+      if (webSearch) {
+        thinking = `### 1. Dual-Tool Concurrent Orchestration: Live Web Mesh & Epistemic Reasoning
+- Engaging Nixima Omni Autonomous Multi-Tool Core across 3,000,000 token continuous context window.
+- Tool 1 (Search V3): Real-time web ingestion and neural source retrieval for: "${prompt.slice(0, 50)}..."
+- Tool 2 (DeepThinking): Epistemic deduction and boundary invariant verification running concurrently.
+
+### 2. Multi-Source Fact Distillation & Cognitive Cross-Verification
+- Cross-referencing real-time findings across verified websites and domain knowledge registries.
+- Resolving conflicting data points, isolating verified empirical consensus with 99.8% precision.
+- Validating formal arguments and analyzing trade-offs inside inner reasoning trace.
+
+### 3. Unified Epistemic Synthesis & Authoritative Ground Truth
+- Synthesizing verified live facts with deep structural analysis into a definitive, cited response.`;
+      } else {
+        thinking = `### 1. Autonomous Multimodal Swarm Core Telemetry & Routing
 - Dynamic semantic parsing: "${prompt.slice(0, 60)}..."
-- Engaging 0.3O Omni Sovereign Swarm Core across 3,000,000 token context window with zero manual toggles.
+- Engaging Nixima Omni Sovereign Swarm Core across 3,000,000 token context window.
 - Harmonizing multi-modal reasoning, systems architecture, and live knowledge grounding.
 
 ### 2. Live 7-Cluster Knowledge Mesh & Cross-Domain Synthesis
@@ -117,6 +147,7 @@ function generateRawNiximaResponse({
 
 ### 3. Unified Multimodal Synthesis & Delivery
 - Assembling authoritative, high-throughput sovereign response.`;
+      }
     } else if (model.id === 'nixima-0.3-flash') {
       thinking = `### 1. HyperStream V2 Sub-4ms Stream Pipeline Allocation
 - Lightning parsing of query: "${prompt.slice(0, 60)}..."
@@ -2087,18 +2118,35 @@ $$\hat{y}_k = \frac{e^{z_k}}{\sum_{j=1}^K e^{z_j}}, \quad \mathcal{L}_{\text{CE}
     };
   }
 
-  if (lower.includes('hello') || lower.includes('hi') || lower.includes('hey')) {
+  const cleanInput = lower.trim();
+  const isGreeting = /^(прив[еі]т|здравствуй|здравствуйте|добр(ий|ый)\s*(день|веч[еі]р|ранок|утро)|х[еэ]й|салют|ку|вітаю|hello|hi|hey|greetings)\b/i.test(cleanInput);
+  if (isGreeting) {
+    const isUk = /^(привіт|добрий|ранок|вечір|вітаю)/i.test(cleanInput);
+    const isRu = /^(привет|здравствуй|здравствуйте|добрый|утро|вечер|салют)/i.test(cleanInput);
+
+    if (isUk) {
+      return {
+        thinking,
+        response: `Привіт! Я **Nixima AI**, працюю на суверенній моделі **${model.name}**. 
+
+Чим я можу вам допомогти сьогодні? Готовий допомогти з розробкою коду, складними архітектурними рішеннями, аналітикою або будь-яким іншим завданням.`
+      };
+    }
+
+    if (isRu) {
+      return {
+        thinking,
+        response: `Привет! Я **Nixima AI**, работаю на суверенной модели **${model.name}**.
+
+Чем я могу помочь вам сегодня? Готов помочь с программированием, сложными вычислениями, системной архитектурой или любыми другими вопросами.`
+      };
+    }
+
     return {
       thinking,
       response: `Hello! I am **Nixima AI**, operating on **${model.name}**. 
 
-I am ready to help you with:
-- **Architecture & System Design**: Scalable infrastructure, algorithms, and distributed systems.
-- **Full-Stack Development**: Modern React, TypeScript, Rust, Python, and API development.
-- **Deep Scientific & Mathematical Reasoning**: Research breakdown, papers, and complex logic.
-- **Strategic Ideation**: Company strategy, technical roadmaps, and execution plans.
-
-What would you like to explore today?`
+How can I assist you today? I am ready to help with software architecture, deep reasoning, system design, or any questions you have.`
     };
   }
 

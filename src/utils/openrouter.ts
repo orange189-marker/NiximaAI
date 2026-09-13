@@ -1147,17 +1147,21 @@ export async function streamOpenRouterChat({
   ];
 
   // Dynamic search engine optimization: prioritize the best engine candidate for active search mode
-  if (webSearch && searchMode === 'fast') {
-    const fastCandidate = 'nvidia/nemotron-3.5-lightning:free';
-    if (primarySlug !== fastCandidate && fallbacks.includes(fastCandidate)) {
-      fallbacks = [primarySlug, ...fallbacks.filter(f => f !== fastCandidate && f !== primarySlug)];
-      primarySlug = fastCandidate;
-    }
-  } else if (webSearch && searchMode === 'mega') {
-    const reasoningCandidate = 'nvidia/nemotron-3-super-120b-a12b:free';
-    if (primarySlug !== reasoningCandidate && fallbacks.includes(reasoningCandidate)) {
-      fallbacks = [primarySlug, ...fallbacks.filter(f => f !== reasoningCandidate && f !== primarySlug)];
-      primarySlug = reasoningCandidate;
+  // Only override candidate if model is NOT an Omni model (Omni models must retain their reasoning core for dual-tool execution)
+  const isOmni = Boolean(model.isOmni || model.id.includes('omni'));
+  if (!isOmni) {
+    if (webSearch && searchMode === 'fast') {
+      const fastCandidate = 'nvidia/nemotron-3.5-lightning:free';
+      if (primarySlug !== fastCandidate && fallbacks.includes(fastCandidate)) {
+        fallbacks = [primarySlug, ...fallbacks.filter(f => f !== fastCandidate && f !== primarySlug)];
+        primarySlug = fastCandidate;
+      }
+    } else if (webSearch && searchMode === 'mega') {
+      const reasoningCandidate = 'nvidia/nemotron-3-super-120b-a12b:free';
+      if (primarySlug !== reasoningCandidate && fallbacks.includes(reasoningCandidate)) {
+        fallbacks = [primarySlug, ...fallbacks.filter(f => f !== reasoningCandidate && f !== primarySlug)];
+        primarySlug = reasoningCandidate;
+      }
     }
   }
 
@@ -1169,12 +1173,19 @@ export async function streamOpenRouterChat({
 
   const rawCandidates = [primarySlug, ...fallbacks.filter(f => f !== primarySlug)];
   const candidates = rawCandidates.filter(c => !BLOCKED_MODELS.has(c));
-  if (candidates.length === 0) {
-    candidates.push(
-      'nvidia/nemotron-3-super-120b-a12b:free',
-      'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
-      'cohere/north-mini-code:free'
-    );
+  
+  // Guarantee multi-provider resilient safety fallbacks (Cohere, Liquid, Nvidia)
+  const universalSafetyFallbacks = [
+    'cohere/north-mini-code:free',
+    'liquid/lfm-2.5-2.6b:free',
+    'nvidia/nemotron-3.5-lightning:free',
+    'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+    'nvidia/nemotron-3-super-120b-a12b:free'
+  ];
+  for (const fb of universalSafetyFallbacks) {
+    if (!candidates.includes(fb)) {
+      candidates.push(fb);
+    }
   }
 
   // Prepare full message history with system instructions
@@ -1198,9 +1209,11 @@ export async function streamOpenRouterChat({
 
   for (const candidateModel of candidates) {
     const candidateCtrl = new AbortController();
+    const isHeavyReasoning = effectiveThinkingMode === 'ultra' || effectiveThinkingMode === 'deep';
+    const connectionTimeoutMs = isHeavyReasoning ? 25000 : 15000;
     let candidateTimeout: any = setTimeout(() => {
-      candidateCtrl.abort(new Error(`Model ${candidateModel} connection timed out after 12s`));
-    }, 12000);
+      candidateCtrl.abort(new Error(`Model ${candidateModel} connection timed out after ${Math.round(connectionTimeoutMs / 1000)}s`));
+    }, connectionTimeoutMs);
 
     const onParentAbort = () => candidateCtrl.abort(signal?.reason);
     if (signal) {
@@ -1223,11 +1236,10 @@ export async function streamOpenRouterChat({
         requestPayload.max_tokens = maxTokens;
       }
 
-      // Configure reasoning effort based on thinking mode
+      // Configure reasoning effort based on thinking mode (OpenRouter strictly requires either effort OR max_tokens, never both)
       if (effectiveThinkingMode === 'ultra') {
         requestPayload.reasoning = {
           effort: 'high',
-          max_tokens: infiniteOutput ? 16000 : 8192,
         };
       } else if (effectiveThinkingMode === 'deep') {
         requestPayload.reasoning = {
@@ -1237,9 +1249,13 @@ export async function streamOpenRouterChat({
         requestPayload.reasoning = {
           effort: 'low',
         };
+      } else if (isOmni) {
+        requestPayload.reasoning = {
+          effort: 'medium',
+        };
       }
 
-      const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      let response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${activeKey}`,
@@ -1252,17 +1268,41 @@ export async function streamOpenRouterChat({
       });
 
       if (!response.ok) {
-        const errorText = await response.text();
+        let errorText = await response.text();
         console.warn(`[Nixima Core] Model ${candidateModel} returned ${response.status}: ${errorText}. Attempting fallback...`);
 
-        // If the active key has exhausted its rate limit, fail fast so UI can notify the user
+        // If upstream provider returned 429, log and proceed to next candidate provider
         if (response.status === 429 || errorText.includes('Rate limit exceeded') || errorText.includes('rate-limited')) {
           lastError = new Error(`RATE_LIMIT_EXCEEDED: ${errorText}`);
-          break;
+          continue; // Try next candidate provider
         }
 
-        lastError = new Error(`HTTP ${response.status}: ${errorText}`);
-        continue; // Try next candidate model
+        // Auto-heal: If 400 occurred due to reasoning parameter incompatibility on this model, retry immediately without reasoning payload
+        if (response.status === 400 && requestPayload.reasoning) {
+          console.warn(`[Nixima Core] Retrying ${candidateModel} without reasoning object due to upstream 400...`);
+          const retryPayload = { ...requestPayload };
+          delete retryPayload.reasoning;
+          response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${activeKey}`,
+              'HTTP-Referer': typeof window !== 'undefined' ? window.location.origin : 'https://nixima.ai',
+              'X-Title': 'Nixima AI',
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(retryPayload),
+            signal: candidateCtrl.signal,
+          });
+
+          if (!response.ok) {
+            errorText = await response.text();
+            lastError = new Error(`HTTP ${response.status}: ${errorText}`);
+            continue;
+          }
+        } else {
+          lastError = new Error(`HTTP ${response.status}: ${errorText}`);
+          continue; // Try next candidate model
+        }
       }
 
       if (!response.body) {

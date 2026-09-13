@@ -156,16 +156,16 @@ export const NiximaCanvas: React.FC<NiximaCanvasProps> = ({
   const getTypeBadge = (type: ArtifactType) => {
     switch (type) {
       case 'html':
-        return { label: t.canvas.htmlApp, color: 'text-cyan-400 bg-cyan-950/60 border-cyan-800/60' };
+        return { label: t.canvas.htmlApp, color: 'text-zinc-200 bg-zinc-850 border-zinc-700' };
       case 'react':
-        return { label: t.canvas.reactComponent, color: 'text-cyan-300 bg-blue-950/60 border-blue-800/60' };
+        return { label: t.canvas.reactComponent, color: 'text-zinc-200 bg-zinc-850 border-zinc-700' };
       case 'svg':
-        return { label: t.canvas.svgGraphic, color: 'text-purple-300 bg-purple-950/60 border-purple-800/60' };
+        return { label: t.canvas.svgGraphic, color: 'text-zinc-200 bg-zinc-850 border-zinc-700' };
       case 'markdown':
-        return { label: t.canvas.markdownDoc, color: 'text-amber-300 bg-amber-950/60 border-amber-800/60' };
+        return { label: t.canvas.markdownDoc, color: 'text-zinc-200 bg-zinc-850 border-zinc-700' };
       case 'code':
       default:
-        return { label: t.canvas.scriptCode, color: 'text-zinc-300 bg-zinc-800/80 border-zinc-700' };
+        return { label: t.canvas.scriptCode, color: 'text-zinc-300 bg-zinc-850 border-zinc-700' };
     }
   };
 
@@ -182,7 +182,7 @@ export const NiximaCanvas: React.FC<NiximaCanvasProps> = ({
         {/* Left: Type Pill & Artifact Title & Version Dropdown */}
         <div className="flex items-center gap-2 min-w-0 pr-1">
           <div className="flex items-center gap-1.5 flex-shrink-0">
-            <span className="p-1 rounded bg-zinc-800 text-cyan-400 border border-zinc-700">
+            <span className="p-1 rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
               <Layers className="w-3.5 h-3.5" />
             </span>
             <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider border truncate max-w-[120px] sm:max-w-none ${typeBadge.color}`}>
@@ -277,7 +277,7 @@ export const NiximaCanvas: React.FC<NiximaCanvasProps> = ({
             <Code2 className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">{t.canvas.codeTab}</span>
             {hasUnsavedChanges && (
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
             )}
           </button>
 
@@ -307,10 +307,10 @@ export const NiximaCanvas: React.FC<NiximaCanvasProps> = ({
             <button
               type="button"
               onClick={handleApplyChanges}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-mono font-medium shadow-md transition-all active:scale-95"
+              className="flex items-center gap-1 px-2.5 py-1 rounded-md bg-white hover:bg-zinc-200 text-black text-xs font-mono font-semibold shadow-sm transition-all active:scale-95"
               title={t.canvas.applyAndRefresh}
             >
-              <Play className="w-3 h-3 fill-white" />
+              <Play className="w-3 h-3 fill-black text-black" />
               <span className="hidden md:inline">{t.canvas.applyAndRefresh}</span>
             </button>
           ) : (
@@ -318,7 +318,7 @@ export const NiximaCanvas: React.FC<NiximaCanvasProps> = ({
               type="button"
               onClick={handleRefresh}
               className={`p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/80 transition-all ${
-                isRefreshing ? 'animate-spin text-cyan-400' : ''
+                isRefreshing ? 'animate-spin text-white' : ''
               }`}
               title={t.canvas.runCode}
             >
@@ -331,12 +331,12 @@ export const NiximaCanvas: React.FC<NiximaCanvasProps> = ({
             onClick={handleCopyCode}
             className={`p-1.5 rounded-lg transition-all ${
               copied
-                ? 'text-emerald-400 bg-emerald-500/20'
+                ? 'text-white bg-zinc-800'
                 : 'text-zinc-400 hover:text-white hover:bg-zinc-800/80'
             }`}
             title={copied ? t.canvas.copiedCode : t.common.copy}
           >
-            {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+            {copied ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5" />}
           </button>
 
           <button
@@ -464,7 +464,7 @@ export const NiximaCanvas: React.FC<NiximaCanvasProps> = ({
       {/* 3. Follow-up Quick Action Chips */}
       <div className="p-2.5 bg-[#101014] border-t border-zinc-800/80 flex items-center gap-2 overflow-x-auto scrollbar-none">
         <span className="flex items-center gap-1 text-[11px] font-mono text-zinc-400 flex-shrink-0">
-          <Sparkles className="w-3 h-3 text-cyan-400" />
+          <Sparkles className="w-3 h-3 text-zinc-300" />
           <span className="hidden sm:inline">Iterate:</span>
         </span>
 

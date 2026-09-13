@@ -51,49 +51,20 @@ export const EmptyChat: React.FC<EmptyChatProps> = ({
 
   const getChartChipMeta = (chartType?: string, index?: number) => {
     const type = chartType || (index === 0 ? 'bar' : index === 1 ? 'area' : index === 2 ? 'line' : 'pyramid');
-    switch (type) {
-      case 'bar':
-        return {
-          icon: <BarChart3 className="w-3.5 h-3.5" />,
-          badgeBg: 'bg-cyan-950/80',
-          badgeBorder: 'border-cyan-500/50',
-          badgeColor: 'text-cyan-300',
-          badgeShadow: 'shadow-[0_0_10px_rgba(6,182,212,0.25)]',
-          tagStyle: 'bg-cyan-950/60 text-cyan-300 border-cyan-600/40',
-          cardHover: 'hover:border-cyan-500/50 hover:shadow-[0_0_20px_rgba(6,182,212,0.15)]',
-        };
-      case 'area':
-        return {
-          icon: <TrendingUp className="w-3.5 h-3.5" />,
-          badgeBg: 'bg-purple-950/80',
-          badgeBorder: 'border-purple-500/50',
-          badgeColor: 'text-purple-300',
-          badgeShadow: 'shadow-[0_0_10px_rgba(168,85,247,0.25)]',
-          tagStyle: 'bg-purple-950/60 text-purple-300 border-purple-600/40',
-          cardHover: 'hover:border-purple-500/50 hover:shadow-[0_0_20px_rgba(168,85,247,0.15)]',
-        };
-      case 'line':
-        return {
-          icon: <LineChart className="w-3.5 h-3.5" />,
-          badgeBg: 'bg-emerald-950/80',
-          badgeBorder: 'border-emerald-500/50',
-          badgeColor: 'text-emerald-300',
-          badgeShadow: 'shadow-[0_0_10px_rgba(16,185,129,0.25)]',
-          tagStyle: 'bg-emerald-950/60 text-emerald-300 border-emerald-600/40',
-          cardHover: 'hover:border-emerald-500/50 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)]',
-        };
-      case 'pyramid':
-      default:
-        return {
-          icon: <Layers className="w-3.5 h-3.5" />,
-          badgeBg: 'bg-amber-950/80',
-          badgeBorder: 'border-amber-500/50',
-          badgeColor: 'text-amber-300',
-          badgeShadow: 'shadow-[0_0_10px_rgba(245,158,11,0.25)]',
-          tagStyle: 'bg-amber-950/60 text-amber-300 border-amber-600/40',
-          cardHover: 'hover:border-amber-500/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.15)]',
-        };
-    }
+    let icon = <BarChart3 className="w-3.5 h-3.5" />;
+    if (type === 'area') icon = <TrendingUp className="w-3.5 h-3.5" />;
+    if (type === 'line') icon = <LineChart className="w-3.5 h-3.5" />;
+    if (type === 'pyramid') icon = <Layers className="w-3.5 h-3.5" />;
+
+    return {
+      icon,
+      badgeBg: 'bg-zinc-850/90',
+      badgeBorder: 'border-zinc-700/80',
+      badgeColor: 'text-zinc-300 group-hover:text-white',
+      badgeShadow: 'shadow-inner-light',
+      tagStyle: 'bg-zinc-800/90 text-zinc-300 border-zinc-700/70',
+      cardHover: 'hover:border-white/20 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.12),0_8px_24px_rgba(0,0,0,0.6)]',
+    };
   };
 
   return (
@@ -172,13 +143,13 @@ export const EmptyChat: React.FC<EmptyChatProps> = ({
           {/* Section Header */}
           <div className="flex items-center justify-between px-1">
             <div className="flex items-center gap-2.5">
-              <div className="w-5 h-5 rounded-md bg-cyan-950/80 border border-cyan-500/40 flex items-center justify-center text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.25)]">
+              <div className="w-5 h-5 rounded-md bg-zinc-900 border border-zinc-750 flex items-center justify-center text-zinc-300 shadow-inner-light">
                 <BarChart3 className="w-3 h-3" />
               </div>
               <span className="text-xs font-mono font-bold uppercase tracking-wider text-zinc-200">
                 {t.emptyChat.graphSectionTitle}
               </span>
-              <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-cyan-950/80 text-cyan-300 border border-cyan-500/50 shadow-[0_0_8px_rgba(6,182,212,0.2)]">
+              <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-white text-black">
                 NEW
               </span>
             </div>

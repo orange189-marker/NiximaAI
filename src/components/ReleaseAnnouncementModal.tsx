@@ -118,7 +118,7 @@ export const ReleaseAnnouncementModal: React.FC<ReleaseAnnouncementModalProps> =
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               <div className="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/90 space-y-2">
                 <div className="flex items-center gap-2 text-white font-semibold text-xs sm:text-sm">
-                  <Cpu className="w-4 h-4 text-cyan-400" />
+                  <Cpu className="w-4 h-4 text-zinc-300" />
                   <span>{t.releaseAnnouncement.highlight1Title}</span>
                 </div>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
@@ -128,7 +128,7 @@ export const ReleaseAnnouncementModal: React.FC<ReleaseAnnouncementModalProps> =
 
               <div className="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/90 space-y-2">
                 <div className="flex items-center gap-2 text-white font-semibold text-xs sm:text-sm">
-                  <Zap className="w-4 h-4 text-amber-400" />
+                  <Zap className="w-4 h-4 text-zinc-300" />
                   <span>{t.releaseAnnouncement.highlight2Title}</span>
                 </div>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
@@ -138,7 +138,7 @@ export const ReleaseAnnouncementModal: React.FC<ReleaseAnnouncementModalProps> =
 
               <div className="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/90 space-y-2">
                 <div className="flex items-center gap-2 text-white font-semibold text-xs sm:text-sm">
-                  <BrainCircuit className="w-4 h-4 text-purple-400" />
+                  <BrainCircuit className="w-4 h-4 text-zinc-300" />
                   <span>{t.releaseAnnouncement.highlight3Title}</span>
                 </div>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
@@ -148,7 +148,7 @@ export const ReleaseAnnouncementModal: React.FC<ReleaseAnnouncementModalProps> =
 
               <div className="p-4 rounded-xl bg-zinc-900/40 border border-zinc-800/90 space-y-2">
                 <div className="flex items-center gap-2 text-white font-semibold text-xs sm:text-sm">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                  <ShieldCheck className="w-4 h-4 text-zinc-300" />
                   <span>{t.releaseAnnouncement.highlight4Title}</span>
                 </div>
                 <p className="text-[11px] text-zinc-400 leading-relaxed">
@@ -186,7 +186,7 @@ export const ReleaseAnnouncementModal: React.FC<ReleaseAnnouncementModalProps> =
                           <div>
                             <div className="font-bold text-sm sm:text-base text-white tracking-tight flex items-center gap-2">
                               <span>{renderWithNiximaBrand(modelTr.name || model.name)}</span>
-                              {isSelected && <Check className="w-4 h-4 text-emerald-400 stroke-[2.5]" />}
+                              {isSelected && <Check className="w-4 h-4 text-white stroke-[2.5]" />}
                             </div>
                             <span className="text-[10px] font-mono text-zinc-400">
                               {model.parameters}

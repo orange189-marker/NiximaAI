@@ -161,7 +161,7 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
                 {isDad ? 'Nixima Family Clearance' : 'Nixima VIP Sovereign Access'}
               </span>
               {isPreview && (
-                <span className="px-1.5 py-0.5 rounded text-[8px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0">
+                <span className="px-1.5 py-0.5 rounded text-[8px] font-mono font-bold bg-zinc-800 text-zinc-300 border border-zinc-700 shrink-0">
                   PREVIEW
                 </span>
               )}
@@ -232,11 +232,11 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
         {/* ================================================================= */}
         <div className="relative px-3.5 py-2.5 sm:px-5 sm:py-3.5 bg-gradient-to-b from-[#13131d] via-[#0d0d14] to-[#0b0b0f] border-b border-zinc-800/80 overflow-hidden shrink-0">
           {/* Subtle Ambient Radial Energy Mesh */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-transparent to-transparent pointer-events-none" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/[0.03] via-transparent to-transparent pointer-events-none" />
 
           {/* Smooth vector energy pulse upon reaching infinity */}
           {isPulsing && (
-            <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/15 via-purple-500/20 to-cyan-500/15 animate-pulse pointer-events-none" />
+            <div className="absolute inset-0 bg-white/[0.03] animate-pulse pointer-events-none" />
           )}
 
           <div className="relative z-10 flex flex-row items-center justify-between gap-2 sm:gap-4">
@@ -247,13 +247,13 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
                   <NiximaCreditLogo size={18} glow={phase === 'infinite'} />
                 </div>
                 {phase === 'infinite' && (
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping opacity-75" />
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-white animate-ping opacity-75" />
                 )}
               </div>
 
               <div className="min-w-0">
                 <div className="flex items-center gap-1 text-[10px] font-mono text-zinc-400">
-                  <ShieldCheck className="w-3 h-3 text-cyan-400 shrink-0" />
+                  <ShieldCheck className="w-3 h-3 text-zinc-300 shrink-0" />
                   <span className="uppercase tracking-wider font-semibold text-zinc-300 truncate">
                     {isDad || lang === 'uk' ? 'Баланс:' : lang === 'ru' ? 'Баланс:' : 'Balance:'}
                   </span>
@@ -279,10 +279,10 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
                 /* Revealed Sovereign Iridescent Infinity Symbol */
                 <div className="flex items-center gap-2 animate-in fade-in zoom-in-90 duration-300">
                   <div className="transform scale-90 sm:scale-100 py-0.5">
-                    <InfinitySymbol size={24} glow animated />
+                    <InfinitySymbol size={24} glow animated theme="titanium" />
                   </div>
                   <div className="text-left">
-                    <span className="block text-[11px] sm:text-xs font-mono font-bold text-cyan-300 uppercase tracking-wide leading-none">
+                    <span className="block text-[11px] sm:text-xs font-mono font-bold text-white uppercase tracking-wide leading-none">
                       {isDad || lang === 'uk' ? 'Безліміт' : lang === 'ru' ? 'Бесконечно' : 'Infinite'}
                     </span>
                     <span className="block text-[9px] sm:text-[10px] font-mono text-zinc-400 leading-tight">
@@ -324,10 +324,10 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
                   ? `Привіт, ${recipientName}! Ласкаво просимо до Nixima AI`
                   : `Hey ${recipientName}! Welcome to Nixima AI`}
               </span>
-              <Sparkles className="w-4 h-4 text-cyan-400 shrink-0 inline" />
+              <Sparkles className="w-4 h-4 text-zinc-300 shrink-0 inline" />
             </h2>
             <div className="flex items-center gap-1.5 text-[11px] font-mono text-zinc-400">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 shrink-0" />
+              <span className="w-2 h-2 rounded-full bg-white shrink-0" />
               <span>
                 {isDad
                   ? 'Особистий лист від твого сина Богдана (orange17)'
@@ -349,7 +349,7 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
 
               <div className="p-3 sm:p-3.5 rounded-xl bg-zinc-900/80 border border-zinc-800 space-y-2">
                 <div className="flex items-center gap-2 text-xs font-mono font-bold text-white uppercase tracking-wider">
-                  <Cpu className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                  <Cpu className="w-3.5 h-3.5 text-zinc-300 shrink-0" />
                   <span>Що вміє Nixima AI:</span>
                 </div>
                 <ul className="text-xs space-y-1.5 text-zinc-300 list-disc list-inside">
@@ -394,7 +394,7 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
 
                   <div className="p-3.5 rounded-xl bg-zinc-900/70 border border-zinc-800/80 space-y-2">
                     <div className="flex items-center gap-2 text-xs font-mono font-bold text-white uppercase tracking-wider">
-                      <Cpu className="w-3.5 h-3.5 text-indigo-400" />
+                      <Cpu className="w-3.5 h-3.5 text-zinc-300" />
                       <span>Что умеет Nixima AI:</span>
                     </div>
                     <ul className="text-xs space-y-1.5 text-zinc-300 list-disc list-inside">
@@ -435,7 +435,7 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
 
                   <div className="p-3.5 rounded-xl bg-zinc-900/70 border border-zinc-800/80 space-y-2">
                     <div className="flex items-center gap-2 text-xs font-mono font-bold text-white uppercase tracking-wider">
-                      <Cpu className="w-3.5 h-3.5 text-indigo-400" />
+                      <Cpu className="w-3.5 h-3.5 text-zinc-300" />
                       <span>Можливості платформи Nixima AI:</span>
                     </div>
                     <ul className="text-xs space-y-1.5 text-zinc-300 list-disc list-inside">
@@ -476,7 +476,7 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
 
                   <div className="p-3.5 rounded-xl bg-zinc-900/70 border border-zinc-800/80 space-y-2">
                     <div className="flex items-center gap-2 text-xs font-mono font-bold text-white uppercase tracking-wider">
-                      <Cpu className="w-3.5 h-3.5 text-indigo-400" />
+                      <Cpu className="w-3.5 h-3.5 text-zinc-300" />
                       <span>Key Nixima AI Capabilities:</span>
                     </div>
                     <ul className="text-xs space-y-1.5 text-zinc-300 list-disc list-inside">
@@ -516,8 +516,8 @@ export const VipWelcomeModal: React.FC<VipWelcomeModalProps> = ({
         {/* ================================================================= */}
         <div className="px-3.5 py-2.5 sm:px-5 sm:py-3.5 bg-[#101017] border-t border-zinc-800 flex flex-col-reverse sm:flex-row items-center justify-between gap-2 shrink-0">
           <div className="text-[10px] sm:text-[11px] font-mono text-zinc-500 hidden sm:flex items-center gap-1.5">
-            <Zap className="w-3 h-3 text-cyan-400" />
-            <span>Nixima Sovereign Mesh v0.1</span>
+            <Zap className="w-3 h-3 text-zinc-400" />
+            <span>Nixima Sovereign Mesh v0.3</span>
           </div>
 
           <button

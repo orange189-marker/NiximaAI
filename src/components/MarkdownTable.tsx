@@ -340,7 +340,7 @@ export const MarkdownTable: React.FC<MarkdownTableProps> = ({ data }) => {
             className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors flex items-center gap-1 text-[11px]"
             title="Copy as CSV data"
           >
-            {copiedCsv ? <Check className="w-3 h-3 text-emerald-400" /> : <FileSpreadsheet className="w-3 h-3" />}
+            {copiedCsv ? <Check className="w-3 h-3 text-white" /> : <FileSpreadsheet className="w-3 h-3" />}
             <span className="hidden md:inline">{copiedCsv ? t.table.copiedCsv : t.table.copyCsv}</span>
           </button>
 
@@ -351,7 +351,7 @@ export const MarkdownTable: React.FC<MarkdownTableProps> = ({ data }) => {
             className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors flex items-center gap-1 text-[11px]"
             title="Copy as Markdown table"
           >
-            {copiedMd ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
+            {copiedMd ? <Check className="w-3 h-3 text-white" /> : <Copy className="w-3 h-3" />}
             <span className="hidden md:inline">{copiedMd ? t.table.copiedMarkdown : t.table.copyMarkdown}</span>
           </button>
 
@@ -375,12 +375,12 @@ export const MarkdownTable: React.FC<MarkdownTableProps> = ({ data }) => {
                 onClick={() => setIsGraphView(!isGraphView)}
                 className={`px-2 py-1 rounded-lg text-[11px] font-mono font-medium flex items-center gap-1.5 transition-all cursor-pointer ${
                   isGraphView
-                    ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40 shadow-glow-subtle'
+                    ? 'bg-white/[0.08] text-white border border-white/20 shadow-sm'
                     : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
                 }`}
                 title={isGraphView ? 'View as Data Table' : 'Visualize as Interactive Graph'}
               >
-                <BarChart3 className="w-3.5 h-3.5 text-cyan-400" />
+                <BarChart3 className="w-3.5 h-3.5 text-zinc-300" />
                 <span>{isGraphView ? 'Table' : 'Graph'}</span>
               </button>
             </>

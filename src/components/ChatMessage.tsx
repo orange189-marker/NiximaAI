@@ -747,30 +747,14 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                 const is03Coder = (message.model && message.model.toLowerCase().includes('0.3')) || (activeModelName && activeModelName.toLowerCase().includes('0.3'));
                 const isDeepV21 = !isUltra && is03Coder && !isBasicThinking;
                 return (
-                <div className={`rounded-xl border backdrop-blur-md overflow-hidden text-xs shadow-lg animate-fade-in ${
-                  isUltra
-                    ? 'border-purple-500/50 shadow-[0_0_25px_rgba(168,85,247,0.22)] bg-[#0f0b18]/95 ring-1 ring-purple-500/20'
-                    : isDeepV21
-                    ? 'border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.12)] bg-[#0e0e13]/90'
-                    : 'border-zinc-800 bg-[#0e0e13]/90'
-                }`}>
+                <div className="rounded-xl border border-zinc-800 bg-[#0e0e13]/95 backdrop-blur-md overflow-hidden text-xs shadow-lg animate-fade-in">
                   <div
                     onClick={() => setIsThinkingOpen(!isThinkingOpen)}
-                    className={`w-full px-3.5 py-2.5 flex items-center justify-between transition-colors cursor-pointer select-none border-b ${
-                      isUltra
-                        ? 'bg-purple-950/30 border-purple-900/40 text-purple-200 hover:text-white hover:bg-purple-950/45'
-                        : isDeepV21
-                        ? 'bg-emerald-950/20 border-emerald-900/40 text-zinc-300 hover:text-white'
-                        : 'bg-zinc-900/70 border-zinc-800 text-zinc-300 hover:text-white'
-                    }`}
+                    className="w-full px-3.5 py-2.5 flex items-center justify-between transition-colors cursor-pointer select-none border-b bg-zinc-900/70 border-zinc-800 text-zinc-300 hover:text-white"
                   >
                     <div className="flex items-center gap-2.5 flex-wrap">
-                      <BrainCircuit className={`w-4 h-4 ${
-                        isUltra ? 'text-purple-400 animate-pulse' : isDeepV21 ? 'text-emerald-400' : isBasicThinking ? 'text-cyan-400' : 'text-zinc-300'
-                      }`} />
-                      <span className={`font-mono text-xs font-bold tracking-tight ${
-                        isUltra ? 'text-purple-300 drop-shadow-[0_0_8px_rgba(192,132,252,0.4)]' : isDeepV21 ? 'text-emerald-300' : 'text-white'
-                      }`}>
+                      <BrainCircuit className="w-4 h-4 text-zinc-300" />
+                      <span className="font-mono text-xs font-bold tracking-tight text-white">
                         {isUltra
                           ? t.chatMessage.ultraThinkingV1
                           : isDeepV21
@@ -795,13 +779,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                           : t.chatMessage.stagesVerified(dynamicSteps.length || 3)
                         }
                       </span>
-                      <span className={`hidden sm:inline-flex items-center px-2 py-0.5 rounded border text-[10px] font-mono ${
-                        isUltra
-                          ? 'bg-purple-950/50 border-purple-800/60 text-purple-300'
-                          : isDeepV21
-                          ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-400'
-                          : 'bg-zinc-850 border-zinc-700 text-zinc-300'
-                      }`}>
+                      <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded border border-zinc-750 bg-zinc-850 text-zinc-300 text-[10px] font-mono">
                         {message.deepThinkingTelemetry?.epistemicDepth || (
                           isUltra
                             ? t.chatMessage.ultraThinkingStruggle
@@ -813,14 +791,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                         )}
                       </span>
                       {message.isStreaming && !message.content && (
-                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border text-[10px] font-mono ${
-                          isUltra
-                            ? 'bg-purple-950/80 border-purple-600/70 text-purple-200'
-                            : isDeepV21
-                            ? 'bg-emerald-950/60 border-emerald-700/60 text-emerald-300'
-                            : 'bg-zinc-800 border-zinc-700 text-zinc-300'
-                        }`}>
-                          <span className={`w-1.5 h-1.5 rounded-full animate-ping ${isUltra ? 'bg-purple-400' : isDeepV21 ? 'bg-emerald-400' : 'bg-zinc-400'}`} />
+                        <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/20 bg-white/[0.08] text-white text-[10px] font-mono">
+                          <span className="w-1.5 h-1.5 rounded-full animate-ping bg-white" />
                           <span>{t.chatMessage.generatingTrace}</span>
                         </span>
                       )}
@@ -836,17 +808,13 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                           playCompletionChime();
                           setTimeout(() => setCopiedThinking(false), 2000);
                         }}
-                        className={`px-2 py-1 rounded-md transition-colors flex items-center gap-1 text-[11px] font-mono cursor-pointer ${
-                          isUltra
-                            ? 'hover:bg-purple-900/40 text-purple-300 hover:text-white'
-                            : 'hover:bg-zinc-800 text-zinc-400 hover:text-white'
-                        }`}
+                        className="px-2 py-1 rounded-md transition-colors flex items-center gap-1 text-[11px] font-mono cursor-pointer hover:bg-zinc-800 text-zinc-400 hover:text-white"
                         title={t.chatMessage.copyThoughtTrace}
                       >
                         {copiedThinking ? (
                           <>
-                            <Check className={`w-3 h-3 ${isUltra ? 'text-purple-400' : 'text-emerald-400'}`} />
-                            <span className={`${isUltra ? 'text-purple-300' : 'text-emerald-400'} text-[10px]`}>{t.chatMessage.copiedThoughtTrace}</span>
+                            <Check className="w-3 h-3 text-white" />
+                            <span className="text-white text-[10px]">{t.chatMessage.copiedThoughtTrace}</span>
                           </>
                         ) : (
                           <>
@@ -855,7 +823,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                           </>
                         )}
                       </button>
-                      <div className={isUltra ? 'text-purple-400 pl-0.5' : 'text-zinc-500 pl-0.5'}>
+                      <div className="text-zinc-500 pl-0.5">
                         {isThinkingOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                       </div>
                     </div>
@@ -863,30 +831,20 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
                   {/* Expanded Thinking Drawer */}
                   {isThinkingOpen && (
-                    <div className={`divide-y bg-black/40 animate-fade-in ${
-                      isUltra ? 'divide-purple-900/40' : 'divide-zinc-800'
-                    }`}>
+                    <div className="divide-y divide-zinc-800 bg-black/40 animate-fade-in">
                       {/* View Mode Toggle Sub-bar */}
-                      <div className={`px-3.5 py-2 flex items-center justify-between text-[10.5px] font-mono border-b ${
-                        isUltra
-                          ? 'border-purple-900/40 bg-purple-950/40'
-                          : 'border-zinc-800/80 bg-zinc-950/60'
-                      }`}>
-                        <span className={`uppercase tracking-wider font-semibold ${
-                          isUltra ? 'text-purple-300/90' : 'text-zinc-400'
-                        }`}>
+                      <div className="px-3.5 py-2 flex items-center justify-between text-[10.5px] font-mono border-b border-zinc-800/80 bg-zinc-950/60">
+                        <span className="uppercase tracking-wider font-semibold text-zinc-400">
                           {isUltra ? 'Ultra Cognitive Dialectic Trace' : 'Cognitive Trace Telemetry'}
                         </span>
-                        <div className={`flex items-center gap-1 rounded-lg p-0.5 border ${
-                          isUltra ? 'bg-purple-950/60 border-purple-800/60' : 'bg-zinc-900 border-zinc-800'
-                        }`}>
+                        <div className="flex items-center gap-1 rounded-lg p-0.5 border bg-zinc-900 border-zinc-800">
                           <button
                             type="button"
                             onClick={() => setThinkingViewMode('steps')}
                             className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors cursor-pointer select-none ${
                               thinkingViewMode === 'steps'
-                                ? isUltra ? 'bg-purple-700/80 text-white font-semibold' : 'bg-zinc-700 text-white font-semibold'
-                                : isUltra ? 'text-purple-300/80 hover:text-white' : 'text-zinc-400 hover:text-white'
+                                ? 'bg-zinc-700 text-white font-semibold'
+                                : 'text-zinc-400 hover:text-white'
                             }`}
                           >
                             AI Steps ({dynamicSteps.length})
@@ -896,8 +854,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                             onClick={() => setThinkingViewMode('raw')}
                             className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors cursor-pointer select-none ${
                               thinkingViewMode === 'raw'
-                                ? isUltra ? 'bg-purple-700/80 text-white font-semibold' : 'bg-zinc-700 text-white font-semibold'
-                                : isUltra ? 'text-purple-300/80 hover:text-white' : 'text-zinc-400 hover:text-white'
+                                ? 'bg-zinc-700 text-white font-semibold'
+                                : 'text-zinc-400 hover:text-white'
                             }`}
                           >
                             Full Stream
@@ -913,50 +871,32 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                             return (
                               <div
                                 key={sIdx}
-                                className={`rounded-lg border transition-all duration-150 overflow-hidden ${
-                                  isUltra
-                                    ? 'bg-purple-950/20 hover:bg-purple-950/35 border-purple-900/40 hover:border-purple-700/60'
-                                    : 'bg-zinc-900/60 hover:bg-zinc-900/90 border-zinc-800 hover:border-zinc-700'
-                                }`}
+                                className="rounded-lg border transition-all duration-150 overflow-hidden bg-zinc-900/60 hover:bg-zinc-900/90 border-zinc-800 hover:border-zinc-700"
                               >
                                 <div
                                   onClick={() => setExpandedStepIndex(isStepExpanded ? -1 : sIdx)}
                                   className="p-3 flex items-start justify-between gap-3 cursor-pointer select-none"
                                 >
                                   <div className="flex items-center gap-2.5 min-w-0">
-                                    <span className={`w-5 h-5 rounded border font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0 ${
-                                      isUltra
-                                        ? 'bg-purple-900/70 border-purple-600/70 text-purple-200'
-                                        : 'bg-zinc-800 border-zinc-700 text-zinc-200'
-                                    }`}>
+                                    <span className="w-5 h-5 rounded border font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0 bg-zinc-800 border-zinc-700 text-zinc-200">
                                       {String(step.stepNumber).padStart(2, '0')}
                                     </span>
-                                    <span className={`font-semibold text-xs tracking-tight truncate ${
-                                      isUltra ? 'text-purple-100' : 'text-zinc-100'
-                                    }`}>
+                                    <span className="font-semibold text-xs tracking-tight truncate text-zinc-100">
                                       {step.title}
                                     </span>
                                   </div>
-                                  <div className={`transition-colors flex-shrink-0 pt-0.5 ${
-                                    isUltra ? 'text-purple-400 hover:text-purple-200' : 'text-zinc-500 hover:text-zinc-300'
-                                  }`}>
+                                  <div className="transition-colors flex-shrink-0 pt-0.5 text-zinc-500 hover:text-zinc-300">
                                     {isStepExpanded ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
                                   </div>
                                 </div>
 
                                 {isStepExpanded && (
-                                  <div className={`px-3 pb-3 pt-1 border-t font-mono text-[11px] leading-relaxed whitespace-pre-wrap selection:bg-purple-900 animate-fade-in ${
-                                    isUltra
-                                      ? 'border-purple-900/40 text-purple-200/90'
-                                      : 'border-zinc-800/60 text-zinc-300'
-                                  }`}>
+                                  <div className="px-3 pb-3 pt-1 border-t font-mono text-[11px] leading-relaxed whitespace-pre-wrap selection:bg-white/20 animate-fade-in border-zinc-800/60 text-zinc-300">
                                     {step.bullets && step.bullets.length > 0 ? (
                                       <div className="space-y-1.5 pt-1">
                                         {step.bullets.map((b, bIdx) => (
                                           <div key={bIdx} className="flex items-start gap-2">
-                                            <span className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 ${
-                                              isUltra ? 'bg-purple-400' : 'bg-zinc-400'
-                                            }`} />
+                                            <span className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 bg-zinc-400" />
                                             <span>{b}</span>
                                           </div>
                                         ))}
@@ -974,11 +914,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
                       {/* Full Thought Stream */}
                       {thinkingViewMode === 'raw' && (
-                        <div className={`p-3.5 font-mono text-[11px] leading-relaxed whitespace-pre-wrap selection:bg-purple-900 max-h-96 overflow-y-auto scrollbar-thin ${
-                          isUltra
-                            ? 'text-purple-200/90 scrollbar-thumb-purple-800'
-                            : 'text-zinc-300 scrollbar-thumb-zinc-700'
-                        }`}>
+                        <div className="p-3.5 font-mono text-[11px] leading-relaxed whitespace-pre-wrap selection:bg-white/20 max-h-96 overflow-y-auto scrollbar-thin text-zinc-300 scrollbar-thumb-zinc-700">
                           {message.thinking}
                         </div>
                       )}
@@ -995,45 +931,31 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                   return (
                   /* Cool Animated Thinking UI with Bouncing Neural Dots */
                   <div className="py-2.5 animate-fade-in select-none">
-                    <div className={`inline-flex items-center gap-3 px-4 py-2.5 rounded-2xl backdrop-blur-xl transition-all ${
-                      isUltraStreaming
-                        ? 'bg-[#0f0b18]/95 border border-purple-500/50 shadow-[0_4px_25px_rgba(168,85,247,0.25),inset_0_1px_0_rgba(192,132,252,0.15)]'
-                        : 'bg-[#0e0e13]/90 border border-zinc-800/90 shadow-[0_4px_25px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)]'
-                    }`}>
+                    <div className="inline-flex items-center gap-3 px-4 py-2.5 rounded-2xl backdrop-blur-xl transition-all bg-[#0e0e13]/90 border border-zinc-800/90 shadow-[0_4px_25px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)]">
                       {/* Animated Multi-Ring Neural Core */}
                       <div className="relative flex items-center justify-center w-5 h-5">
-                        <span className={`absolute -inset-1 rounded-full animate-ping opacity-60 pointer-events-none ${
-                          isUltraStreaming ? 'bg-purple-500/20' : 'bg-white/10'
-                        }`} />
+                        <span className="absolute -inset-1 rounded-full animate-ping opacity-60 pointer-events-none bg-white/10" />
                         <NiximaIdLogo size={16} animated glow={false} />
                       </div>
 
                       {/* Thinking / Reasoning Label */}
                       <div className="flex items-center gap-2.5 font-mono text-xs">
-                        <span className={`font-medium tracking-tight ${
-                          isUltraStreaming ? 'text-purple-300 font-semibold' : 'text-zinc-300'
-                        }`}>
+                        <span className="font-medium tracking-tight text-zinc-300">
                           {isUltraStreaming ? t.chatMessage.ultraThinkingV1 : message.thinking ? t.chatMessage.reasoning : t.chatMessage.thinking}
                         </span>
 
                         {/* 3 Glowing Bouncing Fluid Dots */}
                         <div className="flex items-center gap-1.5 pl-0.5">
                           <span
-                            className={`w-1.5 h-1.5 rounded-full animate-bounce ${
-                              isUltraStreaming ? 'bg-purple-400 shadow-[0_0_8px_rgba(192,132,252,0.9)]' : 'bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]'
-                            }`}
+                            className="w-1.5 h-1.5 rounded-full animate-bounce bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]"
                             style={{ animationDuration: '0.85s', animationDelay: '0ms' }}
                           />
                           <span
-                            className={`w-1.5 h-1.5 rounded-full animate-bounce ${
-                              isUltraStreaming ? 'bg-purple-300 shadow-[0_0_6px_rgba(168,85,247,0.7)]' : 'bg-zinc-300 shadow-[0_0_6px_rgba(255,255,255,0.6)]'
-                            }`}
+                            className="w-1.5 h-1.5 rounded-full animate-bounce bg-zinc-300 shadow-[0_0_6px_rgba(255,255,255,0.6)]"
                             style={{ animationDuration: '0.85s', animationDelay: '180ms' }}
                           />
                           <span
-                            className={`w-1.5 h-1.5 rounded-full animate-bounce ${
-                              isUltraStreaming ? 'bg-purple-500 shadow-[0_0_4px_rgba(147,51,234,0.5)]' : 'bg-zinc-500 shadow-[0_0_4px_rgba(255,255,255,0.3)]'
-                            }`}
+                            className="w-1.5 h-1.5 rounded-full animate-bounce bg-zinc-500 shadow-[0_0_4px_rgba(255,255,255,0.3)]"
                             style={{ animationDuration: '0.85s', animationDelay: '360ms' }}
                           />
                         </div>
@@ -1078,10 +1000,10 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                               window.dispatchEvent(new CustomEvent('NIXIMA_OPEN_ARTIFACT', { detail: primary }));
                             }
                           }}
-                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-950/80 hover:bg-cyan-900 border border-cyan-500/50 hover:border-cyan-400 text-cyan-300 hover:text-white transition-all shadow-[0_0_15px_rgba(6,182,212,0.25)] active:scale-95 cursor-pointer font-mono text-xs font-semibold mr-1"
+                          className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/[0.08] hover:bg-white/[0.14] border border-white/20 hover:border-white/40 text-zinc-200 hover:text-white transition-all shadow-sm active:scale-95 cursor-pointer font-mono text-xs font-semibold mr-1"
                           title={primary.title}
                         >
-                          <Layers className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                          <Layers className="w-3.5 h-3.5 text-zinc-300" />
                           <span>{t.chatMessage.launchInCanvas}</span>
                         </button>
                       );
@@ -1093,7 +1015,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                         onClick={handleCopy}
                         className={`relative h-7 rounded-lg transition-all duration-300 flex items-center justify-center select-none overflow-visible ${
                           copied
-                            ? 'px-2.5 bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 shadow-[0_0_16px_rgba(16,185,129,0.35),inset_0_1px_0_rgba(255,255,255,0.1)]'
+                            ? 'px-2.5 bg-zinc-800 border border-zinc-600 text-white shadow-sm'
                             : 'w-7 px-0 text-zinc-400 hover:text-white hover:bg-zinc-800/80 border border-transparent active:scale-95'
                         }`}
                         title={copied ? t.chatMessage.copied : t.chatMessage.copyResponse}
@@ -1102,14 +1024,14 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                         {copied ? (
                           <>
                             {/* Expanding Shockwave Ring */}
-                            <span className="absolute inset-0 rounded-lg border border-emerald-400/60 animate-copy-shockwave pointer-events-none" />
+                            <span className="absolute inset-0 rounded-lg border border-white/40 animate-copy-shockwave pointer-events-none" />
                             {/* Luminous Particle Sparks */}
-                            <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-400 animate-spark-1 shadow-[0_0_8px_rgba(52,211,153,1)] pointer-events-none" />
-                            <span className="absolute -bottom-0.5 -left-0.5 w-1.5 h-1.5 rounded-full bg-cyan-400 animate-spark-2 shadow-[0_0_8px_rgba(34,211,238,1)] pointer-events-none" />
+                            <span className="absolute -top-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-white animate-spark-1 shadow-[0_0_8px_rgba(255,255,255,0.8)] pointer-events-none" />
+                            <span className="absolute -bottom-0.5 -left-0.5 w-1.5 h-1.5 rounded-full bg-zinc-300 animate-spark-2 shadow-[0_0_8px_rgba(255,255,255,0.8)] pointer-events-none" />
 
                             <span className="flex items-center gap-1.5 font-mono text-[11px] font-medium tracking-tight">
-                              <Check className="w-3.5 h-3.5 text-emerald-400 animate-check-pop stroke-[2.5]" />
-                              <span className="animate-text-reveal text-emerald-300 whitespace-nowrap">
+                              <Check className="w-3.5 h-3.5 text-white animate-check-pop stroke-[2.5]" />
+                              <span className="animate-text-reveal text-white whitespace-nowrap">
                                 {t.chatMessage.copied}
                               </span>
                             </span>
@@ -1376,7 +1298,7 @@ const CodeBlock: React.FC<{
 
   return (
     <div className={`my-3 rounded-xl border transition-all duration-200 bg-[#0c0c0e] shadow-xl relative ${
-      isStreaming ? 'border-cyan-500/50 shadow-[0_0_20px_rgba(6,182,212,0.12)]' : 'border-zinc-800/90'
+      isStreaming ? 'border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.06)]' : 'border-zinc-800/90'
     }`}>
       {/* Sticky Code Block Header Toolbar (Pins cleanly at the top while scrolling long code) */}
       <div className="sticky top-0 z-20 flex items-center justify-between px-3.5 py-2 bg-[#121216]/95 backdrop-blur-md border-b border-zinc-800/80 rounded-t-xl text-[11px] font-mono text-zinc-400 select-none shadow-sm transition-all">
@@ -1390,8 +1312,8 @@ const CodeBlock: React.FC<{
             </span>
           )}
           {isStreaming && (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9.5px] font-mono font-medium bg-cyan-950/70 text-cyan-300 border border-cyan-800/60 shadow-[0_0_8px_rgba(6,182,212,0.25)]">
-              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9.5px] font-mono font-medium bg-zinc-850 text-zinc-200 border border-zinc-700 shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
               <span>{currentLang === 'uk' ? 'Генерація коду...' : 'Streaming code...'}</span>
             </span>
           )}
@@ -1402,10 +1324,10 @@ const CodeBlock: React.FC<{
             <button
               type="button"
               onClick={handleOpenCanvas}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-cyan-950/90 hover:bg-cyan-900 border border-cyan-500/60 hover:border-cyan-400 text-cyan-200 hover:text-white transition-all shadow-[0_0_12px_rgba(6,182,212,0.3)] active:scale-95 cursor-pointer font-medium text-[11px]"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/[0.08] hover:bg-white/[0.14] border border-white/20 hover:border-white/40 text-zinc-200 hover:text-white transition-all shadow-sm active:scale-95 cursor-pointer font-medium text-[11px]"
               title="Open and run in Nixima Canvas"
             >
-              <Layers className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+              <Layers className="w-3.5 h-3.5 text-zinc-300" />
               <span>{t.chatMessage.openInCanvas}</span>
             </button>
           )}
@@ -1424,16 +1346,16 @@ const CodeBlock: React.FC<{
             onClick={copyCode}
             className={`relative rounded-md transition-all duration-300 flex items-center justify-center gap-1.5 px-2.5 py-1 select-none cursor-pointer ${
               copied
-                ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
+                ? 'bg-zinc-800 border border-zinc-600 text-white shadow-sm'
                 : 'hover:text-white hover:bg-zinc-800/80 text-zinc-400 border border-transparent active:scale-95'
             }`}
             title={copied ? t.chatMessage.copied : t.chatMessage.copyCode}
           >
             {copied ? (
               <>
-                <span className="absolute inset-0 rounded-md border border-emerald-400/50 animate-copy-shockwave pointer-events-none" />
-                <Check className="w-3 h-3 text-emerald-400 animate-check-pop stroke-[2.5]" />
-                <span className="animate-text-reveal text-emerald-300 font-medium">{t.chatMessage.copied}</span>
+                <span className="absolute inset-0 rounded-md border border-white/40 animate-copy-shockwave pointer-events-none" />
+                <Check className="w-3 h-3 text-white animate-check-pop stroke-[2.5]" />
+                <span className="animate-text-reveal text-white font-medium">{t.chatMessage.copied}</span>
               </>
             ) : (
               <>
@@ -1446,13 +1368,13 @@ const CodeBlock: React.FC<{
       </div>
 
       {/* Code Content Container with Syntax Highlighting */}
-      <pre className="p-4 text-[13px] font-mono overflow-x-auto text-zinc-200 leading-relaxed nixima-code-block selection:bg-cyan-500/30 rounded-b-xl">
+      <pre className="p-4 text-[13px] font-mono overflow-x-auto text-zinc-200 leading-relaxed nixima-code-block selection:bg-white/20 rounded-b-xl">
         <code 
           className={`language-${language || 'plaintext'} font-mono`}
           dangerouslySetInnerHTML={{ __html: highlightedHtml }} 
         />
         {isStreaming && (
-          <span className="inline-block w-2 h-4 ml-0.5 bg-cyan-400 align-middle animate-code-cursor" />
+          <span className="inline-block w-2 h-4 ml-0.5 bg-white align-middle animate-code-cursor" />
         )}
       </pre>
     </div>

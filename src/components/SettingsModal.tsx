@@ -540,8 +540,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     {t.settings.contextLimitTitle}
                   </label>
                   {settings.infiniteOutputEnabled && (
-                    <span className="text-[10px] font-mono text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-600/50 flex items-center gap-1">
-                      <InfinitySymbol size={11} className="text-amber-400" />
+                    <span className="text-[10px] font-mono text-zinc-200 bg-zinc-800 px-2 py-0.5 rounded border border-zinc-700 flex items-center gap-1">
+                      <InfinitySymbol size={11} theme="titanium" className="text-zinc-200" />
                       <span>{language === 'uk' ? 'БЕЗ ЛІМІТУ' : 'UNBOUNDED'}</span>
                     </span>
                   )}
@@ -566,24 +566,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
               {/* Creator Exclusive: Sovereign Infinite Output Clearance */}
               {isStrictCreator(currentUser) && (
-                <div className="p-3.5 rounded-xl bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-transparent border border-amber-500/30 flex items-center justify-between shadow-[0_0_20px_rgba(245,158,11,0.06)]">
+                <div className="p-3.5 rounded-xl bg-zinc-900/90 border border-zinc-750 flex items-center justify-between shadow-sm">
                   <div className="space-y-1 pr-4">
                     <div className="flex items-center gap-2">
                       <InfinitySymbol
                         size={16}
                         active={settings.infiniteOutputEnabled}
-                        theme="amber"
+                        theme="titanium"
                         glow={settings.infiniteOutputEnabled}
                         className={`transition-all duration-300 ${settings.infiniteOutputEnabled ? 'scale-110' : 'opacity-70'}`}
                       />
-                      <span className="text-xs font-bold text-amber-300 uppercase tracking-wider font-mono">
+                      <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">
                         {t.settings.infiniteOutputTitle}
                       </span>
-                      <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold rounded bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                      <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold rounded bg-zinc-800 text-zinc-200 border border-zinc-700">
                         CREATOR CLEARANCE
                       </span>
                     </div>
-                    <p className="text-xs text-amber-200/80 leading-relaxed">
+                    <p className="text-xs text-zinc-300 leading-relaxed">
                       {t.settings.infiniteOutputDesc}
                     </p>
                   </div>
@@ -591,12 +591,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     type="button"
                     onClick={() => onUpdateSettings({ infiniteOutputEnabled: !settings.infiniteOutputEnabled })}
                     className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                      settings.infiniteOutputEnabled ? 'bg-amber-500' : 'bg-zinc-800'
+                      settings.infiniteOutputEnabled ? 'bg-white' : 'bg-zinc-800'
                     }`}
                   >
                     <span
-                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                        settings.infiniteOutputEnabled ? 'translate-x-5' : 'translate-x-0'
+                      className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-black shadow-lg ring-0 transition duration-200 ease-in-out ${
+                        settings.infiniteOutputEnabled ? 'translate-x-5' : 'translate-x-0 bg-white'
                       }`}
                     />
                   </button>
@@ -631,16 +631,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
               </div>
 
-              {/* Token Purity & Anti-Glitch Guard (Nixima-0.2 Zero-Drift) */}
+              {/* Token Purity & Anti-Glitch Guard (Nixima-0.3 / 0.2 Zero-Drift) */}
               <div className="p-3.5 rounded-xl bg-zinc-900/80 border border-zinc-800 flex items-center justify-between">
                 <div className="space-y-1 pr-4">
                   <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                    <ShieldCheck className="w-4 h-4 text-zinc-300" />
                     <span className="text-xs font-bold text-white uppercase tracking-wider font-mono">
                       {t.settings.antiGlitchTitle}
                     </span>
-                    <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                      NIXIMA 0.2
+                    <span className="px-1.5 py-0.5 text-[9px] font-mono font-bold rounded bg-zinc-800 text-zinc-300 border border-zinc-700">
+                      NIXIMA 0.3 / 0.2
                     </span>
                   </div>
                   <p className="text-xs text-zinc-400 leading-relaxed">
@@ -651,12 +651,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   type="button"
                   onClick={() => onUpdateSettings({ antiGlitchFilter: settings.antiGlitchFilter === false ? true : false })}
                   className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
-                    settings.antiGlitchFilter !== false ? 'bg-emerald-500' : 'bg-zinc-800'
+                    settings.antiGlitchFilter !== false ? 'bg-white' : 'bg-zinc-800'
                   }`}
                 >
                   <span
-                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                      settings.antiGlitchFilter !== false ? 'translate-x-5' : 'translate-x-0'
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-black shadow-lg ring-0 transition duration-200 ease-in-out ${
+                      settings.antiGlitchFilter !== false ? 'translate-x-5' : 'translate-x-0 bg-white'
                     }`}
                   />
                 </button>
@@ -718,7 +718,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="space-y-5">
               {importStatus && (
                 <div className="p-3 rounded-lg bg-zinc-800 border border-zinc-700 text-xs text-white font-mono flex items-center gap-2">
-                  <Check className="w-4 h-4 text-emerald-400" />
+                  <Check className="w-4 h-4 text-white" />
                   {importStatus}
                 </div>
               )}
@@ -795,15 +795,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="p-4 rounded-xl bg-zinc-900/90 border border-zinc-700/80 space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-semibold text-zinc-200 uppercase tracking-wider font-mono flex items-center gap-1.5">
-                    <Key className="w-3.5 h-3.5 text-orange-400" />
+                    <Key className="w-3.5 h-3.5 text-zinc-300" />
                     <span>{language === 'uk' ? 'Персональний OpenRouter API Ключ' : 'Dedicated OpenRouter API Key'}</span>
                   </label>
                   {settings.openRouterApiKey ? (
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono font-medium">
+                    <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-200 border border-zinc-700 text-[10px] font-mono font-medium">
                       {language === 'uk' ? 'Персональний ключ активний' : 'Custom Key Active'}
                     </span>
                   ) : (
-                    <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-mono font-medium">
+                    <span className="px-2 py-0.5 rounded-full bg-zinc-850 text-zinc-400 border border-zinc-800 text-[10px] font-mono font-medium">
                       {language === 'uk' ? 'Спільний демо-ключ (50/день)' : 'Shared Demo Key (50/day)'}
                     </span>
                   )}
@@ -911,7 +911,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       </p>
                     </div>
                   </div>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-mono font-medium">
+                  <span className="px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-200 border border-zinc-700 text-[10px] font-mono font-medium">
                     {language === 'uk' ? 'Активний статус' : 'Active Status'}
                   </span>
                 </div>

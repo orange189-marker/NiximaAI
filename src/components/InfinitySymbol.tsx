@@ -27,11 +27,12 @@ export interface InfinitySymbolProps {
   active?: boolean;
   /**
    * Color theme for the active radiant state:
-   * - 'iridescent': Multicolored chromatic spectrum (Cyan, Indigo, Purple, Pink, Gold, Emerald)
-   * - 'amber': Solar Sovereign Amber/Gold (Gold, Amber, Neon Orange, Rose Crimson)
-   * Default is 'iridescent'.
+   * - 'titanium': Liquid Silver / Titanium Monochrome (matches Nixima wordmark sheen & website UI)
+   * - 'iridescent': Multicolored chromatic spectrum
+   * - 'amber': Solar Sovereign Amber/Gold
+   * Default is 'titanium'.
    */
-  theme?: 'iridescent' | 'amber';
+  theme?: 'titanium' | 'iridescent' | 'amber';
 }
 
 /**
@@ -53,7 +54,7 @@ export const InfinitySymbol: React.FC<InfinitySymbolProps> = ({
   glow = false,
   animated = true,
   active = true,
-  theme = 'iridescent',
+  theme = 'titanium',
 }) => {
   const id = useId().replace(/:/g, '');
   const numSize = typeof size === 'number' ? size : parseFloat(size) || 14;
@@ -90,7 +91,7 @@ export const InfinitySymbol: React.FC<InfinitySymbolProps> = ({
           <stop offset="100%" stopColor="#52525B" stopOpacity="0.8" />
         </linearGradient>
 
-        {/* Active Radiant Chassis: Iridescent Titanium or Solar Gold */}
+        {/* Active Radiant Chassis: Titanium Silver or Solar Gold or Iridescent */}
         {theme === 'amber' ? (
           <linearGradient id={`${id}-active-chassis`} x1="1" y1="2" x2="31" y2="14" gradientUnits="userSpaceOnUse">
             <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.95" />
@@ -117,7 +118,7 @@ export const InfinitySymbol: React.FC<InfinitySymbolProps> = ({
             <stop offset="85%" stopColor="#FBBF24" />   {/* Golden Spark */}
             <stop offset="100%" stopColor="#FDE047" />
           </linearGradient>
-        ) : (
+        ) : theme === 'iridescent' ? (
           <linearGradient id={`${id}-active-laser`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#38BDF8" />     {/* Electric Cyan */}
             <stop offset="18%" stopColor="#818CF8" />    {/* Neon Indigo */}
@@ -126,6 +127,14 @@ export const InfinitySymbol: React.FC<InfinitySymbolProps> = ({
             <stop offset="72%" stopColor="#FBBF24" />    {/* Prismatic Gold */}
             <stop offset="88%" stopColor="#34D399" />    {/* Emerald Sheen */}
             <stop offset="100%" stopColor="#38BDF8" />   {/* Electric Cyan */}
+          </linearGradient>
+        ) : (
+          <linearGradient id={`${id}-active-laser`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FFFFFF" />
+            <stop offset="25%" stopColor="#F4F4F5" />
+            <stop offset="50%" stopColor="#A1A1AA" />
+            <stop offset="75%" stopColor="#FFFFFF" />
+            <stop offset="100%" stopColor="#E4E4E7" />
           </linearGradient>
         )}
 
@@ -136,11 +145,17 @@ export const InfinitySymbol: React.FC<InfinitySymbolProps> = ({
             <stop offset="50%" stopColor="#FDE047" stopOpacity="0.4" />
             <stop offset="100%" stopColor="#EA580C" stopOpacity="0.5" />
           </linearGradient>
-        ) : (
+        ) : theme === 'iridescent' ? (
           <linearGradient id={`${id}-active-glow`} x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#38BDF8" stopOpacity="0.4" />
             <stop offset="50%" stopColor="#C084FC" stopOpacity="0.4" />
             <stop offset="100%" stopColor="#F472B6" stopOpacity="0.4" />
+          </linearGradient>
+        ) : (
+          <linearGradient id={`${id}-active-glow`} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.3" />
+            <stop offset="50%" stopColor="#E4E4E7" stopOpacity="0.2" />
+            <stop offset="100%" stopColor="#A1A1AA" stopOpacity="0.3" />
           </linearGradient>
         )}
       </defs>

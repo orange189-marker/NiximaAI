@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { ModelOption, SearchMode, ThinkingMode } from '../types/chat';
 import { getRecommendedModelForSearchMode, NIXIMA_MODELS } from '../data/models';
+import { isOmniModel } from '../utils/omniTools';
 import { NiximaIdLogo } from './NiximaIdLogo';
 import { ModelIcon } from './ModelIcon';
 import { useLanguage } from '../context/LanguageContext';
@@ -162,19 +163,21 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     setAttachedFiles(prev => prev.filter(f => f !== fileName));
   };
 
-  const isOmni = currentModel.isOmni || currentModel.id === 'nixima-0.2-omni';
+  const isOmni = isOmniModel(currentModel);
   const is03Coder = currentModel.id === 'nixima-0.3-coder' || currentModel.name.toLowerCase().includes('0.3');
+  const isThinkingTurnedOn = thinkingMode === 'basic' || thinkingMode === 'deep' || thinkingMode === 'ultra' || deepThink;
+  const isDualToolActive = isOmni && isThinkingTurnedOn && webSearch;
 
   const modifiers = [
-    { label: t.chatInput.modifiers.concise.label, icon: <Zap className="w-3 h-3 text-amber-400" />, prompt: t.chatInput.modifiers.concise.prompt },
-    { label: t.chatInput.modifiers.codeOnly.label, icon: <Code2 className="w-3 h-3 text-emerald-400" />, prompt: t.chatInput.modifiers.codeOnly.prompt },
-    { label: t.chatInput.modifiers.deepProof.label, icon: <BrainCircuit className="w-3 h-3 text-cyan-400" />, prompt: t.chatInput.modifiers.deepProof.prompt },
-    { label: t.chatInput.modifiers.table.label, icon: <Table className="w-3 h-3 text-violet-400" />, prompt: t.chatInput.modifiers.table.prompt },
+    { label: t.chatInput.modifiers.concise.label, icon: <Zap className="w-3 h-3 text-zinc-400 group-hover:text-zinc-200" />, prompt: t.chatInput.modifiers.concise.prompt },
+    { label: t.chatInput.modifiers.codeOnly.label, icon: <Code2 className="w-3 h-3 text-zinc-400 group-hover:text-zinc-200" />, prompt: t.chatInput.modifiers.codeOnly.prompt },
+    { label: t.chatInput.modifiers.deepProof.label, icon: <BrainCircuit className="w-3 h-3 text-zinc-400 group-hover:text-zinc-200" />, prompt: t.chatInput.modifiers.deepProof.prompt },
+    { label: t.chatInput.modifiers.table.label, icon: <Table className="w-3 h-3 text-zinc-400 group-hover:text-zinc-200" />, prompt: t.chatInput.modifiers.table.prompt },
   ];
 
   const estimated = useMemo(() => {
-    return calculateEstimatedCost(input, currentModel, isOmni ? false : deepThink, isOmni ? undefined : thinkingMode);
-  }, [input, currentModel, deepThink, isOmni, thinkingMode]);
+    return calculateEstimatedCost(input, currentModel, deepThink, thinkingMode);
+  }, [input, currentModel, deepThink, thinkingMode]);
 
   const hasCredits = (userCredits ?? 1000) >= (currentModel.baseCreditCost || 2);
   const canSubmit = (input.trim().length > 0 || attachedFiles.length > 0) && !isLoading && hasCredits;
@@ -182,7 +185,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   return (
     <div className="w-full max-w-3xl mx-auto px-4 pb-4 pt-1">
       {/* Quick Prompt Modifiers Rail */}
-      <div className="flex items-center gap-1.5 pb-2.5 overflow-x-auto text-[11px] font-mono select-none scrollbar-none">
+      <div className="flex items-center gap-1.5 pb-2.5 overflow-x-auto text-[11px] font-mono select-none no-scrollbar scrollbar-none">
         <span className="text-zinc-500 pl-1 text-[10px] uppercase tracking-wider font-semibold flex items-center gap-1 flex-shrink-0">
           <Sparkles className="w-3 h-3 text-zinc-400" />
           <span>{t.chatInput.modifierLabel}</span>
@@ -192,7 +195,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             key={idx}
             type="button"
             onClick={() => applyModifier(m.prompt)}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/60 hover:bg-zinc-800/80 text-zinc-400 hover:text-zinc-100 border border-zinc-800/80 hover:border-zinc-700/80 transition-all duration-200 whitespace-nowrap active:scale-95 shadow-sm backdrop-blur-sm"
+            className="group flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900/80 hover:bg-zinc-800 text-zinc-400 hover:text-white border border-zinc-800 hover:border-zinc-700 transition-all duration-200 whitespace-nowrap active:scale-95 shadow-sm backdrop-blur-sm"
           >
             {m.icon}
             <span>{m.label}</span>
@@ -202,8 +205,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
       {/* Main Elevated Input Dock */}
       <div className="relative group">
-        {/* Ambient Atmospheric Radiance on Focus */}
-        <div className="absolute -inset-1 bg-gradient-to-r from-cyan-500/10 via-amber-500/10 to-purple-500/10 rounded-[28px] blur-xl opacity-0 group-focus-within:opacity-100 transition-all duration-700 pointer-events-none" />
+        {/* Subtle Titanium Atmospheric Radiance on Focus */}
+        <div className="absolute -inset-1 bg-white/[0.04] rounded-[28px] blur-xl opacity-0 group-focus-within:opacity-100 transition-all duration-500 pointer-events-none" />
 
         <div className="relative rounded-2xl sm:rounded-[24px] bg-[#0c0c11]/92 border border-white/[0.09] hover:border-white/[0.15] focus-within:!border-white/35 shadow-[0_16px_48px_-8px_rgba(0,0,0,0.85),0_0_0_1px_rgba(255,255,255,0.02),inset_0_1px_0_0_rgba(255,255,255,0.1)] focus-within:shadow-[0_20px_60px_-10px_rgba(0,0,0,0.95),0_0_30px_rgba(255,255,255,0.06),inset_0_1px_0_0_rgba(255,255,255,0.18)] backdrop-blur-2xl transition-all duration-300 overflow-hidden">
           {/* Subtle Top Specular Glass Highlight */}
@@ -246,8 +249,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
           {/* High-Tech Capability Toolbar (Bottom Dock) */}
           <div className="flex items-center justify-between px-3 sm:px-4 py-2 bg-black/30 border-t border-white/[0.06] gap-2 min-w-0">
-            {/* Left Controls: Brain & Capability Switches */}
-            <div className="flex items-center gap-1 sm:gap-1.5 min-w-0 py-0.5">
+            {/* Left Controls: Brain & Capability Switches (Smooth scrollable, never pushes right controls) */}
+            <div className="flex items-center gap-1 sm:gap-1.5 min-w-0 py-0.5 overflow-x-auto no-scrollbar scroll-smooth flex-1 mr-1">
               {/* Context Attachment Button */}
               <button
                 type="button"
@@ -258,46 +261,36 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 <Paperclip className="w-4 h-4" />
               </button>
 
-              {!isOmni && (
-                <>
-                  <div className="hidden sm:block h-3.5 w-[1px] bg-zinc-800 mx-0.5 flex-shrink-0" />
+              <div className="hidden sm:block h-3.5 w-[1px] bg-zinc-800 mx-0.5 flex-shrink-0" />
 
-                  {/* Thinking Engine Control (Basic Thinking vs DeepThinking V2/V2.1 vs UltraThinking V1.0) */}
-                  <div className="relative flex items-center flex-shrink-0 z-30" ref={thinkingMenuRef}>
-                    <div
-                      className={`flex items-center rounded-full text-xs font-mono transition-all duration-200 border select-none ${
-                        thinkingMode === 'ultra'
-                          ? 'bg-purple-950/40 text-purple-200 font-semibold border-purple-500/50 shadow-[0_0_14px_rgba(168,85,247,0.25)] ring-1 ring-purple-500/20'
-                          : thinkingMode === 'basic'
-                          ? 'bg-cyan-950/40 text-cyan-200 font-semibold border-cyan-500/50 shadow-[0_0_12px_rgba(6,182,212,0.2)] ring-1 ring-cyan-500/20'
-                          : thinkingMode === 'deep' || deepThink
-                          ? (is03Coder
-                              ? 'bg-emerald-950/40 text-emerald-200 font-semibold border-emerald-500/50 shadow-[0_0_14px_rgba(16,185,129,0.2)] ring-1 ring-emerald-500/20'
-                              : 'bg-zinc-800/90 text-white font-semibold border-zinc-500 shadow-inner-light')
-                          : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:border-zinc-700 hover:bg-zinc-850/80'
-                      }`}
-                    >
-                      <button
-                        type="button"
-                        onClick={onToggleDeepThink}
-                        className="flex items-center gap-1.5 pl-2.5 sm:pl-3 pr-1 py-1.5 cursor-pointer"
-                        title={
-                          thinkingMode === 'ultra'
-                            ? t.chatInput.ultraThinkingTooltip
-                            : thinkingMode === 'basic'
-                            ? t.chatInput.basicThinkingTooltip
-                            : thinkingMode === 'deep' || deepThink
-                            ? (is03Coder ? t.chatInput.deepThinkingV21Desc : t.chatInput.deepThinkTooltip)
-                            : t.chatInput.thinkingEngineTitle
-                        }
-                      >
+              {/* Thinking Engine Control (Unified Sleek Titanium Pill) */}
+              <div className="relative flex items-center flex-shrink-0 z-30" ref={thinkingMenuRef}>
+                <div
+                  className={`flex items-center rounded-full text-xs font-mono transition-all duration-200 border select-none ${
+                    (thinkingMode === 'basic' || thinkingMode === 'deep' || thinkingMode === 'ultra' || deepThink)
+                      ? 'bg-white/[0.08] text-white font-medium border-white/25 shadow-[0_0_12px_rgba(255,255,255,0.06)]'
+                      : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:border-zinc-700 hover:bg-zinc-850/80'
+                  }`}
+                >
+                  <button
+                    type="button"
+                    onClick={onToggleDeepThink}
+                    className="flex items-center gap-1.5 pl-2.5 sm:pl-3 pr-1 py-1.5 cursor-pointer"
+                    title={
+                      isOmni && !(thinkingMode === 'basic' || thinkingMode === 'deep' || thinkingMode === 'ultra' || deepThink)
+                        ? `Omni Thinking Engine (Autonomous On-Demand • Click to lock active) • Concurrent with Search V3`
+                        : thinkingMode === 'ultra'
+                        ? t.chatInput.ultraThinkingTooltip
+                        : thinkingMode === 'basic'
+                        ? t.chatInput.basicThinkingTooltip
+                        : thinkingMode === 'deep' || deepThink
+                        ? (is03Coder ? t.chatInput.deepThinkingV21Desc : t.chatInput.deepThinkTooltip)
+                        : t.chatInput.thinkingEngineTitle
+                    }
+                  >
                         <BrainCircuit className={`w-3.5 h-3.5 flex-shrink-0 ${
-                          thinkingMode === 'ultra'
-                            ? 'text-purple-400 animate-pulse'
-                            : thinkingMode === 'basic'
-                            ? 'text-cyan-400'
-                            : thinkingMode === 'deep' || deepThink
-                            ? (is03Coder ? 'text-emerald-400' : 'text-zinc-200')
+                          (thinkingMode === 'basic' || thinkingMode === 'deep' || thinkingMode === 'ultra' || deepThink)
+                            ? 'text-zinc-100'
                             : 'text-zinc-400'
                         }`} />
                         <span className="tracking-tight whitespace-nowrap hidden sm:inline">
@@ -312,28 +305,22 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                           {thinkingMode === 'ultra' ? 'Ultra' : thinkingMode === 'basic' ? 'Think' : 'Deep'}
                         </span>
                         {thinkingMode === 'ultra' && (
-                          <span className="px-1.5 py-0.2 rounded bg-purple-950/90 text-[9px] font-mono font-bold tracking-wider text-purple-300 border border-purple-500/60 whitespace-nowrap flex-shrink-0">
+                          <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-[9px] font-mono font-bold tracking-wider text-zinc-200 border border-zinc-700 whitespace-nowrap flex-shrink-0">
                             V1.0
                           </span>
                         )}
                         {thinkingMode === 'basic' && (
-                          <span className="px-1.5 py-0.2 rounded bg-cyan-950/80 text-[9px] font-mono font-bold tracking-wider text-cyan-300 border border-cyan-600/50 whitespace-nowrap flex-shrink-0">
+                          <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-[9px] font-mono font-bold tracking-wider text-zinc-200 border border-zinc-700 whitespace-nowrap flex-shrink-0">
                             BASIC
                           </span>
                         )}
                         {(thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic' && thinkingMode !== 'ultra')) && (
-                          <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-bold tracking-wider border whitespace-nowrap flex-shrink-0 ${
-                            is03Coder
-                              ? 'bg-emerald-950/80 text-emerald-300 border-emerald-600/50'
-                              : 'bg-zinc-700 text-zinc-100 border border-zinc-600'
-                          }`}>
+                          <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold tracking-wider bg-zinc-800 text-zinc-200 border border-zinc-700 whitespace-nowrap flex-shrink-0">
                             {is03Coder ? 'V2.1' : 'DEEP'}
                           </span>
                         )}
                         {(thinkingMode === 'basic' || thinkingMode === 'deep' || thinkingMode === 'ultra' || deepThink) && (
-                          <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ml-0.5 flex-shrink-0 ${
-                            thinkingMode === 'ultra' ? 'bg-purple-400 shadow-[0_0_6px_rgba(168,85,247,0.9)]' : thinkingMode === 'basic' ? 'bg-cyan-400' : is03Coder ? 'bg-emerald-400' : 'bg-white'
-                          }`} />
+                          <span className="relative inline-flex rounded-full h-1.5 w-1.5 ml-0.5 flex-shrink-0 bg-white shadow-[0_0_6px_rgba(255,255,255,0.8)]" />
                         )}
                       </button>
 
@@ -384,17 +371,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                             }}
                             className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
                               thinkingMode === 'basic'
-                                ? 'bg-zinc-850/90 border-cyan-600/70 shadow-sm' 
+                                ? 'bg-zinc-800/90 border-white/30 text-white shadow-sm' 
                                 : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
                             }`}
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <div className="p-1 rounded-md bg-cyan-950/60 border border-cyan-800/60 text-cyan-300">
+                                <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
                                   <Sparkles className="w-3.5 h-3.5" />
                                 </div>
                                 <span className="font-semibold text-xs text-white font-mono">{t.chatInput.basicThinking}</span>
-                                <span className="px-1.5 py-0.2 rounded bg-cyan-950/80 border border-cyan-600/40 text-[9px] font-mono font-bold text-cyan-300">
+                                <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-[9px] font-mono font-bold text-zinc-300">
                                   AGILE
                                 </span>
                               </div>
@@ -417,27 +404,19 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                             }}
                             className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
                               thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic' && thinkingMode !== 'ultra')
-                                ? (is03Coder ? 'bg-zinc-850/90 border-emerald-600/70 shadow-sm' : 'bg-zinc-850/90 border-zinc-500 shadow-sm')
+                                ? 'bg-zinc-800/90 border-white/30 text-white shadow-sm'
                                 : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
                             }`}
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <div className={`p-1 rounded-md border ${
-                                  is03Coder 
-                                    ? 'bg-emerald-950/60 border-emerald-800/60 text-emerald-300' 
-                                    : 'bg-zinc-800 border-zinc-700 text-zinc-200'
-                                }`}>
+                                <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
                                   <BrainCircuit className="w-3.5 h-3.5" />
                                 </div>
                                 <span className="font-semibold text-xs text-white font-mono">
                                   {is03Coder ? t.chatInput.deepThinkingV21 : t.chatInput.deepThink}
                                 </span>
-                                <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono font-bold border ${
-                                  is03Coder 
-                                    ? 'bg-emerald-950/80 text-emerald-300 border-emerald-600/50' 
-                                    : 'bg-zinc-700 text-zinc-200 border border-zinc-600'
-                                }`}>
+                                <span className="px-1.5 py-0.2 rounded text-[9px] font-mono font-bold bg-zinc-800 text-zinc-200 border border-zinc-700">
                                   {is03Coder ? 'V2.1 CODER' : 'L3 PROOF'}
                                 </span>
                               </div>
@@ -452,7 +431,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                             </p>
                           </div>
 
-                          {/* 3. UltraThinking V2.0 / V1.0 (Pinnacle Epistemic Struggle for Nixima Pro) */}
+                          {/* 3. UltraThinking V2.0 / V1.0 */}
                           <div 
                             onClick={() => {
                               onChangeThinkingMode?.('ultra');
@@ -465,19 +444,19 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                             }}
                             className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
                               thinkingMode === 'ultra'
-                                ? 'bg-purple-950/40 border-purple-500/80 shadow-[0_0_15px_rgba(168,85,247,0.25)]' 
-                                : 'bg-zinc-900/60 border-zinc-800 hover:border-purple-700/60 hover:bg-zinc-850/50'
+                                ? 'bg-zinc-800/90 border-white/30 text-white shadow-sm' 
+                                : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
                             }`}
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <div className="p-1 rounded-md bg-purple-950/80 border border-purple-700/60 text-purple-300 shadow-[0_0_8px_rgba(168,85,247,0.3)]">
-                                  <BrainCircuit className="w-3.5 h-3.5 text-purple-300 animate-pulse" />
+                                <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
+                                  <BrainCircuit className="w-3.5 h-3.5 text-zinc-200" />
                                 </div>
                                 <span className="font-semibold text-xs text-white font-mono">
                                   {currentModel.id === 'nixima-0.3-pro' ? 'UltraThinking V2.0' : t.chatInput.ultraThinkingV1}
                                 </span>
-                                <span className="px-1.5 py-0.2 rounded bg-purple-950/90 text-[9px] font-mono font-bold text-purple-300 border border-purple-500/60">
+                                <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-[9px] font-mono font-bold text-zinc-200 border border-zinc-700">
                                   {currentModel.id === 'nixima-0.3-pro' ? 'ULTRA V2.0' : 'ULTRA V1.0'}
                                 </span>
                               </div>
@@ -491,8 +470,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                               {t.chatInput.ultraThinkingDesc}
                             </p>
                             {currentModel.id !== 'nixima-0.2-pro' && (
-                              <div className="mt-1.5 text-[10px] font-mono text-purple-300/90 flex items-center gap-1">
-                                <span>⚡ {language === 'uk' ? 'Підключає та оптимізує Nixima-0.2 Pro' : 'Auto-pairs with Nixima-0.2 Pro'}</span>
+                              <div className="mt-1.5 text-[10px] font-mono text-zinc-400 flex items-center gap-1">
+                                <span>⚡ {language === 'uk' ? 'Підключає та оптимізує Nixima Pro' : 'Auto-pairs with Nixima Pro'}</span>
                               </div>
                             )}
                           </div>
@@ -501,16 +480,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     )}
                   </div>
 
-              {/* Search V3 Engine Control (Fast, Standard, Mega + Model Pairing) */}
+              {/* Search V3 Engine Control (Unified Sleek Titanium Pill) */}
               <div className="relative flex items-center flex-shrink-0 z-30" ref={searchMenuRef}>
                 <div
                   className={`flex items-center rounded-full text-xs font-mono transition-all duration-200 border select-none ${
                     webSearch 
-                      ? searchMode === 'fast'
-                        ? 'bg-amber-950/40 text-amber-200 font-semibold border-amber-500/50 shadow-[0_0_12px_rgba(245,158,11,0.2)] ring-1 ring-amber-500/20'
-                        : (searchMode === 'mega' && isCreator)
-                        ? 'bg-gradient-to-r from-amber-950/50 via-zinc-850 to-zinc-900 text-amber-200 font-semibold border-amber-500/60 shadow-[0_0_16px_rgba(245,158,11,0.25)] ring-1 ring-amber-500/25'
-                        : 'bg-zinc-800/90 text-white font-semibold border-zinc-500 shadow-inner-light' 
+                      ? 'bg-white/[0.08] text-white font-medium border-white/25 shadow-[0_0_12px_rgba(255,255,255,0.06)]'
                       : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:border-zinc-700 hover:bg-zinc-850/80'
                   }`}
                 >
@@ -519,32 +494,28 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     onClick={onToggleWebSearch}
                     className="flex items-center gap-1.5 pl-2.5 sm:pl-3 pr-1 py-1.5 cursor-pointer"
                     title={
-                      webSearch
+                      isOmni && !webSearch
+                        ? `Omni Search V3 (Autonomous On-Demand • Click to lock active) • Concurrent with DeepThinking`
+                        : webSearch
                         ? `Search V3 ${searchMode.toUpperCase()} active • Click to cycle`
                         : t.chatInput.searchTooltip
                     }
                   >
-                    {webSearch && searchMode === 'fast' ? (
-                      <Zap className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-                    ) : (
-                      <Globe className={`w-3.5 h-3.5 flex-shrink-0 ${webSearch ? (searchMode === 'mega' && isCreator ? 'text-amber-300' : 'text-zinc-200') : 'text-zinc-400'}`} />
-                    )}
+                    <Globe className={`w-3.5 h-3.5 flex-shrink-0 ${webSearch ? 'text-zinc-100' : 'text-zinc-400'}`} />
                     <span className="tracking-tight whitespace-nowrap hidden sm:inline">{t.chatInput.search}</span>
                     <span className="tracking-tight whitespace-nowrap sm:hidden">Search</span>
                     {webSearch && searchMode === 'fast' && (
-                      <span className="px-1.5 py-0.2 rounded bg-amber-950/80 text-[9px] font-mono font-bold tracking-wider text-amber-300 border border-amber-600/50 whitespace-nowrap flex-shrink-0">
+                      <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-[9px] font-mono font-bold tracking-wider text-zinc-200 border border-zinc-700 whitespace-nowrap flex-shrink-0">
                         FAST
                       </span>
                     )}
                     {webSearch && isCreator && searchMode === 'mega' && (
-                      <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-[9px] font-mono font-bold tracking-wider text-amber-300 border border-amber-500/40 whitespace-nowrap flex-shrink-0">
+                      <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-[9px] font-mono font-bold tracking-wider text-zinc-200 border border-zinc-700 whitespace-nowrap flex-shrink-0">
                         MEGA
                       </span>
                     )}
                     {webSearch && (
-                      <span className={`relative inline-flex rounded-full h-1.5 w-1.5 ml-0.5 flex-shrink-0 ${
-                        searchMode === 'fast' ? 'bg-amber-400' : searchMode === 'mega' && isCreator ? 'bg-amber-300' : 'bg-zinc-300'
-                      }`} />
+                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 ml-0.5 flex-shrink-0 bg-white shadow-[0_0_6px_rgba(255,255,255,0.8)]" />
                     )}
                   </button>
 
@@ -596,17 +567,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                             onClick={() => handleSelectSearchMode('fast')}
                             className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
                               isModeActive 
-                                ? 'bg-zinc-850/90 border-amber-600/70 shadow-sm' 
+                                ? 'bg-zinc-850/90 border-white/30 text-white shadow-sm' 
                                 : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
                             }`}
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <div className="p-1 rounded-md bg-amber-950/60 border border-amber-800/60 text-amber-300">
+                                <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
                                   <Zap className="w-3.5 h-3.5" />
                                 </div>
                                 <span className="font-semibold text-xs text-white font-mono">Search V3 Fast</span>
-                                <span className="px-1.5 py-0.2 rounded bg-amber-950/80 border border-amber-600/40 text-[9px] font-mono font-bold text-amber-300">
+                                <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-[9px] font-mono font-bold text-zinc-300">
                                   &lt;50MS
                                 </span>
                               </div>
@@ -620,9 +591,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                               {t.chatInput.searchFastDesc}
                             </p>
                             <div className="mt-1.5 pt-1.5 border-t border-zinc-800/60 flex items-center justify-between text-[10px] font-mono text-zinc-400">
-                              <span className="flex items-center gap-1 text-amber-300/90">
+                              <span className="flex items-center gap-1 text-zinc-300">
                                 <span>⚡ Optimal:</span>
-                                <strong className="text-zinc-200">{recFast.shortName}</strong>
+                                <strong className="text-zinc-100">{recFast.shortName}</strong>
                               </span>
                               <span className="text-zinc-500">20 Websites Rapid</span>
                             </div>
@@ -639,7 +610,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                             onClick={() => handleSelectSearchMode('standard')}
                             className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
                               isModeActive 
-                                ? 'bg-zinc-850/90 border-zinc-500 shadow-sm' 
+                                ? 'bg-zinc-850/90 border-white/30 text-white shadow-sm' 
                                 : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
                             }`}
                           >
@@ -682,17 +653,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                             onClick={() => handleSelectSearchMode('mega')}
                             className={`p-2.5 rounded-xl border transition-all cursor-pointer select-none ${
                               isModeActive 
-                                ? 'bg-zinc-850/90 border-zinc-400 shadow-sm' 
+                                ? 'bg-zinc-850/90 border-white/30 text-white shadow-sm' 
                                 : 'bg-zinc-900/60 border-zinc-800 hover:border-zinc-700 hover:bg-zinc-850/50'
                             }`}
                           >
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-2">
-                                <div className="p-1 rounded-md bg-zinc-800 border border-zinc-600 text-white">
+                                <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
                                   <BrainCircuit className="w-3.5 h-3.5" />
                                 </div>
                                 <span className="font-semibold text-xs text-white font-mono">Search V3 Mega</span>
-                                <span className="px-1.5 py-0.2 rounded bg-zinc-700 border border-zinc-600 text-[9px] font-mono font-bold text-zinc-100">
+                                <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-[9px] font-mono font-bold text-zinc-300">
                                   CREATOR SWARM
                                 </span>
                               </div>
@@ -732,27 +703,36 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   </div>
                 )}
               </div>
-                </>
+
+              {/* Omni Dual-Tool Active Indicator Badge */}
+              {isDualToolActive && (
+                <div 
+                  className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.08] border border-white/20 text-[10.5px] font-mono text-zinc-200 shadow-[0_0_12px_rgba(255,255,255,0.06)] flex-shrink-0 select-none animate-in fade-in duration-200"
+                  title="Nixima Omni Dual-Tool: Epistemic DeepThinking and Live Search V3 executing concurrently"
+                >
+                  <Sparkles className="w-3 h-3 text-white animate-pulse" />
+                  <span className="font-semibold text-white tracking-wide">2 TOOLS ACTIVE</span>
+                </div>
               )}
 
-              {/* Sovereign Infinite Output Toggle (Creator Exclusive Clearance) */}
+              {/* Sovereign Infinite Output Toggle (Sleek Titanium Styling) */}
               {isCreator && (
                 <>
                   <div className="hidden sm:block h-3.5 w-[1px] bg-zinc-800 mx-0.5 flex-shrink-0" />
                   <button
                     type="button"
                     onClick={onToggleInfiniteOutput}
-                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-mono transition-all duration-300 border select-none cursor-pointer flex-shrink-0 active:scale-95 ${
+                    className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-xs font-mono transition-all duration-200 border select-none cursor-pointer flex-shrink-0 active:scale-95 ${
                       infiniteOutput
-                        ? 'bg-amber-500/15 text-amber-300 font-semibold border-amber-500/60 shadow-[0_0_18px_rgba(245,158,11,0.28)] hover:bg-amber-500/25 scale-[1.02] animate-infinity-ignite'
-                        : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-amber-200/90 hover:border-amber-600/40 hover:bg-zinc-850/80'
+                        ? 'bg-white/[0.08] text-white font-medium border-white/25 shadow-[0_0_12px_rgba(255,255,255,0.06)] scale-[1.02]'
+                        : 'bg-zinc-900/80 text-zinc-400 border-zinc-800 hover:text-zinc-200 hover:border-zinc-700 hover:bg-zinc-850/80'
                     }`}
                     title={infiniteOutput ? t.chatInput.infiniteOutputActiveTooltip : t.chatInput.infiniteOutputInactiveTooltip}
                   >
                     <InfinitySymbol
                       size={13}
                       active={infiniteOutput}
-                      theme="amber"
+                      theme="titanium"
                       glow={infiniteOutput}
                       className={`flex-shrink-0 transition-all duration-300 ${infiniteOutput ? 'scale-110' : 'scale-100 opacity-75'}`}
                     />
@@ -760,11 +740,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                       {language === 'uk' ? 'Безліміт' : (t.chatInput.infiniteOutputShort || 'Infinite')}
                     </span>
                     {infiniteOutput ? (
-                      <span className="px-1.5 py-0.2 rounded bg-amber-950/80 text-[9px] font-mono font-bold tracking-wider text-amber-300 border border-amber-500/50 whitespace-nowrap flex-shrink-0 transition-all duration-300 animate-check-pop">
+                      <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-[9px] font-mono font-bold tracking-wider text-zinc-200 border border-zinc-700 whitespace-nowrap flex-shrink-0">
                         {t.chatInput.infiniteOutputBadge || 'MAX'}
                       </span>
                     ) : (
-                      <span className="px-1 py-0.2 rounded bg-zinc-800/80 text-[8.5px] font-mono font-semibold text-zinc-500 whitespace-nowrap flex-shrink-0 transition-all duration-300">
+                      <span className="px-1 py-0.2 rounded bg-zinc-850 text-[8.5px] font-mono font-semibold text-zinc-500 whitespace-nowrap flex-shrink-0">
                         OFF
                       </span>
                     )}
@@ -789,7 +769,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 {soundEnabled ? <Volume2 className="w-3.5 h-3.5 text-zinc-200" /> : <VolumeX className="w-3.5 h-3.5" />}
               </button>
 
-              {/* Live Cost Estimation Indicator with Smooth Transition */}
+              {/* Live Cost Estimation Indicator with Smooth Titanium Styling */}
               <button
                 type="button"
                 onClick={onOpenCredits}
@@ -797,7 +777,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   !hasCredits
                     ? 'bg-red-500/15 border-red-500/50 text-red-300 shadow-[0_0_15px_rgba(239,68,68,0.2)] animate-pulse'
                     : userCredits === Infinity
-                    ? 'bg-amber-500/10 hover:bg-amber-500/15 border-amber-500/30 hover:border-amber-500/50 text-amber-200/90 shadow-[0_0_12px_rgba(245,158,11,0.12)]'
+                    ? 'bg-white/[0.04] hover:bg-white/[0.08] border-white/[0.1] hover:border-white/25 text-zinc-200 shadow-sm'
                     : estimated.isHardPrompt
                     ? 'bg-white/[0.05] border-white/[0.14] text-zinc-200 hover:border-white/30'
                     : 'bg-white/[0.03] border-white/[0.07] text-zinc-400 hover:text-zinc-200 hover:border-white/[0.16] hover:bg-white/[0.06]'
@@ -811,11 +791,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 }
               >
                 <NiximaCreditLogo size={12} />
-                <span className="tabular-nums font-medium whitespace-nowrap inline-flex items-center gap-1">
+                <span className="tabular-nums font-medium whitespace-nowrap inline-flex items-center gap-1 text-zinc-200">
                   {userCredits === Infinity ? (
                     <>
-                      <span className="font-semibold text-amber-200">Creator</span>
-                      <InfinitySymbol size={10} className="inline-block text-amber-300" />
+                      <span className="font-semibold text-zinc-100">Creator</span>
+                      <InfinitySymbol size={10} theme="titanium" className="inline-block text-zinc-200" />
                     </>
                   ) : (
                     t.credits.estCost(estimated.minCost, estimated.maxCost)
@@ -823,7 +803,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 </span>
                 {userCredits !== Infinity && estimated.isHardPrompt && (
                   <span className="flex items-center gap-0.5 text-[9px] font-bold text-zinc-300 px-1 py-0.2 rounded bg-zinc-800 border border-zinc-700 whitespace-nowrap flex-shrink-0">
-                    <Flame className="w-2.5 h-2.5 text-amber-400 fill-amber-400/30" />
+                    <Flame className="w-2.5 h-2.5 text-zinc-400 fill-zinc-400/30" />
                     <span>DIFFICULT</span>
                   </span>
                 )}
@@ -874,13 +854,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       <div className="mt-2.5 text-center text-[10.5px] text-zinc-500 font-mono tracking-tight flex items-center justify-center gap-2 select-none">
         <span className="inline-flex items-center gap-1.5">
           <span className="relative flex h-1.5 w-1.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-40"></span>
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-zinc-300"></span>
           </span>
           <span className="text-zinc-400">Nixima AI Mesh</span>
         </span>
         <span className="text-zinc-700">•</span>
-        <span className="text-emerald-400/90 font-medium">{t.chatInput.meshOnline}</span>
+        <span className="text-zinc-300 font-medium">{t.chatInput.meshOnline}</span>
         <span className="hidden sm:inline text-zinc-700">•</span>
         <span className="hidden sm:inline text-zinc-500">
           {t.chatInput.enterToSend}

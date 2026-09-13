@@ -161,7 +161,7 @@ export const HotkeyCustomizerModal: React.FC<HotkeyCustomizerModalProps> = ({
           <div className="flex items-center justify-between text-[11px]">
             <span className="text-zinc-400 font-semibold uppercase tracking-wider flex items-center gap-1.5">
               <span>{t.hotkeys.deviceProfile}</span>
-              <span className="px-1.5 py-0.2 rounded-full bg-emerald-950/70 border border-emerald-800 text-emerald-400 text-[9px]">
+              <span className="px-1.5 py-0.2 rounded-full bg-zinc-800 border border-zinc-700 text-zinc-300 text-[9px]">
                 {language === 'uk' ? 'Виявлено' : 'Detected'}: {getPlatformName(detectPlatform())}
               </span>
             </span>
@@ -209,8 +209,8 @@ export const HotkeyCustomizerModal: React.FC<HotkeyCustomizerModalProps> = ({
 
             {/* Render Keycap or Touch Badge */}
             {currentConfig.isTouchBadge ? (
-              <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold bg-emerald-950/60 border border-emerald-700/80 px-2 py-0.5 rounded-md text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
-                <Sparkles className="w-2.5 h-2.5 animate-pulse" />
+              <span className="inline-flex items-center gap-1 text-[10px] font-mono font-bold bg-zinc-800 border border-zinc-700 px-2 py-0.5 rounded-md text-zinc-200">
+                <Sparkles className="w-2.5 h-2.5" />
                 <span>{currentConfig.label}</span>
               </span>
             ) : (
@@ -242,7 +242,7 @@ export const HotkeyCustomizerModal: React.FC<HotkeyCustomizerModalProps> = ({
                 >
                   <div className="flex items-center gap-2">
                     {preset.isTouchBadge ? (
-                      <Smartphone className="w-3.5 h-3.5 text-emerald-400" />
+                      <Smartphone className="w-3.5 h-3.5 text-zinc-300" />
                     ) : (
                       <Keyboard className="w-3.5 h-3.5 text-zinc-400" />
                     )}

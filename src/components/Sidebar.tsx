@@ -166,7 +166,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 onClick={() => handleSaveRename(conv.id)}
                 className="p-1 rounded text-zinc-300 hover:text-white"
               >
-                <Check className="w-3 h-3 text-emerald-400" />
+                <Check className="w-3 h-3 text-white" />
               </button>
             </div>
           ) : (

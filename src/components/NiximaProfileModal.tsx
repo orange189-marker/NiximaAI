@@ -78,54 +78,54 @@ export const NiximaProfileModal: React.FC<NiximaProfileModalProps> = ({
     switch (profile.tier) {
       case 'creator':
         return {
-          border: 'border-amber-500/50',
-          shadow: 'shadow-[0_0_50px_rgba(245,158,11,0.25)]',
-          badgeBg: 'bg-amber-500/20 text-amber-300 border-amber-500/40',
-          glowRing: 'ring-2 ring-amber-400 shadow-[0_0_25px_rgba(245,158,11,0.6)]',
-          primaryBtn: 'bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 hover:from-amber-400 hover:to-orange-500 text-black shadow-[0_0_20px_rgba(245,158,11,0.4)]',
-          avatarIcon: <Crown className="w-4 h-4 text-amber-300" />,
-          accentText: 'text-amber-400',
+          border: 'border-white/40',
+          shadow: 'shadow-[0_0_50px_rgba(255,255,255,0.12)]',
+          badgeBg: 'bg-white/10 text-white border-white/30',
+          glowRing: 'ring-2 ring-white/60 shadow-[0_0_25px_rgba(255,255,255,0.3)]',
+          primaryBtn: 'bg-white hover:bg-zinc-200 text-black shadow-[0_0_20px_rgba(255,255,255,0.2)]',
+          avatarIcon: <Crown className="w-4 h-4 text-white" />,
+          accentText: 'text-white',
         };
       case 'vip':
         return {
-          border: 'border-cyan-500/50',
-          shadow: 'shadow-[0_0_50px_rgba(6,182,212,0.25)]',
-          badgeBg: 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
-          glowRing: 'ring-2 ring-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.6)]',
-          primaryBtn: 'bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-white shadow-[0_0_20px_rgba(6,182,212,0.4)]',
-          avatarIcon: <Sparkles className="w-4 h-4 text-cyan-300" />,
-          accentText: 'text-cyan-400',
+          border: 'border-zinc-600',
+          shadow: 'shadow-[0_0_50px_rgba(255,255,255,0.08)]',
+          badgeBg: 'bg-zinc-800 text-zinc-100 border-zinc-600',
+          glowRing: 'ring-2 ring-white/40 shadow-[0_0_20px_rgba(255,255,255,0.2)]',
+          primaryBtn: 'bg-white hover:bg-zinc-200 text-black shadow-[0_0_15px_rgba(255,255,255,0.15)]',
+          avatarIcon: <Sparkles className="w-4 h-4 text-zinc-200" />,
+          accentText: 'text-zinc-100',
         };
       case 'family':
         return {
-          border: 'border-blue-500/50',
-          shadow: 'shadow-[0_0_50px_rgba(59,130,246,0.25)]',
-          badgeBg: 'bg-blue-500/20 text-blue-300 border-blue-500/40',
-          glowRing: 'ring-2 ring-blue-400 shadow-[0_0_25px_rgba(59,130,246,0.6)]',
-          primaryBtn: 'bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white shadow-[0_0_20px_rgba(59,130,246,0.4)]',
-          avatarIcon: <Shield className="w-4 h-4 text-blue-300" />,
-          accentText: 'text-blue-400',
+          border: 'border-zinc-700',
+          shadow: 'shadow-[0_0_40px_rgba(0,0,0,0.8)]',
+          badgeBg: 'bg-zinc-800 text-zinc-200 border-zinc-700',
+          glowRing: 'ring-2 ring-zinc-500 shadow-[0_0_15px_rgba(255,255,255,0.1)]',
+          primaryBtn: 'bg-white hover:bg-zinc-200 text-black shadow-sm',
+          avatarIcon: <Shield className="w-4 h-4 text-zinc-300" />,
+          accentText: 'text-zinc-200',
         };
       case 'system':
         return {
-          border: 'border-emerald-500/50',
-          shadow: 'shadow-[0_0_50px_rgba(16,185,129,0.25)]',
-          badgeBg: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
-          glowRing: 'ring-2 ring-emerald-400 shadow-[0_0_25px_rgba(16,185,129,0.6)]',
-          primaryBtn: 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-600 hover:from-emerald-400 hover:to-cyan-500 text-black shadow-[0_0_20px_rgba(16,185,129,0.4)]',
-          avatarIcon: <Cpu className="w-4 h-4 text-emerald-300" />,
-          accentText: 'text-emerald-400',
+          border: 'border-zinc-700',
+          shadow: 'shadow-[0_0_40px_rgba(0,0,0,0.8)]',
+          badgeBg: 'bg-zinc-800 text-zinc-200 border-zinc-700',
+          glowRing: 'ring-2 ring-zinc-500 shadow-[0_0_15px_rgba(255,255,255,0.1)]',
+          primaryBtn: 'bg-white hover:bg-zinc-200 text-black shadow-sm',
+          avatarIcon: <Cpu className="w-4 h-4 text-zinc-300" />,
+          accentText: 'text-zinc-200',
         };
       case 'operator':
       default:
         return {
-          border: 'border-zinc-700/80',
+          border: 'border-zinc-750',
           shadow: 'shadow-[0_0_50px_rgba(0,0,0,0.8)]',
           badgeBg: 'bg-zinc-800/80 text-zinc-300 border-zinc-700',
-          glowRing: 'ring-2 ring-purple-500/60 shadow-[0_0_20px_rgba(168,85,247,0.3)]',
-          primaryBtn: 'bg-white hover:bg-zinc-200 text-black shadow-[0_0_15px_rgba(255,255,255,0.2)]',
-          avatarIcon: <ShieldCheck className="w-4 h-4 text-purple-300" />,
-          accentText: 'text-purple-400',
+          glowRing: 'ring-2 ring-zinc-600 shadow-[0_0_15px_rgba(255,255,255,0.1)]',
+          primaryBtn: 'bg-white hover:bg-zinc-200 text-black shadow-sm',
+          avatarIcon: <ShieldCheck className="w-4 h-4 text-zinc-300" />,
+          accentText: 'text-zinc-200',
         };
     }
   })();
@@ -155,8 +155,8 @@ export const NiximaProfileModal: React.FC<NiximaProfileModalProps> = ({
               <span className="text-[11px] font-mono uppercase tracking-widest text-zinc-400 font-semibold">
                 {t.niximaProfile.cardBadge}
               </span>
-              <span className="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-bold tracking-wider uppercase border border-emerald-500/40 bg-emerald-500/10 text-emerald-400 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
+              <span className="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-bold tracking-wider uppercase border border-zinc-700 bg-zinc-800 text-zinc-200 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
                 {profile.nodeStatus}
               </span>
             </div>
@@ -228,7 +228,7 @@ export const NiximaProfileModal: React.FC<NiximaProfileModalProps> = ({
               <div className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">
                 {t.niximaProfile.niximaId}
               </div>
-              <div className="font-mono text-sm sm:text-base font-bold text-white tracking-wider truncate selection:bg-purple-500 selection:text-white">
+              <div className="font-mono text-sm sm:text-base font-bold text-white tracking-wider truncate selection:bg-white/20">
                 {profile.niximaId}
               </div>
               <div className="text-[10.5px] font-mono text-zinc-500 mt-0.5">
@@ -243,8 +243,8 @@ export const NiximaProfileModal: React.FC<NiximaProfileModalProps> = ({
             >
               {copied ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-emerald-400" />
-                  <span className="text-emerald-400">{t.niximaProfile.copiedId}</span>
+                  <Check className="w-3.5 h-3.5 text-white" />
+                  <span className="text-white">{t.niximaProfile.copiedId}</span>
                 </>
               ) : (
                 <>
@@ -283,7 +283,7 @@ export const NiximaProfileModal: React.FC<NiximaProfileModalProps> = ({
             {/* Compute Quota Tile */}
             <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800/80">
               <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-400 mb-1">
-                <Zap className="w-3 h-3 text-amber-400" />
+                <Zap className="w-3 h-3 text-zinc-300" />
                 {t.niximaProfile.neuralComputeQuota}
               </div>
               <div className="font-mono text-xs sm:text-sm font-bold text-white tracking-tight">
@@ -294,11 +294,11 @@ export const NiximaProfileModal: React.FC<NiximaProfileModalProps> = ({
             {/* Latency Routing Tile */}
             <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800/80">
               <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-400 mb-1">
-                <Wifi className="w-3 h-3 text-emerald-400" />
+                <Wifi className="w-3 h-3 text-zinc-300" />
                 {t.niximaProfile.latencyRouting}
               </div>
               <div className="font-mono text-xs sm:text-sm font-bold text-zinc-200 tracking-tight flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
+                <span className="w-2 h-2 rounded-full bg-white inline-block" />
                 {profile.latencyRouting}
               </div>
             </div>
@@ -306,7 +306,7 @@ export const NiximaProfileModal: React.FC<NiximaProfileModalProps> = ({
             {/* Authorized Neural Engines */}
             <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800/80 sm:col-span-2">
               <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-400 mb-2">
-                <Cpu className="w-3 h-3 text-cyan-400" />
+                <Cpu className="w-3 h-3 text-zinc-300" />
                 {t.niximaProfile.neuralPrivileges}
               </div>
               <div className="flex flex-wrap gap-1.5">
@@ -324,7 +324,7 @@ export const NiximaProfileModal: React.FC<NiximaProfileModalProps> = ({
             {/* Cryptographic Security Protocols */}
             <div className="p-3 rounded-xl bg-zinc-900/60 border border-zinc-800/80 sm:col-span-2">
               <div className="flex items-center gap-1.5 text-[10px] font-mono uppercase tracking-widest text-zinc-400 mb-2">
-                <Lock className="w-3 h-3 text-purple-400" />
+                <Lock className="w-3 h-3 text-zinc-300" />
                 {t.niximaProfile.securityProtocols}
               </div>
               <div className="flex flex-wrap gap-1.5">

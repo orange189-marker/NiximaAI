@@ -80,7 +80,7 @@ export const MathRenderer: React.FC<MathRendererProps> = ({
       {/* Top Header Strip */}
       <div className="flex items-center justify-between px-3.5 py-1.5 border-b border-zinc-800/80 bg-zinc-950/70 text-[10px] font-mono select-none">
         <div className="flex items-center gap-1.5 text-zinc-400">
-          <span className="w-1.5 h-1.5 rounded-full bg-cyan-400/80 animate-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" />
           <span className="font-semibold text-zinc-300 uppercase tracking-wider">
             {t.chatMessage.formulaBadge}
           </span>
@@ -94,16 +94,16 @@ export const MathRenderer: React.FC<MathRendererProps> = ({
           onClick={handleCopy}
           className={`relative flex items-center gap-1.5 px-2 py-0.5 rounded-md transition-all duration-300 cursor-pointer text-[10px] select-none ${
             copied
-              ? 'bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.3)]'
+              ? 'bg-zinc-800 border border-zinc-600 text-white shadow-sm'
               : 'hover:bg-zinc-800/90 text-zinc-400 hover:text-white border border-transparent active:scale-95'
           }`}
           title={copied ? t.chatMessage.copiedLatex : t.chatMessage.copyLatex}
         >
           {copied ? (
             <>
-              <span className="absolute inset-0 rounded-md border border-emerald-400/50 animate-copy-shockwave pointer-events-none" />
-              <Check className="w-3 h-3 text-emerald-400 animate-check-pop stroke-[2.5]" />
-              <span className="animate-text-reveal text-emerald-300 font-semibold">{t.chatMessage.copiedLatex}</span>
+              <span className="absolute inset-0 rounded-md border border-white/40 animate-copy-shockwave pointer-events-none" />
+              <Check className="w-3 h-3 text-white animate-check-pop stroke-[2.5]" />
+              <span className="animate-text-reveal text-white font-semibold">{t.chatMessage.copiedLatex}</span>
             </>
           ) : (
             <>

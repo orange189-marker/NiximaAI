@@ -77,37 +77,37 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
           {/* Status Indicator Beacon */}
           {isStreaming ? (
             <span className="relative flex h-2.5 w-2.5 flex-shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-400" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-white" />
             </span>
           ) : isFast ? (
-            <Zap className="w-4 h-4 text-amber-400 flex-shrink-0" />
+            <Zap className="w-4 h-4 text-zinc-300 flex-shrink-0" />
           ) : (
             <Globe className="w-4 h-4 text-zinc-300 flex-shrink-0" />
           )}
 
           {/* Search Engine Badge */}
           {isMega ? (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-zinc-850 border border-amber-500/60 text-amber-200 font-mono text-[10.5px] font-bold shadow-[0_0_12px_rgba(245,158,11,0.25)] flex-shrink-0">
-              <Sparkles className="w-3 h-3 text-amber-400 animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-white/[0.08] border border-white/20 text-white font-mono text-[10.5px] font-bold shadow-[0_0_12px_rgba(255,255,255,0.06)] flex-shrink-0">
+              <Sparkles className="w-3 h-3 text-white animate-pulse" />
               <span>Search V3</span>
-              <span className="px-1.5 py-0.2 rounded bg-amber-500/20 text-[9px] text-amber-300 border border-amber-500/40 font-extrabold tracking-wider">
+              <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-[9px] text-zinc-200 border border-zinc-700 font-extrabold tracking-wider">
                 MEGA (50–80 SITES)
               </span>
             </span>
           ) : isFast ? (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-zinc-800 border border-amber-500/40 text-zinc-100 font-mono text-[10.5px] font-bold shadow-inner-light flex-shrink-0">
-              <Zap className="w-3 h-3 text-amber-400" />
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-zinc-850 border border-zinc-700 text-zinc-100 font-mono text-[10.5px] font-bold shadow-inner-light flex-shrink-0">
+              <Zap className="w-3 h-3 text-zinc-300" />
               <span>Search V3</span>
-              <span className="px-1.5 py-0.2 rounded bg-amber-950/90 text-[9px] text-amber-300 border border-amber-600/50 font-bold">
+              <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-[9px] text-zinc-300 border border-zinc-700 font-bold">
                 FAST (20 SITES)
               </span>
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-zinc-800 border border-zinc-700 text-zinc-200 font-mono text-[10.5px] font-semibold flex-shrink-0">
+            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-zinc-850 border border-zinc-800 text-zinc-200 font-mono text-[10.5px] font-semibold flex-shrink-0">
               <Globe className="w-3 h-3 text-zinc-300" />
               <span>Search V3</span>
-              <span className="px-1.5 py-0.2 rounded bg-zinc-700 text-[9px] text-zinc-300 border border-zinc-600 font-bold">
+              <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-[9px] text-zinc-400 border border-zinc-700 font-bold">
                 STANDARD (20+ SITES)
               </span>
             </span>
@@ -126,7 +126,7 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
             </span>
 
             {isMega ? (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-950/60 border border-amber-600/40 text-amber-300 text-[9.5px]">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-850 border border-zinc-700 text-zinc-200 text-[9.5px]">
                 <span>7 Clusters Active</span>
               </span>
             ) : (
@@ -136,14 +136,14 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
             )}
 
             {sources.length > 0 && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-850 border border-zinc-800 text-emerald-400">
-                <ShieldCheck className="w-3 h-3 text-emerald-400" />
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-850 border border-zinc-800 text-zinc-300">
+                <ShieldCheck className="w-3 h-3 text-zinc-300" />
                 <span>{consensusScore}% Consensus</span>
               </span>
             )}
 
             {isFast ? (
-              <span className="text-amber-400/90">
+              <span className="text-zinc-400">
                 • {t.chatMessage.fastLatency(searchTimeMs)}
               </span>
             ) : (
@@ -164,8 +164,8 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
           >
             {copiedTrace ? (
               <>
-                <Check className="w-3 h-3 text-emerald-400" />
-                <span className="text-emerald-400">Copied!</span>
+                <Check className="w-3 h-3 text-white" />
+                <span className="text-white">Copied!</span>
               </>
             ) : (
               <>
@@ -232,7 +232,7 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
 
             {/* Live consensus score pill */}
             <div className="text-[10px] font-mono text-zinc-400 flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <span className="w-1.5 h-1.5 rounded-full bg-zinc-300" />
               <span>Factual Consensus: <strong className="text-zinc-200">{consensusScore}%</strong></span>
             </div>
           </div>
@@ -264,17 +264,17 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
                   {/* Step Node Marker on vertical rail */}
                   <div className={`absolute left-1.5 top-2.5 -translate-x-1/2 w-4 h-4 rounded-full border flex items-center justify-center text-[9px] font-mono font-bold transition-all shadow-sm ${
                     action.status === 'in_progress'
-                      ? 'bg-amber-950 border-amber-500/80 text-amber-300 ring-2 ring-amber-500/30 animate-pulse'
+                      ? 'bg-zinc-800 border-white/60 text-white ring-2 ring-white/20 animate-pulse'
                       : isSynth 
-                      ? 'bg-emerald-950 border-emerald-600/80 text-emerald-300 ring-2 ring-emerald-500/20'
+                      ? 'bg-zinc-800 border-zinc-500 text-white ring-1 ring-white/10'
                       : isQuery
                       ? 'bg-zinc-850 border-zinc-600 text-zinc-200'
                       : 'bg-zinc-900 border-zinc-700 text-zinc-300'
                   }`}>
                     {action.status === 'in_progress' ? (
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
                     ) : isSynth ? (
-                      <Check className="w-2.5 h-2.5 text-emerald-400 stroke-[3]" />
+                      <Check className="w-2.5 h-2.5 text-white stroke-[3]" />
                     ) : (
                       action.stepNumber
                     )}
@@ -286,22 +286,12 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
                     <div className="flex items-center justify-between gap-2 flex-wrap">
                       <div className="flex items-center gap-2 flex-wrap">
                         {/* Action Type Badge */}
-                        <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold tracking-wide uppercase border ${
-                          isQuery
-                            ? 'bg-zinc-800 border-zinc-700 text-zinc-300'
-                            : isVisit
-                            ? 'bg-blue-950/60 border-blue-800/60 text-blue-300'
-                            : isEval
-                            ? 'bg-amber-950/60 border-amber-800/60 text-amber-300'
-                            : isExtract
-                            ? 'bg-purple-950/60 border-purple-800/60 text-purple-300'
-                            : 'bg-emerald-950/60 border-emerald-800/60 text-emerald-300'
-                        }`}>
-                          {isQuery && <Search className="w-2.5 h-2.5" />}
-                          {isVisit && <Globe className="w-2.5 h-2.5" />}
-                          {isEval && <Layers className="w-2.5 h-2.5" />}
-                          {isExtract && <FileText className="w-2.5 h-2.5" />}
-                          {isSynth && <Sparkles className="w-2.5 h-2.5" />}
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold tracking-wide uppercase border bg-zinc-800/90 border-zinc-700 text-zinc-300">
+                          {isQuery && <Search className="w-2.5 h-2.5 text-zinc-400" />}
+                          {isVisit && <Globe className="w-2.5 h-2.5 text-zinc-400" />}
+                          {isEval && <Layers className="w-2.5 h-2.5 text-zinc-400" />}
+                          {isExtract && <FileText className="w-2.5 h-2.5 text-zinc-400" />}
+                          {isSynth && <Sparkles className="w-2.5 h-2.5 text-white" />}
                           <span>{typeBadgeLabel}</span>
                         </span>
 
@@ -314,8 +304,8 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
                       {/* Right Telemetry: Latency & Relevance */}
                       <div className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-400">
                         {action.status === 'in_progress' ? (
-                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-950/70 border border-amber-600/50 text-amber-300 text-[9.5px]">
-                            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-zinc-200 text-[9.5px]">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
                             <span>In Progress...</span>
                           </span>
                         ) : (
@@ -393,8 +383,8 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
 
             {sources.length === 0 && isStreaming && (
               <div className="relative pl-8 group animate-fade-in">
-                <div className="absolute left-1.5 top-3 -translate-x-1/2 w-4 h-4 rounded-full border border-amber-500/80 bg-amber-950/80 flex items-center justify-center ring-2 ring-amber-500/30">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-ping" />
+                <div className="absolute left-1.5 top-3 -translate-x-1/2 w-4 h-4 rounded-full border border-white/50 bg-zinc-800 flex items-center justify-center ring-2 ring-white/10">
+                  <span className="w-1.5 h-1.5 rounded-full bg-white animate-ping" />
                 </div>
                 <div className="rounded-xl border border-zinc-800/90 bg-[#111116]/90 p-3 flex items-center gap-2.5 text-zinc-300 font-mono text-xs shadow-sm">
                   <span className="text-zinc-400 animate-pulse">Scouring live web index and cross-referencing multi-source records...</span>
@@ -410,7 +400,7 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
                 <span className="flex items-center gap-1.5">
                   <span>{t.chatMessage.verifiedSources}</span>
                   {isMega ? (
-                    <span className="px-1.5 py-0.2 rounded bg-amber-950/60 border border-amber-600/40 text-amber-300 text-[9px]">
+                    <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-750 text-zinc-200 text-[9px]">
                       MEGA SWARM (50–80)
                     </span>
                   ) : (

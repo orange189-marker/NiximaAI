@@ -251,7 +251,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                   : 'text-zinc-400 hover:text-white'
               }`}
             >
-              <Flame className="w-3.5 h-3.5 text-amber-400" />
+              <Flame className="w-3.5 h-3.5 text-zinc-300" />
               <span>{isUk ? 'Live Арена' : 'Live Arena'}</span>
             </button>
           </div>
@@ -500,7 +500,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                 <div className="flex flex-wrap items-start justify-between gap-3 border-b border-zinc-800/80 pb-4">
                   <div className="space-y-1 max-w-2xl">
                     <div className="flex items-center gap-2">
-                      <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase">
+                      <span className="px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-zinc-800 text-zinc-200 border border-zinc-700 uppercase">
                         {currentSuite.difficulty}
                       </span>
                       <span className="text-xs font-mono text-zinc-400">
@@ -516,7 +516,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                   </div>
 
                   <div className="p-2.5 rounded-xl bg-zinc-950 border border-zinc-800 flex items-center gap-2.5">
-                    <Trophy className="w-4 h-4 text-amber-400 shrink-0" />
+                    <Trophy className="w-4 h-4 text-zinc-300 shrink-0" />
                     <div className="text-xs font-mono">
                       <span className="block text-[10px] text-zinc-500 uppercase">{isUk ? 'Переможець сюїти' : 'Suite Winner'}</span>
                       <span className="font-bold text-white">
@@ -599,7 +599,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                       <div 
                         key={model.id}
                         className={`p-3.5 rounded-2xl bg-zinc-950/80 border ${
-                          isWinner ? 'border-amber-500/60 shadow-[0_0_20px_rgba(245,158,11,0.12)]' : 'border-zinc-800'
+                          isWinner ? 'border-white/50 shadow-[0_0_20px_rgba(255,255,255,0.08)] ring-1 ring-white/20' : 'border-zinc-800'
                         } flex flex-col justify-between space-y-3`}
                       >
                         <div>
@@ -614,7 +614,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
 
                             <div className="flex items-center gap-1.5">
                               {isWinner && (
-                                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                                <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-white text-black">
                                   WINNER
                                 </span>
                               )}
@@ -642,10 +642,10 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
 
                           {/* Optional Reasoning Thinking Trace */}
                           {result.thinking && (
-                            <div className="my-2 p-2 rounded-xl bg-purple-950/20 border border-purple-800/40 text-xs">
+                            <div className="my-2 p-2 rounded-xl bg-zinc-900/80 border border-zinc-750 text-xs">
                               <button
                                 onClick={() => setExpandedThinking(prev => ({ ...prev, [model.id]: !isThinkingOpen }))}
-                                className="w-full flex items-center justify-between text-[11px] font-mono font-bold text-purple-300 cursor-pointer"
+                                className="w-full flex items-center justify-between text-[11px] font-mono font-bold text-zinc-200 cursor-pointer"
                               >
                                 <span className="flex items-center gap-1">
                                   <BrainCircuit className="w-3 h-3" />
@@ -654,7 +654,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                                 {isThinkingOpen ? <ChevronDown className="w-3 h-3" /> : <ChevronRight className="w-3 h-3" />}
                               </button>
                               {isThinkingOpen && (
-                                <pre className="mt-2 text-[11px] font-mono text-purple-200/80 whitespace-pre-wrap max-h-48 overflow-y-auto leading-relaxed">
+                                <pre className="mt-2 text-[11px] font-mono text-zinc-300 whitespace-pre-wrap max-h-48 overflow-y-auto leading-relaxed">
                                   {result.thinking}
                                 </pre>
                               )}
@@ -680,7 +680,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
                           </p>
                           <div className="flex flex-wrap gap-1 pt-1">
                             {result.keyStrengths.map((str, idx) => (
-                              <span key={idx} className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+                              <span key={idx} className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-zinc-800 text-zinc-200 border border-zinc-700">
                                 + {str}
                               </span>
                             ))}
@@ -704,7 +704,7 @@ export const BenchmarksModal: React.FC<BenchmarksModalProps> = ({
               <div className="p-4 sm:p-5 rounded-2xl bg-zinc-900/50 border border-zinc-800 space-y-4">
                 <div>
                   <h4 className="font-bold text-sm text-white flex items-center gap-2">
-                    <Flame className="w-4 h-4 text-amber-400" />
+                    <Flame className="w-4 h-4 text-zinc-300" />
                     <span>{isUk ? 'Live Арена: Порівняйте 2 моделі на власному промпті' : 'Live Arena: Benchmark 2 Models Head-to-Head'}</span>
                   </h4>
                   <p className="text-xs text-zinc-400 mt-0.5">

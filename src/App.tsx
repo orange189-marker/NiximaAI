@@ -35,102 +35,14 @@ import { LanguageProvider, useLanguage } from './context/LanguageContext';
 
 const STORAGE_KEY_MODEL = 'nixima_active_model_v4';
 
-/**
- * Evaluates whether Nixima-0.2O (Omni) should autonomously invoke live web grounding
- */
-export function shouldOmniSearch(query: string): boolean {
-  const trimmed = query.trim().toLowerCase();
-
-  // 1. News, breaking events, current updates
-  const searchAnalysis = cleanUserSearchQuery(query);
-  if (searchAnalysis.isNewsQuery) return true;
-
-  // 2. Explicit search requests
-  if (
-    /(?:search(?:\s+for|\s+web|\s+the\s+web|\s+google|\s+online)?|google\s+this|find(?:\s+online|\s+on\s+the\s+web|\s+in\s+web)?|lookup|look\s+up|browse(?:\s+web)?|check\s+online|live\s+data|weather\s+in|stock\s+price|market\s+price|exchange\s+rate|latest\s+version|release\s+date|documentation\s+for)/i.test(trimmed) ||
-    /(?:пошукай(?:те)?|знайди(?:те)?(?:\s+в\s+інтернеті|\s+в\s+мережі|\s+в\s+гуглі|\s+онлайн)?|пошук|погугли|глянь\s+в\s+інтернеті|яка\s+погода|курс\s+валют|ціна\s+акцій|свіжі\s+дані|остання\s+версія)/i.test(trimmed)
-  ) {
-    return true;
-  }
-
-  // 3. URLs, domains, or web links
-  if (/https?:\/\/|www\.[a-z0-9-]+\.[a-z]{2,}|[a-z0-9-]+\.(?:com|org|io|ai|net|ua|gov|edu)\b/i.test(trimmed)) {
-    return true;
-  }
-
-  // 4. Temporal anchors indicating need for up-to-date data
-  if (/\b(?:2025|2026|today|tonight|this month|this year|right now|currently|current)\b/i.test(trimmed) ||
-      /(?:сьогодні|зараз|цього року|актуальн)/i.test(trimmed)) {
-    return true;
-  }
-
-  return false;
-}
-
-/**
- * Evaluates whether Nixima-0.2O (Omni) should autonomously invoke Basic Thinking, DeepThinking, or no thinking.
- * Prevents always triggering heavy DeepThinking overhead for everyday inquiries.
- */
-export function getOmniThinkingDecision(query: string): ThinkingMode {
-  const trimmed = query.trim().toLowerCase();
-
-  // 1. Trivial or minimal greetings / short acknowledgements -> 'none' (zero latency overhead)
-  if (
-    /^(?:hi|hello|hey|greetings|howdy|sup|yo|привіт|вітаю|добрий\s+(?:день|ранок|вечір)|дякую|thanks|thank\s+you|ок|ok|good|bye|бувай)\b/i.test(trimmed) &&
-    trimmed.length < 35
-  ) {
-    return 'none';
-  }
-
-  // 2. High-intensity logic, mathematical derivations, algorithmic complexity, or explicit deep reasoning requests -> 'deep'
-  if (
-    /(?:think\s+deeply|deep\s+think|step\s+by\s+step|formal\s+proof|derive|deduce|rigorous|chain\s+of\s+thought|verify\s+logically|prove\b|break\s+it\s+down\s+deeply)/i.test(trimmed) ||
-    /(?:глибоко\s+подумай|подумай\s+глибоко|покроково|ланцюжок\s+думок|доведи|виведи|строге\s+доведення|обґрунтуй\s+детально)/i.test(trimmed)
-  ) {
-    return 'deep';
-  }
-
-  if (
-    /(?:algorithm|complexity|o\(n\)|dynamic\s+programming|dijkstra|binary\s+tree|graph\s+traversal|matrix\s+multiplication|eigenvalue|derivative|integral|differential|theorem|axioms?|proof\b|puzzle|riddle|logician)/i.test(trimmed) ||
-    /(?:алгоритм|складність|дерево|граф|матриц|похідна|інтеграл|диференціал|теорем|аксіом|доведення|головоломк|загадк|мудрец)/i.test(trimmed)
-  ) {
-    return 'deep';
-  }
-
-  if (
-    /(?:architecture|concurrency|mutex|deadlock|race\s+condition|microservices|distributed\s+system|memory\s+leak|kernel|compiler|refactor)/i.test(trimmed) ||
-    /(?:архітектур|асинхрон|паралелізм|дедлок|гонка\s+станів|мікросервіс|розподілен|витік\s+пам'яті|компілятор)/i.test(trimmed)
-  ) {
-    return 'deep';
-  }
-
-  // 3. Substantial multi-part analytical queries (>300 chars with multiple questions or structure) -> 'deep'
-  if (query.length > 300 && ((query.match(/\?/g) || []).length >= 2 || query.includes('\n-') || query.includes('1.'))) {
-    return 'deep';
-  }
-
-  // 4. General explanations, coding tasks, comparisons, planning, troubleshooting, non-trivial questions -> 'basic'
-  if (
-    /(?:think|reason|explain|why|how|what\s+is\s+the\s+difference|compare|plan|analyze|suggest|solve|debug|implement|write|code|create|guide|troubleshoot)/i.test(trimmed) ||
-    /(?:подумай|поясни|чому|як|в\s+чому\s+різниця|порівняй|сплануй|проаналізуй|порадь|виріши|задебаж|реалізуй|напиши|код|створи|інструкція)/i.test(trimmed)
-  ) {
-    return 'basic';
-  }
-
-  // If query is moderate length (>60 chars) or asks a question, benefit from basic agile thought process
-  if (query.length > 60 || query.includes('?')) {
-    return 'basic';
-  }
-
-  return 'none';
-}
-
-/**
- * Backward-compatible helper to check if any thinking mode is active for Omni
- */
-export function shouldOmniThink(query: string): boolean {
-  return getOmniThinkingDecision(query) !== 'none';
-}
+export { 
+  shouldOmniSearch, 
+  getOmniThinkingDecision, 
+  shouldOmniThink, 
+  isOmniModel, 
+  resolveOmniToolExecution 
+} from './utils/omniTools';
+import { isOmniModel, resolveOmniToolExecution } from './utils/omniTools';
 
 const AppContent: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -629,7 +541,25 @@ All conversations and model preferences in this workspace are private to your Ni
     const newTitle = isFirstMessage ? (userText.length > 28 ? userText.slice(0, 28) + '...' : userText) : currentConv.title;
 
     const aiMessageId = 'ai-' + Date.now();
-    const initialGrounding: SearchGrounding | undefined = settings.webSearchEnabled
+    const isOmni = isOmniModel(currentModel);
+
+    // Resolve Dual-Tool Execution: Both Tool 1 (Search V3) and Tool 2 (DeepThinking) can run concurrently if needed
+    const {
+      runWebSearch: shouldRunWebSearch,
+      effectiveThinkingMode,
+      isDeepThink: effectiveDeepThink,
+      isThinkingActive,
+      isDualToolActive,
+    } = resolveOmniToolExecution({
+      query: userText,
+      isOmni,
+      userWebSearch: settings.webSearchEnabled,
+      userThinkingMode: settings.thinkingMode,
+      userDeepThink: settings.deepThinkEnabled,
+      searchMode: settings.searchMode || 'standard',
+    });
+
+    const initialGrounding: SearchGrounding | undefined = shouldRunWebSearch
       ? {
           query: userText,
           sources: [],
@@ -660,6 +590,7 @@ All conversations and model preferences in this workspace are private to your Ni
       role: 'assistant',
       content: '',
       thinking: '',
+      thinkingMode: isThinkingActive ? effectiveThinkingMode : undefined,
       searchGrounding: initialGrounding,
       timestamp: Date.now(),
       model: currentModel.name,
@@ -686,23 +617,6 @@ All conversations and model preferences in this workspace are private to your Ni
     const startTime = performance.now();
     let tokenTickCount = 0;
     let liveGrounding: SearchGrounding | undefined;
-
-    const isOmni = Boolean(currentModel.isOmni || currentModel.id === 'nixima-0.2-omni' || currentModel.id === 'nixima-0.3-omni');
-
-    // Determine whether web search should run: explicitly enabled, current news/events, or Omni autonomous
-    const searchAnalysis = cleanUserSearchQuery(userText);
-    const isNewsQuery = searchAnalysis.isNewsQuery;
-    const shouldRunWebSearch = isOmni
-      ? shouldOmniSearch(userText)
-      : (settings.webSearchEnabled || isNewsQuery);
-
-    // Determine thinking mode: Omni autonomous (none, basic, deep) or user settings
-    const omniThinkingDecision = isOmni ? getOmniThinkingDecision(userText) : 'none';
-    const effectiveThinkingMode: ThinkingMode = isOmni
-      ? omniThinkingDecision
-      : (settings.thinkingMode || (settings.deepThinkEnabled ? 'deep' : 'none'));
-    const effectiveDeepThink = effectiveThinkingMode === 'deep' || effectiveThinkingMode === 'ultra';
-    const isThinkingActive = effectiveThinkingMode !== 'none';
 
     let historyForApi: { role: 'user' | 'assistant' | 'system'; content: string }[] = [
       ...currentConv.messages

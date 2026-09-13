@@ -154,7 +154,7 @@ export const NiximaIdBadge: React.FC<NiximaIdBadgeProps> = ({
       </span>
       {showVerified && (
         <span
-          className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] ml-0.5"
+          className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] ml-0.5"
           title="Cryptographically Secured"
         />
       )}

@@ -361,7 +361,7 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({
         <div className="p-3.5 rounded-xl bg-zinc-900/70 border border-zinc-800 space-y-3 font-mono text-xs">
           <div className="flex items-center justify-between">
             <span className="font-bold text-white uppercase tracking-wider flex items-center gap-1.5 text-[11px]">
-              <Sliders className="w-3.5 h-3.5 text-cyan-400" />
+              <Sliders className="w-3.5 h-3.5 text-zinc-300" />
               <span>Interactive Parameter Tuning</span>
             </span>
             <button
@@ -939,7 +939,7 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({
               className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors cursor-pointer"
               title="Copy Chart JSON"
             >
-              {copiedSpec ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+              {copiedSpec ? <Check className="w-3.5 h-3.5 text-white" /> : <Copy className="w-3.5 h-3.5" />}
             </button>
             <button
               type="button"
@@ -960,7 +960,7 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({
             {/* 1. Color Palette Switcher */}
             <div className="space-y-1.5">
               <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold flex items-center gap-1">
-                <Palette className="w-3 h-3 text-cyan-400" />
+                <Palette className="w-3 h-3 text-zinc-300" />
                 <span>Color Palette</span>
               </span>
               <div className="flex items-center gap-2">
@@ -1022,7 +1022,7 @@ export const NiximaChart: React.FC<NiximaChartProps> = ({
           {/* 3. Conversational AI Quick Action Chips */}
           <div className="pt-2 border-t border-zinc-900 space-y-2">
             <span className="text-[10px] text-zinc-400 uppercase tracking-wider font-semibold flex items-center gap-1">
-              <Sparkles className="w-3 h-3 text-amber-400" />
+              <Sparkles className="w-3 h-3 text-zinc-300" />
               <span>Ask AI to Modify This Graph:</span>
             </span>
 
