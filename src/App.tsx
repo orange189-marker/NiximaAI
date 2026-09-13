@@ -387,6 +387,47 @@ All conversations and model preferences in this workspace are private to your Ni
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [currentModel.id]);
 
+  // Centralized model selection handler: auto-arms thinking and search modes for specialized engines
+  const handleSelectModel = (model: ModelOption, options?: { fromTab?: string }) => {
+    setCurrentModel(model);
+
+    // Auto-arm Thinking engine for thinking-focused models
+    if (model.id === 'nixima-0.3-pro' || model.id === 'nixima-0.2-pro') {
+      setSettings(prev => ({
+        ...prev,
+        thinkingMode: 'ultra',
+        deepThinkEnabled: true,
+      }));
+    } else if (model.id === 'nixima-0.3-coder') {
+      setSettings(prev => ({
+        ...prev,
+        thinkingMode: 'deep',
+        deepThinkEnabled: true,
+      }));
+    } else if (isOmniModel(model)) {
+      setSettings(prev => ({
+        ...prev,
+        thinkingMode: prev.thinkingMode === 'none' ? 'deep' : prev.thinkingMode,
+        deepThinkEnabled: true,
+      }));
+    } else if (options?.fromTab === 'thinking') {
+      setSettings(prev => ({
+        ...prev,
+        thinkingMode: 'deep',
+        deepThinkEnabled: true,
+      }));
+    }
+
+    // Auto-arm Search engine if selected from search tab or for hyperflash search engine
+    if (options?.fromTab === 'search' || model.id === 'nixima-0.3-flash') {
+      setSettings(prev => ({
+        ...prev,
+        webSearchEnabled: true,
+        searchMode: model.searchOptimization?.recommendedMode || 'fast',
+      }));
+    }
+  };
+
   const activeConversation = conversations.find(c => c.id === activeId);
 
   // Scroll to bottom
@@ -1038,7 +1079,7 @@ All conversations and model preferences in this workspace are private to your Ni
         {/* Global Application Header */}
         <Header
           currentModel={currentModel}
-          onSelectModel={setCurrentModel}
+          onSelectModel={handleSelectModel}
           onOpenSettings={() => handleOpenSettings('general')}
           onOpenCompanyInfo={() => setIsCompanyModalOpen(true)}
           onOpenBenchmarks={() => setIsBenchmarksOpen(true)}
@@ -1068,7 +1109,7 @@ All conversations and model preferences in this workspace are private to your Ni
               <EmptyChat
                 currentModel={currentModel}
                 onSelectPrompt={handleSendMessage}
-                onSelectModel={setCurrentModel}
+                onSelectModel={handleSelectModel}
                 onOpenReleaseModal={() => setIsReleaseModalOpen(true)}
               />
             ) : (
@@ -1154,7 +1195,7 @@ All conversations and model preferences in this workspace are private to your Ni
               }));
             }}
             onSelectModel={(model: ModelOption) => {
-              setCurrentModel(model);
+              handleSelectModel(model);
             }}
             searchMode={settings.searchMode || 'standard'}
             isCreator={isStrictCreator(currentUser)}

@@ -122,6 +122,7 @@ export interface Translations {
     allModelsTab: string;
     gen03Tab: string;
     gen02Tab: string;
+    thinkingTab: string;
     searchOptimizedTab: string;
     codingTab: string;
     noModelsFound: string;
@@ -693,6 +694,7 @@ export const translations: Record<Language, Translations> = {
       allModelsTab: 'All',
       gen03Tab: '0.3 Gen',
       gen02Tab: '0.2 Gen',
+      thinkingTab: 'Thinking',
       searchOptimizedTab: 'Search',
       codingTab: 'Coding',
       noModelsFound: 'No models found in this category',
@@ -1415,6 +1417,7 @@ export const translations: Record<Language, Translations> = {
       allModelsTab: 'Всі',
       gen03Tab: '0.3 Gen',
       gen02Tab: '0.2 Gen',
+      thinkingTab: 'Мислення',
       searchOptimizedTab: 'Пошук',
       codingTab: 'Кодинг',
       noModelsFound: 'У цій категорії моделей не знайдено',

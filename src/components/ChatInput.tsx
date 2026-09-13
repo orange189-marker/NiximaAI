@@ -276,6 +276,101 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             </div>
           )}
 
+          {/* Active Model Engine Capability Telemetry HUD */}
+          <div className="flex items-center gap-1.5 px-4 sm:px-6 pt-3 pb-1 text-[11px] font-mono select-none flex-wrap border-b border-white/[0.04]">
+            {/* Active Model Pill */}
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-300 shadow-sm flex-shrink-0">
+              <ModelIcon modelId={currentModel.id} size="xs" />
+              <span className="font-semibold text-zinc-100">{currentModel.shortName}</span>
+              <span className="text-[9px] px-1 py-0.2 rounded bg-zinc-800 text-zinc-400 border border-zinc-750 font-bold uppercase">
+                {currentModel.generation === '0.3' ? '0.3' : '0.2'}
+              </span>
+            </div>
+
+            {/* Thinking Capability Indicator */}
+            {isThinkingTurnedOn ? (
+              <div
+                onClick={() => setIsThinkingPopoverOpen(true)}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10.5px] font-mono cursor-pointer transition-all shadow-sm flex-shrink-0 ${
+                  thinkingMode === 'ultra'
+                    ? 'bg-purple-950/60 border-purple-600/70 text-purple-200 hover:bg-purple-900/60 shadow-[0_0_12px_rgba(168,85,247,0.25)]'
+                    : 'bg-emerald-950/60 border-emerald-600/70 text-emerald-200 hover:bg-emerald-900/60 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
+                }`}
+                title="Thinking Engine Active • Click to configure"
+              >
+                <BrainCircuit className="w-3.5 h-3.5 text-current animate-pulse flex-shrink-0" />
+                <span className="font-semibold">
+                  {thinkingMode === 'ultra'
+                    ? (currentModel.id === 'nixima-0.3-pro' ? 'UltraThinking V2.0' : 'UltraThinking V1.0')
+                    : is03Coder && (thinkingMode === 'deep' || deepThink)
+                    ? 'DeepThinking V2.1'
+                    : thinkingMode === 'basic'
+                    ? 'Basic Thinking'
+                    : 'DeepThinking'
+                  }
+                </span>
+                <span className="relative flex h-1.5 w-1.5 ml-0.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
+                </span>
+              </div>
+            ) : (currentModel.id.includes('pro') || currentModel.id.includes('coder') || isOmni) ? (
+              <div
+                onClick={onToggleDeepThink}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/80 hover:bg-zinc-850 border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-zinc-200 text-[10.5px] font-mono cursor-pointer transition-all shadow-sm flex-shrink-0"
+                title="Click to activate Thinking for this model"
+              >
+                <BrainCircuit className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
+                <span>
+                  {currentModel.id.includes('pro') ? 'UltraThinking' : 'DeepThinking'}
+                </span>
+                <span className="text-[9px] px-1 py-0.2 rounded bg-zinc-800 text-zinc-400 border border-zinc-700 font-bold">
+                  OFF
+                </span>
+              </div>
+            ) : null}
+
+            {/* Search Capability Indicator */}
+            {webSearch ? (
+              <div
+                onClick={() => setIsSearchPopoverOpen(true)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-950/60 border border-cyan-600/70 text-cyan-200 hover:bg-cyan-900/60 text-[10.5px] font-mono cursor-pointer transition-all shadow-[0_0_12px_rgba(6,182,212,0.25)] flex-shrink-0"
+                title="Search V3 Engine Active • Click to configure"
+              >
+                <Globe className="w-3.5 h-3.5 text-cyan-300 animate-pulse flex-shrink-0" />
+                <span className="font-semibold">
+                  {searchMode === 'fast' ? 'Search V3 Fast' : searchMode === 'mega' ? 'Search V3 Mega' : 'Search V3 Standard'}
+                </span>
+                <span className="relative flex h-1.5 w-1.5 ml-0.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-400" />
+                </span>
+              </div>
+            ) : (currentModel.searchOptimization || isOmni) ? (
+              <div
+                onClick={onToggleWebSearch}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/80 hover:bg-zinc-850 border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-zinc-200 text-[10.5px] font-mono cursor-pointer transition-all shadow-sm flex-shrink-0"
+                title="Click to activate Web Search for this model"
+              >
+                <Globe className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
+                <span>
+                  {currentModel.searchOptimization?.badge || 'Search Ready'}
+                </span>
+                <span className="text-[9px] px-1 py-0.2 rounded bg-zinc-800 text-zinc-400 border border-zinc-700 font-bold">
+                  OFF
+                </span>
+              </div>
+            ) : null}
+
+            {/* Omni Dual-Tool Badge */}
+            {isDualToolActive && (
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/10 border border-white/25 text-white text-[10.5px] font-mono font-semibold shadow-sm flex-shrink-0">
+                <Sparkles className="w-3.5 h-3.5 text-white animate-pulse flex-shrink-0" />
+                <span>2 TOOLS ACTIVE</span>
+              </div>
+            )}
+          </div>
+
           {/* Primary Textarea Field */}
           <textarea
             ref={textareaRef}
@@ -843,7 +938,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   )}
                 </span>
                 {userCredits !== Infinity && estimated.isHardPrompt && (
-                  <span className="flex items-center gap-0.5 text-[9px] font-bold text-zinc-300 px-1 py-0.2 rounded bg-zinc-800 border border-zinc-700 whitespace-nowrap flex-shrink-0">
+                  <span className="hidden sm:flex items-center gap-0.5 text-[9px] font-bold text-zinc-300 px-1 py-0.2 rounded bg-zinc-800 border border-zinc-700 whitespace-nowrap flex-shrink-0">
                     <Flame className="w-2.5 h-2.5 text-zinc-400 fill-zinc-400/30" />
                     <span>DIFFICULT</span>
                   </span>

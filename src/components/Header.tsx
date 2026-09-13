@@ -28,7 +28,7 @@ import { NiximaWordmark, renderWithNiximaBrand } from './NiximaWordmark';
 
 interface HeaderProps {
   currentModel: ModelOption;
-  onSelectModel: (model: ModelOption) => void;
+  onSelectModel: (model: ModelOption, options?: { fromTab?: string }) => void;
   onOpenSettings: () => void;
   onOpenCompanyInfo: () => void;
   onOpenBenchmarks?: () => void;
@@ -59,7 +59,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { language, toggleLanguage, t } = useLanguage();
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
-  const [filterTab, setFilterTab] = useState<'0.3' | '0.2' | 'search' | 'code' | 'all'>('0.3');
+  const [filterTab, setFilterTab] = useState<'0.3' | '0.2' | 'thinking' | 'search' | 'code' | 'all'>('0.3');
   const [hotkeyConfig, setHotkeyConfig] = useState<HotkeyConfig>(() => getSavedHotkey());
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -250,12 +250,26 @@ export const Header: React.FC<HeaderProps> = ({
               const countAll = NIXIMA_MODELS.length;
               const count03 = NIXIMA_MODELS.filter(m => m.generation === '0.3' || m.id.includes('0.3')).length;
               const count02 = NIXIMA_MODELS.filter(m => (m.generation === '0.2' || m.id.includes('0.2')) && !m.id.includes('0.3')).length;
+              const countThinking = NIXIMA_MODELS.filter(m => 
+                Boolean(m.badge?.toLowerCase().includes('thinking') || 
+                m.badge?.toLowerCase().includes('reasoning') || 
+                m.id.includes('pro') || 
+                m.id.includes('coder') || 
+                m.isOmni)
+              ).length;
               const countSearch = NIXIMA_MODELS.filter(m => Boolean(m.searchOptimization)).length;
               const countCode = NIXIMA_MODELS.filter(m => m.id.includes('coder') || m.id.includes('omni')).length;
 
               const filteredModels = NIXIMA_MODELS.filter((model) => {
                 if (filterTab === '0.3') return model.generation === '0.3' || model.id.includes('0.3');
                 if (filterTab === '0.2') return (model.generation === '0.2' || model.id.includes('0.2')) && !model.id.includes('0.3');
+                if (filterTab === 'thinking') return Boolean(
+                  model.badge?.toLowerCase().includes('thinking') || 
+                  model.badge?.toLowerCase().includes('reasoning') || 
+                  model.id.includes('pro') || 
+                  model.id.includes('coder') || 
+                  model.isOmni
+                );
                 if (filterTab === 'search') return Boolean(model.searchOptimization);
                 if (filterTab === 'code') return model.id.includes('coder') || model.id.includes('omni');
                 return true;
@@ -264,12 +278,12 @@ export const Header: React.FC<HeaderProps> = ({
 
               return (
                 <>
-                  <div className="flex items-center gap-1 p-1 mt-1 mb-2 bg-zinc-900/90 rounded-xl border border-zinc-800/80 text-[11px] font-mono overflow-x-auto no-scrollbar scroll-smooth">
+                  <div className="flex flex-wrap items-center gap-1.5 p-1.5 mt-1 mb-2 bg-zinc-900/90 rounded-xl border border-zinc-800/80 text-[11px] font-mono select-none">
                     {/* 1. Main 0.3 Generation Models (Primary Default Selection) */}
                     <button
                       type="button"
                       onClick={() => setFilterTab('0.3')}
-                      className={`px-2.5 py-1 rounded-lg text-center font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 ${
+                      className={`px-2 py-1 rounded-lg text-center font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 ${
                         filterTab === '0.3' 
                           ? 'bg-zinc-800 text-white shadow-inner-light border border-zinc-700' 
                           : 'text-zinc-400 hover:text-white hover:bg-zinc-800/40 border border-transparent'
@@ -277,8 +291,8 @@ export const Header: React.FC<HeaderProps> = ({
                     >
                       <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.8)] animate-pulse" />
                       <span>{t.header.gen03Tab}</span>
-                      <span className="text-[8.5px] px-1 py-0.2 rounded bg-white text-black font-bold uppercase tracking-wider">
-                        {language === 'uk' ? 'ОСНОВНІ' : 'MAIN'}
+                      <span className="text-[8px] px-1 py-0.2 rounded bg-white text-black font-bold uppercase tracking-wider">
+                        {language === 'uk' ? 'ГОЛОВНІ' : 'MAIN'}
                       </span>
                       <span className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-mono ${filterTab === '0.3' ? 'bg-white/10 text-white border border-white/20' : 'bg-zinc-800 text-zinc-400'}`}>
                         {count03}
@@ -289,7 +303,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <button
                       type="button"
                       onClick={() => setFilterTab('0.2')}
-                      className={`px-2.5 py-1 rounded-lg text-center font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 ${
+                      className={`px-2 py-1 rounded-lg text-center font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 ${
                         filterTab === '0.2' 
                           ? 'bg-zinc-800 text-white shadow-inner-light border border-zinc-700' 
                           : 'text-zinc-400 hover:text-white hover:bg-zinc-800/40 border border-transparent'
@@ -302,28 +316,45 @@ export const Header: React.FC<HeaderProps> = ({
                       </span>
                     </button>
 
-                    {/* 3. Search V3 Optimized Models */}
+                    {/* 3. Thinking & Reasoning Models */}
                     <button
                       type="button"
-                      onClick={() => setFilterTab('search')}
-                      className={`px-2.5 py-1 rounded-lg text-center font-medium transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap flex-shrink-0 ${
-                        filterTab === 'search' 
-                          ? 'bg-zinc-800 text-white shadow-inner-light border border-zinc-700' 
+                      onClick={() => setFilterTab('thinking')}
+                      className={`px-2 py-1 rounded-lg text-center font-medium transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap flex-shrink-0 ${
+                        filterTab === 'thinking' 
+                          ? 'bg-purple-950/70 text-purple-200 border border-purple-600/70 shadow-sm' 
                           : 'text-zinc-400 hover:text-white hover:bg-zinc-800/40 border border-transparent'
                       }`}
                     >
-                      <Globe className="w-3 h-3 text-zinc-300" />
+                      <BrainCircuit className="w-3 h-3 text-purple-400" />
+                      <span>{t.header.thinkingTab}</span>
+                      <span className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-mono ${filterTab === 'thinking' ? 'bg-purple-900 text-purple-200 border border-purple-700' : 'bg-zinc-800 text-zinc-400'}`}>
+                        {countThinking}
+                      </span>
+                    </button>
+
+                    {/* 4. Search V3 Optimized Models */}
+                    <button
+                      type="button"
+                      onClick={() => setFilterTab('search')}
+                      className={`px-2 py-1 rounded-lg text-center font-medium transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap flex-shrink-0 ${
+                        filterTab === 'search' 
+                          ? 'bg-cyan-950/70 text-cyan-200 border border-cyan-600/70 shadow-sm' 
+                          : 'text-zinc-400 hover:text-white hover:bg-zinc-800/40 border border-transparent'
+                      }`}
+                    >
+                      <Globe className="w-3 h-3 text-cyan-400" />
                       <span>{t.header.searchOptimizedTab}</span>
-                      <span className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-mono ${filterTab === 'search' ? 'bg-zinc-700 text-white' : 'bg-zinc-800 text-zinc-400'}`}>
+                      <span className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-mono ${filterTab === 'search' ? 'bg-cyan-900 text-cyan-200 border border-cyan-700' : 'bg-zinc-800 text-zinc-400'}`}>
                         {countSearch}
                       </span>
                     </button>
 
-                    {/* 4. Code & Architecture Models */}
+                    {/* 5. Code & Architecture Models */}
                     <button
                       type="button"
                       onClick={() => setFilterTab('code')}
-                      className={`px-2.5 py-1 rounded-lg text-center font-medium transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap flex-shrink-0 ${
+                      className={`px-2 py-1 rounded-lg text-center font-medium transition-all flex items-center gap-1.5 cursor-pointer whitespace-nowrap flex-shrink-0 ${
                         filterTab === 'code' 
                           ? 'bg-zinc-800 text-white shadow-inner-light border border-zinc-700' 
                           : 'text-zinc-400 hover:text-white hover:bg-zinc-800/40 border border-transparent'
@@ -336,11 +367,11 @@ export const Header: React.FC<HeaderProps> = ({
                       </span>
                     </button>
 
-                    {/* 5. All Models */}
+                    {/* 6. All Models */}
                     <button
                       type="button"
                       onClick={() => setFilterTab('all')}
-                      className={`px-2.5 py-1 rounded-lg text-center font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 ${
+                      className={`px-2 py-1 rounded-lg text-center font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 ${
                         filterTab === 'all' 
                           ? 'bg-zinc-800 text-white shadow-inner-light border border-zinc-700' 
                           : 'text-zinc-400 hover:text-white hover:bg-zinc-800/40 border border-transparent'
@@ -400,7 +431,7 @@ export const Header: React.FC<HeaderProps> = ({
                             key={model.id}
                             type="button"
                             onClick={() => {
-                              onSelectModel(model);
+                              onSelectModel(model, { fromTab: filterTab });
                               setIsModelDropdownOpen(false);
                             }}
                             className={`w-full text-left p-2 sm:p-2.5 rounded-xl transition-all flex items-start justify-between group cursor-pointer ${
@@ -439,7 +470,22 @@ export const Header: React.FC<HeaderProps> = ({
                                 )}
                               </div>
 
-                              {filterTab === 'search' && searchOpt ? (
+                              {filterTab === 'thinking' ? (
+                                <div className="space-y-1">
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="text-[9.5px] font-mono font-bold px-1.5 py-0.2 rounded bg-purple-950/80 text-purple-200 border border-purple-700/80 flex items-center gap-1">
+                                      <BrainCircuit className="w-2.5 h-2.5 text-purple-400" />
+                                      <span>{model.badge}</span>
+                                    </span>
+                                    <span className="text-[10px] font-mono text-zinc-400">
+                                      • {model.latency}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-zinc-300 line-clamp-1">
+                                    {modelTr?.description || model.description}
+                                  </p>
+                                </div>
+                              ) : filterTab === 'search' && searchOpt ? (
                                 <div className="space-y-1">
                                   <div className="flex items-center gap-1.5 flex-wrap">
                                     <span className="text-[9.5px] font-mono font-bold px-1.5 py-0.2 rounded bg-zinc-750 text-zinc-200 border border-zinc-600">
@@ -466,6 +512,12 @@ export const Header: React.FC<HeaderProps> = ({
                                 <span className="text-[10px] font-mono text-zinc-400">
                                   {model.latency}
                                 </span>
+                                {model.badge && (model.badge.includes('THINKING') || model.badge.includes('REASONING') || model.id.includes('pro')) && (
+                                  <span className="text-[9px] font-mono text-purple-300 bg-purple-950/60 px-1.5 py-0.5 rounded border border-purple-800/80 truncate max-w-[140px] flex items-center gap-1">
+                                    <BrainCircuit className="w-2.5 h-2.5 text-purple-400 flex-shrink-0" />
+                                    <span>{model.badge}</span>
+                                  </span>
+                                )}
                                 {filterTab !== 'search' && searchOpt && (
                                   <span className="text-[9px] font-mono text-zinc-400 bg-zinc-900/90 px-1.5 py-0.5 rounded border border-zinc-800/80 truncate max-w-[130px]">
                                     {searchOpt.badge}
