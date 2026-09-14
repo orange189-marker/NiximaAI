@@ -15,9 +15,12 @@ import {
   Download,
   LogOut,
   Sliders,
-  BarChart3
+  BarChart3,
+  Code2,
+  Terminal,
+  FileCode
 } from 'lucide-react';
-import { Conversation } from '../types/chat';
+import { Conversation, NiximaProduct } from '../types/chat';
 import { NiximaUser } from '../types/user';
 import { NiximaIdLogo } from './NiximaIdLogo';
 import { ModelIcon } from './ModelIcon';
@@ -41,6 +44,9 @@ interface SidebarProps {
   onOpenSettings: () => void;
   onOpenCompanyInfo: () => void;
   onOpenBenchmarks?: () => void;
+  activeProduct?: NiximaProduct;
+  onSelectProduct?: (product: NiximaProduct) => void;
+  onNewCodeProject?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -58,6 +64,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onOpenSettings,
   onOpenCompanyInfo,
   onOpenBenchmarks,
+  activeProduct = 'chat',
+  onSelectProduct,
+  onNewCodeProject,
 }) => {
   const { language, t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
@@ -110,13 +119,22 @@ export const Sidebar: React.FC<SidebarProps> = ({
     link.remove();
   };
 
+  const productConversations = useMemo(() => {
+    return conversations.filter(c => {
+      if (activeProduct === 'code') {
+        return c.product === 'code';
+      }
+      return c.product !== 'code';
+    });
+  }, [conversations, activeProduct]);
+
   const filteredConversations = useMemo(() => {
-    if (!searchQuery.trim()) return conversations;
-    return conversations.filter(c => 
+    if (!searchQuery.trim()) return productConversations;
+    return productConversations.filter(c => 
       c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.messages.some(m => m.content.toLowerCase().includes(searchQuery.toLowerCase()))
     );
-  }, [conversations, searchQuery]);
+  }, [productConversations, searchQuery]);
 
   const pinnedConversations = useMemo(() => 
     filteredConversations.filter(c => c.pinned),
@@ -145,6 +163,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           {conv.pinned ? (
             <Pin className="w-3.5 h-3.5 text-white flex-shrink-0 fill-white" />
+          ) : activeProduct === 'code' ? (
+            <div className="w-5 h-5 rounded-md bg-emerald-950/90 border border-emerald-500/40 flex items-center justify-center text-emerald-400 flex-shrink-0">
+              <Code2 className="w-3 h-3" />
+            </div>
           ) : (
             <ModelIcon modelId={conv.modelId || 'nixima-0.2'} size="xs" />
           )}
@@ -261,46 +283,103 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
 
-        {/* Action button: New Chat */}
+        {/* Product Switcher: Nixima Chat vs Nixima Code */}
+        <div className="px-3 pt-2.5 pb-1">
+          <div className="grid grid-cols-2 p-1 bg-zinc-950/90 rounded-xl border border-zinc-800/80 text-xs font-mono">
+            <button
+              type="button"
+              onClick={() => onSelectProduct?.('chat')}
+              className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg transition-all select-none cursor-pointer ${
+                activeProduct === 'chat'
+                  ? 'bg-zinc-800 text-white font-bold shadow-sm'
+                  : 'text-zinc-400 hover:text-zinc-200'
+              }`}
+            >
+              <MessageSquare className="w-3.5 h-3.5" />
+              <span>{t.sidebar.productChat}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onSelectProduct?.('code')}
+              className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg transition-all select-none cursor-pointer ${
+                activeProduct === 'code'
+                  ? 'bg-gradient-to-r from-emerald-950/90 to-cyan-950/90 border border-emerald-500/50 text-emerald-300 font-bold shadow-[0_0_12px_rgba(16,185,129,0.25)]'
+                  : 'text-zinc-400 hover:text-emerald-300'
+              }`}
+            >
+              <Code2 className="w-3.5 h-3.5 text-emerald-400" />
+              <span>{t.sidebar.productCode}</span>
+              <span className="text-[8px] px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                0.3
+              </span>
+            </button>
+          </div>
+        </div>
+
+        {/* Action button: New Chat / New Code Project */}
         <div className="p-3 space-y-2.5">
           <div className="relative group">
             {/* Ambient Radiant Glow Aura on Hover */}
-            <div className="absolute -inset-0.5 rounded-2xl bg-gradient-to-r from-white/20 via-white/40 to-white/20 opacity-0 group-hover:opacity-100 blur-sm transition-all duration-300 pointer-events-none" />
+            <div className={`absolute -inset-0.5 rounded-2xl opacity-0 group-hover:opacity-100 blur-sm transition-all duration-300 pointer-events-none ${
+              activeProduct === 'code'
+                ? 'bg-gradient-to-r from-emerald-500/30 via-cyan-500/40 to-emerald-500/30'
+                : 'bg-gradient-to-r from-white/20 via-white/40 to-white/20'
+            }`} />
 
-            <button
-              onClick={onNewChat}
-              className="relative w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-white via-zinc-100 to-zinc-200 hover:from-white hover:to-white text-black font-semibold text-sm transition-all duration-200 shadow-[0_4px_20px_rgba(255,255,255,0.2),inset_0_1px_0_rgba(255,255,255,0.9)] hover:shadow-[0_6px_25px_rgba(255,255,255,0.35)] active:scale-[0.98] cursor-pointer select-none"
-            >
-              <div className="flex items-center gap-2.5">
-                {/* High-tech rotating plus tile */}
-                <div className="w-6 h-6 rounded-lg bg-zinc-950 text-white flex items-center justify-center border border-zinc-800 shadow-sm transition-transform duration-300 group-hover:rotate-90 group-hover:scale-105">
-                  <Plus className="w-3.5 h-3.5 stroke-[3]" />
-                </div>
-                <span className="font-bold text-xs tracking-tight text-zinc-950 font-sans">
-                  {t.sidebar.newChatButton}
-                </span>
-              </div>
-
-              {/* Tactile Keycap or Adaptive Touch Badge with Quick Customizer */}
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setIsHotkeyModalOpen(true);
-                }}
-                title={`Hotkey: ${hotkeyConfig.label} (Click to customize for Windows/Mac/Mobile)`}
-                className="inline-flex items-center gap-1 text-[10px] font-mono font-bold bg-zinc-950/10 hover:bg-zinc-950/20 border border-zinc-950/15 px-2 py-0.5 rounded-md text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] transition-all cursor-pointer group/key select-none"
+            {activeProduct === 'code' ? (
+              <button
+                onClick={onNewCodeProject || onNewChat}
+                className="relative w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-400 via-emerald-300 to-cyan-300 hover:from-emerald-300 hover:to-cyan-200 text-black font-semibold text-sm transition-all duration-200 shadow-[0_4px_20px_rgba(16,185,129,0.25)] active:scale-[0.98] cursor-pointer select-none"
               >
-                {hotkeyConfig.isTouchBadge ? (
-                  <span className="flex items-center gap-1 text-emerald-800 font-bold">
-                    <Sparkles className="w-2.5 h-2.5 text-emerald-600 animate-pulse" />
-                    <span>{hotkeyConfig.label}</span>
+                <div className="flex items-center gap-2.5">
+                  <div className="w-6 h-6 rounded-lg bg-zinc-950 text-emerald-400 flex items-center justify-center border border-emerald-500/30 shadow-sm transition-transform duration-300 group-hover:rotate-90 group-hover:scale-105">
+                    <Terminal className="w-3.5 h-3.5 stroke-[2.5]" />
+                  </div>
+                  <span className="font-bold text-xs tracking-tight text-zinc-950 font-sans">
+                    {t.sidebar.newCodeProjectButton}
                   </span>
-                ) : (
-                  <span>{hotkeyConfig.label}</span>
-                )}
-                <Sliders className="w-2.5 h-2.5 text-zinc-600 opacity-60 group-hover/key:opacity-100 transition-opacity ml-0.5" />
-              </div>
-            </button>
+                </div>
+                <span className="text-[10px] font-mono font-bold bg-black/10 border border-black/15 px-2 py-0.5 rounded-md text-zinc-950">
+                  0.3 CODER
+                </span>
+              </button>
+            ) : (
+              <button
+                onClick={onNewChat}
+                className="relative w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-white via-zinc-100 to-zinc-200 hover:from-white hover:to-white text-black font-semibold text-sm transition-all duration-200 shadow-[0_4px_20px_rgba(255,255,255,0.2),inset_0_1px_0_rgba(255,255,255,0.9)] hover:shadow-[0_6px_25px_rgba(255,255,255,0.35)] active:scale-[0.98] cursor-pointer select-none"
+              >
+                <div className="flex items-center gap-2.5">
+                  {/* High-tech rotating plus tile */}
+                  <div className="w-6 h-6 rounded-lg bg-zinc-950 text-white flex items-center justify-center border border-zinc-800 shadow-sm transition-transform duration-300 group-hover:rotate-90 group-hover:scale-105">
+                    <Plus className="w-3.5 h-3.5 stroke-[3]" />
+                  </div>
+                  <span className="font-bold text-xs tracking-tight text-zinc-950 font-sans">
+                    {t.sidebar.newChatButton}
+                  </span>
+                </div>
+
+                {/* Tactile Keycap or Adaptive Touch Badge with Quick Customizer */}
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsHotkeyModalOpen(true);
+                  }}
+                  title={`Hotkey: ${hotkeyConfig.label} (Click to customize for Windows/Mac/Mobile)`}
+                  className="inline-flex items-center gap-1 text-[10px] font-mono font-bold bg-zinc-950/10 hover:bg-zinc-950/20 border border-zinc-950/15 px-2 py-0.5 rounded-md text-zinc-900 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)] transition-all cursor-pointer group/key select-none"
+                >
+                  {hotkeyConfig.isTouchBadge ? (
+                    <span className="flex items-center gap-1 text-emerald-800 font-bold">
+                      <Sparkles className="w-2.5 h-2.5 text-emerald-600 animate-pulse" />
+                      <span>{hotkeyConfig.label}</span>
+                    </span>
+                  ) : (
+                    <span>{hotkeyConfig.label}</span>
+                  )}
+                  <Sliders className="w-2.5 h-2.5 text-zinc-600 opacity-60 group-hover/key:opacity-100 transition-opacity ml-0.5" />
+                </div>
+              </button>
+            )}
           </div>
 
           {/* Search input */}
@@ -328,7 +407,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex-1 overflow-y-auto px-2 py-1 space-y-3">
           {filteredConversations.length === 0 ? (
             <div className="text-center py-8 px-4 text-xs text-zinc-500">
-              {searchQuery ? t.sidebar.noMatchingConversations : t.sidebar.noConversations}
+              {searchQuery ? t.sidebar.noMatchingConversations : (activeProduct === 'code' ? t.sidebar.noCodeProjects : t.sidebar.noConversations)}
             </div>
           ) : (
             <>
@@ -347,7 +426,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="space-y-1">
                 {pinnedConversations.length > 0 && (
                   <div className="px-2 pt-2 text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-bold">
-                    {t.sidebar.recentSection}
+                    {activeProduct === 'code' ? t.sidebar.codeProjectsSection : t.sidebar.recentSection}
                   </div>
                 )}
                 {regularConversations.map(renderConversationItem)}

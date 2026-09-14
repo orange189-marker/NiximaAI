@@ -129,11 +129,19 @@ export interface Translations {
     searchEngineBadge: string;
     activeSearchBanner: (mode: string, modelName: string) => string;
     switchModelBtn: string;
+    niximaCodeLockedModel: string;
+    niximaCodeLockedBadge: string;
   };
 
   sidebar: {
+    productChat: string;
+    productCode: string;
+    productCodeBadge: string;
     conversationsTitle: string;
     newChatButton: string;
+    newCodeProjectButton: string;
+    codeProjectsSection: string;
+    noCodeProjects: string;
     searchPlaceholder: string;
     pinnedSection: string;
     recentSection: string;
@@ -588,6 +596,50 @@ export interface Translations {
     operatorTier: string;
     onlineBadge: string;
   };
+
+  niximaCode: {
+    heroTitle: string;
+    heroSubtitle: string;
+    heroBadge: string;
+    titanCoderBadge: string;
+    exclusiveEngineNotice: string;
+    zeroLazinessActive: string;
+    zeroLazinessDesc: string;
+    deepThinkingV3Active: string;
+    quickPresetsTitle: string;
+    presetGameTitle: string;
+    presetGameDesc: string;
+    presetGamePrompt: string;
+    presetComponentTitle: string;
+    presetComponentDesc: string;
+    presetComponentPrompt: string;
+    presetAlgoTitle: string;
+    presetAlgoDesc: string;
+    presetAlgoPrompt: string;
+    presetRefactorTitle: string;
+    presetRefactorDesc: string;
+    presetRefactorPrompt: string;
+    promptInputPlaceholder: string;
+    contextDrawerTitle: string;
+    contextDrawerPlaceholder: string;
+    attachCodeContext: string;
+    clearContext: string;
+    taskTypeGenerate: string;
+    taskTypeRefactor: string;
+    taskTypeDebug: string;
+    taskTypeArchitect: string;
+    taskTypeTest: string;
+    runInCanvas: string;
+    copyCode: string;
+    copiedCode: string;
+    downloadFile: string;
+    generateButton: string;
+    generatingCode: string;
+    followUpRefine: string;
+    followUpOptimize: string;
+    followUpAudio: string;
+    followUpTests: string;
+  };
 }
 
 export const translations: Record<Language, Translations> = {
@@ -720,11 +772,19 @@ export const translations: Record<Language, Translations> = {
       searchEngineBadge: 'SEARCH PARTNER',
       activeSearchBanner: (mode: string, modelName: string) => `Active Search: ${mode} • Recommended model is ${modelName}`,
       switchModelBtn: 'Switch',
+      niximaCodeLockedModel: 'Nixima Code is exclusively powered by the Nixima-0.3 Coder Titan architecture (DeepThinking V3.0, 2M context).',
+      niximaCodeLockedBadge: 'EXCLUSIVE TITAN CODER',
     },
 
     sidebar: {
+      productChat: 'Nixima Chat',
+      productCode: 'Nixima Code',
+      productCodeBadge: '0.3 TITAN',
       conversationsTitle: 'Conversations',
       newChatButton: 'New conversation',
+      newCodeProjectButton: 'New Code Project',
+      codeProjectsSection: 'Code Projects',
+      noCodeProjects: 'No code projects yet. Start by creating one!',
       searchPlaceholder: 'Search chats...',
       pinnedSection: 'Pinned',
       recentSection: 'Recent',
@@ -1331,6 +1391,50 @@ export const translations: Record<Language, Translations> = {
       operatorTier: 'VERIFIED OPERATOR',
       onlineBadge: 'ONLINE / VERIFIED',
     },
+
+    niximaCode: {
+      heroTitle: 'Nixima Code Studio',
+      heroSubtitle: 'Autonomous AI Software Architect & Full-Stack Systems Engineer',
+      heroBadge: 'NIXIMA CODE V1.0',
+      titanCoderBadge: '0.3 TITAN CODER',
+      exclusiveEngineNotice: 'Nixima Code is exclusively powered by Nixima-0.3 Coder with DeepThinking V3.0 and zero thinking laziness.',
+      zeroLazinessActive: 'Zero-Laziness Active',
+      zeroLazinessDesc: 'Guarantees 100% complete, runnable code with zero placeholders or omissions.',
+      deepThinkingV3Active: 'DeepThinking V3.0 Proof Engine',
+      quickPresetsTitle: 'Architecture Presets & Starter Blueprints',
+      presetGameTitle: 'Interactive Canvas Game (60 FPS + Web Audio)',
+      presetGameDesc: 'Complete 2D game loop, particle physics, neon styling & synthesized retro Web Audio sound effects.',
+      presetGamePrompt: 'Build an interactive Asteroids / Space Shooter game using HTML5 Canvas with neon vector graphics, 60 FPS particle loop, keyboard & touch controls, and synthesized Web Audio sound effects.',
+      presetComponentTitle: 'Full-Stack TypeScript & React Component',
+      presetComponentDesc: 'Production-ready component with strict types, responsive Tailwind aesthetics, and clean state.',
+      presetComponentPrompt: 'Create a production-grade TypeScript React component with modern dark neon Tailwind styling, full accessibility, strict types, and animated transitions.',
+      presetAlgoTitle: 'High-Performance Algorithm / Data Structure',
+      presetAlgoDesc: 'Concurrency-safe, lock-free or sub-millisecond data structure with O(1) benchmarks.',
+      presetAlgoPrompt: 'Implement a zero-defect, production-ready LRU Cache or high-performance concurrent queue in TypeScript with O(1) operations, TTL support, and zero memory leaks.',
+      presetRefactorTitle: 'AST Refactor & Bug Fix',
+      presetRefactorDesc: 'Deep dialectic analysis, edge case elimination, memory leak prevention, and complexity reduction.',
+      presetRefactorPrompt: 'Analyze this code snippet, identify all edge cases, memory leaks, or suboptimal algorithms, and provide the complete refactored production solution.',
+      promptInputPlaceholder: 'Describe what you want to build, refactor, or fix... E.g. "Build a retro cyberpunk canvas game with particle physics and Web Audio sounds" or paste code below...',
+      contextDrawerTitle: 'Existing Code & Snippet Context (Optional)',
+      contextDrawerPlaceholder: '// Paste existing code or snippet here for the AI Assistant to inspect, refactor, or enhance...',
+      attachCodeContext: 'Attach Code Context',
+      clearContext: 'Clear Context',
+      taskTypeGenerate: 'Generate App / Game',
+      taskTypeRefactor: 'Refactor Code',
+      taskTypeDebug: 'Debug & Fix',
+      taskTypeArchitect: 'Architecture',
+      taskTypeTest: 'Test Suite',
+      runInCanvas: 'Run Live in Canvas',
+      copyCode: 'Copy Code',
+      copiedCode: 'Copied!',
+      downloadFile: 'Download File',
+      generateButton: 'Generate Code',
+      generatingCode: 'Synthesizing with 0.3 Coder...',
+      followUpRefine: 'Refine & Extend Code',
+      followUpOptimize: '⚡ Optimize Performance & Memory',
+      followUpAudio: '🔊 Add Web Audio Sound Effects',
+      followUpTests: '🧪 Generate Unit Test Suite',
+    },
   },
 
   uk: {
@@ -1462,11 +1566,19 @@ export const translations: Record<Language, Translations> = {
       searchEngineBadge: 'ПОШУКОВИЙ ПАРТНЕР',
       activeSearchBanner: (mode: string, modelName: string) => `Активний пошук: ${mode} • Рекомендована модель ${modelName}`,
       switchModelBtn: 'Перемкнути',
+      niximaCodeLockedModel: 'Nixima Code працює виключно на архітектурі Nixima-0.3 Coder Titan (DeepThinking V3.0, 2M контекст).',
+      niximaCodeLockedBadge: 'ЕКСКЛЮЗИВНИЙ TITAN CODER',
     },
 
     sidebar: {
+      productChat: 'Nixima Chat',
+      productCode: 'Nixima Code',
+      productCodeBadge: '0.3 TITAN',
       conversationsTitle: 'Діалоги',
       newChatButton: 'Новий діалог',
+      newCodeProjectButton: 'Новий проєкт коду',
+      codeProjectsSection: 'Проєкти коду',
+      noCodeProjects: 'Ще немає проєктів коду. Створіть перший!',
       searchPlaceholder: 'Пошук діалогів...',
       pinnedSection: 'Закріплені',
       recentSection: 'Недавні',
@@ -2072,6 +2184,50 @@ export const translations: Record<Language, Translations> = {
       systemTier: 'АВТОНОМНЕ СИСТЕМНЕ ЯДРО',
       operatorTier: 'ВЕРИФІКОВАНИЙ ОПЕРАТОР',
       onlineBadge: 'В МЕРЕЖІ / ВЕРИФІКОВАНО',
+    },
+
+    niximaCode: {
+      heroTitle: 'Nixima Code Studio',
+      heroSubtitle: 'Автономний архітектор ПЗ та full-stack ШІ-асистент програмування',
+      heroBadge: 'NIXIMA CODE V1.0',
+      titanCoderBadge: '0.3 TITAN CODER',
+      exclusiveEngineNotice: 'Nixima Code працює ексклюзивно на базі Nixima-0.3 Coder з рушієм DeepThinking V3.0 та нулем лінощів мислення.',
+      zeroLazinessActive: 'Режим без лінощів активний',
+      zeroLazinessDesc: 'Гарантує 100% завершений, готовий до запуску код без плейсхолдерів і скорочень.',
+      deepThinkingV3Active: 'Рушій доведень DeepThinking V3.0',
+      quickPresetsTitle: 'Архітектурні шаблони та пресети',
+      presetGameTitle: 'Інтерактивна гра на Canvas (60 FPS + Web Audio)',
+      presetGameDesc: 'Повний 2D ігровий цикл, фізика часток, неоновий стиль та синтезовані звуки Web Audio API.',
+      presetGamePrompt: 'Створи повноцінну інтерактивну гру Asteroids або космічний шутер на HTML5 Canvas з неоновою векторною графікою, циклом часток 60 FPS, клавіатурним/сенсорним керуванням та синтезом звуку через Web Audio API.',
+      presetComponentTitle: 'Full-Stack компонент TypeScript & React',
+      presetComponentDesc: 'Готовий до продакшену компонент зі строгою типізацією, естетикою Tailwind та чистим станом.',
+      presetComponentPrompt: 'Створи продакшен-компонент React на TypeScript із сучасним темним неоновим стилем Tailwind, повною доступністю, строгими типами та плавними анімаціями.',
+      presetAlgoTitle: 'Високопродуктивний алгоритм / Структура даних',
+      presetAlgoDesc: 'Потокобезпечна структура даних без блокувань або субмілісекундна обробка з O(1) операціями.',
+      presetAlgoPrompt: 'Реалізуй бездоганний LRU Cache або конкурентну чергу на TypeScript з O(1) операціями, підтримкою TTL та захистом від витоків пам’яті.',
+      presetRefactorTitle: 'AST рефакторинг та усунення багів',
+      presetRefactorDesc: 'Глибокий діалектичний аналіз, усунення крайових випадків, захист від витоків пам’яті та зменшення складності.',
+      presetRefactorPrompt: 'Проаналізуй цей фрагмент коду, знайди всі крайові випадки, потенційні баги або неоптимальні алгоритми та надай повне перероблене продакшен-рішення.',
+      promptInputPlaceholder: 'Опишіть, що ви хочете створити, оптимізувати чи виправити... Наприклад: "Створи ретро-кіберпанк гру на Canvas з фізикою та звуками Web Audio" або вставте код нижче...',
+      contextDrawerTitle: 'Контекст існуючого коду (необов’язково)',
+      contextDrawerPlaceholder: '// Вставте фрагмент або існуючий код для перевірки, рефакторингу чи розширення ШІ-асистентом...',
+      attachCodeContext: 'Додати контекст коду',
+      clearContext: 'Очистити контекст',
+      taskTypeGenerate: 'Створити додаток / гру',
+      taskTypeRefactor: 'Рефакторинг коду',
+      taskTypeDebug: 'Виправити баги',
+      taskTypeArchitect: 'Архітектура системи',
+      taskTypeTest: 'Набір тестів',
+      runInCanvas: 'Запустити в Canvas',
+      copyCode: 'Копіювати код',
+      copiedCode: 'Скопійовано!',
+      downloadFile: 'Завантажити файл',
+      generateButton: 'Згенерувати код',
+      generatingCode: 'Синтез через 0.3 Coder...',
+      followUpRefine: 'Покращити та розширити код',
+      followUpOptimize: '⚡ Оптимізувати продуктивність та пам’ять',
+      followUpAudio: '🔊 Додати звукові ефекти Web Audio',
+      followUpTests: '🧪 Згенерувати набір юніт-тестів',
     },
   },
 };

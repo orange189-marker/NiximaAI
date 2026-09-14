@@ -153,6 +153,8 @@ export interface Message {
   canvasContext?: CanvasCodeContext;
 }
 
+export type NiximaProduct = 'chat' | 'code';
+
 export interface Conversation {
   id: string;
   title: string;
@@ -162,6 +164,9 @@ export interface Conversation {
   modelId: string;
   pinned?: boolean;
   activeArtifactId?: string;
+  product?: NiximaProduct;
+  codeTaskType?: 'generate' | 'refactor' | 'debug' | 'architect' | 'test';
+  codeLanguage?: string;
 }
 
 export interface UserSettings {

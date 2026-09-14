@@ -11,7 +11,8 @@ import { BenchmarksModal } from './components/BenchmarksModal';
 import { ReleaseAnnouncementModal } from './components/ReleaseAnnouncementModal';
 import { AuthPortal } from './components/AuthPortal';
 import { NiximaCanvas } from './components/NiximaCanvas';
-import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry, SearchMode, ThinkingMode, NiximaArtifact, SearchGrounding, CanvasCodeContext } from './types/chat';
+import { NiximaCodeStudio } from './components/NiximaCodeStudio';
+import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry, SearchMode, ThinkingMode, NiximaArtifact, SearchGrounding, CanvasCodeContext, NiximaProduct } from './types/chat';
 import { NiximaUser } from './types/user';
 import { NIXIMA_MODELS, DEFAULT_MODEL } from './data/models';
 import { INITIAL_CONVERSATIONS } from './data/initialChats';
@@ -91,8 +92,23 @@ const AppContent: React.FC = () => {
     };
   });
 
+  // 2.5 Active Product ('chat' | 'code')
+  const [activeProduct, setActiveProduct] = useState<NiximaProduct>(() => {
+    const savedProd = localStorage.getItem('nixima_active_product_v1');
+    return (savedProd === 'code' || savedProd === 'chat') ? savedProd : 'chat';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('nixima_active_product_v1', activeProduct);
+  }, [activeProduct]);
+
   // 3. Active Model
   const [currentModel, setCurrentModel] = useState<ModelOption>(() => {
+    const savedProd = localStorage.getItem('nixima_active_product_v1');
+    if (savedProd === 'code') {
+      const coder = NIXIMA_MODELS.find(m => m.id === 'nixima-0.3-coder');
+      if (coder) return coder;
+    }
     const savedModelId = localStorage.getItem(STORAGE_KEY_MODEL);
     if (savedModelId) {
       const match = NIXIMA_MODELS.find(m => m.id === savedModelId);
@@ -118,8 +134,14 @@ const AppContent: React.FC = () => {
 
   // 5. Active conversation ID
   const [activeId, setActiveId] = useState<string>(() => {
-    if (conversations.length > 0) return conversations[0].id;
-    return 'new-chat';
+    const savedProd = localStorage.getItem('nixima_active_product_v1');
+    const isCode = savedProd === 'code';
+    if (conversations.length > 0) {
+      const match = conversations.find(c => isCode ? c.product === 'code' : c.product !== 'code');
+      if (match) return match.id;
+      return conversations[0].id;
+    }
+    return isCode ? 'code-initial' : 'new-chat';
   });
 
   // 6. UI & Modals
@@ -439,8 +461,117 @@ All conversations and model preferences in this workspace are private to your Ni
     scrollToBottom(false);
   }, [activeId]);
 
+  // Handler: Switch Product (Nixima Chat vs Nixima Code)
+  const handleSelectProduct = (prod: NiximaProduct) => {
+    setActiveProduct(prod);
+    if (prod === 'code') {
+      const coderModel = NIXIMA_MODELS.find(m => m.id === 'nixima-0.3-coder') || currentModel;
+      setCurrentModel(coderModel);
+      setSettings(prev => ({
+        ...prev,
+        thinkingMode: 'deep',
+        deepThinkEnabled: true,
+      }));
+
+      const existingCodeConv = conversations.find(c => c.product === 'code');
+      if (existingCodeConv) {
+        setActiveId(existingCodeConv.id);
+      } else {
+        const newId = 'code-' + Date.now();
+        const newConv: Conversation = {
+          id: newId,
+          title: language === 'uk' ? 'Новий код-проєкт' : 'New Code Project',
+          messages: [],
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          modelId: 'nixima-0.3-coder',
+          product: 'code',
+          pinned: false,
+        };
+        setConversations(prev => [newConv, ...prev]);
+        setActiveId(newId);
+      }
+    } else {
+      const existingChatConv = conversations.find(c => c.product !== 'code');
+      if (existingChatConv) {
+        setActiveId(existingChatConv.id);
+        if (existingChatConv.modelId) {
+          const match = NIXIMA_MODELS.find(m => m.id === existingChatConv.modelId);
+          if (match) setCurrentModel(match);
+        }
+      } else {
+        const newId = 'chat-' + Date.now();
+        const newConv: Conversation = {
+          id: newId,
+          title: t.sidebar.newChatButton,
+          messages: [],
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          modelId: currentModel.id,
+          product: 'chat',
+          pinned: false,
+        };
+        setConversations(prev => [newConv, ...prev]);
+        setActiveId(newId);
+      }
+    }
+  };
+
+  // Handler: New Code Project
+  const handleNewCodeProject = () => {
+    const newId = 'code-' + Date.now();
+    const coderModel = NIXIMA_MODELS.find(m => m.id === 'nixima-0.3-coder') || currentModel;
+    const newConv: Conversation = {
+      id: newId,
+      title: language === 'uk' ? 'Новий код-проєкт' : 'New Code Project',
+      messages: [],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      modelId: 'nixima-0.3-coder',
+      product: 'code',
+      pinned: false,
+    };
+    setConversations(prev => [newConv, ...prev]);
+    setActiveId(newId);
+    setCurrentModel(coderModel);
+    setSettings(prev => ({
+      ...prev,
+      thinkingMode: 'deep',
+      deepThinkEnabled: true,
+    }));
+  };
+
+  // Handler: Send Code Prompt from Nixima Code Studio
+  const handleSendCodePrompt = (
+    promptText: string,
+    codeContext?: string,
+    options?: { taskType?: string; language?: string }
+  ) => {
+    let finalPrompt = promptText;
+    if (codeContext && codeContext.trim()) {
+      const lang = options?.language || 'typescript';
+      const taskLabel = (options?.taskType || 'generate').toUpperCase();
+      finalPrompt = `[ATTACHED CODE CONTEXT - ${lang.toUpperCase()}]\n\`\`\`${lang}\n${codeContext.trim()}\n\`\`\`\n\n[TASK DIRECTIVE: ${taskLabel}]\n${promptText}`;
+    } else if (options?.taskType && options.taskType !== 'generate') {
+      const lang = options.language ? ` [LANGUAGE: ${options.language}]` : '';
+      finalPrompt = `[TASK: ${options.taskType.toUpperCase()}${lang}]\n${promptText}`;
+    }
+
+    if (activeConversation && !activeConversation.product) {
+      setConversations(prev => prev.map(c =>
+        c.id === activeConversation.id ? { ...c, product: 'code', modelId: 'nixima-0.3-coder' } : c
+      ));
+    }
+
+    handleSendMessage(finalPrompt);
+  };
+
   // Handler: New Chat
   const handleNewChat = () => {
+    if (activeProduct === 'code') {
+      handleNewCodeProject();
+      return;
+    }
     const newId = 'chat-' + Date.now();
     const newConv: Conversation = {
       id: newId,
@@ -449,6 +580,7 @@ All conversations and model preferences in this workspace are private to your Ni
       createdAt: Date.now(),
       updatedAt: Date.now(),
       modelId: currentModel.id,
+      product: 'chat',
       pinned: false,
     };
     setConversations(prev => [newConv, ...prev]);
@@ -459,22 +591,26 @@ All conversations and model preferences in this workspace are private to your Ni
   const handleDeleteConversation = (id: string) => {
     setConversations(prev => {
       const remaining = prev.filter(c => c.id !== id);
-      if (remaining.length === 0) {
-        const freshId = 'chat-' + Date.now();
+      const isCode = activeProduct === 'code';
+      const remainingInProduct = remaining.filter(c => isCode ? c.product === 'code' : c.product !== 'code');
+
+      if (remainingInProduct.length === 0) {
+        const freshId = (isCode ? 'code-' : 'chat-') + Date.now();
         const freshConv: Conversation = {
           id: freshId,
-          title: t.sidebar.newChatButton,
+          title: isCode ? (language === 'uk' ? 'Новий код-проєкт' : 'New Code Project') : t.sidebar.newChatButton,
           messages: [],
           createdAt: Date.now(),
           updatedAt: Date.now(),
-          modelId: currentModel.id,
+          modelId: isCode ? 'nixima-0.3-coder' : currentModel.id,
+          product: isCode ? 'code' : 'chat',
           pinned: false,
         };
         setActiveId(freshId);
-        return [freshConv];
+        return [freshConv, ...remaining];
       }
       if (activeId === id) {
-        setActiveId(remaining[0].id);
+        setActiveId(remainingInProduct[0].id);
       }
       return remaining;
     });
@@ -514,6 +650,7 @@ All conversations and model preferences in this workspace are private to your Ni
       createdAt: Date.now(),
       updatedAt: Date.now(),
       modelId: activeConversation.modelId || currentModel.id,
+      product: activeConversation.product || activeProduct,
       pinned: false,
     };
 
@@ -531,17 +668,19 @@ All conversations and model preferences in this workspace are private to your Ni
 
   // Handler: Clear All
   const handleClearAllChats = () => {
-    const freshId = 'chat-' + Date.now();
+    const isCode = activeProduct === 'code';
+    const freshId = (isCode ? 'code-' : 'chat-') + Date.now();
     const freshConv: Conversation = {
       id: freshId,
-      title: t.sidebar.newChatButton,
+      title: isCode ? (language === 'uk' ? 'Новий код-проєкт' : 'New Code Project') : t.sidebar.newChatButton,
       messages: [],
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      modelId: currentModel.id,
+      modelId: isCode ? 'nixima-0.3-coder' : currentModel.id,
+      product: isCode ? 'code' : 'chat',
       pinned: false,
     };
-    setConversations([freshConv]);
+    setConversations(prev => [freshConv, ...prev.filter(c => isCode ? c.product !== 'code' : c.product === 'code')]);
     setActiveId(freshId);
   };
 
@@ -575,18 +714,26 @@ All conversations and model preferences in this workspace are private to your Ni
     let currentConv = conversations.find(c => c.id === targetConvId);
 
     if (!currentConv) {
-      targetConvId = 'chat-' + Date.now();
+      targetConvId = (activeProduct === 'code' ? 'code-' : 'chat-') + Date.now();
       currentConv = {
         id: targetConvId,
         title: userText.slice(0, 32),
         messages: [],
         createdAt: Date.now(),
         updatedAt: Date.now(),
-        modelId: currentModel.id,
+        modelId: activeProduct === 'code' ? 'nixima-0.3-coder' : currentModel.id,
+        product: activeProduct,
         pinned: false,
       };
       setConversations(prev => [currentConv!, ...prev]);
       setActiveId(targetConvId);
+    } else if (activeProduct === 'code' && currentConv.product !== 'code') {
+      currentConv = {
+        ...currentConv,
+        product: 'code',
+        modelId: 'nixima-0.3-coder',
+      };
+      setConversations(prev => prev.map(c => c.id === targetConvId ? currentConv! : c));
     }
 
     const userMessage: Message = {
@@ -723,6 +870,17 @@ All conversations and model preferences in this workspace are private to your Ni
         searchMode: settings.searchMode || 'standard',
         infiniteOutput: isInfiniteOutputActive,
       });
+
+      // Nixima Code Studio AI Coding Assistant Specialization Protocol
+      if (activeProduct === 'code' || currentConv.product === 'code') {
+        dynamicSystemPrompt += `\n\n[NIXIMA CODE: AI CODING ASSISTANT PROTOCOL - ZERO THINKING LAZINESS ACTIVE]\n` +
+          `You are Nixima Code, an elite frontier AI software architect and coding assistant powered exclusively by the Nixima-0.3 Coder Titan engine.\n` +
+          `MANDATORY CODING SPECIFICATIONS:\n` +
+          `1. ZERO LAZINESS: Never truncate code. Never write "// ... rest of code remains the same" or "// implement logic here". Provide full, complete, copy-paste ready implementations.\n` +
+          `2. ARCHITECTURAL QUALITY: Provide idiomatic code with robust error boundaries, strict types, edge case handling, and optimal time/space complexity.\n` +
+          `3. RUNNABLE ARTIFACTS: When delivering complete web applications, interactive games, or full-stack components, enclose them in complete single-file code blocks (e.g. \`\`\`html for Canvas games, \`\`\`tsx for React) so the user can immediately test them live in Nixima Canvas Studio.\n` +
+          `4. DEEPTHINKING V3.0 VERIFICATION: Verify mathematical and algorithmic bounds, AST integrity, and syntax before generating response.`;
+      }
 
       // Prepare base user prompt, pairing with live Canvas code context if present
       const basePrompt = effectiveCanvasContext
@@ -1072,6 +1230,9 @@ All conversations and model preferences in this workspace are private to your Ni
         onOpenSettings={() => handleOpenSettings('general')}
         onOpenCompanyInfo={() => setIsCompanyModalOpen(true)}
         onOpenBenchmarks={() => setIsBenchmarksOpen(true)}
+        activeProduct={activeProduct}
+        onSelectProduct={handleSelectProduct}
+        onNewCodeProject={handleNewCodeProject}
       />
 
       {/* Main Content Area: Global Header + Split-Screen Workspace */}
@@ -1086,135 +1247,176 @@ All conversations and model preferences in this workspace are private to your Ni
           onOpenReleaseModal={() => setIsReleaseModalOpen(true)}
           isSidebarOpen={isSidebarOpen}
           onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
-          onNewChat={handleNewChat}
+          onNewChat={activeProduct === 'code' ? handleNewCodeProject : handleNewChat}
           credits={getUserCredits(currentUser)}
           onOpenCredits={handleOpenCredits}
           webSearchEnabled={settings.webSearchEnabled}
           searchMode={settings.searchMode || 'standard'}
+          activeProduct={activeProduct}
         />
 
-        {/* Workspace Area: Chat + Nixima Canvas Split Screen */}
+        {/* Workspace Area: Chat / Nixima Code Studio + Nixima Canvas Split Screen */}
         <div className="flex-1 flex overflow-hidden min-w-0 relative h-full">
-          {/* Main Chat Column */}
-          <div className={`flex flex-col h-full min-w-0 relative transition-all duration-200 ${isPureBlack ? 'bg-black' : 'bg-[#09090b]'} ${
-            isCanvasOpen && !isCanvasMaximized
-              ? 'hidden lg:flex lg:w-1/2 xl:w-[48%] border-r border-zinc-800/80'
-              : isCanvasMaximized
-              ? 'hidden'
-              : 'w-full flex-1'
-          }`}>
-            {/* Chat Messages Container */}
-          <div className="flex-1 overflow-y-auto min-w-0 bg-grid-pattern">
-            {!activeConversation || activeConversation.messages.length === 0 ? (
-              <EmptyChat
-                currentModel={currentModel}
-                onSelectPrompt={handleSendMessage}
-                onSelectModel={handleSelectModel}
-                onOpenReleaseModal={() => setIsReleaseModalOpen(true)}
-              />
-            ) : (
-              <div className="pb-8">
-                {activeConversation.messages.map((msg) => (
-                  <ChatMessage
-                    key={msg.id}
-                    message={msg}
-                    onRegenerate={msg.role === 'assistant' ? handleRegenerate : undefined}
-                    onEditMessage={msg.role === 'user' ? (newContent) => handleEditUserMessage(msg.id, newContent) : undefined}
-                    onActionPrompt={handleSendMessage}
-                    onBranchMessage={handleBranchConversation}
-                    onOpenArtifact={handleOpenArtifact}
-                    activeModelName={currentModel.name}
-                  />
-                ))}
-                <div ref={messagesEndRef} className="h-4" />
-              </div>
-            )}
-          </div>
-
-          {/* Input Bar Dock */}
-          <ChatInput
-            onSendMessage={handleSendMessage}
-            isLoading={isLoading}
-            onStopGeneration={handleStopGeneration}
-            currentModel={currentModel}
-            deepThink={settings.thinkingMode === 'deep' || settings.thinkingMode === 'ultra' || settings.deepThinkEnabled}
-            thinkingMode={settings.thinkingMode || (settings.deepThinkEnabled ? 'deep' : 'none')}
-            onToggleDeepThink={() => {
-              setSettings(prev => {
-                const current = prev.thinkingMode || (prev.deepThinkEnabled ? 'deep' : 'none');
-                const next: ThinkingMode =
-                  current === 'none' ? 'basic' :
-                  current === 'basic' ? 'deep' :
-                  current === 'deep' ? 'ultra' : 'none';
-                return {
-                  ...prev,
-                  thinkingMode: next,
-                  deepThinkEnabled: next === 'deep' || next === 'ultra',
-                };
-              });
-            }}
-            onChangeThinkingMode={(mode: ThinkingMode) => {
-              setSettings(prev => ({
-                ...prev,
-                thinkingMode: mode,
-                deepThinkEnabled: mode === 'deep' || mode === 'ultra',
-              }));
-            }}
-            webSearch={settings.webSearchEnabled}
-            onToggleWebSearch={() => {
-              setSettings(prev => {
-                const isCreator = isStrictCreator(currentUser);
-                if (isCreator) {
-                  // Creator exclusive cycle: Off -> Fast -> Standard -> Mega -> Off
-                  if (!prev.webSearchEnabled) {
-                    return { ...prev, webSearchEnabled: true, searchMode: 'fast' };
-                  } else if (prev.searchMode === 'fast') {
-                    return { ...prev, webSearchEnabled: true, searchMode: 'standard' };
-                  } else if (prev.searchMode === 'standard') {
-                    return { ...prev, webSearchEnabled: true, searchMode: 'mega' };
-                  } else {
-                    return { ...prev, webSearchEnabled: false, searchMode: 'fast' };
-                  }
-                } else {
-                  // Regular user cycle: Off -> Fast -> Standard -> Off
-                  if (!prev.webSearchEnabled) {
-                    return { ...prev, webSearchEnabled: true, searchMode: 'fast' };
-                  } else if (prev.searchMode === 'fast') {
-                    return { ...prev, webSearchEnabled: true, searchMode: 'standard' };
-                  } else {
-                    return { ...prev, webSearchEnabled: false, searchMode: 'fast' };
-                  }
+          {/* Main Column: Nixima Code Studio or Nixima Chat */}
+          {activeProduct === 'code' ? (
+            <div className={`flex flex-col h-full min-w-0 relative transition-all duration-200 ${isPureBlack ? 'bg-black' : 'bg-[#09090b]'} ${
+              isCanvasOpen && !isCanvasMaximized
+                ? 'hidden lg:flex lg:w-1/2 xl:w-[48%] border-r border-zinc-800/80'
+                : isCanvasMaximized
+                ? 'hidden'
+                : 'w-full flex-1'
+            }`}>
+              <NiximaCodeStudio
+                conversation={
+                  (activeConversation && activeConversation.product === 'code')
+                    ? activeConversation
+                    : conversations.find(c => c.product === 'code') || {
+                        id: activeId || 'code-' + Date.now(),
+                        title: language === 'uk' ? 'Новий код-проєкт' : 'New Code Project',
+                        messages: [],
+                        createdAt: Date.now(),
+                        updatedAt: Date.now(),
+                        modelId: 'nixima-0.3-coder',
+                        product: 'code',
+                      }
                 }
-              });
-            }}
-            onSelectSearchMode={(mode: SearchMode) => {
-              setSettings(prev => ({
-                ...prev,
-                webSearchEnabled: true,
-                searchMode: mode
-              }));
-            }}
-            onSelectModel={(model: ModelOption) => {
-              handleSelectModel(model);
-            }}
-            searchMode={settings.searchMode || 'standard'}
-            isCreator={isStrictCreator(currentUser)}
-            infiniteOutput={Boolean(isStrictCreator(currentUser) && settings.infiniteOutputEnabled)}
-            onToggleInfiniteOutput={() => setSettings(s => ({ ...s, infiniteOutputEnabled: !s.infiniteOutputEnabled }))}
-            soundEnabled={settings.soundEnabled}
-            onToggleSound={() => setSettings(s => ({ ...s, soundEnabled: !s.soundEnabled }))}
-            userCredits={getUserCredits(currentUser)}
-            onOpenCredits={handleOpenCredits}
-            activeCanvasArtifact={isCanvasOpen && activeArtifact ? {
-              title: activeArtifact.title,
-              version: activeArtifact.currentVersion || 1,
-              language: activeArtifact.language,
-              lineCount: activeArtifact.content.split('\n').length,
-            } : null}
-            isCanvasContextLinked={isCanvasContextLinked}
-            onToggleCanvasContext={() => setIsCanvasContextLinked(prev => !prev)}
-          />
-        </div>
+                onSendPrompt={handleSendCodePrompt}
+                isLoading={isLoading}
+                onStopGeneration={handleStopGeneration}
+                onRegenerate={handleRegenerate}
+                onOpenArtifact={handleOpenArtifact}
+                currentModel={currentModel}
+                userCredits={getUserCredits(currentUser)}
+                activeCanvasArtifact={isCanvasOpen && activeArtifact ? {
+                  title: activeArtifact.title,
+                  version: activeArtifact.currentVersion || 1,
+                  language: activeArtifact.language,
+                  lineCount: activeArtifact.content.split('\n').length,
+                  content: activeArtifact.content,
+                } : null}
+              />
+            </div>
+          ) : (
+            <div className={`flex flex-col h-full min-w-0 relative transition-all duration-200 ${isPureBlack ? 'bg-black' : 'bg-[#09090b]'} ${
+              isCanvasOpen && !isCanvasMaximized
+                ? 'hidden lg:flex lg:w-1/2 xl:w-[48%] border-r border-zinc-800/80'
+                : isCanvasMaximized
+                ? 'hidden'
+                : 'w-full flex-1'
+            }`}>
+              {/* Chat Messages Container */}
+              <div className="flex-1 overflow-y-auto min-w-0 bg-grid-pattern">
+                {!activeConversation || activeConversation.messages.length === 0 ? (
+                  <EmptyChat
+                    currentModel={currentModel}
+                    onSelectPrompt={handleSendMessage}
+                    onSelectModel={handleSelectModel}
+                    onOpenReleaseModal={() => setIsReleaseModalOpen(true)}
+                  />
+                ) : (
+                  <div className="pb-8">
+                    {activeConversation.messages.map((msg) => (
+                      <ChatMessage
+                        key={msg.id}
+                        message={msg}
+                        onRegenerate={msg.role === 'assistant' ? handleRegenerate : undefined}
+                        onEditMessage={msg.role === 'user' ? (newContent) => handleEditUserMessage(msg.id, newContent) : undefined}
+                        onActionPrompt={handleSendMessage}
+                        onBranchMessage={handleBranchConversation}
+                        onOpenArtifact={handleOpenArtifact}
+                        activeModelName={currentModel.name}
+                      />
+                    ))}
+                    <div ref={messagesEndRef} className="h-4" />
+                  </div>
+                )}
+              </div>
+
+              {/* Input Bar Dock */}
+              <ChatInput
+                onSendMessage={handleSendMessage}
+                isLoading={isLoading}
+                onStopGeneration={handleStopGeneration}
+                currentModel={currentModel}
+                deepThink={settings.thinkingMode === 'deep' || settings.thinkingMode === 'ultra' || settings.deepThinkEnabled}
+                thinkingMode={settings.thinkingMode || (settings.deepThinkEnabled ? 'deep' : 'none')}
+                onToggleDeepThink={() => {
+                  setSettings(prev => {
+                    const current = prev.thinkingMode || (prev.deepThinkEnabled ? 'deep' : 'none');
+                    const next: ThinkingMode =
+                      current === 'none' ? 'basic' :
+                      current === 'basic' ? 'deep' :
+                      current === 'deep' ? 'ultra' : 'none';
+                    return {
+                      ...prev,
+                      thinkingMode: next,
+                      deepThinkEnabled: next === 'deep' || next === 'ultra',
+                    };
+                  });
+                }}
+                onChangeThinkingMode={(mode: ThinkingMode) => {
+                  setSettings(prev => ({
+                    ...prev,
+                    thinkingMode: mode,
+                    deepThinkEnabled: mode === 'deep' || mode === 'ultra',
+                  }));
+                }}
+                webSearch={settings.webSearchEnabled}
+                onToggleWebSearch={() => {
+                  setSettings(prev => {
+                    const isCreator = isStrictCreator(currentUser);
+                    if (isCreator) {
+                      // Creator exclusive cycle: Off -> Fast -> Standard -> Mega -> Off
+                      if (!prev.webSearchEnabled) {
+                        return { ...prev, webSearchEnabled: true, searchMode: 'fast' };
+                      } else if (prev.searchMode === 'fast') {
+                        return { ...prev, webSearchEnabled: true, searchMode: 'standard' };
+                      } else if (prev.searchMode === 'standard') {
+                        return { ...prev, webSearchEnabled: true, searchMode: 'mega' };
+                      } else {
+                        return { ...prev, webSearchEnabled: false, searchMode: 'fast' };
+                      }
+                    } else {
+                      // Regular user cycle: Off -> Fast -> Standard -> Off
+                      if (!prev.webSearchEnabled) {
+                        return { ...prev, webSearchEnabled: true, searchMode: 'fast' };
+                      } else if (prev.searchMode === 'fast') {
+                        return { ...prev, webSearchEnabled: true, searchMode: 'standard' };
+                      } else {
+                        return { ...prev, webSearchEnabled: false, searchMode: 'fast' };
+                      }
+                    }
+                  });
+                }}
+                onSelectSearchMode={(mode: SearchMode) => {
+                  setSettings(prev => ({
+                    ...prev,
+                    webSearchEnabled: true,
+                    searchMode: mode
+                  }));
+                }}
+                onSelectModel={(model: ModelOption) => {
+                  handleSelectModel(model);
+                }}
+                searchMode={settings.searchMode || 'standard'}
+                isCreator={isStrictCreator(currentUser)}
+                infiniteOutput={Boolean(isStrictCreator(currentUser) && settings.infiniteOutputEnabled)}
+                onToggleInfiniteOutput={() => setSettings(s => ({ ...s, infiniteOutputEnabled: !s.infiniteOutputEnabled }))}
+                soundEnabled={settings.soundEnabled}
+                onToggleSound={() => setSettings(s => ({ ...s, soundEnabled: !s.soundEnabled }))}
+                userCredits={getUserCredits(currentUser)}
+                onOpenCredits={handleOpenCredits}
+                activeCanvasArtifact={isCanvasOpen && activeArtifact ? {
+                  title: activeArtifact.title,
+                  version: activeArtifact.currentVersion || 1,
+                  language: activeArtifact.language,
+                  lineCount: activeArtifact.content.split('\n').length,
+                } : null}
+                isCanvasContextLinked={isCanvasContextLinked}
+                onToggleCanvasContext={() => setIsCanvasContextLinked(prev => !prev)}
+              />
+            </div>
+          )}
 
         {/* Nixima Canvas Studio Drawer / Split Pane */}
         {isCanvasOpen && activeArtifact && (
@@ -1290,7 +1492,12 @@ All conversations and model preferences in this workspace are private to your Ni
       <BenchmarksModal
         isOpen={isBenchmarksOpen}
         onClose={() => setIsBenchmarksOpen(false)}
-        onSelectModel={(model) => setCurrentModel(model)}
+        onSelectModel={(model) => {
+          if (activeProduct === 'code') {
+            setActiveProduct('chat');
+          }
+          handleSelectModel(model);
+        }}
       />
 
       {/* Nixima 0.2 Generation Release Briefing Modal */}
@@ -1298,7 +1505,12 @@ All conversations and model preferences in this workspace are private to your Ni
         isOpen={isReleaseModalOpen}
         onClose={() => setIsReleaseModalOpen(false)}
         currentModel={currentModel}
-        onSelectModel={(model) => setCurrentModel(model)}
+        onSelectModel={(model) => {
+          if (activeProduct === 'code') {
+            setActiveProduct('chat');
+          }
+          handleSelectModel(model);
+        }}
         onOpenBenchmarks={() => setIsBenchmarksOpen(true)}
       />
     </div>

@@ -16,7 +16,7 @@ import {
   BarChart3,
   Globe
 } from 'lucide-react';
-import { ModelOption, SearchMode } from '../types/chat';
+import { ModelOption, SearchMode, NiximaProduct } from '../types/chat';
 import { NIXIMA_MODELS, getRecommendedModelForSearchMode } from '../data/models';
 import { NiximaIdLogo } from './NiximaIdLogo';
 import { ModelIcon } from './ModelIcon';
@@ -40,6 +40,7 @@ interface HeaderProps {
   onOpenCredits?: () => void;
   webSearchEnabled?: boolean;
   searchMode?: SearchMode;
+  activeProduct?: NiximaProduct;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -55,7 +56,8 @@ export const Header: React.FC<HeaderProps> = ({
   credits = 1000,
   onOpenCredits,
   webSearchEnabled = false,
-  searchMode = 'standard'
+  searchMode = 'standard',
+  activeProduct = 'chat',
 }) => {
   const { language, toggleLanguage, t } = useLanguage();
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
@@ -130,54 +132,84 @@ export const Header: React.FC<HeaderProps> = ({
             <NiximaIdLogo size={18} glow={false} />
           </div>
           <div className="hidden min-[400px]:flex items-center gap-1.5">
-            <NiximaWordmark
-              size="md"
-              variant="sheen"
-              withAi
-              aiStyle="pill"
-            />
-            <button
-              type="button"
-              onClick={onOpenReleaseModal}
-              className="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-mono font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/80 transition-all cursor-pointer shadow-sm group"
-              title={t.releaseAnnouncement.detailsBtn}
-            >
-              <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.8)] animate-pulse" />
-              <span>v0.3</span>
-              <span className="text-[9px] px-1 rounded bg-white text-black font-bold uppercase ml-0.5">
-                NEW
-              </span>
-            </button>
+            {activeProduct === 'code' ? (
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold text-sm sm:text-base tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent font-sans">
+                  Nixima Code
+                </span>
+                <span className="px-1.5 py-0.2 rounded bg-emerald-950/80 border border-emerald-500/40 text-[9px] font-mono text-emerald-300 font-bold uppercase tracking-wider">
+                  STUDIO
+                </span>
+              </div>
+            ) : (
+              <>
+                <NiximaWordmark
+                  size="md"
+                  variant="sheen"
+                  withAi
+                  aiStyle="pill"
+                />
+                <button
+                  type="button"
+                  onClick={onOpenReleaseModal}
+                  className="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-mono font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/80 transition-all cursor-pointer shadow-sm group"
+                  title={t.releaseAnnouncement.detailsBtn}
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.8)] animate-pulse" />
+                  <span>v0.3</span>
+                  <span className="text-[9px] px-1 rounded bg-white text-black font-bold uppercase ml-0.5">
+                    NEW
+                  </span>
+                </button>
+              </>
+            )}
           </div>
         </div>
       </div>
 
       {/* Center: Model Selector Dropdown (Carefully constrained to prevent layout collisions) */}
       <div className="relative flex-1 flex justify-center min-w-0 px-1 sm:px-2 max-w-xs md:max-w-md mx-auto" ref={dropdownRef}>
-        <button
-          type="button"
-          onClick={() => {
-            if (!isModelDropdownOpen) {
-              setFilterTab('0.3');
-            }
-            setIsModelDropdownOpen(!isModelDropdownOpen);
-          }}
-          className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/70 hover:border-zinc-500 transition-all duration-150 shadow-inner-light select-none cursor-pointer max-w-[160px] sm:max-w-[240px] md:max-w-[320px] min-w-0"
-          title={`${t.common.active}: ${currentModel.name}`}
-        >
-          <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
-            <span className="flex-shrink-0">{getModelIcon(currentModel.id)}</span>
-            <span className="font-semibold text-xs sm:text-sm text-white tracking-tight whitespace-nowrap truncate min-w-0">
-              {renderWithNiximaBrand(t.models[currentModel.id]?.name || currentModel.name)}
+        {activeProduct === 'code' ? (
+          <div
+            className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-emerald-950/70 border border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.2)] select-none max-w-[280px] sm:max-w-[340px] min-w-0"
+            title={t.header.niximaCodeLockedModel}
+          >
+            <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
+              <span className="flex-shrink-0">{getModelIcon('nixima-0.3-coder')}</span>
+              <span className="font-semibold text-xs sm:text-sm text-emerald-200 tracking-tight whitespace-nowrap truncate min-w-0 font-mono">
+                Nixima-0.3 Coder
+              </span>
+            </div>
+            <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold tracking-wider uppercase border border-emerald-500/40 flex-shrink-0">
+              TITAN CODER
             </span>
           </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              if (!isModelDropdownOpen) {
+                setFilterTab('0.3');
+              }
+              setIsModelDropdownOpen(!isModelDropdownOpen);
+            }}
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/70 hover:border-zinc-500 transition-all duration-150 shadow-inner-light select-none cursor-pointer max-w-[160px] sm:max-w-[240px] md:max-w-[320px] min-w-0"
+            title={`${t.common.active}: ${currentModel.name}`}
+          >
+            <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
+              <span className="flex-shrink-0">{getModelIcon(currentModel.id)}</span>
+              <span className="font-semibold text-xs sm:text-sm text-white tracking-tight whitespace-nowrap truncate min-w-0">
+                {renderWithNiximaBrand(t.models[currentModel.id]?.name || currentModel.name)}
+              </span>
+            </div>
 
-          <span className="hidden lg:inline-block text-[10px] font-mono px-1.5 py-0.2 rounded bg-white text-black font-bold tracking-wider uppercase flex-shrink-0">
-            {t.models[currentModel.id]?.badge || currentModel.badge}
-          </span>
+            <span className="hidden lg:inline-block text-[10px] font-mono px-1.5 py-0.2 rounded bg-white text-black font-bold tracking-wider uppercase flex-shrink-0">
+              {t.models[currentModel.id]?.badge || currentModel.badge}
+            </span>
 
-          <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 flex-shrink-0 transition-transform duration-200 ${isModelDropdownOpen ? 'rotate-180' : ''}`} />
-        </button>
+            <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 flex-shrink-0 transition-transform duration-200 ${isModelDropdownOpen ? 'rotate-180' : ''}`} />
+          </button>
+        )}
 
         {/* Mobile Backdrop Scrim */}
         {isModelDropdownOpen && (
