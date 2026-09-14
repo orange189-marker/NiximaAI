@@ -445,7 +445,11 @@ export const Header: React.FC<HeaderProps> = ({
                       <button
                         type="button"
                         onClick={() => {
-                          if (currentModel.generation === '0.2' || currentModel.id.includes('0.2')) {
+                          if (currentModel.generation === '0.4' || currentModel.id.includes('0.4')) {
+                            setFilterTab('0.4');
+                          } else if (currentModel.generation === '0.3' || currentModel.id.includes('0.3')) {
+                            setFilterTab('0.3');
+                          } else if (currentModel.generation === '0.2' || currentModel.id.includes('0.2')) {
                             setFilterTab('0.2');
                           } else {
                             setFilterTab('all');
@@ -475,7 +479,8 @@ export const Header: React.FC<HeaderProps> = ({
                         const isSelected = currentModel.id === model.id;
                         const modelTr = t.models[model.id];
                         const searchOpt = model.searchOptimization;
-                        const is03 = model.generation === '0.3' || model.id.includes('0.3');
+                        const is04 = model.generation === '0.4' || model.id.includes('0.4');
+                        const is03 = !is04 && (model.generation === '0.3' || model.id.includes('0.3'));
 
                         return (
                           <button
@@ -499,7 +504,11 @@ export const Header: React.FC<HeaderProps> = ({
                                 </span>
 
                                 {/* Generation badge */}
-                                {is03 ? (
+                                {is04 ? (
+                                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 font-bold flex-shrink-0 shadow-[0_0_8px_rgba(245,158,11,0.2)]">
+                                    0.4 GEN
+                                  </span>
+                                ) : is03 ? (
                                   <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-white/10 text-white border border-white/20 font-bold flex-shrink-0">
                                     0.3 GEN
                                   </span>

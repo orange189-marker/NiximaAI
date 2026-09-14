@@ -216,7 +216,7 @@ function generateRawNiximaResponse(options: GenerateResponseOptions): AIResponse
       day: 'numeric',
     });
 
-    const modelGen = model.generation || (model.id.includes('0.3') ? '0.3' : '0.2');
+    const modelGen = model.generation || (model.id.includes('0.4') ? '0.4' : model.id.includes('0.3') ? '0.3' : '0.2');
 
     if (isUk) {
       return {
