@@ -750,7 +750,9 @@ All conversations and model preferences in this workspace are private to your Ni
     const aiMessageId = 'ai-' + Date.now();
     const isOmni = isOmniModel(currentModel);
 
-    // Resolve Dual-Tool Execution: Both Tool 1 (Search V3) and Tool 2 (DeepThinking) can run concurrently if needed
+    // Resolve Dual-Tool Execution: For Nixima-0.4, both Tool 1 (Search V3) and Tool 2 (DeepThinking) are autonomously evaluated
+    const is04 = currentModel.id === 'nixima-0.4' || currentModel.generation === '0.4';
+
     const {
       runWebSearch: shouldRunWebSearch,
       effectiveThinkingMode,
@@ -760,9 +762,11 @@ All conversations and model preferences in this workspace are private to your Ni
     } = resolveOmniToolExecution({
       query: userText,
       isOmni,
-      userWebSearch: settings.webSearchEnabled,
-      userThinkingMode: settings.thinkingMode,
-      userDeepThink: settings.deepThinkEnabled,
+      is04,
+      modelId: currentModel.id,
+      userWebSearch: is04 ? false : settings.webSearchEnabled,
+      userThinkingMode: is04 ? undefined : settings.thinkingMode,
+      userDeepThink: is04 ? false : settings.deepThinkEnabled,
       searchMode: settings.searchMode || 'standard',
     });
 

@@ -1,6 +1,7 @@
 import { NiximaUser } from '../types/user';
 import { ModelOption, ThinkingMode } from '../types/chat';
 import { getAllUsers, saveUsers, setActiveUser, getActiveUser, isDadAccount } from './auth';
+import { getOmniThinkingDecision } from './omniTools';
 
 export const DEFAULT_INITIAL_CREDITS = 1000;
 export const DAILY_GRANT_AMOUNT = 500;
@@ -103,9 +104,13 @@ export function calculateEstimatedCost(
   const cleanPrompt = prompt.trim();
   const inputLen = cleanPrompt.length;
 
-  const isThinkingActive = Boolean(thinkingMode === 'basic' || thinkingMode === 'deep' || thinkingMode === 'ultra' || deepThink);
-  const isUltra = thinkingMode === 'ultra';
-  const isDeep = thinkingMode === 'deep' || (deepThink && thinkingMode !== 'basic' && !isUltra);
+  const is04 = model.id === 'nixima-0.4' || (model as any)?.generation === '0.4';
+  const effectiveThinkingMode = is04 ? getOmniThinkingDecision(cleanPrompt) : thinkingMode;
+  const effectiveDeepThink = is04 ? (effectiveThinkingMode === 'deep' || effectiveThinkingMode === 'ultra') : deepThink;
+
+  const isThinkingActive = Boolean(effectiveThinkingMode === 'basic' || effectiveThinkingMode === 'deep' || effectiveThinkingMode === 'ultra' || effectiveDeepThink);
+  const isUltra = effectiveThinkingMode === 'ultra';
+  const isDeep = effectiveThinkingMode === 'deep' || (effectiveDeepThink && effectiveThinkingMode !== 'basic' && !isUltra);
 
   // Detect if the prompt is computationally "hard"
   const hasCode = /```|function|def\s+|class\s+|SELECT\s+|import\s+/i.test(cleanPrompt);

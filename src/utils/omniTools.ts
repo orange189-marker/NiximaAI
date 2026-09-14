@@ -139,6 +139,8 @@ export function shouldOmniThink(query: string): boolean {
 export function resolveOmniToolExecution(params: {
   query: string;
   isOmni: boolean;
+  is04?: boolean;
+  modelId?: string;
   userWebSearch?: boolean;
   userThinkingMode?: ThinkingMode;
   userDeepThink?: boolean;
@@ -150,7 +152,30 @@ export function resolveOmniToolExecution(params: {
   isThinkingActive: boolean;
   isDualToolActive: boolean;
 } {
-  const { query, isOmni, userWebSearch = false, userThinkingMode, userDeepThink = false } = params;
+  const { query, isOmni, is04, modelId, userWebSearch = false, userThinkingMode, userDeepThink = false } = params;
+
+  const isNixima04 = Boolean(
+    is04 ||
+    modelId === 'nixima-0.4' ||
+    (modelId && modelId.startsWith('nixima-0.4'))
+  );
+
+  // When Nixima-0.4 is active, it chooses completely on its own whether to use search, deepthink, or rest
+  if (isNixima04) {
+    const runWebSearch = shouldOmniSearch(query);
+    const effectiveThinkingMode = getOmniThinkingDecision(query);
+    const isDeepThink = effectiveThinkingMode === 'deep' || effectiveThinkingMode === 'ultra';
+    const isThinkingActive = effectiveThinkingMode !== 'none';
+    const isDualToolActive = runWebSearch && isThinkingActive;
+
+    return {
+      runWebSearch,
+      effectiveThinkingMode,
+      isDeepThink,
+      isThinkingActive,
+      isDualToolActive,
+    };
+  }
 
   // Search determination: user explicitly enabled, or news query, or autonomous Omni trigger
   const searchAnalysis = cleanUserSearchQuery(query);
