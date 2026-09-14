@@ -100,20 +100,30 @@ export interface NiximaArtifact {
   sourceCodeBlockIdx?: number;
 }
 
+export type EpistemicPhase = 'axioms' | 'hypotheses' | 'falsification' | 'verification' | 'synthesis';
+
 export interface DynamicThinkingStep {
   stepNumber: number;
   title: string;
   explanation: string;
   bullets?: string[];
+  phase?: EpistemicPhase;
+  status?: 'verified' | 'falsified' | 'exploring';
+  confidenceScore?: number;
 }
 
 export interface DeepThinkingTelemetry {
   stepsCount?: number;
   durationMs?: number;
-  epistemicDepth?: string; // e.g. "Frontier L3 Epistemic Proof"
+  epistemicDepth?: string; // e.g. "Frontier L4 Epistemic Dialectic (DeepThinking V3)"
   dynamicSteps?: DynamicThinkingStep[];
   phases?: string[];
   mode?: ThinkingMode;
+  version?: 'v2' | 'v2.1' | 'v3';
+  proofConfidence?: number; // e.g. 99.9%
+  hypothesesPruned?: number; // count of contradictions/flaws pruned
+  axiomsVerified?: number; // count of verified axioms
+  epistemicVelocity?: string; // e.g. "~14ms / node"
 }
 
 export interface CanvasCodeContext {

@@ -51,8 +51,8 @@ export const BENCHMARK_LEADERBOARD: ModelLeaderboardEntry[] = [
     eloRating: 1965,
     winRate: 98.8,
     primaryBadge: '0.3 TITAN CODER & DESIGN ARCHITECT',
-    summaryEn: 'The definitive next-generation coding and interactive application engine powered by DeepThinking V2.1. Engineered with zero thinking laziness, delivering complete runnable code, modern neon aesthetics, 60 FPS physics loops, and pure Web Audio sound synthesis.',
-    summaryUk: 'Флагманська модель покоління 0.3 для розробки коду та інтерактивних додатків на базі DeepThinking V2.1. Повна відсутність лінощів мислення, 100% завершений робочий код, неонова естетика дизайну, анімації 60 FPS та синтез звуку через Web Audio API.',
+    summaryEn: 'The definitive next-generation coding and interactive application engine powered by DeepThinking V3.0. Engineered with zero thinking laziness, delivering complete runnable code, modern neon aesthetics, 60 FPS physics loops, and pure Web Audio sound synthesis.',
+    summaryUk: 'Флагманська модель покоління 0.3 для розробки коду та інтерактивних додатків на базі DeepThinking V3.0. Повна відсутність лінощів мислення, 100% завершений робочий код, неонова естетика дизайну, анімації 60 FPS та синтез звуку через Web Audio API.',
     recommendedForEn: 'Production software architecture, interactive games with canvas, aesthetic UI design, zero-laziness code, Web Audio synthesis, algorithms & concurrency.',
     recommendedForUk: 'Архітектура програмного забезпечення, інтерактивні ігри на canvas, естетичний UI дизайн, код без скорочень, синтез звуку Web Audio, алгоритми та асинхронність.',
     metrics: {
@@ -640,7 +640,7 @@ Strict Requirements:
 
 3. Type Safety & Event Hooks:
 - Clean TypeScript generics LRUCache<K, V> with typed onEvict callbacks.`,
-        response: `Here is a complete, production-grade, zero-defect \`LRUCache<K, V>\` written in idiomatic TypeScript using DeepThinking V2.1 with strict zero-laziness compliance:
+        response: `Here is a complete, production-grade, zero-defect \`LRUCache<K, V>\` written in idiomatic TypeScript using DeepThinking V3.0 with strict zero-laziness compliance:
 
 \`\`\`typescript
 export type EvictionReason = 'capacity' | 'ttl';
@@ -811,8 +811,8 @@ export class LRUCache<K, V> {
   }
 }
 \`\`\``,
-        judgeVerdict: 'Flawless DeepThinking V2.1 architecture. Zero placeholders, robust Sentinel nodes, complete O(1) doubly-linked list mechanics, and memory leak prevention.',
-        judgeVerdictUk: 'Бездоганна архітектура DeepThinking V2.1. Повна відсутність скорочень чи плейсхолдерів, надійні Sentinels, повний двобічно зв’язаний список та захист від витоків пам’яті.',
+        judgeVerdict: 'Flawless DeepThinking V3.0 architecture. Zero placeholders, robust Sentinel nodes, complete O(1) doubly-linked list mechanics, and memory leak prevention.',
+        judgeVerdictUk: 'Бездоганна архітектура DeepThinking V3.0. Повна відсутність скорочень чи плейсхолдерів, надійні Sentinels, повний двобічно зв’язаний список та захист від витоків пам’яті.',
         keyStrengths: ['Zero thinking laziness', 'Complete production code', 'Sub-millisecond O(1) throughput', 'Memory-safe TTL timers'],
         keyTradeoffs: ['None observed']
       },

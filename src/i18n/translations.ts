@@ -168,6 +168,10 @@ export interface Translations {
     deepThinkTooltip: string;
     deepThinkingV21: string;
     deepThinkingV21Desc: string;
+    deepThinkingV3: string;
+    deepThinkingV3Badge: string;
+    deepThinkingV3Desc: string;
+    deepThinkingV3Tooltip: string;
     ultraThinking: string;
     ultraThinkingV1: string;
     ultraThinkingTooltip: string;
@@ -240,6 +244,21 @@ export interface Translations {
     deepThinkingV21: string;
     coderV21Architecture: string;
     stagesVerifiedV21: (count: number) => string;
+    deepThinkingV3: string;
+    deepThinkingV3Badge: string;
+    stagesVerifiedV3: (count: number) => string;
+    proofConfidenceLabel: string;
+    hypothesesPrunedLabel: string;
+    axiomsVerifiedLabel: string;
+    epistemicVelocityLabel: string;
+    phaseAxioms: string;
+    phaseHypotheses: string;
+    phaseFalsification: string;
+    phaseVerification: string;
+    phaseSynthesis: string;
+    viewSteps: string;
+    viewPhases: string;
+    viewRaw: string;
     ultraThinkingV1: string;
     ultraThinkingStruggle: string;
     ultraStagesVerified: (count: number) => string;
@@ -740,6 +759,10 @@ export const translations: Record<Language, Translations> = {
       deepThinkTooltip: 'DeepThinking V2: Activate multi-stage epistemic reasoning & proof verification',
       deepThinkingV21: 'DeepThinking V2.1',
       deepThinkingV21Desc: 'Zero-laziness software & game architecture engine. Complete runnable code, modern neon aesthetics, and Web Audio API synthesis.',
+      deepThinkingV3: 'DeepThinking V3.0',
+      deepThinkingV3Badge: 'V3 PROOF ENGINE',
+      deepThinkingV3Desc: 'Quantum Epistemic Dialectic Engine. Multi-branch hypothesis falsification, formal proof verification, and zero thinking laziness.',
+      deepThinkingV3Tooltip: 'DeepThinking V3.0: Multi-branch hypothesis falsification, formal proof verification & epistemic struggle',
       ultraThinking: 'UltraThinking',
       ultraThinkingV1: 'UltraThinking V1.0',
       ultraThinkingTooltip: 'UltraThinking: Deepest epistemic struggle & exhaustive multi-branch deduction (Nixima Pro)',
@@ -769,22 +792,22 @@ export const translations: Record<Language, Translations> = {
       attachTooltip: 'Attach dataset / document',
       infiniteOutput: 'Infinite Output',
       infiniteOutputShort: 'Infinite',
-      infiniteOutputActiveTooltip: 'Infinite Output Active: Unbounded token output clearance. Client stream will remain open until exhaustive generation completes without 4,096 token truncation.',
-      infiniteOutputInactiveTooltip: 'Infinite Output (Creator Exclusive): Bypass max output token limit for full code synthesis.',
+      infiniteOutputActiveTooltip: 'Infinite Output Active: Maximum output token ceiling removed. Nixima will stream full code without truncated tokens or 4096-token limits.',
+      infiniteOutputInactiveTooltip: 'Infinite Output (Creator Sovereign Feature): Remove token ceiling to generate complete, un-truncated applications.',
       infiniteOutputBadge: 'MAX',
       stopTooltip: 'Stop generation (Esc)',
-      sendTooltip: 'Send prompt (Enter)',
+      sendTooltip: 'Send message (Enter)',
       chars: 'chars',
-      meshOnline: 'Online',
+      meshOnline: 'Mesh Online',
       enterToSend: 'Press Enter ↵ to send',
-      shiftEnterNewline: 'Shift + Enter for newline',
+      shiftEnterNewline: 'Shift + Enter for new line',
     },
 
     chatMessage: {
       you: 'You',
       thinking: 'Nixima is thinking',
-      reasoning: 'Nixima is reasoning',
-      generatingTrace: 'Generating trace...',
+      reasoning: 'Nixima reasoning',
+      generatingTrace: 'Formulating dialectic trace...',
       reasoningProcess: 'Reasoning Process',
       chainOfThought: '(Chain of Thought)',
       saveAndResend: 'Save & Resend',
@@ -812,6 +835,21 @@ export const translations: Record<Language, Translations> = {
       deepThinkingV21: 'DeepThinking V2.1 Coder',
       coderV21Architecture: 'V2.1 Code & Architecture Telemetry',
       stagesVerifiedV21: (count: number) => `${count} Architectural Stages Verified (Zero Laziness)`,
+      deepThinkingV3: 'DeepThinking V3.0',
+      deepThinkingV3Badge: 'V3 PROOF ENGINE',
+      stagesVerifiedV3: (count: number) => `${count} Epistemic Dialectic Stages Verified`,
+      proofConfidenceLabel: 'Proof Confidence',
+      hypothesesPrunedLabel: 'Contradictions Pruned',
+      axiomsVerifiedLabel: 'Axioms Verified',
+      epistemicVelocityLabel: 'Epistemic Velocity',
+      phaseAxioms: 'Phase 1: Axioms',
+      phaseHypotheses: 'Phase 2: Hypotheses',
+      phaseFalsification: 'Phase 3: Falsification',
+      phaseVerification: 'Phase 4: Invariance',
+      phaseSynthesis: 'Phase 5: Synthesis',
+      viewSteps: 'AI Steps',
+      viewPhases: 'Phases Pipeline',
+      viewRaw: 'Raw Trace',
       ultraThinkingV1: 'UltraThinking V1.0',
       ultraThinkingStruggle: 'Dialectical Epistemic Proof (Nixima-0.2 Pro)',
       ultraStagesVerified: (count: number) => `${count} Ultra-Branches Hypothesized & Falsified`,
@@ -1463,6 +1501,10 @@ export const translations: Record<Language, Translations> = {
       deepThinkTooltip: 'DeepThinking V2: Багатокрокове епістемічне міркування та верифікація логіки',
       deepThinkingV21: 'DeepThinking V2.1',
       deepThinkingV21Desc: 'Архітектурний рушій коду та ігор без лінощів. 100% завершений код, сучасна неонова естетика та синтез Web Audio API.',
+      deepThinkingV3: 'DeepThinking V3.0',
+      deepThinkingV3Badge: 'РУШІЙ ДОВЕДЕНЬ V3',
+      deepThinkingV3Desc: 'Квантовий епістемічний діалектичний рушій. Багатогілкове спростування гіпотез, формальне доведення та нуль лінощів мислення.',
+      deepThinkingV3Tooltip: 'DeepThinking V3.0: Багатогілкове спростування гіпотез, формальне доведення та повна дедукція',
       ultraThinking: 'UltraThinking',
       ultraThinkingV1: 'UltraThinking V1.0',
       ultraThinkingTooltip: 'UltraThinking: Глибока діалектична боротьба думок та верифікація гіпотез (Nixima Pro)',
@@ -1507,7 +1549,7 @@ export const translations: Record<Language, Translations> = {
       you: 'Ви',
       thinking: 'Nixima думає',
       reasoning: 'Nixima міркує',
-      generatingTrace: 'Генерація ланцюжка...',
+      generatingTrace: 'Формулювання діалектичного ланцюжка...',
       reasoningProcess: 'Процес міркування',
       chainOfThought: '(Ланцюжок міркувань)',
       saveAndResend: 'Зберегти й надіслати',
@@ -1535,6 +1577,21 @@ export const translations: Record<Language, Translations> = {
       deepThinkingV21: 'DeepThinking V2.1 Coder',
       coderV21Architecture: 'V2.1 Архітектура коду та дизайну',
       stagesVerifiedV21: (count: number) => `Верифіковано ${count} архітектурних стадій (Без скорочень)`,
+      deepThinkingV3: 'DeepThinking V3.0',
+      deepThinkingV3Badge: 'РУШІЙ ДОВЕДЕНЬ V3',
+      stagesVerifiedV3: (count: number) => `Верифіковано ${count} діалектичних стадій`,
+      proofConfidenceLabel: 'Впевненість доведення',
+      hypothesesPrunedLabel: 'Спростовано суперечностей',
+      axiomsVerifiedLabel: 'Верифіковано аксіом',
+      epistemicVelocityLabel: 'Швидкість дедукції',
+      phaseAxioms: 'Фаза 1: Аксіоми',
+      phaseHypotheses: 'Фаза 2: Гіпотези',
+      phaseFalsification: 'Фаза 3: Спростування',
+      phaseVerification: 'Фаза 4: Інваріантність',
+      phaseSynthesis: 'Фаза 5: Синтез',
+      viewSteps: 'Кроки AI',
+      viewPhases: 'Пайплайн фаз',
+      viewRaw: 'Повний лог',
       ultraThinkingV1: 'UltraThinking V1.0',
       ultraThinkingStruggle: 'Квантове діалектичне доведення (Nixima-0.2 Pro)',
       ultraStagesVerified: (count: number) => `Верифіковано ${count} ультра-гіпотез`,

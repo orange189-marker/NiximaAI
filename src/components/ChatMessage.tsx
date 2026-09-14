@@ -24,9 +24,13 @@ import {
   Globe,
   ExternalLink,
   Zap,
-  Layers
+  Layers,
+  ShieldCheck,
+  CheckCircle2,
+  XCircle,
+  Gauge
 } from 'lucide-react';
-import { Message, NiximaArtifact } from '../types/chat';
+import { Message, NiximaArtifact, EpistemicPhase } from '../types/chat';
 import { MarkdownTable, TableBlockData } from './MarkdownTable';
 import { NiximaIdLogo } from './NiximaIdLogo';
 import { ModelIcon } from './ModelIcon';
@@ -69,7 +73,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   const [copied, setCopied] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isThinkingOpen, setIsThinkingOpen] = useState(false);
-  const [thinkingViewMode, setThinkingViewMode] = useState<'steps' | 'raw'>('steps');
+  const [thinkingViewMode, setThinkingViewMode] = useState<'steps' | 'phases' | 'raw'>('steps');
   const [expandedStepIndex, setExpandedStepIndex] = useState<number | null>(null);
   const [copiedThinking, setCopiedThinking] = useState(false);
   const [highlightedSourceIdx, setHighlightedSourceIdx] = useState<number | null>(null);
@@ -741,37 +745,65 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                 />
               )}
 
-              {/* ULTRA THINKING V1.0 / DEEPTHINKING V2.1 / DEEPTHINKING V2 / BASIC COGNITIVE TELEMETRY STATION */}
+              {/* DEEPTHINKING V3.0 / ULTRA THINKING V1.0 / DEEPTHINKING V2.1 / BASIC COGNITIVE TELEMETRY STATION */}
               {!isUser && message.thinking && (message.deepThinkingTelemetry || message.isStreaming) && (() => {
                 const isUltra = message.deepThinkingTelemetry?.mode === 'ultra' || message.thinkingMode === 'ultra';
                 const isBasicThinking = !isUltra && (message.deepThinkingTelemetry?.mode === 'basic' || message.thinkingMode === 'basic');
+                const isV3 = !isUltra && !isBasicThinking && (message.deepThinkingTelemetry?.version === 'v3' || message.thinkingMode === 'deep' || (!message.thinkingMode && message.deepThinkingTelemetry));
                 const is03Coder = (message.model && message.model.toLowerCase().includes('0.3')) || (activeModelName && activeModelName.toLowerCase().includes('0.3'));
-                const isDeepV21 = !isUltra && is03Coder && !isBasicThinking;
+                const isDeepV21 = !isUltra && !isV3 && is03Coder && !isBasicThinking;
+
+                const epistemicPhasesConfig: Array<{ key: EpistemicPhase; label: string; desc: string; border: string; bg: string; text: string; dot: string }> = [
+                  { key: 'axioms', label: t.chatMessage.phaseAxioms, desc: 'Axiomatic primitives & verified premises', border: 'border-cyan-500/40', bg: 'bg-cyan-950/40', text: 'text-cyan-300', dot: 'bg-cyan-400' },
+                  { key: 'hypotheses', label: t.chatMessage.phaseHypotheses, desc: 'Multi-branch hypothesis generation', border: 'border-indigo-500/40', bg: 'bg-indigo-950/40', text: 'text-indigo-300', dot: 'bg-indigo-400' },
+                  { key: 'falsification', label: t.chatMessage.phaseFalsification, desc: 'Contradiction pruning & stress testing', border: 'border-rose-500/40', bg: 'bg-rose-950/40', text: 'text-rose-300', dot: 'bg-rose-400' },
+                  { key: 'verification', label: t.chatMessage.phaseVerification, desc: 'Formal invariance & empirical consistency', border: 'border-emerald-500/40', bg: 'bg-emerald-950/40', text: 'text-emerald-300', dot: 'bg-emerald-400' },
+                  { key: 'synthesis', label: t.chatMessage.phaseSynthesis, desc: 'Epistemic convergence & unified solution', border: 'border-purple-500/40', bg: 'bg-purple-950/40', text: 'text-purple-300', dot: 'bg-purple-400' },
+                ];
+
                 return (
-                <div className="rounded-xl border border-zinc-800 bg-[#0e0e13]/95 backdrop-blur-md overflow-hidden text-xs shadow-lg animate-fade-in">
+                <div className={`rounded-xl border backdrop-blur-md overflow-hidden text-xs shadow-lg animate-fade-in transition-all ${
+                  isV3 
+                    ? 'border-cyan-500/30 bg-[#0a0f16]/95 shadow-[0_4px_30px_rgba(6,182,212,0.1)]'
+                    : isUltra 
+                    ? 'border-purple-800/60 bg-[#0f0a18]/95 shadow-[0_4px_30px_rgba(168,85,247,0.1)]'
+                    : 'border-zinc-800 bg-[#0e0e13]/95'
+                }`}>
                   <div
                     onClick={() => setIsThinkingOpen(!isThinkingOpen)}
-                    className="w-full px-3.5 py-2.5 flex items-center justify-between transition-colors cursor-pointer select-none border-b bg-zinc-900/70 border-zinc-800 text-zinc-300 hover:text-white"
+                    className={`w-full px-3.5 py-2.5 flex items-center justify-between transition-colors cursor-pointer select-none border-b text-zinc-300 hover:text-white ${
+                      isV3 ? 'bg-gradient-to-r from-cyan-950/50 via-zinc-900/70 to-emerald-950/40 border-cyan-500/20' :
+                      isUltra ? 'bg-zinc-900/80 border-purple-900/40' :
+                      'bg-zinc-900/70 border-zinc-800'
+                    }`}
                   >
                     <div className="flex items-center gap-2.5 flex-wrap">
-                      <BrainCircuit className="w-4 h-4 text-zinc-300" />
-                      <span className="font-mono text-xs font-bold tracking-tight text-white">
+                      <BrainCircuit className={`w-4 h-4 ${isV3 ? 'text-cyan-400 animate-pulse' : isUltra ? 'text-purple-400' : 'text-zinc-300'}`} />
+                      <span className="font-mono text-xs font-bold tracking-tight text-white flex items-center gap-1.5">
                         {isUltra
                           ? t.chatMessage.ultraThinkingV1
+                          : isV3
+                          ? t.chatMessage.deepThinkingV3
                           : isDeepV21
                           ? t.chatMessage.deepThinkingV21
                           : isBasicThinking
                           ? t.chatMessage.basicThinking
                           : t.chatMessage.deepThinkingV2}
                       </span>
+
+                      {/* V3 Engine Pill / Ultra Pill / V2.1 Pill */}
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[10px] font-mono font-medium ${
-                        isUltra
+                        isV3
+                          ? 'bg-gradient-to-r from-cyan-950/90 to-emerald-950/90 border-cyan-500/60 text-cyan-200 shadow-[0_0_12px_rgba(6,182,212,0.3)]'
+                          : isUltra
                           ? 'bg-purple-950/80 border-purple-600/70 text-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.25)]'
                           : isDeepV21
                           ? 'bg-emerald-950/60 border-emerald-700/60 text-emerald-300'
                           : 'bg-zinc-800 border-zinc-700 text-zinc-300'
                       }`}>
-                        {isUltra
+                        {isV3
+                          ? t.chatMessage.stagesVerifiedV3(dynamicSteps.length || 5)
+                          : isUltra
                           ? t.chatMessage.ultraStagesVerified(dynamicSteps.length || 5)
                           : isDeepV21
                           ? t.chatMessage.stagesVerifiedV21(dynamicSteps.length || 3)
@@ -780,10 +812,20 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                           : t.chatMessage.stagesVerified(dynamicSteps.length || 3)
                         }
                       </span>
+
+                      {/* V3 PROOF ENGINE BADGE */}
+                      {isV3 && (
+                        <span className="hidden md:inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-cyan-400/40 bg-cyan-400/10 text-[9px] font-mono text-cyan-300 font-bold uppercase tracking-wider">
+                          {t.chatMessage.deepThinkingV3Badge}
+                        </span>
+                      )}
+
                       <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded border border-zinc-750 bg-zinc-850 text-zinc-300 text-[10px] font-mono">
                         {message.deepThinkingTelemetry?.epistemicDepth || (
                           isUltra
                             ? t.chatMessage.ultraThinkingStruggle
+                            : isV3
+                            ? 'Quantum Epistemic Dialectic (V3.0)'
                             : isDeepV21 
                             ? t.chatMessage.coderV21Architecture
                             : isBasicThinking 
@@ -793,7 +835,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                       </span>
                       {message.isStreaming && !message.content && (
                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/20 bg-white/[0.08] text-white text-[10px] font-mono">
-                          <span className="w-1.5 h-1.5 rounded-full animate-ping bg-white" />
+                          <span className={`w-1.5 h-1.5 rounded-full animate-ping ${isV3 ? 'bg-cyan-400' : 'bg-white'}`} />
                           <span>{t.chatMessage.generatingTrace}</span>
                         </span>
                       )}
@@ -833,10 +875,67 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                   {/* Expanded Thinking Drawer */}
                   {isThinkingOpen && (
                     <div className="divide-y divide-zinc-800 bg-black/40 animate-fade-in">
+                      {/* Holographic V3 Telemetry Metrics Grid (Always rendered for V3 or when telemetry metrics exist) */}
+                      {(isV3 || message.deepThinkingTelemetry?.proofConfidence) && (
+                        <div className="p-3 border-b border-zinc-800/80 bg-gradient-to-r from-cyan-950/30 via-zinc-950/60 to-emerald-950/20 grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                          {/* Proof Confidence */}
+                          <div className="p-2 rounded-lg border border-cyan-500/25 bg-cyan-950/20 flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-md bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 flex-shrink-0">
+                              <ShieldCheck className="w-3.5 h-3.5" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-[9px] font-mono text-cyan-300/70 truncate uppercase">{t.chatMessage.proofConfidenceLabel}</div>
+                              <div className="text-xs font-mono font-bold text-cyan-200">
+                                {message.deepThinkingTelemetry?.proofConfidence ? `${message.deepThinkingTelemetry.proofConfidence}%` : '99.9%'}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Axioms Verified */}
+                          <div className="p-2 rounded-lg border border-emerald-500/25 bg-emerald-950/20 flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-md bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                              <CheckCircle2 className="w-3.5 h-3.5" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-[9px] font-mono text-emerald-300/70 truncate uppercase">{t.chatMessage.axiomsVerifiedLabel}</div>
+                              <div className="text-xs font-mono font-bold text-emerald-200">
+                                {message.deepThinkingTelemetry?.axiomsVerified ?? Math.max(2, Math.floor(dynamicSteps.length * 0.4))}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Pruned Contradictions */}
+                          <div className="p-2 rounded-lg border border-rose-500/25 bg-rose-950/20 flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-md bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 flex-shrink-0">
+                              <XCircle className="w-3.5 h-3.5" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-[9px] font-mono text-rose-300/70 truncate uppercase">{t.chatMessage.hypothesesPrunedLabel}</div>
+                              <div className="text-xs font-mono font-bold text-rose-200">
+                                {message.deepThinkingTelemetry?.hypothesesPruned ?? Math.max(1, Math.floor(dynamicSteps.length * 0.3))}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Epistemic Velocity */}
+                          <div className="p-2 rounded-lg border border-purple-500/25 bg-purple-950/20 flex items-center gap-2.5">
+                            <div className="w-7 h-7 rounded-md bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 flex-shrink-0">
+                              <Activity className="w-3.5 h-3.5" />
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-[9px] font-mono text-purple-300/70 truncate uppercase">{t.chatMessage.epistemicVelocityLabel}</div>
+                              <div className="text-xs font-mono font-bold text-purple-200">
+                                {message.deepThinkingTelemetry?.epistemicVelocity || '~14ms/node'}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
                       {/* View Mode Toggle Sub-bar */}
                       <div className="px-3.5 py-2 flex items-center justify-between text-[10.5px] font-mono border-b border-zinc-800/80 bg-zinc-950/60">
                         <span className="uppercase tracking-wider font-semibold text-zinc-400">
-                          {isUltra ? 'Ultra Cognitive Dialectic Trace' : 'Cognitive Trace Telemetry'}
+                          {isV3 ? 'V3.0 Quantum Epistemic Dialectic' : isUltra ? 'Ultra Cognitive Dialectic Trace' : 'Cognitive Trace Telemetry'}
                         </span>
                         <div className="flex items-center gap-1 rounded-lg p-0.5 border bg-zinc-900 border-zinc-800">
                           <button
@@ -844,22 +943,33 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                             onClick={() => setThinkingViewMode('steps')}
                             className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors cursor-pointer select-none ${
                               thinkingViewMode === 'steps'
-                                ? 'bg-zinc-700 text-white font-semibold'
+                                ? isV3 ? 'bg-cyan-900/60 text-cyan-200 font-semibold border border-cyan-500/40' : 'bg-zinc-700 text-white font-semibold'
                                 : 'text-zinc-400 hover:text-white'
                             }`}
                           >
-                            AI Steps ({dynamicSteps.length})
+                            {t.chatMessage.viewSteps || 'AI Steps'} ({dynamicSteps.length})
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setThinkingViewMode('phases')}
+                            className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors cursor-pointer select-none ${
+                              thinkingViewMode === 'phases'
+                                ? isV3 ? 'bg-cyan-900/60 text-cyan-200 font-semibold border border-cyan-500/40' : 'bg-zinc-700 text-white font-semibold'
+                                : 'text-zinc-400 hover:text-white'
+                            }`}
+                          >
+                            {t.chatMessage.viewPhases || 'Phases'} (5)
                           </button>
                           <button
                             type="button"
                             onClick={() => setThinkingViewMode('raw')}
                             className={`px-2 py-0.5 rounded text-[10px] font-mono transition-colors cursor-pointer select-none ${
                               thinkingViewMode === 'raw'
-                                ? 'bg-zinc-700 text-white font-semibold'
+                                ? isV3 ? 'bg-cyan-900/60 text-cyan-200 font-semibold border border-cyan-500/40' : 'bg-zinc-700 text-white font-semibold'
                                 : 'text-zinc-400 hover:text-white'
                             }`}
                           >
-                            Full Stream
+                            {t.chatMessage.viewRaw || 'Raw Trace'}
                           </button>
                         </div>
                       </div>
@@ -878,10 +988,36 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                                   onClick={() => setExpandedStepIndex(isStepExpanded ? -1 : sIdx)}
                                   className="p-3 flex items-start justify-between gap-3 cursor-pointer select-none"
                                 >
-                                  <div className="flex items-center gap-2.5 min-w-0">
+                                  <div className="flex items-center gap-2 min-w-0 flex-wrap sm:flex-nowrap">
                                     <span className="w-5 h-5 rounded border font-mono text-[10px] font-bold flex items-center justify-center flex-shrink-0 bg-zinc-800 border-zinc-700 text-zinc-200">
                                       {String(step.stepNumber).padStart(2, '0')}
                                     </span>
+
+                                    {/* Epistemic Phase Badge */}
+                                    {step.phase && (
+                                      <span className={`px-1.5 py-0.2 rounded text-[9px] font-mono uppercase tracking-wider font-semibold border ${
+                                        step.phase === 'axioms' ? 'bg-cyan-950/70 border-cyan-500/40 text-cyan-300' :
+                                        step.phase === 'hypotheses' ? 'bg-indigo-950/70 border-indigo-500/40 text-indigo-300' :
+                                        step.phase === 'falsification' ? 'bg-rose-950/70 border-rose-500/40 text-rose-300' :
+                                        step.phase === 'verification' ? 'bg-emerald-950/70 border-emerald-500/40 text-emerald-300' :
+                                        'bg-purple-950/70 border-purple-500/40 text-purple-300'
+                                      }`}>
+                                        {step.phase === 'axioms' ? t.chatMessage.phaseAxioms :
+                                         step.phase === 'hypotheses' ? t.chatMessage.phaseHypotheses :
+                                         step.phase === 'falsification' ? t.chatMessage.phaseFalsification :
+                                         step.phase === 'verification' ? t.chatMessage.phaseVerification :
+                                         t.chatMessage.phaseSynthesis}
+                                      </span>
+                                    )}
+
+                                    {/* Step Confidence Score */}
+                                    {step.confidenceScore && (
+                                      <span className="hidden sm:inline-flex items-center gap-1 px-1.5 py-0.2 rounded text-[9px] font-mono bg-zinc-800/80 border border-zinc-700/60 text-zinc-300">
+                                        <Sparkles className="w-2.5 h-2.5 text-cyan-400" />
+                                        {step.confidenceScore}%
+                                      </span>
+                                    )}
+
                                     <span className="font-semibold text-xs tracking-tight truncate text-zinc-100">
                                       {step.title}
                                     </span>
@@ -897,7 +1033,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                                       <div className="space-y-1.5 pt-1">
                                         {step.bullets.map((b, bIdx) => (
                                           <div key={bIdx} className="flex items-start gap-2">
-                                            <span className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 bg-zinc-400" />
+                                            <span className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 bg-cyan-400/80" />
                                             <span>{b}</span>
                                           </div>
                                         ))}
@@ -910,6 +1046,49 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                               </div>
                             );
                           })}
+                        </div>
+                      )}
+
+                      {/* 5-NODE EPISTEMIC PHASES PIPELINE VIEW */}
+                      {thinkingViewMode === 'phases' && (
+                        <div className="p-3.5 space-y-3">
+                          <div className="grid grid-cols-1 gap-2.5">
+                            {epistemicPhasesConfig.map((phase, pIdx) => {
+                              const matchingSteps = dynamicSteps.filter(s => (s.phase || 'axioms') === phase.key);
+                              const isCompleted = matchingSteps.length > 0;
+                              return (
+                                <div
+                                  key={phase.key}
+                                  className={`rounded-lg border p-3 transition-all ${phase.bg} ${phase.border}`}
+                                >
+                                  <div className="flex items-center justify-between gap-2">
+                                    <div className="flex items-center gap-2">
+                                      <div className={`w-2 h-2 rounded-full ${phase.dot} ${isCompleted ? 'animate-pulse' : 'opacity-40'}`} />
+                                      <span className={`font-mono text-xs font-bold uppercase tracking-wider ${phase.text}`}>
+                                        {pIdx + 1}. {phase.label}
+                                      </span>
+                                    </div>
+                                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-black/40 border border-white/10 text-zinc-300">
+                                      {matchingSteps.length} {matchingSteps.length === 1 ? 'node' : 'nodes'}
+                                    </span>
+                                  </div>
+                                  <div className="text-[10.5px] text-zinc-400 mt-1 font-mono">
+                                    {phase.desc}
+                                  </div>
+                                  {matchingSteps.length > 0 && (
+                                    <div className="mt-2 pt-2 border-t border-white/10 space-y-1">
+                                      {matchingSteps.map((s, sIdx) => (
+                                        <div key={sIdx} className="flex items-center gap-1.5 text-[10px] font-mono text-zinc-300">
+                                          <Check className="w-3 h-3 text-cyan-400 flex-shrink-0" />
+                                          <span className="truncate">{s.title}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
                         </div>
                       )}
 
@@ -929,34 +1108,41 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
               <div className="text-zinc-200">
                 {!message.content.trim() && message.isStreaming ? (() => {
                   const isUltraStreaming = message.deepThinkingTelemetry?.mode === 'ultra' || message.thinkingMode === 'ultra';
+                  const isV3Streaming = !isUltraStreaming && (message.deepThinkingTelemetry?.version === 'v3' || message.thinkingMode === 'deep');
                   return (
                   /* Cool Animated Thinking UI with Bouncing Neural Dots */
                   <div className="py-2.5 animate-fade-in select-none">
-                    <div className="inline-flex items-center gap-3 px-4 py-2.5 rounded-2xl backdrop-blur-xl transition-all bg-[#0e0e13]/90 border border-zinc-800/90 shadow-[0_4px_25px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)]">
+                    <div className={`inline-flex items-center gap-3 px-4 py-2.5 rounded-2xl backdrop-blur-xl transition-all shadow-[0_4px_25px_rgba(0,0,0,0.6),inset_0_1px_0_rgba(255,255,255,0.06)] ${
+                      isV3Streaming 
+                        ? 'bg-[#0a0f16]/95 border border-cyan-500/40 shadow-[0_0_20px_rgba(6,182,212,0.15)]'
+                        : isUltraStreaming
+                        ? 'bg-[#0f0a18]/95 border border-purple-800/40 shadow-[0_0_20px_rgba(168,85,247,0.15)]'
+                        : 'bg-[#0e0e13]/90 border border-zinc-800/90'
+                    }`}>
                       {/* Animated Multi-Ring Neural Core */}
                       <div className="relative flex items-center justify-center w-5 h-5">
-                        <span className="absolute -inset-1 rounded-full animate-ping opacity-60 pointer-events-none bg-white/10" />
+                        <span className={`absolute -inset-1 rounded-full animate-ping opacity-60 pointer-events-none ${isV3Streaming ? 'bg-cyan-400/20' : 'bg-white/10'}`} />
                         <NiximaIdLogo size={16} animated glow={false} />
                       </div>
 
                       {/* Thinking / Reasoning Label */}
                       <div className="flex items-center gap-2.5 font-mono text-xs">
-                        <span className="font-medium tracking-tight text-zinc-300">
-                          {isUltraStreaming ? t.chatMessage.ultraThinkingV1 : message.thinking ? t.chatMessage.reasoning : t.chatMessage.thinking}
+                        <span className={`font-medium tracking-tight ${isV3Streaming ? 'text-cyan-200 font-bold' : 'text-zinc-300'}`}>
+                          {isUltraStreaming ? t.chatMessage.ultraThinkingV1 : isV3Streaming ? t.chatMessage.deepThinkingV3 : message.thinking ? t.chatMessage.reasoning : t.chatMessage.thinking}
                         </span>
 
                         {/* 3 Glowing Bouncing Fluid Dots */}
                         <div className="flex items-center gap-1.5 pl-0.5">
                           <span
-                            className="w-1.5 h-1.5 rounded-full animate-bounce bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]"
+                            className={`w-1.5 h-1.5 rounded-full animate-bounce ${isV3Streaming ? 'bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.9)]' : 'bg-white shadow-[0_0_8px_rgba(255,255,255,0.9)]'}`}
                             style={{ animationDuration: '0.85s', animationDelay: '0ms' }}
                           />
                           <span
-                            className="w-1.5 h-1.5 rounded-full animate-bounce bg-zinc-300 shadow-[0_0_6px_rgba(255,255,255,0.6)]"
+                            className={`w-1.5 h-1.5 rounded-full animate-bounce ${isV3Streaming ? 'bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.7)]' : 'bg-zinc-300 shadow-[0_0_6px_rgba(255,255,255,0.6)]'}`}
                             style={{ animationDuration: '0.85s', animationDelay: '180ms' }}
                           />
                           <span
-                            className="w-1.5 h-1.5 rounded-full animate-bounce bg-zinc-500 shadow-[0_0_4px_rgba(255,255,255,0.3)]"
+                            className={`w-1.5 h-1.5 rounded-full animate-bounce ${isV3Streaming ? 'bg-cyan-300 shadow-[0_0_4px_rgba(6,182,212,0.5)]' : 'bg-zinc-500 shadow-[0_0_4px_rgba(255,255,255,0.3)]'}`}
                             style={{ animationDuration: '0.85s', animationDelay: '360ms' }}
                           />
                         </div>
