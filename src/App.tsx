@@ -1294,6 +1294,9 @@ All conversations and model preferences in this workspace are private to your Ni
                   lineCount: activeArtifact.content.split('\n').length,
                   content: activeArtifact.content,
                 } : null}
+                onNewProject={handleNewCodeProject}
+                onToggleCanvas={() => setIsCanvasOpen(prev => !prev)}
+                isCanvasOpen={isCanvasOpen}
               />
             </div>
           ) : (
