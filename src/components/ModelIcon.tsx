@@ -53,6 +53,46 @@ function getModelTheme(id: string): ModelTheme {
   const norm = (id || '').toLowerCase();
 
   // =========================================================================
+  // GENERATION 0.4 — UNIFIED SOVEREIGN OMNI INTELLIGENCE
+  // =========================================================================
+  if (norm.includes('0.4') || norm === 'nixima-0.4') {
+    return {
+      name: '0.4 Omni',
+      containerBg: 'bg-gradient-to-br from-amber-500/25 via-emerald-950/90 to-[#070b13]/95',
+      borderClass: 'border-amber-400/70 hover:border-amber-300',
+      glowClass: 'shadow-[0_0_18px_rgba(245,158,11,0.4)]',
+      accentColor: '#f59e0b',
+      renderGlyph: (s, animated) => (
+        <svg viewBox="0 0 24 24" width={s} height={s} fill="none" className="overflow-visible">
+          <defs>
+            <linearGradient id="omni04-ring" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#fef08a" />
+              <stop offset="50%" stopColor="#f59e0b" />
+              <stop offset="100%" stopColor="#10b981" />
+            </linearGradient>
+            <radialGradient id="omni04-core" cx="12" cy="12" r="5" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="45%" stopColor="#fde047" />
+              <stop offset="100%" stopColor="#d97706" />
+            </radialGradient>
+          </defs>
+          {/* Outer Gyroscopic Orbital Ring */}
+          <circle cx="12" cy="12" r="9.5" stroke="url(#omni04-ring)" strokeWidth="1.2" strokeDasharray="3 1.5" opacity="0.85" />
+          {/* Inner Intersecting Omni Ellipses */}
+          <ellipse cx="12" cy="12" rx="9" ry="3.8" transform="rotate(45 12 12)" stroke="#fde047" strokeWidth="0.9" opacity="0.65" />
+          <ellipse cx="12" cy="12" rx="9" ry="3.8" transform="rotate(-45 12 12)" stroke="#34d399" strokeWidth="0.9" opacity="0.65" />
+          {/* Central 8-Point Radiant Singularity Core */}
+          <polygon
+            points="12,4.8 13.5,9.5 18.5,9.5 14.4,12.6 15.9,17.4 12,14.4 8.1,17.4 9.6,12.6 5.5,9.5 10.5,9.5"
+            fill="url(#omni04-core)"
+            filter="drop-shadow(0 0 6px rgba(245,158,11,0.9))"
+          />
+        </svg>
+      )
+    };
+  }
+
+  // =========================================================================
   // GENERATION 0.3 — NEXT-GEN SOVEREIGN FRONTIER FLEET
   // =========================================================================
 

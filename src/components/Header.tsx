@@ -61,7 +61,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const { language, toggleLanguage, t } = useLanguage();
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
-  const [filterTab, setFilterTab] = useState<'0.3' | '0.2' | 'thinking' | 'search' | 'code' | 'all'>('0.3');
+  const [filterTab, setFilterTab] = useState<'0.4' | '0.3' | '0.2' | 'thinking' | 'search' | 'code' | 'all'>('0.4');
   const [hotkeyConfig, setHotkeyConfig] = useState<HotkeyConfig>(() => getSavedHotkey());
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -77,10 +77,10 @@ export const Header: React.FC<HeaderProps> = ({
     return () => window.removeEventListener(HOTKEY_CHANGE_EVENT, handleUpdate);
   }, []);
 
-  // Always reset to Generation 0.3 (main model selection) whenever dropdown opens
+  // Always reset to Generation 0.4 (new unified omni flagship) whenever dropdown opens
   useEffect(() => {
     if (isModelDropdownOpen) {
-      setFilterTab('0.3');
+      setFilterTab('0.4');
     }
   }, [isModelDropdownOpen]);
 
@@ -152,12 +152,12 @@ export const Header: React.FC<HeaderProps> = ({
                 <button
                   type="button"
                   onClick={onOpenReleaseModal}
-                  className="hidden md:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10.5px] font-mono font-medium bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border border-zinc-700/80 transition-all cursor-pointer shadow-sm group"
+                  className="hidden md:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-mono font-medium bg-gradient-to-r from-amber-950/70 via-zinc-900 to-zinc-900 hover:bg-zinc-800 text-amber-200 border border-amber-500/50 transition-all cursor-pointer shadow-sm group"
                   title={t.releaseAnnouncement.detailsBtn}
                 >
-                  <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.8)] animate-pulse" />
-                  <span>v0.3</span>
-                  <span className="text-[9px] px-1 rounded bg-white text-black font-bold uppercase ml-0.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.9)] animate-pulse" />
+                  <span className="font-bold">v0.4 Omni</span>
+                  <span className="text-[9px] px-1 rounded bg-amber-400 text-black font-bold uppercase ml-0.5">
                     NEW
                   </span>
                 </button>
@@ -280,8 +280,9 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Category & Generation Filter Tabs */}
             {(() => {
               const countAll = NIXIMA_MODELS.length;
-              const count03 = NIXIMA_MODELS.filter(m => m.generation === '0.3' || m.id.includes('0.3')).length;
-              const count02 = NIXIMA_MODELS.filter(m => (m.generation === '0.2' || m.id.includes('0.2')) && !m.id.includes('0.3')).length;
+              const count04 = NIXIMA_MODELS.filter(m => m.generation === '0.4' || m.id.includes('0.4')).length;
+              const count03 = NIXIMA_MODELS.filter(m => (m.generation === '0.3' || m.id.includes('0.3')) && !m.id.includes('0.4')).length;
+              const count02 = NIXIMA_MODELS.filter(m => (m.generation === '0.2' || m.id.includes('0.2')) && !m.id.includes('0.3') && !m.id.includes('0.4')).length;
               const countThinking = NIXIMA_MODELS.filter(m => 
                 Boolean(m.badge?.toLowerCase().includes('thinking') || 
                 m.badge?.toLowerCase().includes('reasoning') || 
@@ -293,8 +294,9 @@ export const Header: React.FC<HeaderProps> = ({
               const countCode = NIXIMA_MODELS.filter(m => m.id.includes('coder') || m.id.includes('omni')).length;
 
               const filteredModels = NIXIMA_MODELS.filter((model) => {
-                if (filterTab === '0.3') return model.generation === '0.3' || model.id.includes('0.3');
-                if (filterTab === '0.2') return (model.generation === '0.2' || model.id.includes('0.2')) && !model.id.includes('0.3');
+                if (filterTab === '0.4') return model.generation === '0.4' || model.id.includes('0.4');
+                if (filterTab === '0.3') return (model.generation === '0.3' || model.id.includes('0.3')) && !model.id.includes('0.4');
+                if (filterTab === '0.2') return (model.generation === '0.2' || model.id.includes('0.2')) && !model.id.includes('0.3') && !model.id.includes('0.4');
                 if (filterTab === 'thinking') return Boolean(
                   model.badge?.toLowerCase().includes('thinking') || 
                   model.badge?.toLowerCase().includes('reasoning') || 
@@ -311,7 +313,27 @@ export const Header: React.FC<HeaderProps> = ({
               return (
                 <>
                   <div className="flex flex-wrap items-center gap-1.5 p-1.5 mt-1 mb-2 bg-zinc-900/90 rounded-xl border border-zinc-800/80 text-[11px] font-mono select-none">
-                    {/* 1. Main 0.3 Generation Models (Primary Default Selection) */}
+                    {/* 0. Generation 0.4 Unified Omni (Primary Flagship) */}
+                    <button
+                      type="button"
+                      onClick={() => setFilterTab('0.4')}
+                      className={`px-2 py-1 rounded-lg text-center font-medium transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 flex-shrink-0 ${
+                        filterTab === '0.4' 
+                          ? 'bg-gradient-to-r from-amber-950/90 via-emerald-950/80 to-zinc-900 text-white shadow-inner-light border border-amber-500/60' 
+                          : 'text-zinc-400 hover:text-white hover:bg-zinc-800/40 border border-transparent'
+                      }`}
+                    >
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.9)] animate-pulse" />
+                      <span className="font-bold text-amber-200">0.4 Omni</span>
+                      <span className="text-[8px] px-1 py-0.2 rounded bg-amber-400 text-black font-bold uppercase tracking-wider">
+                        {language === 'uk' ? 'НОВЕ' : 'NEW'}
+                      </span>
+                      <span className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-mono ${filterTab === '0.4' ? 'bg-amber-400/20 text-amber-300 border border-amber-500/30' : 'bg-zinc-800 text-zinc-400'}`}>
+                        {count04}
+                      </span>
+                    </button>
+
+                    {/* 1. Main 0.3 Generation Models */}
                     <button
                       type="button"
                       onClick={() => setFilterTab('0.3')}
@@ -321,11 +343,8 @@ export const Header: React.FC<HeaderProps> = ({
                           : 'text-zinc-400 hover:text-white hover:bg-zinc-800/40 border border-transparent'
                       }`}
                     >
-                      <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.8)] animate-pulse" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_6px_rgba(255,255,255,0.8)]" />
                       <span>{t.header.gen03Tab}</span>
-                      <span className="text-[8px] px-1 py-0.2 rounded bg-white text-black font-bold uppercase tracking-wider">
-                        {language === 'uk' ? 'ГОЛОВНІ' : 'MAIN'}
-                      </span>
                       <span className={`text-[9.5px] px-1.5 py-0.2 rounded-full font-mono ${filterTab === '0.3' ? 'bg-white/10 text-white border border-white/20' : 'bg-zinc-800 text-zinc-400'}`}>
                         {count03}
                       </span>

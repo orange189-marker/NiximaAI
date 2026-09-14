@@ -4,10 +4,13 @@ import { cleanUserSearchQuery } from './openrouter';
 /**
  * Checks whether a given model is a Nixima Omni sovereign model (e.g. Nixima-0.3O or Nixima-0.2O).
  */
-export function isOmniModel(model?: ModelOption | { id?: string; isOmni?: boolean } | null): boolean {
+export function isOmniModel(model?: ModelOption | { id?: string; isOmni?: boolean; generation?: string } | null): boolean {
   if (!model) return false;
   return Boolean(
     model.isOmni ||
+    model.id === 'nixima-0.4' ||
+    (model.id && model.id.startsWith('nixima-0.4')) ||
+    (model as any).generation === '0.4' ||
     model.id === 'nixima-0.3-omni' ||
     model.id === 'nixima-0.2-omni' ||
     model.id === 'nixima-0.3-o' ||

@@ -120,6 +120,7 @@ export interface Translations {
     closeMenu: string;
     defaultBadge: string;
     allModelsTab: string;
+    gen04Tab: string;
     gen03Tab: string;
     gen02Tab: string;
     thinkingTab: string;
@@ -763,6 +764,7 @@ export const translations: Record<Language, Translations> = {
       closeMenu: 'Close menu',
       defaultBadge: 'DEFAULT',
       allModelsTab: 'All',
+      gen04Tab: '0.4 Gen',
       gen03Tab: '0.3 Gen',
       gen02Tab: '0.2 Gen',
       thinkingTab: 'Thinking',
@@ -1138,29 +1140,40 @@ export const translations: Record<Language, Translations> = {
     },
 
     releaseAnnouncement: {
-      badge: 'NIXIMA 0.2 GENERATION RELEASE',
-      headline: 'Introducing the Nixima-0.2 Generation',
-      subheadline: 'Four next-gen sovereign neural engines engineered for frontier reasoning, production systems code, and 2M token hyper-speed intelligence.',
-      exploreBtn: 'Try Nixima-0.2 Flagship',
-      detailsBtn: 'Explore 0.2 Architecture',
+      badge: 'NIXIMA 0.4 GENERATION — UNIFIED OMNI',
+      headline: 'Introducing Nixima-0.4: Unified Omni Intelligence',
+      subheadline: 'The new era of single sovereign architecture. No fragmentation or separate variants needed: DeepThinking V3.0 formal proof reasoning, production systems engineering, multimodal vision, live 7-cluster search swarm, and 4M context all in one unified model.',
+      exploreBtn: 'Launch Nixima-0.4 Omni',
+      detailsBtn: 'Explore 0.4 Architecture',
       dismiss: 'Dismiss release card',
-      modalTitle: 'Nixima 0.2 Generation Architecture & Release Briefing',
-      modalSubtitle: 'Official release briefing and benchmark specifications engineered by Bogdan.',
-      keyHighlightsTitle: 'Architectural Breakthroughs in 0.2',
-      highlight1Title: 'Sparse Rotary Attention (SRA v2)',
-      highlight1Desc: 'Enables dynamic multi-head token routing with zero performance degradation across 500,000+ context lengths.',
-      highlight2Title: 'Hyper-Throughput 2M Context Window',
-      highlight2Desc: 'Nixima-0.2 Flash processes 2,000,000 tokens with sub-10ms latency for real-time document analysis and streaming.',
-      highlight3Title: 'Autonomous Epistemic Chain-of-Thought',
-      highlight3Desc: 'Nixima-0.2 Pro incorporates self-correcting logic verification, rigorous math proofs, and transparent <think> traces.',
-      highlight4Title: 'Neural Token Purity & Anti-Glitch Engine',
-      highlight4Desc: 'Active sanitization against cross-lingual CJK bleeding (e.g. "co[CJK]ol" -> "cool") and logit repetition stutters.',
+      modalTitle: 'Nixima-0.4 Unified Omni Architecture Briefing',
+      modalSubtitle: 'Official release briefing and benchmark specifications for the 0.4 Generation sovereign all-in-one intelligence, engineered by Bogdan.',
+      keyHighlightsTitle: 'Architectural Breakthroughs in 0.4',
+      highlight1Title: 'Unified Omni Core Architecture',
+      highlight1Desc: 'Eliminates fragmentation — combines deep theoretical reasoning, full-stack systems engineering, vision, and real-time execution in a single sovereign engine.',
+      highlight2Title: 'Continuous 4,000,000 Token Context Window',
+      highlight2Desc: 'Nixima-0.4 maintains unbroken associative recall, semantic coherence, and zero-degradation reasoning across 4M tokens.',
+      highlight3Title: 'DeepThinking V3.0 Formal Proof Engine',
+      highlight3Desc: 'Dialectical quantum struggle, multi-hypothesis falsification trees, adversarial theorem solvers, and transparent <think> proofs.',
+      highlight4Title: 'Dual-Tool Search & Live Consensus Swarm',
+      highlight4Desc: 'Autonomous zero-toggle execution across 7 live web clusters with real-time multi-source verification and neural token purity.',
       activateModel: 'Activate Model',
       activeNow: 'Active Engine',
       close: 'Close Briefing',
     },
 
     models: {
+      'nixima-0.4': {
+        name: 'Nixima-0.4',
+        badge: '0.4 UNIFIED OMNI',
+        description: 'New and only sovereign neural model of Generation 0.4. Built on an all-in-one unified architecture without fragmentation: deep epistemic reasoning (DeepThinking V3.0), production systems engineering, multimodal vision, live 7-cluster web swarm, and 4,000,000 continuous context in a single supreme engine.',
+        strengths: [
+          'Unified All-in-One Omni Architecture',
+          'Autonomous Dual-Tool Execution (Search V3 + DeepThinking V3.0)',
+          '4,000,000 Token Continuous Context',
+          'Zero Model Fragmentation Policy'
+        ],
+      },
       'nixima-0.3': {
         name: 'Nixima-0.3',
         badge: '0.3 PRIME FLAGSHIP',
@@ -1557,6 +1570,7 @@ export const translations: Record<Language, Translations> = {
       closeMenu: 'Закрити меню',
       defaultBadge: 'СТАНДАРТ',
       allModelsTab: 'Всі',
+      gen04Tab: '0.4 Gen',
       gen03Tab: '0.3 Gen',
       gen02Tab: '0.2 Gen',
       thinkingTab: 'Мислення',
@@ -1932,29 +1946,40 @@ export const translations: Record<Language, Translations> = {
     },
 
     releaseAnnouncement: {
-      badge: 'РЕЛІЗ ПОКОЛІННЯ NIXIMA 0.2',
-      headline: 'Представляємо покоління Nixima-0.2',
-      subheadline: 'Чотири суверенні нейрорушії нового покоління: проривні міркування, системне програмування та надшвидкісний контекст у 2 000 000 токенів.',
-      exploreBtn: 'Спробувати флагман Nixima-0.2',
-      detailsBtn: 'Архітектура 0.2 та бенчмарки',
+      badge: 'ПОКОЛІННЯ NIXIMA 0.4 — UNIFIED OMNI',
+      headline: 'Представляємо Nixima-0.4: Єдиний Omni Інтелект',
+      subheadline: 'Нова ера суверенної архітектури без фрагментації. Жодних окремих модифікацій: формальні доведення DeepThinking V3.0, системна інженерія, мультимодальний зір, 7-кластерний пошуковий рій та 4M контекст в одній моделі.',
+      exploreBtn: 'Запустити Nixima-0.4 Omni',
+      detailsBtn: 'Архітектура 0.4 та специфікації',
       dismiss: 'Приховати картку релізу',
-      modalTitle: 'Архітектурний бриф релізу Nixima 0.2',
-      modalSubtitle: 'Офіційна презентація та специфікації моделей, розроблені Богданом.',
-      keyHighlightsTitle: 'Ключові архітектурні досягнення 0.2',
-      highlight1Title: 'Sparse Rotary Attention (SRA v2)',
-      highlight1Desc: 'Динамічна маршрутизація токенів без деградації якості при довжині контексту понад 500 000 токенів.',
-      highlight2Title: 'Надшвидкий контекст 2 000 000 токенів',
-      highlight2Desc: 'Nixima-0.2 Flash обробляє до 2 мільйонів токенів із затримкою до 10 мс для миттєвого аналізу великих масивів коду та документів.',
-      highlight3Title: 'Автономний епістемічний ланцюг думок',
-      highlight3Desc: 'Nixima-0.2 Pro виконує глибоку самоверифікацію логіки, точні математичні доведення та прозорі роздуми у блоках <think>.',
-      highlight4Title: 'Чистота токенів та анти-глітч фільтр',
-      highlight4Desc: 'Активне усунення витоку ієрогліфів усередині слів (наприклад "co[ієрогліф]ol" -> "cool") та зациклень заїкання.',
+      modalTitle: 'Архітектурний бриф релізу Nixima-0.4 Unified Omni',
+      modalSubtitle: 'Офіційна презентація та специфікації суверенного все-в-одному інтелекту покоління 0.4, розроблені Богданом.',
+      keyHighlightsTitle: 'Ключові архітектурні досягнення 0.4',
+      highlight1Title: 'Єдина архітектура Unified Omni',
+      highlight1Desc: 'Повна відмова від фрагментації: фундаментальні міркування, інженерія системного коду, зір та виконання в єдиному суверенному ядрі.',
+      highlight2Title: 'Безперервний контекст 4 000 000 токенів',
+      highlight2Desc: 'Nixima-0.4 забезпечує неперевершене асоціативне пригадування, семантичну зв’язність і нульову деградацію на 4M токенах.',
+      highlight3Title: 'Формальний рушій DeepThinking V3.0',
+      highlight3Desc: 'Діалектична квантова боротьба гіпотез, дерева фальсифікації, спростування контраргументів та прозорі математичні доведення в <think>.',
+      highlight4Title: 'Двоінструментальний пошуковий рій 7 кластерів',
+      highlight4Desc: 'Автономне виконання без ручних перемикачів через 7 веб-кластерів з багатоджерельною верифікацією консенсусу.',
       activateModel: 'Активувати модель',
       activeNow: 'Поточний рушій',
       close: 'Закрити бриф',
     },
 
     models: {
+      'nixima-0.4': {
+        name: 'Nixima-0.4',
+        badge: '0.4 UNIFIED OMNI',
+        description: 'Нова та єдина суверенна нейромодель покоління 0.4. Побудована на архітектурі «все-в-одному» без фрагментації: глибокі епістемічні міркування (DeepThinking V3.0), системна інженерія коду, мультимодальний зір, живий 7-кластерний веб-рій та 4 000 000 безперервного контексту в єдиному флагманському ядрі.',
+        strengths: [
+          'Єдина архітектура Unified All-in-One Omni',
+          'Автономне виконання двох інструментів (Пошук V3 + DeepThinking V3.0)',
+          'Безперервний контекст 4 000 000 токенів',
+          'Політика нульової фрагментації моделей'
+        ],
+      },
       'nixima-0.3': {
         name: 'Nixima-0.3',
         badge: '0.3 ПРАЙМ ФЛАГМАН',

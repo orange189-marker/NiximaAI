@@ -2,11 +2,34 @@ import { BenchmarkSuite, ModelLeaderboardEntry } from '../types/benchmark';
 
 export const BENCHMARK_LEADERBOARD: ModelLeaderboardEntry[] = [
   // =========================================================================
+  // GENERATION 0.4 — UNIFIED SOVEREIGN OMNI INTELLIGENCE
+  // =========================================================================
+  {
+    modelId: 'nixima-0.4',
+    rank: 1,
+    overallScore: 100.0,
+    eloRating: 2048,
+    winRate: 99.8,
+    primaryBadge: 'GENERATION 0.4 • UNIFIED OMNI SOVEREIGN',
+    summaryEn: 'The singular unified frontier intelligence of Generation 0.4. Built on an all-in-one sovereign omni-architecture where deep reasoning, production systems engineering, multimodal perception, and live 7-cluster Search V3 converge seamlessly with zero manual toggles. Massive 4,000,000 token context window.',
+    summaryUk: 'Єдиний уніфікований інтелект нового Покоління 0.4. Створений на базі суверенної все-в-одному omni-архітектури, де глибоке міркування, інженерія систем, мультимодальне сприйняття та живий 7-кластерний пошук Search V3 безшовно поєднані без ручних перемикачів. Колосальне вікно контексту на 4 000 000 токенів.',
+    recommendedForEn: 'Universal flagship intelligence: autonomous systems architecture, complex mathematical proofs, multi-cluster web synthesis, live interactive apps, full-repository comprehension.',
+    recommendedForUk: 'Універсальний флагманський інтелект: автономна архітектура систем, комплексні математичні доведення, мультикластерний веб-синтез, живі інтерактивні додатки, аналіз повних репозиторіїв.',
+    metrics: {
+      mathAndLogic: 100,
+      codingAndEngineering: 100,
+      systemArchitecture: 100,
+      scientificSynthesis: 100,
+      throughputSpeed: 99,
+      costEfficiency: 94,
+    }
+  },
+  // =========================================================================
   // GENERATION 0.3 — NEXT-GEN SOVEREIGN FRONTIER FLEET
   // =========================================================================
   {
     modelId: 'nixima-0.3-pro',
-    rank: 1,
+    rank: 2,
     overallScore: 99.9,
     eloRating: 1995,
     winRate: 99.4,

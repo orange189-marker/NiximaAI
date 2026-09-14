@@ -2,6 +2,46 @@ import { ModelOption, SearchMode } from '../types/chat';
 
 export const NIXIMA_MODELS: ModelOption[] = [
   // =========================================================================
+  // GENERATION 0.4 — UNIFIED SOVEREIGN OMNI INTELLIGENCE (FLAGSHIP)
+  // =========================================================================
+  {
+    id: 'nixima-0.4',
+    name: 'Nixima-0.4',
+    shortName: '0.4 Omni',
+    badge: '0.4 UNIFIED OMNI',
+    description: 'The singular unified frontier intelligence of Generation 0.4. Built on an all-in-one sovereign omni-architecture where deep reasoning, systems code synthesis, multimodal perception, and live 7-cluster Search V3 converge seamlessly with zero manual toggles. Massive 4,000,000 token context window.',
+    contextWindow: '4,000,000 tokens',
+    latency: '~8 ms / token',
+    strengths: [
+      'Unified All-in-One Omni Architecture',
+      'Autonomous Dual-Tool Execution (Search V3 + DeepThinking V3.0)',
+      'Frontier Systems & Production Code Synthesis',
+      '4M Continuous Context Horizon',
+      'Zero Fragmentation (All Capabilities Unified)'
+    ],
+    parameters: 'Frontier 0.4 Unified Omni Sovereign Core (4M Context)',
+    generation: '0.4',
+    isFlagship: true,
+    isOmni: true,
+    openRouterModel: 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
+    fallbackModels: [
+      'nvidia/nemotron-3-super-120b-a12b:free',
+      'cohere/north-mini-code:free',
+      'nvidia/nemotron-3.5-lightning:free',
+      'liquid/lfm-2.5-2.6b:free'
+    ],
+    creditMultiplier: 2.0,
+    baseCreditCost: 10,
+    searchOptimization: {
+      recommendedMode: 'mega',
+      badge: '0.4 UNIFIED OMNI SWARM',
+      role: 'Autonomous All-in-One Real-Time Web & Neural Synthesis',
+      searchThroughput: 'Unified Swarm (~55ms)',
+      searchStrengths: ['Autonomous dual-tool routing', 'Unified real-time verification & reasoning', 'Exhaustive multi-cluster consensus'],
+      searchRating: '99.99%'
+    }
+  },
+  // =========================================================================
   // GENERATION 0.3 — NEXT-GEN SOVEREIGN FRONTIER FLEET
   // =========================================================================
   {
@@ -354,19 +394,19 @@ export const NIXIMA_MODELS: ModelOption[] = [
   }
 ];
 
-export const DEFAULT_MODEL = NIXIMA_MODELS.find(m => m.id === 'nixima-0.3') || NIXIMA_MODELS.find(m => m.id === 'nixima-0.2') || NIXIMA_MODELS[0];
+export const DEFAULT_MODEL = NIXIMA_MODELS.find(m => m.id === 'nixima-0.4') || NIXIMA_MODELS.find(m => m.id === 'nixima-0.3') || NIXIMA_MODELS[0];
 export const MODELS = NIXIMA_MODELS;
 
 // Helper to look up recommended model for a given search mode
 export function getRecommendedModelForSearchMode(mode: SearchMode): ModelOption {
   switch (mode) {
     case 'fast':
-      return NIXIMA_MODELS.find(m => m.id === 'nixima-0.3-flash') || NIXIMA_MODELS.find(m => m.id === 'nixima-0.2-flash') || DEFAULT_MODEL;
+      return NIXIMA_MODELS.find(m => m.id === 'nixima-0.3-flash') || DEFAULT_MODEL;
     case 'mega':
-      return NIXIMA_MODELS.find(m => m.id === 'nixima-0.3-pro') || NIXIMA_MODELS.find(m => m.id === 'nixima-0.2-pro') || DEFAULT_MODEL;
+      return NIXIMA_MODELS.find(m => m.id === 'nixima-0.4') || NIXIMA_MODELS.find(m => m.id === 'nixima-0.3-pro') || DEFAULT_MODEL;
     case 'standard':
     default:
-      return NIXIMA_MODELS.find(m => m.id === 'nixima-0.3') || NIXIMA_MODELS.find(m => m.id === 'nixima-0.2') || DEFAULT_MODEL;
+      return NIXIMA_MODELS.find(m => m.id === 'nixima-0.4') || NIXIMA_MODELS.find(m => m.id === 'nixima-0.3') || DEFAULT_MODEL;
   }
 }
 
