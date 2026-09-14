@@ -852,6 +852,35 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
               </div>
 
+              {/* Gesual Cloud Direct Service */}
+              <div className="p-4 rounded-xl bg-blue-950/20 border border-blue-900/40 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Zap className="w-4 h-4 text-blue-400" />
+                    <label className="text-xs font-semibold text-blue-300 uppercase tracking-wider font-mono">
+                      Gesual Cloud Direct AI
+                    </label>
+                  </div>
+                  <span className="px-2 py-0.5 rounded-full bg-blue-900/40 text-blue-300 border border-blue-700/50 text-[10px] font-mono font-medium flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span>
+                    {language === 'uk' ? 'Підключено (Gemini 3.5 Flash-Lite)' : 'Connected (Gemini 3.5 Flash-Lite)'}
+                  </span>
+                </div>
+                <p className="text-[11px] text-zinc-400 leading-relaxed">
+                  {language === 'uk'
+                    ? 'Прямий коннектор до приватного AI-сервісу Gesual (gesual.odyssey-mpg.xyz). Працює на базі Google Gemini 3.5 Flash-Lite через кастомний ключ lum_... без обмежень OpenRouter.'
+                    : 'Direct connector to Gesual AI Cloud (gesual.odyssey-mpg.xyz). Operates on Google Gemini 3.5 Flash-Lite using custom key lum_... completely bypassing OpenRouter limits.'}
+                </p>
+                <div className="flex items-center justify-between text-[11px] pt-1 border-t border-blue-900/30">
+                  <span className="text-zinc-500 font-mono">
+                    API: <span className="text-zinc-300">gesual.odyssey-mpg.xyz/api/v1/chat</span>
+                  </span>
+                  <span className="text-zinc-500 font-mono">
+                    Ключ: <span className="text-blue-400">lum_...Vwlw (Active)</span>
+                  </span>
+                </div>
+              </div>
+
               {/* Underlying Free Model Architecture Mapping */}
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-zinc-300 uppercase tracking-wider font-mono">
@@ -863,6 +892,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <span>{language === 'uk' ? 'Активний AI рушій' : 'Active Free AI Engine'}</span>
                   </div>
                   <div className="divide-y divide-zinc-800/60 bg-zinc-950/50">
+                    <div className="grid grid-cols-2 p-2.5 items-center bg-blue-950/30">
+                      <span className="text-blue-300 font-medium">Gemini 3.5 Flash-Lite</span>
+                      <span className="text-blue-400 text-[11px] font-mono">Gesual Cloud (Пряме підключення)</span>
+                    </div>
                     <div className="grid grid-cols-2 p-2.5 items-center">
                       <span className="text-white font-medium">Nixima-0.3 (Prime Flagship)</span>
                       <span className="text-zinc-400 text-[11px]">nvidia/nemotron-3-super-120b</span>

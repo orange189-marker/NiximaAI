@@ -9,6 +9,7 @@ import {
   DynamicThinkingStep 
 } from '../types/chat';
 import { isCjkRequested, isPureSafetyArtifact, sanitizeModelOutput, sanitizeTokenStream } from './textSanitizer';
+import { streamGesualChat } from './gesual';
 
 // Pre-configured system keys pool inserted directly into the runtime (Base64 obfuscated)
 const BUILTIN_SYSTEM_KEYS: string[] = [
@@ -1214,24 +1215,40 @@ export function computeDeepThinkingTelemetry(
 /**
  * Stream chat completions directly from OpenRouter using Server-Sent Events (SSE)
  */
-export async function streamOpenRouterChat({
-  model,
-  messages,
-  systemPrompt,
-  temperature = 0.7,
-  topP = 0.95,
-  maxTokens = 4096,
-  callbacks,
-  signal,
-  antiGlitchFilter = true,
-  deepThink = false,
-  thinkingMode,
-  webSearch = false,
-  searchMode = 'standard',
-  initialSearchGrounding,
-  infiniteOutput = false,
-  apiKey,
-}: StreamChatParams): Promise<StreamChatResult> {
+export async function streamOpenRouterChat(params: StreamChatParams): Promise<StreamChatResult> {
+  const {
+    model,
+    messages,
+    systemPrompt,
+    temperature = 0.7,
+    topP = 0.95,
+    maxTokens = 4096,
+    callbacks,
+    signal,
+    antiGlitchFilter = true,
+    deepThink = false,
+    thinkingMode,
+    webSearch = false,
+    searchMode = 'standard',
+    initialSearchGrounding,
+    infiniteOutput = false,
+    apiKey,
+  } = params;
+
+  // Direct Gesual Cloud AI service routing (custom key lum_... or Gesual model selection)
+  if (
+    model.provider === 'gesual' || 
+    Boolean(model.gesualModel) || 
+    (apiKey && apiKey.trim().startsWith('lum_'))
+  ) {
+    try {
+      return await streamGesualChat(params);
+    } catch (gesualErr: any) {
+      console.warn('[Nixima Core] Direct Gesual stream failed, falling over to OpenRouter pool...', gesualErr?.message);
+      // Fallback to OpenRouter pool if Gesual was unreachable
+    }
+  }
+
   const activeKey = getSystemApiKey(apiKey);
   const effectiveThinkingMode: ThinkingMode = thinkingMode || (deepThink ? 'deep' : 'none');
   const allowThinking = Boolean(
@@ -1625,6 +1642,20 @@ export async function streamOpenRouterChat({
         }
       }
     }
+  }
+
+  // Resilient zero-downtime backup: Try Gesual Cloud (Gemini 3.5 Flash-Lite) if all OpenRouter keys/models failed
+  try {
+    console.log('[Nixima Core] All OpenRouter endpoints failed. Failing over to Gesual Cloud (Gemini 3.5 Flash-Lite)...');
+    return await streamGesualChat({
+      ...params,
+      model: {
+        ...model,
+        gesualModel: 'Gemini 3.5 Flash-Lite',
+      },
+    });
+  } catch (gesualFallbackErr: any) {
+    console.warn('[Nixima Core] Gesual zero-downtime fallback also failed:', gesualFallbackErr?.message);
   }
 
   throw lastError || new Error('All model endpoints and API keys were temporarily unavailable. Please try again.');

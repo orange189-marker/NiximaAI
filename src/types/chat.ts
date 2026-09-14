@@ -24,6 +24,8 @@ export interface ModelOption {
   isOmni?: boolean;
   openRouterModel?: string;
   fallbackModels?: string[];
+  gesualModel?: string;
+  provider?: 'openrouter' | 'gesual';
   creditMultiplier?: number;
   baseCreditCost?: number;
   searchOptimization?: SearchOptimizationProfile;

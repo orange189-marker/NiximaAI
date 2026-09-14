@@ -5,6 +5,41 @@ export const NIXIMA_MODELS: ModelOption[] = [
   // GENERATION 0.3 — NEXT-GEN SOVEREIGN FRONTIER FLEET
   // =========================================================================
   {
+    id: 'gemini-3.5-flash-lite',
+    name: 'Gemini 3.5 Flash-Lite (Gesual)',
+    shortName: '3.5 Flash-Lite',
+    badge: 'GESUAL CLOUD • 1M CONTEXT',
+    description: 'Direct high-speed connection to Google Gemini 3.5 Flash-Lite powered by Gesual AI Cloud. 1,000,000 token context, sub-5ms streaming, and zero rate-limit friction.',
+    contextWindow: '1,000,000 tokens',
+    latency: '~4 ms / token',
+    strengths: [
+      'Direct Gesual Cloud Core',
+      '1,000,000 Token Ultra Context',
+      'Sub-Second Hyper-Stream Latency',
+      'Zero Rate-Limit Friction'
+    ],
+    parameters: 'Google Gemini 3.5 Flash-Lite (Gesual Cloud Core)',
+    generation: '0.3',
+    provider: 'gesual',
+    gesualModel: 'Gemini 3.5 Flash-Lite',
+    openRouterModel: 'nvidia/nemotron-3-super-120b-a12b:free',
+    fallbackModels: [
+      'Gemini 3.8 Flash',
+      'nvidia/nemotron-3.5-lightning:free',
+      'nvidia/nemotron-3-super-120b-a12b:free'
+    ],
+    creditMultiplier: 1.0,
+    baseCreditCost: 5,
+    searchOptimization: {
+      recommendedMode: 'fast',
+      badge: 'LIGHTNING ACCURACY',
+      role: 'Optimal for Fast Search & Instantaneous Q&A',
+      searchThroughput: 'Gesual Fast (<25ms)',
+      searchStrengths: ['Real-time synthesis', 'High factual accuracy', 'Instant token emission'],
+      searchRating: '99.8%'
+    }
+  },
+  {
     id: 'nixima-0.3',
     name: 'Nixima-0.3',
     shortName: '0.3 Prime',
