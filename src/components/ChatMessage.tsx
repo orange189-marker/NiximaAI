@@ -830,17 +830,17 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                       )}
 
                       <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded border border-zinc-750 bg-zinc-850 text-zinc-300 text-[10px] font-mono">
-                        {message.deepThinkingTelemetry?.epistemicDepth || (
-                          isUltra
-                            ? t.chatMessage.ultraThinkingStruggle
-                            : (is04Model || isV3)
-                            ? 'Quantum Epistemic Dialectic (DeepThinking V3.0)'
-                            : isDeepV21 
-                            ? t.chatMessage.coderV21Architecture
-                            : isBasicThinking 
-                            ? t.chatMessage.agileSynthesis 
-                            : 'Quantum Epistemic Dialectic (DeepThinking V3.0)'
-                        )}
+                        {(is04Model || isV3)
+                          ? 'Quantum Epistemic Dialectic (DeepThinking V3.0)'
+                          : isUltra
+                          ? 'Quantum Epistemic Dialectic (DeepThinking V3 Ultra)'
+                          : (message.deepThinkingTelemetry?.epistemicDepth?.replace(/Flash/gi, 'V3.0') || (
+                            isDeepV21 
+                              ? t.chatMessage.coderV21Architecture
+                              : isBasicThinking 
+                              ? t.chatMessage.agileSynthesis 
+                              : 'Quantum Epistemic Dialectic (DeepThinking V3.0)'
+                          ))}
                       </span>
                       {message.isStreaming && !message.content && (
                         <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full border border-white/20 bg-white/[0.08] text-white text-[10px] font-mono">

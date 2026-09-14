@@ -29,10 +29,11 @@ export function shouldOmniSearch(query: string): boolean {
   const searchAnalysis = cleanUserSearchQuery(query);
   if (searchAnalysis.isNewsQuery) return true;
 
-  // 2. Explicit search requests
+  // 2. Explicit search requests across English, Ukrainian, and Russian
   if (
     /(?:search(?:\s+for|\s+web|\s+the\s+web|\s+google|\s+online)?|google\s+this|find(?:\s+online|\s+on\s+the\s+web|\s+in\s+web)?|lookup|look\s+up|browse(?:\s+web)?|check\s+online|live\s+data|weather\s+in|stock\s+price|market\s+price|exchange\s+rate|latest\s+version|release\s+date|documentation\s+for)/i.test(trimmed) ||
-    /(?:пошукай(?:те)?|знайди(?:те)?(?:\s+в\s+інтернеті|\s+в\s+мережі|\s+в\s+гуглі|\s+онлайн)?|пошук|погугли|глянь\s+в\s+інтернеті|яка\s+погода|курс\s+валют|ціна\s+акцій|свіжі\s+дані|остання\s+версія)/i.test(trimmed)
+    /(?:пошукай(?:те)?|знайди(?:те)?(?:\s+в\s+інтернеті|\s+в\s+мережі|\s+в\s+гуглі|\s+онлайн)?|пошук|погугли|глянь\s+в\s+інтернеті|яка\s+погода|курс\s+валют|ціна\s+акцій|свіжі\s+дані|остання\s+версія)/i.test(trimmed) ||
+    /(?:найди(?:те)?|поищи(?:те)?(?:\s+в\s+интернете|\s+в\s+сети|\s+в\s+гугле|\s+онлайн)?|погугли|глянь\s+в\s+интернете|какая\s+погода|курс\s+валют|цена\s+акций|свежие\s+данные|последняя\s+версия|кто\s+такой|что\s+такое|где\s+находится)/i.test(trimmed)
   ) {
     return true;
   }
@@ -42,10 +43,20 @@ export function shouldOmniSearch(query: string): boolean {
     return true;
   }
 
-  // 4. Temporal anchors indicating need for up-to-date data
+  // 4. Temporal anchors indicating need for up-to-date data (EN, UK, RU)
   if (
     /\b(?:2025|2026|today|tonight|this month|this year|right now|currently|current|recent|newest|latest)\b/i.test(trimmed) ||
-    /(?:сьогодні|зараз|цього року|актуальн|останні|найновіш|свіж)/i.test(trimmed)
+    /(?:сьогодні|зараз|цього року|актуальн|останні|найновіш|свіж)/i.test(trimmed) ||
+    /(?:сегодня|сейчас|в\s+этом\s+году|актуальн|последн|новейш|свеж)/i.test(trimmed)
+  ) {
+    return true;
+  }
+
+  // 5. Real-world dynamics, urban growth, geopolitical progress, mega-projects, and city/country inquiries
+  if (
+    /(?:насколько\s+быстро|наскільки\s+швидко|how\s+fast|how\s+rapidly|growth\s+rate|speed\s+of)/i.test(trimmed) ||
+    /(?:развива[еє]т?ся|розвива[еє]т?ся|строительств|будівництв|население|населення|population)/i.test(trimmed) ||
+    /(?:эр[- ]?рияд|ер[- ]?ріяд|riyadh|саудовск|саудівськ|неом|neom|дубай|dubai|vision\s+2030)/i.test(trimmed)
   ) {
     return true;
   }

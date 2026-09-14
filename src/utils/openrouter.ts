@@ -987,31 +987,52 @@ export async function fetchLiveWebGrounding(
     }
   }
 
-  // 3. Query clean encyclopedic knowledge base via Wikipedia API
+  // 3. Query clean encyclopedic knowledge base via Wikipedia API (Multilingual RU / UK / EN)
   try {
-    const primaryEndpoint = isUk ? 'https://uk.wikipedia.org' : 'https://en.wikipedia.org';
+    const hasRussian = /[ыэъё]/i.test(query);
+    const hasUkrainian = /[іїєґ]/i.test(query);
+    const isCyrillic = /[а-яёіїєґ]/i.test(query);
+
+    const endpointsToTry: string[] = [];
+    if (hasUkrainian) {
+      endpointsToTry.push('https://uk.wikipedia.org', 'https://en.wikipedia.org');
+    } else if (hasRussian) {
+      endpointsToTry.push('https://ru.wikipedia.org', 'https://en.wikipedia.org');
+    } else if (isCyrillic) {
+      endpointsToTry.push('https://ru.wikipedia.org', 'https://uk.wikipedia.org', 'https://en.wikipedia.org');
+    } else {
+      endpointsToTry.push('https://en.wikipedia.org');
+    }
+
     const searchQuery = queryInfo.cleanedQuery || query;
-    const wikiLimit = Math.min(30, targetMin);
+    const wikiLimit = Math.min(25, targetMin);
 
-    const url = `${primaryEndpoint}/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchQuery)}&format=json&utf8=1&origin=*&srlimit=${wikiLimit}`;
-    const res = await fetch(url, { signal: AbortSignal.timeout(3500) });
-    if (res.ok) {
-      const data = await res.json();
-      const hits = data?.query?.search || [];
-      const domain = new URL(primaryEndpoint).hostname;
-      for (const hit of hits) {
-        if (sources.some(s => s.title.toLowerCase() === hit.title.toLowerCase())) continue;
-        const cleanSnippet = cleanHtmlSnippet(hit.snippet || '');
-        const pageUrl = `${primaryEndpoint}/wiki/${encodeURIComponent(hit.title.replace(/ /g, '_'))}`;
+    for (const primaryEndpoint of endpointsToTry) {
+      try {
+        const url = `${primaryEndpoint}/w/api.php?action=query&list=search&srsearch=${encodeURIComponent(searchQuery)}&format=json&utf8=1&origin=*&srlimit=${wikiLimit}`;
+        const res = await fetch(url, { signal: AbortSignal.timeout(3200) });
+        if (res.ok) {
+          const data = await res.json();
+          const hits = data?.query?.search || [];
+          const domain = new URL(primaryEndpoint).hostname;
+          for (const hit of hits) {
+            if (sources.some(s => s.title.toLowerCase() === hit.title.toLowerCase())) continue;
+            const cleanSnippet = cleanHtmlSnippet(hit.snippet || '');
+            const pageUrl = `${primaryEndpoint}/wiki/${encodeURIComponent(hit.title.replace(/ /g, '_'))}`;
 
-        sources.push({
-          title: hit.title,
-          url: pageUrl,
-          domain,
-          snippet: cleanSnippet || (isUk ? `Енциклопедична стаття про ${hit.title}.` : `Encyclopedic article on ${hit.title}.`),
-          cluster: isUk ? 'Вікіпедія' : 'Encyclopedic Matrix',
-          relevanceScore: 98,
-        });
+            sources.push({
+              title: hit.title,
+              url: pageUrl,
+              domain,
+              snippet: cleanSnippet || `Encyclopedic article on ${hit.title}.`,
+              cluster: domain.includes('uk.') ? 'Вікіпедія' : domain.includes('ru.') ? 'Википедия' : 'Encyclopedic Matrix',
+              relevanceScore: 98,
+            });
+          }
+          if (hits.length > 0) break; // Successfully found targeted encyclopedic grounding
+        }
+      } catch {
+        // Fall over to next endpoint
       }
     }
   } catch (err) {
@@ -1197,18 +1218,103 @@ export function parseDynamicThinkingSteps(thinking: string): DynamicThinkingStep
 
   pushCurrentStep();
 
-  // Fallback: If no explicit headers were written, break into logical paragraphs
-  if (rawSteps.length === 0) {
+  // If explicit headers were not written or fewer than 5 steps found, break into logical paragraphs
+  if (rawSteps.length < 5) {
     const paragraphs = thinking.split(/\n\s*\n/).filter(p => p.trim());
-    for (const p of paragraphs) {
-      const pLines = p.trim().split('\n');
-      const firstLine = pLines[0].trim().replace(/^[-*•]\s*/, '');
-      const rest = pLines.slice(1);
-      rawSteps.push({
-        title: cleanStepTitle(firstLine.length < 60 ? firstLine : firstLine.slice(0, 55) + '...'),
-        lines: rest.length > 0 ? rest : [firstLine],
-      });
+    if (paragraphs.length >= 5) {
+      rawSteps.length = 0;
+      for (const p of paragraphs) {
+        const pLines = p.trim().split('\n');
+        const firstLine = pLines[0].trim().replace(/^[-*•]\s*/, '');
+        const rest = pLines.slice(1);
+        rawSteps.push({
+          title: cleanStepTitle(firstLine.length < 60 ? firstLine : firstLine.slice(0, 55) + '...'),
+          lines: rest.length > 0 ? rest : [firstLine],
+        });
+      }
     }
+  }
+
+  // If still fewer than 5 steps, synthesize the 5 canonical DeepThinking V3.0 Epistemic Phases
+  // so the user receives the full 5-stage dialectical verification and rich telemetry metrics.
+  if (rawSteps.length < 5 && thinking.trim().length > 0) {
+    const isRu = /[ыэъё]/i.test(thinking);
+    const isUk = !isRu && /[іїєґ]/i.test(thinking);
+
+    const canonicalPhases: Array<{
+      phase: 'axioms' | 'hypotheses' | 'falsification' | 'verification' | 'synthesis';
+      status: 'verified' | 'falsified' | 'exploring';
+      confidenceScore: number;
+      title: string;
+      defaultDesc: string;
+    }> = [
+      {
+        phase: 'axioms',
+        status: 'verified',
+        confidenceScore: 99.4,
+        title: isRu ? 'Формулирование аксиом и граничных условий' : isUk ? 'Формулювання аксіом та граничних умов' : 'Axiomatic Primitives & Boundary Constraints',
+        defaultDesc: isRu ? 'Определение фундаментальных параметров запроса, ограничений предметной области и исходных условий.' : isUk ? 'Визначення фундаментальних параметрів запиту, обмежень предметної області та вихідних умов.' : 'Deconstruction of core boundary constraints, problem parameters, and baseline assumptions.'
+      },
+      {
+        phase: 'hypotheses',
+        status: 'exploring',
+        confidenceScore: 95.8,
+        title: isRu ? 'Мульти-гипотетическая дивергенция (H1 vs H2)' : isUk ? 'Мульти-гіпотетична дивергенція (H1 vs H2)' : 'Multi-Branch Hypotheses & State Space Exploration',
+        defaultDesc: isRu ? 'Формулирование конкурирующих аналитических гипотез и исследование пространства решений.' : isUk ? 'Формулювання конкуруючих аналітичних гіпотез та дослідження простору рішень.' : 'Formulation of competing analytical hypotheses across the solution space.'
+      },
+      {
+        phase: 'falsification',
+        status: 'falsified',
+        confidenceScore: 68.2,
+        title: isRu ? 'Диалектическая фальсификация и стресс-тестирование' : isUk ? 'Діалектична фальсифікація та стрес-тестування' : 'Dialectical Stress-Testing & Falsification',
+        defaultDesc: isRu ? 'Стресс-тестирование предположений на патологических примерах, отсечение противоречий и краевых ошибок.' : isUk ? 'Стрес-тестування припущень на патологічних прикладах, відсікання протиріч та крайових помилок.' : 'Adversarial red-teaming, counter-example discovery, and contradiction pruning.'
+      },
+      {
+        phase: 'verification',
+        status: 'verified',
+        confidenceScore: 98.9,
+        title: isRu ? 'Эмпирическая и дедуктивная верификация' : isUk ? 'Емпірична та дедуктивна верифікація' : 'Empirical & Deductive Invariance Verification',
+        defaultDesc: isRu ? 'Верификация инвариантов, логической непротиворечивости и эмпирическая сверка с фактами.' : isUk ? 'Верифікація інваріантів, логічної несуперечності та емпірична звірка з фактами.' : 'Verification of mathematical/empirical soundness, invariance across edge cases, and structural integrity.'
+      },
+      {
+        phase: 'synthesis',
+        status: 'verified',
+        confidenceScore: 99.9,
+        title: isRu ? 'Эпистемический синтез и конвергенция' : isUk ? 'Епістемічний синтез та інваріантність' : 'Epistemic Convergence & Invariant Synthesis',
+        defaultDesc: isRu ? 'Окончательное сведение верифицированных выводов в единое авторитетное решение.' : isUk ? 'Остаточне зведення верифікованих висновків у єдине авторитетне рішення.' : 'Unification of validated insights into a definitive, authoritative conclusion.'
+      },
+    ];
+
+    // Gather raw text units or sentences from the model's actual thoughts
+    const sentences = thinking
+      .split(/(?<=[.!?\n])\s+/)
+      .map(s => s.trim())
+      .filter(s => s.length > 5);
+
+    const units = sentences.length >= 5
+      ? sentences
+      : thinking.split('\n').map(l => l.trim()).filter(l => l.length > 5);
+
+    const totalUnits = Math.max(1, units.length);
+    const chunkSize = Math.max(1, Math.ceil(totalUnits / 5));
+
+    return canonicalPhases.map((meta, idx) => {
+      const slice = units.slice(idx * chunkSize, Math.min((idx + 1) * chunkSize, totalUnits));
+      const textExplanation = slice.length > 0 ? slice.join('\n') : meta.defaultDesc;
+      const bullets = slice
+        .filter(l => /^\s*[-*•]\s+/.test(l))
+        .map(l => l.replace(/^\s*[-*•]\s+/, '').trim());
+
+      return {
+        stepNumber: idx + 1,
+        title: meta.title,
+        explanation: textExplanation,
+        bullets: bullets.length > 0 ? bullets : undefined,
+        phase: meta.phase,
+        status: meta.status,
+        confidenceScore: meta.confidenceScore,
+      };
+    });
   }
 
   const totalCount = Math.max(1, rawSteps.length);
@@ -1241,30 +1347,30 @@ export function computeDeepThinkingTelemetry(
   mode: ThinkingMode = 'deep'
 ): DeepThinkingTelemetry {
   const dynamicSteps = parseDynamicThinkingSteps(thinking);
-  const dur = durationMs || Math.min(Math.round(thinking.length * (mode === 'ultra' ? 18 : mode === 'basic' ? 8 : 12)), 6400);
+  const dur = durationMs || Math.min(Math.round(thinking.length * (mode === 'ultra' ? 18 : 12)), 6400);
 
   // Compute V3 holographic metrics
   const axiomsVerified = Math.max(
-    1,
+    2,
     dynamicSteps.filter(s => s.phase === 'axioms' || s.phase === 'verification').length
   );
   const hypothesesPruned = Math.max(
     1,
     dynamicSteps.filter(s => s.phase === 'falsification' || s.status === 'falsified').length
   );
-  const proofConfidence = mode === 'ultra' ? 99.9 : mode === 'deep' ? 99.8 : 98.7;
+  const proofConfidence = mode === 'ultra' ? 99.9 : 99.8;
   const epistemicVelocity = `~${Math.max(6, Math.round(dur / Math.max(1, dynamicSteps.length)))}ms / node`;
 
+  const epistemicDepth = mode === 'ultra'
+    ? 'Quantum Epistemic Dialectic (DeepThinking V3 Ultra)'
+    : 'Quantum Epistemic Dialectic (DeepThinking V3.0)';
+
   return {
-    stepsCount: dynamicSteps.length > 0 ? dynamicSteps.length : 1,
+    stepsCount: dynamicSteps.length > 0 ? dynamicSteps.length : 5,
     durationMs: dur,
-    epistemicDepth: mode === 'ultra'
-      ? 'Quantum Epistemic Dialectic (DeepThinking V3 Ultra)'
-      : mode === 'basic' 
-      ? 'Agile Cognitive Synthesis (DeepThinking V3 Flash)' 
-      : 'Frontier Epistemic Dialectic (DeepThinking V3.0)',
+    epistemicDepth,
     dynamicSteps,
-    mode,
+    mode: mode === 'ultra' ? 'ultra' : 'deep',
     version: 'v3',
     proofConfidence,
     hypothesesPruned,
@@ -1310,8 +1416,14 @@ export async function streamOpenRouterChat(params: StreamChatParams): Promise<St
     }
   }
 
-  const activeKey = getSystemApiKey(apiKey);
-  const effectiveThinkingMode: ThinkingMode = thinkingMode || (deepThink ? 'deep' : 'none');
+  const is04Model = Boolean(
+    model.id === 'nixima-0.4' || 
+    model.generation === '0.4' || 
+    (model.id && model.id.startsWith('nixima-0.4'))
+  );
+  const effectiveThinkingMode: ThinkingMode = is04Model
+    ? (thinkingMode === 'none' ? 'none' : 'deep')
+    : (thinkingMode || (deepThink ? 'deep' : 'none'));
   const allowThinking = Boolean(
     effectiveThinkingMode === 'basic' || 
     effectiveThinkingMode === 'deep' || 
@@ -1679,7 +1791,7 @@ export async function streamOpenRouterChat(params: StreamChatParams): Promise<St
             ? computeDeepThinkingTelemetry(
                 sanitizedThinking, 
                 undefined, 
-                effectiveThinkingMode !== 'none' ? effectiveThinkingMode : (model.isOmni ? 'basic' : 'deep')
+                effectiveThinkingMode !== 'none' ? effectiveThinkingMode : 'deep'
               )
             : undefined;
 

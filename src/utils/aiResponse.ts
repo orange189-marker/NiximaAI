@@ -22,7 +22,7 @@ interface AIResponseResult {
 
 export function generateNiximaResponse(options: GenerateResponseOptions): AIResponseResult {
   const allowCjk = isCjkRequested(options.prompt);
-  const isOmni = isOmniModel(options.model);
+  const is04 = options.model.id === 'nixima-0.4' || options.model.generation === '0.4' || (options.model.id && options.model.id.startsWith('nixima-0.4'));
   const {
     runWebSearch: shouldSearch,
     effectiveThinkingMode: effectiveMode,
@@ -32,6 +32,8 @@ export function generateNiximaResponse(options: GenerateResponseOptions): AIResp
   } = resolveOmniToolExecution({
     query: options.prompt,
     isOmni,
+    is04: Boolean(is04),
+    modelId: options.model.id,
     userWebSearch: options.webSearch,
     userThinkingMode: options.thinkingMode,
     userDeepThink: options.deepThink,

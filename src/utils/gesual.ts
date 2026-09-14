@@ -67,7 +67,14 @@ export async function streamGesualChat(params: StreamChatParams): Promise<Stream
   } = params;
 
   const activeKey = getGesualApiKey(apiKey);
-  const effectiveThinkingMode: ThinkingMode = thinkingMode || (deepThink ? 'deep' : 'none');
+  const is04 = Boolean(
+    model.id === 'nixima-0.4' || 
+    model.generation === '0.4' || 
+    (model.id && model.id.startsWith('nixima-0.4'))
+  );
+  const effectiveThinkingMode: ThinkingMode = is04 
+    ? (thinkingMode === 'none' ? 'none' : 'deep')
+    : (thinkingMode || (deepThink ? 'deep' : 'none'));
   const allowThinking = Boolean(
     effectiveThinkingMode === 'basic' || 
     effectiveThinkingMode === 'deep' || 
@@ -269,7 +276,7 @@ export async function streamGesualChat(params: StreamChatParams): Promise<Stream
           ? computeDeepThinkingTelemetry(
               sanitizedThinking, 
               undefined, 
-              effectiveThinkingMode !== 'none' ? effectiveThinkingMode : 'basic'
+              is04 ? 'deep' : (effectiveThinkingMode !== 'none' ? effectiveThinkingMode : 'deep')
             )
           : undefined;
 

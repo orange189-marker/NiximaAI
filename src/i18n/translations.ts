@@ -899,7 +899,7 @@ export const translations: Record<Language, Translations> = {
       stagesVerifiedV21: (count: number) => `${count} Architectural Stages Verified (Zero Laziness)`,
       deepThinkingV3: 'DeepThinking V3.0',
       deepThinkingV3Badge: 'V3 PROOF ENGINE',
-      stagesVerifiedV3: (count: number) => `${count} Epistemic Dialectic Stages Verified`,
+      stagesVerifiedV3: (count: number) => count === 1 ? '1 Epistemic Dialectic Stage Verified' : `${count} Epistemic Dialectic Stages Verified`,
       proofConfidenceLabel: 'Proof Confidence',
       hypothesesPrunedLabel: 'Contradictions Pruned',
       axiomsVerifiedLabel: 'Axioms Verified',
@@ -1705,7 +1705,17 @@ export const translations: Record<Language, Translations> = {
       stagesVerifiedV21: (count: number) => `Верифіковано ${count} архітектурних стадій (Без скорочень)`,
       deepThinkingV3: 'DeepThinking V3.0',
       deepThinkingV3Badge: 'РУШІЙ ДОВЕДЕНЬ V3',
-      stagesVerifiedV3: (count: number) => `Верифіковано ${count} діалектичних стадій`,
+      stagesVerifiedV3: (count: number) => {
+        const mod10 = count % 10;
+        const mod100 = count % 100;
+        if (mod10 === 1 && mod100 !== 11) {
+          return `Верифіковано ${count} діалектичну стадію`;
+        }
+        if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) {
+          return `Верифіковано ${count} діалектичні стадії`;
+        }
+        return `Верифіковано ${count} діалектичних стадій`;
+      },
       proofConfidenceLabel: 'Впевненість доведення',
       hypothesesPrunedLabel: 'Спростовано суперечностей',
       axiomsVerifiedLabel: 'Верифіковано аксіом',
