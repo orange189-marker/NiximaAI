@@ -747,10 +747,19 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
               {/* DEEPTHINKING V3.0 / ULTRA THINKING V1.0 / DEEPTHINKING V2.1 / BASIC COGNITIVE TELEMETRY STATION */}
               {!isUser && message.thinking && (message.deepThinkingTelemetry || message.isStreaming) && (() => {
-                const isUltra = message.deepThinkingTelemetry?.mode === 'ultra' || message.thinkingMode === 'ultra';
-                const isBasicThinking = !isUltra && (message.deepThinkingTelemetry?.mode === 'basic' || message.thinkingMode === 'basic');
-                const isV3 = !isUltra && !isBasicThinking && (message.deepThinkingTelemetry?.version === 'v3' || message.thinkingMode === 'deep' || (!message.thinkingMode && message.deepThinkingTelemetry));
-                const is03Coder = (message.model && message.model.toLowerCase().includes('0.3')) || (activeModelName && activeModelName.toLowerCase().includes('0.3'));
+                const is04Model = Boolean(
+                  (message.model && (message.model.toLowerCase().includes('0.4') || message.model.toLowerCase().includes('nixima-0.4'))) ||
+                  (activeModelName && (activeModelName.toLowerCase().includes('0.4') || activeModelName.toLowerCase().includes('nixima-0.4')))
+                );
+                const isUltra = !is04Model && (message.deepThinkingTelemetry?.mode === 'ultra' || message.thinkingMode === 'ultra');
+                const isBasicThinking = !is04Model && !isUltra && (message.deepThinkingTelemetry?.mode === 'basic' || message.thinkingMode === 'basic');
+                const isV3 = is04Model || (!isUltra && !isBasicThinking && (
+                  message.deepThinkingTelemetry?.version === 'v3' || 
+                  message.thinkingMode === 'deep' || 
+                  Boolean(message.deepThinkingTelemetry) || 
+                  Boolean(message.thinking)
+                ));
+                const is03Coder = !is04Model && ((message.model && message.model.toLowerCase().includes('0.3')) || (activeModelName && activeModelName.toLowerCase().includes('0.3')));
                 const isDeepV21 = !isUltra && !isV3 && is03Coder && !isBasicThinking;
 
                 const epistemicPhasesConfig: Array<{ key: EpistemicPhase; label: string; desc: string; border: string; bg: string; text: string; dot: string }> = [
@@ -782,18 +791,18 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                       <span className="font-mono text-xs font-bold tracking-tight text-white flex items-center gap-1.5">
                         {isUltra
                           ? t.chatMessage.ultraThinkingV1
-                          : isV3
+                          : (is04Model || isV3)
                           ? t.chatMessage.deepThinkingV3
                           : isDeepV21
                           ? t.chatMessage.deepThinkingV21
                           : isBasicThinking
                           ? t.chatMessage.basicThinking
-                          : t.chatMessage.deepThinkingV2}
+                          : t.chatMessage.deepThinkingV3}
                       </span>
 
                       {/* V3 Engine Pill / Ultra Pill / V2.1 Pill */}
                       <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded border text-[10px] font-mono font-medium ${
-                        isV3
+                        (is04Model || isV3)
                           ? 'bg-gradient-to-r from-cyan-950/90 to-emerald-950/90 border-cyan-500/60 text-cyan-200 shadow-[0_0_12px_rgba(6,182,212,0.3)]'
                           : isUltra
                           ? 'bg-purple-950/80 border-purple-600/70 text-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.25)]'
@@ -801,7 +810,7 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                           ? 'bg-emerald-950/60 border-emerald-700/60 text-emerald-300'
                           : 'bg-zinc-800 border-zinc-700 text-zinc-300'
                       }`}>
-                        {isV3
+                        {(is04Model || isV3)
                           ? t.chatMessage.stagesVerifiedV3(dynamicSteps.length || 5)
                           : isUltra
                           ? t.chatMessage.ultraStagesVerified(dynamicSteps.length || 5)
@@ -809,12 +818,12 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                           ? t.chatMessage.stagesVerifiedV21(dynamicSteps.length || 3)
                           : isBasicThinking 
                           ? t.chatMessage.agileStages(dynamicSteps.length || 1)
-                          : t.chatMessage.stagesVerified(dynamicSteps.length || 3)
+                          : t.chatMessage.stagesVerifiedV3(dynamicSteps.length || 5)
                         }
                       </span>
 
                       {/* V3 PROOF ENGINE BADGE */}
-                      {isV3 && (
+                      {(is04Model || isV3) && (
                         <span className="hidden md:inline-flex items-center gap-1 px-1.5 py-0.5 rounded border border-cyan-400/40 bg-cyan-400/10 text-[9px] font-mono text-cyan-300 font-bold uppercase tracking-wider">
                           {t.chatMessage.deepThinkingV3Badge}
                         </span>
@@ -824,13 +833,13 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
                         {message.deepThinkingTelemetry?.epistemicDepth || (
                           isUltra
                             ? t.chatMessage.ultraThinkingStruggle
-                            : isV3
-                            ? 'Quantum Epistemic Dialectic (V3.0)'
+                            : (is04Model || isV3)
+                            ? 'Quantum Epistemic Dialectic (DeepThinking V3.0)'
                             : isDeepV21 
                             ? t.chatMessage.coderV21Architecture
                             : isBasicThinking 
                             ? t.chatMessage.agileSynthesis 
-                            : t.chatMessage.epistemicVerification
+                            : 'Quantum Epistemic Dialectic (DeepThinking V3.0)'
                         )}
                       </span>
                       {message.isStreaming && !message.content && (

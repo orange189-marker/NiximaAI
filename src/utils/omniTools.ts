@@ -163,8 +163,10 @@ export function resolveOmniToolExecution(params: {
   // When Nixima-0.4 is active, it chooses completely on its own whether to use search, deepthink, or rest
   if (isNixima04) {
     const runWebSearch = shouldOmniSearch(query);
-    const effectiveThinkingMode = getOmniThinkingDecision(query);
-    const isDeepThink = effectiveThinkingMode === 'deep' || effectiveThinkingMode === 'ultra';
+    const rawThinking = getOmniThinkingDecision(query);
+    // For Nixima-0.4, autonomous thinking always executes with DeepThinking V3.0
+    const effectiveThinkingMode: ThinkingMode = rawThinking !== 'none' ? 'deep' : 'none';
+    const isDeepThink = effectiveThinkingMode === 'deep';
     const isThinkingActive = effectiveThinkingMode !== 'none';
     const isDualToolActive = runWebSearch && isThinkingActive;
 

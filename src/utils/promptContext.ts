@@ -208,8 +208,8 @@ export function buildNiximaSystemPrompt({
         ### 3. Zero-Defect Code Completeness Audit
         [Perform rigorous self-audit ensuring all functions, event listeners, and render loops are 100% written out with zero placeholders]
     - After closing </think>, provide the complete, authoritative, self-contained, runnable code.
-` : `10. DeepThinking V2 Dynamic Cognitive Reasoning Protocol:
-    - DEEPTHINKING V2 MODE IS ACTIVATED. You must perform rigorous, genuine epistemic reasoning before delivering your final answer.
+` : `10. DeepThinking V3.0 Dynamic Cognitive Reasoning Protocol:
+    - DEEPTHINKING V3.0 MODE IS ACTIVATED. You must perform rigorous, genuine epistemic reasoning before delivering your final answer.
     - Encapsulate your inner reasoning trace inside <think>...</think> tags.
     - Create your own dynamic, contextual reasoning steps tailored specifically to this inquiry!
     - For each step, use a clear title and detailed explanation of what you are analyzing, for example:

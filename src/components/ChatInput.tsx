@@ -629,128 +629,110 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             </div>
           )}
 
-          {/* Active Model Engine Capability Telemetry HUD */}
-          <div className="flex items-center gap-1.5 px-4 sm:px-6 pt-3 pb-1 text-[11px] font-mono select-none flex-wrap border-b border-white/[0.04]">
-            {/* Active Model Pill */}
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-300 shadow-sm flex-shrink-0">
-              <ModelIcon modelId={currentModel.id} size="xs" />
-              <span className="font-semibold text-zinc-100">{currentModel.shortName}</span>
-              <span className={`text-[9px] px-1 py-0.2 rounded font-bold uppercase ${
-                is04 
-                  ? 'bg-amber-400 text-black border border-amber-300' 
-                  : 'bg-zinc-800 text-zinc-400 border border-zinc-750'
-              }`}>
-                {currentModel.generation || '0.4'}
-              </span>
-            </div>
-
-            {/* If Nixima-0.4, show Autonomous Omni indicator instead of manual toggle indicators */}
-            {is04 ? (
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-950/40 border border-amber-500/40 text-amber-200 text-[10.5px] font-mono shadow-[0_0_12px_rgba(245,158,11,0.15)] flex-shrink-0">
-                <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse flex-shrink-0" />
-                <span className="font-semibold">
-                  {language === 'uk' ? 'Автономний Omni Рушій' : 'Autonomous Omni Engine'}
-                </span>
-                <span className="relative flex h-1.5 w-1.5 ml-0.5">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75" />
-                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-400" />
+          {/* Active Model Engine Capability Telemetry HUD (Shown for configured models, hidden for autonomous Nixima-0.4) */}
+          {!is04 && (
+            <div className="flex items-center gap-1.5 px-4 sm:px-6 pt-3 pb-1 text-[11px] font-mono select-none flex-wrap border-b border-white/[0.04]">
+              {/* Active Model Pill */}
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/90 border border-zinc-800 text-zinc-300 shadow-sm flex-shrink-0">
+                <ModelIcon modelId={currentModel.id} size="xs" />
+                <span className="font-semibold text-zinc-100">{currentModel.shortName}</span>
+                <span className="text-[9px] px-1 py-0.2 rounded font-bold uppercase bg-zinc-800 text-zinc-400 border border-zinc-750">
+                  {currentModel.generation || '0.3'}
                 </span>
               </div>
-            ) : (
-              <>
-                {/* Thinking Capability Indicator */}
-                {isThinkingTurnedOn ? (
-                  <div
-                    ref={thinkingHudRef}
-                    onClick={() => {
-                      setIsSearchPopoverOpen(false);
-                      setIsThinkingPopoverOpen(prev => !prev);
-                    }}
-                    className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10.5px] font-mono cursor-pointer transition-all shadow-sm flex-shrink-0 ${
-                      thinkingMode === 'ultra'
-                        ? 'bg-purple-950/60 border-purple-600/70 text-purple-200 hover:bg-purple-900/60 shadow-[0_0_12px_rgba(168,85,247,0.25)]'
-                        : 'bg-emerald-950/60 border-emerald-600/70 text-emerald-200 hover:bg-emerald-900/60 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
-                    }`}
-                    title="Thinking Engine Active • Click to configure"
-                  >
-                    <BrainCircuit className="w-3.5 h-3.5 text-current animate-pulse flex-shrink-0" />
-                    <span className="font-semibold">
-                      {thinkingMode === 'ultra'
-                        ? (currentModel.id === 'nixima-0.3-pro' ? 'UltraThinking V2.0' : 'UltraThinking V1.0')
-                        : (thinkingMode === 'deep' || deepThink)
-                        ? 'DeepThinking V3.0'
-                        : thinkingMode === 'basic'
-                        ? 'Basic Thinking'
-                        : 'DeepThinking V3.0'
-                      }
-                    </span>
-                    <span className="relative flex h-1.5 w-1.5 ml-0.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-400" />
-                    </span>
-                  </div>
-                ) : (currentModel.id.includes('pro') || currentModel.id.includes('coder') || isOmni) ? (
-                  <div
-                    onClick={onToggleDeepThink}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/80 hover:bg-zinc-850 border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-zinc-200 text-[10.5px] font-mono cursor-pointer transition-all shadow-sm flex-shrink-0"
-                    title="Click to activate Thinking for this model"
-                  >
-                    <BrainCircuit className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
-                    <span>
-                      {currentModel.id.includes('pro') ? 'UltraThinking' : 'DeepThinking V3.0'}
-                    </span>
-                    <span className="text-[9px] px-1 py-0.2 rounded bg-zinc-800 text-zinc-400 border border-zinc-750 font-bold">
-                      OFF
-                    </span>
-                  </div>
-                ) : null}
 
-                {/* Search Capability Indicator */}
-                {webSearch ? (
-                  <div
-                    ref={searchHudRef}
-                    onClick={() => {
-                      setIsThinkingPopoverOpen(false);
-                      setIsSearchPopoverOpen(prev => !prev);
-                    }}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-950/60 border border-cyan-600/70 text-cyan-200 hover:bg-cyan-900/60 text-[10.5px] font-mono cursor-pointer transition-all shadow-[0_0_12px_rgba(6,182,212,0.25)] flex-shrink-0"
-                    title="Search V3 Engine Active • Click to configure"
-                  >
-                    <Globe className="w-3.5 h-3.5 text-cyan-300 animate-pulse flex-shrink-0" />
-                    <span className="font-semibold">
-                      {searchMode === 'fast' ? 'Search V3 Fast' : searchMode === 'mega' ? 'Search V3 Mega' : 'Search V3 Standard'}
-                    </span>
-                    <span className="relative flex h-1.5 w-1.5 ml-0.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
-                      <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-400" />
-                    </span>
-                  </div>
-                ) : (currentModel.searchOptimization || isOmni) ? (
-                  <div
-                    onClick={onToggleWebSearch}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/80 hover:bg-zinc-850 border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-zinc-200 text-[10.5px] font-mono cursor-pointer transition-all shadow-sm flex-shrink-0"
-                    title="Click to activate Web Search for this model"
-                  >
-                    <Globe className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
-                    <span>
-                      {currentModel.searchOptimization?.badge || 'Search Ready'}
-                    </span>
-                    <span className="text-[9px] px-1 py-0.2 rounded bg-zinc-800 text-zinc-400 border border-zinc-750 font-bold">
-                      OFF
-                    </span>
-                  </div>
-                ) : null}
+              {/* Thinking Capability Indicator */}
+              {isThinkingTurnedOn ? (
+                <div
+                  ref={thinkingHudRef}
+                  onClick={() => {
+                    setIsSearchPopoverOpen(false);
+                    setIsThinkingPopoverOpen(prev => !prev);
+                  }}
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10.5px] font-mono cursor-pointer transition-all shadow-sm flex-shrink-0 ${
+                    thinkingMode === 'ultra'
+                      ? 'bg-purple-950/60 border-purple-600/70 text-purple-200 hover:bg-purple-900/60 shadow-[0_0_12px_rgba(168,85,247,0.25)]'
+                      : 'bg-emerald-950/60 border-emerald-600/70 text-emerald-200 hover:bg-emerald-900/60 shadow-[0_0_12px_rgba(16,185,129,0.25)]'
+                  }`}
+                  title="Thinking Engine Active • Click to configure"
+                >
+                  <BrainCircuit className="w-3.5 h-3.5 text-current animate-pulse flex-shrink-0" />
+                  <span className="font-semibold">
+                    {thinkingMode === 'ultra'
+                      ? (currentModel.id === 'nixima-0.3-pro' ? 'UltraThinking V2.0' : 'UltraThinking V1.0')
+                      : (thinkingMode === 'deep' || deepThink)
+                      ? 'DeepThinking V3.0'
+                      : thinkingMode === 'basic'
+                      ? 'Basic Thinking'
+                      : 'DeepThinking V3.0'
+                    }
+                  </span>
+                  <span className="relative flex h-1.5 w-1.5 ml-0.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-400" />
+                  </span>
+                </div>
+              ) : (currentModel.id.includes('pro') || currentModel.id.includes('coder') || isOmni) ? (
+                <div
+                  onClick={onToggleDeepThink}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/80 hover:bg-zinc-850 border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-zinc-200 text-[10.5px] font-mono cursor-pointer transition-all shadow-sm flex-shrink-0"
+                  title="Click to activate Thinking for this model"
+                >
+                  <BrainCircuit className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
+                  <span>
+                    {currentModel.id.includes('pro') ? 'UltraThinking' : 'DeepThinking V3.0'}
+                  </span>
+                  <span className="text-[9px] px-1 py-0.2 rounded bg-zinc-800 text-zinc-400 border border-zinc-750 font-bold">
+                    OFF
+                  </span>
+                </div>
+              ) : null}
 
-                {/* Omni Dual-Tool Badge */}
-                {isDualToolActive && (
-                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/10 border border-white/25 text-white text-[10.5px] font-mono font-semibold shadow-sm flex-shrink-0">
-                    <Sparkles className="w-3.5 h-3.5 text-white animate-pulse flex-shrink-0" />
-                    <span>2 TOOLS ACTIVE</span>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
+              {/* Search Capability Indicator */}
+              {webSearch ? (
+                <div
+                  ref={searchHudRef}
+                  onClick={() => {
+                    setIsThinkingPopoverOpen(false);
+                    setIsSearchPopoverOpen(prev => !prev);
+                  }}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-950/60 border border-cyan-600/70 text-cyan-200 hover:bg-cyan-900/60 text-[10.5px] font-mono cursor-pointer transition-all shadow-[0_0_12px_rgba(6,182,212,0.25)] flex-shrink-0"
+                  title="Search V3 Engine Active • Click to configure"
+                >
+                  <Globe className="w-3.5 h-3.5 text-cyan-300 animate-pulse flex-shrink-0" />
+                  <span className="font-semibold">
+                    {searchMode === 'fast' ? 'Search V3 Fast' : searchMode === 'mega' ? 'Search V3 Mega' : 'Search V3 Standard'}
+                  </span>
+                  <span className="relative flex h-1.5 w-1.5 ml-0.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-cyan-400" />
+                  </span>
+                </div>
+              ) : (currentModel.searchOptimization || isOmni) ? (
+                <div
+                  onClick={onToggleWebSearch}
+                  className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-zinc-900/80 hover:bg-zinc-850 border border-zinc-800 hover:border-zinc-700 text-zinc-400 hover:text-zinc-200 text-[10.5px] font-mono cursor-pointer transition-all shadow-sm flex-shrink-0"
+                  title="Click to activate Web Search for this model"
+                >
+                  <Globe className="w-3.5 h-3.5 text-zinc-500 flex-shrink-0" />
+                  <span>
+                    {currentModel.searchOptimization?.badge || 'Search Ready'}
+                  </span>
+                  <span className="text-[9px] px-1 py-0.2 rounded bg-zinc-800 text-zinc-400 border border-zinc-750 font-bold">
+                    OFF
+                  </span>
+                </div>
+              ) : null}
+
+              {/* Omni Dual-Tool Badge */}
+              {isDualToolActive && (
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/10 border border-white/25 text-white text-[10.5px] font-mono font-semibold shadow-sm flex-shrink-0">
+                  <Sparkles className="w-3.5 h-3.5 text-white animate-pulse flex-shrink-0" />
+                  <span>2 TOOLS ACTIVE</span>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Primary Textarea Field */}
           <textarea
@@ -778,28 +760,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 <Paperclip className="w-4 h-4" />
               </button>
 
-              <div className="hidden sm:block h-3.5 w-[1px] bg-zinc-800 mx-0.5 flex-shrink-0" />
-
-              {is04 ? (
-                <div 
-                  className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500/15 via-emerald-500/10 to-amber-500/15 border border-amber-500/30 text-xs font-mono text-amber-200 select-none shadow-[0_0_12px_rgba(245,158,11,0.08)] flex-shrink-0"
-                  title={language === 'uk' ? 'Nixima-0.4 автономно обирає коли застосувати DeepThinking V3.0, Web Search або завершити без затримок' : 'Nixima-0.4 autonomously chooses when to deploy DeepThinking V3.0, Web Search, or direct generation'}
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-400 animate-pulse flex-shrink-0" />
-                  <span className="tracking-tight whitespace-nowrap hidden sm:inline">
-                    {language === 'uk' 
-                      ? 'Автономний режим: Пошук та DeepThinking V3.0' 
-                      : 'Autonomous: Dynamic Search & DeepThinking V3.0'}
-                  </span>
-                  <span className="tracking-tight whitespace-nowrap sm:hidden">
-                    {language === 'uk' ? 'Автономний Omni' : 'Autonomous Omni'}
-                  </span>
-                  <span className="px-1.5 py-0.2 rounded bg-amber-400/20 text-[9px] font-mono font-bold tracking-wider text-amber-300 border border-amber-400/30 whitespace-nowrap flex-shrink-0">
-                    AUTO
-                  </span>
-                </div>
-              ) : (
+              {!is04 && (
                 <>
+                  <div className="hidden sm:block h-3.5 w-[1px] bg-zinc-800 mx-0.5 flex-shrink-0" />
+
                   {/* Thinking Engine Control (Unified Sleek Titanium Pill) */}
                   <div className="relative flex items-center flex-shrink-0 z-30" ref={thinkingMenuRef}>
                     <div
