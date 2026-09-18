@@ -61,7 +61,7 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
       return parts.join('\n');
     }).join('\n\n---\n\n');
 
-    navigator.clipboard.writeText(`SEARCH V3 TOOL ACTION & REASONING TRACE\nQuery: "${query}"\nMode: ${searchMode.toUpperCase()}\nConsensus: ${consensusScore}%\nCrawled Websites: ${websiteActions.length}\n\n` + traceText);
+    navigator.clipboard.writeText(`SEARCH V3.1 TOOL ACTION & REASONING TRACE\nQuery: "${query}"\nMode: ${searchMode.toUpperCase()}\nConsensus: ${consensusScore}%\nCrawled Websites: ${websiteActions.length}\n\n` + traceText);
     setCopiedTrace(true);
     setTimeout(() => setCopiedTrace(false), 2000);
   };
@@ -90,7 +90,7 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
           {isMega ? (
             <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-white/[0.08] border border-white/20 text-white font-mono text-[10.5px] font-bold shadow-[0_0_12px_rgba(255,255,255,0.06)] flex-shrink-0">
               <Sparkles className="w-3 h-3 text-white animate-pulse" />
-              <span>Search V3</span>
+              <span>Search V3.1</span>
               <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-[9px] text-zinc-200 border border-zinc-700 font-extrabold tracking-wider">
                 MEGA (50–80 SITES)
               </span>
@@ -98,7 +98,7 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
           ) : isFast ? (
             <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-zinc-850 border border-zinc-700 text-zinc-100 font-mono text-[10.5px] font-bold shadow-inner-light flex-shrink-0">
               <Zap className="w-3 h-3 text-zinc-300" />
-              <span>Search V3</span>
+              <span>Search V3.1</span>
               <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-[9px] text-zinc-300 border border-zinc-700 font-bold">
                 FAST (20 SITES)
               </span>
@@ -106,7 +106,7 @@ export const SearchActionFeed: React.FC<SearchActionFeedProps> = ({
           ) : (
             <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-zinc-850 border border-zinc-800 text-zinc-200 font-mono text-[10.5px] font-semibold flex-shrink-0">
               <Globe className="w-3 h-3 text-zinc-300" />
-              <span>Search V3</span>
+              <span>Search V3.1</span>
               <span className="px-1.5 py-0.2 rounded bg-zinc-800 text-[9px] text-zinc-400 border border-zinc-700 font-bold">
                 STANDARD (20+ SITES)
               </span>

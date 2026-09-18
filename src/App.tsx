@@ -17,7 +17,8 @@ import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry, Sea
 import { NiximaUser } from './types/user';
 import { NIXIMA_MODELS, DEFAULT_MODEL } from './data/models';
 import { INITIAL_CONVERSATIONS } from './data/initialChats';
-import { streamOpenRouterChat, fetchLiveWebGrounding, cleanUserSearchQuery } from './utils/openrouter';
+import { streamOpenRouterChat, fetchLiveWebGrounding, generateDefaultGrounding, cleanUserSearchQuery } from './utils/openrouter';
+import { parseSearchToolCall } from './utils/toolParser';
 import { extractArtifactsFromMessage } from './utils/artifactDetector';
 import { playTypingTick, playCompletionChime } from './utils/sound';
 import { getActiveUser, logoutUser, syncAccountsWithServer, isDadAccount, isStrictCreator } from './utils/auth';
@@ -812,7 +813,7 @@ All conversations and model preferences in this workspace are private to your Ni
     const aiMessageId = 'ai-' + Date.now();
     const isOmni = isOmniModel(currentModel);
 
-    // Resolve Dual-Tool Execution: For Nixima-0.4, both Tool 1 (Search V3) and Tool 2 (DeepThinking) are autonomously evaluated
+    // Resolve Dual-Tool Execution: For Nixima-0.4, both Tool 1 (Search V3.1) and Tool 2 (DeepThinking) are autonomously evaluated
     const is04 = currentModel.id === 'nixima-0.4' || currentModel.generation === '0.4';
 
     const {
@@ -837,6 +838,7 @@ All conversations and model preferences in this workspace are private to your Ni
           query: userText,
           sources: [],
           searchMode: settings.searchMode || 'standard',
+          searchVersion: 'v3.1',
           searchTimeMs: 0,
           indexedResultsCount: 0,
           consensusScore: 99,
@@ -988,7 +990,7 @@ All conversations and model preferences in this workspace are private to your Ni
             `\n\nInstructions: Ground your response in these verified real-world findings. Answer the user's question directly, accurately, and authoritatively. Cite sources with [1], [2] where appropriate.`;
 
           finalUserPrompt =
-            `[SEARCH V3 REAL-TIME GROUNDED WEB FINDINGS — ${liveGrounding.sources.length} WEBSITES CRAWLED]\n` +
+            `[SEARCH V3.1 REAL-TIME GROUNDED WEB FINDINGS — ${liveGrounding.sources.length} WEBSITES CRAWLED]\n` +
             liveGrounding.sources.map((src, i) =>
               `[Source ${i + 1}] ${src.title} (${src.domain})\nURL: ${src.url}\nSummary: ${src.snippet || 'Authoritative reference'}`
             ).join('\n\n') +
@@ -1004,7 +1006,7 @@ All conversations and model preferences in this workspace are private to your Ni
         { role: 'user', content: finalUserPrompt }
       ];
 
-      const { fullContent, fullThinking, searchGrounding, deepThinkingTelemetry } = await streamOpenRouterChat({
+      let { fullContent, fullThinking, searchGrounding, deepThinkingTelemetry } = await streamOpenRouterChat({
         apiKey: settings.openRouterApiKey,
         model: currentModel,
         messages: historyForApi,
@@ -1115,6 +1117,35 @@ All conversations and model preferences in this workspace are private to your Ni
             currentVersion: nextVersion,
           };
         });
+      }
+
+      // Search V3.1 Autonomous Tool Call Interceptor & Hotfix
+      const toolCall = parseSearchToolCall(fullContent);
+      if (toolCall.isToolCall && toolCall.query) {
+        console.log(`[Nixima Search V3.1] Autonomous search tool call intercepted: "${toolCall.query}". Executing live web grounding...`);
+        try {
+          searchGrounding = await fetchLiveWebGrounding(toolCall.query, language, settings.searchMode || 'standard');
+        } catch {
+          searchGrounding = generateDefaultGrounding(toolCall.query, settings.searchMode || 'standard');
+        }
+
+        const synthesized = generateNiximaResponse({
+          prompt: toolCall.query,
+          model: currentModel,
+          deepThink: effectiveDeepThink,
+          thinkingMode: effectiveThinkingMode,
+          webSearch: true,
+          searchMode: settings.searchMode || 'standard',
+          history: historyForApi
+        });
+
+        fullContent = synthesized.response;
+        if (!fullThinking && synthesized.thinking) {
+          fullThinking = synthesized.thinking;
+        }
+        if (synthesized.deepThinkingTelemetry) {
+          deepThinkingTelemetry = synthesized.deepThinkingTelemetry;
+        }
       }
 
       setConversations(prev => prev.map(c => {

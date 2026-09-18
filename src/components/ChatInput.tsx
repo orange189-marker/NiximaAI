@@ -419,7 +419,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             </p>
 
             <div className="space-y-1.5">
-              {/* 1. Search V3 Fast */}
+              {/* 1. Search V3.1 Fast */}
               {(() => {
                 const recFast = getRecommendedModelForSearchMode('fast');
                 const isModeActive = webSearch && searchMode === 'fast';
@@ -437,7 +437,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                         <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
                           <Zap className="w-3.5 h-3.5" />
                         </div>
-                        <span className="font-semibold text-xs text-white font-mono">Search V3 Fast</span>
+                        <span className="font-semibold text-xs text-white font-mono">Search V3.1 Fast</span>
                         <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-[9px] font-mono font-bold text-zinc-300">
                           &lt;50MS
                         </span>
@@ -462,7 +462,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 );
               })()}
 
-              {/* 2. Search V3 Standard */}
+              {/* 2. Search V3.1 Standard */}
               {(() => {
                 const recStd = getRecommendedModelForSearchMode('standard');
                 const isModeActive = webSearch && searchMode === 'standard';
@@ -480,7 +480,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                         <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
                           <Globe className="w-3.5 h-3.5" />
                         </div>
-                        <span className="font-semibold text-xs text-white font-mono">Search V3 Standard</span>
+                        <span className="font-semibold text-xs text-white font-mono">Search V3.1 Standard</span>
                         <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-[9px] font-mono font-bold text-zinc-300">
                           BALANCED
                         </span>
@@ -505,7 +505,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                 );
               })()}
 
-              {/* 3. Search V3 Mega (Creator Clearance) */}
+              {/* 3. Search V3.1 Mega (Creator Clearance) */}
               {isCreator && (() => {
                 const recMega = getRecommendedModelForSearchMode('mega');
                 const isModeActive = webSearch && searchMode === 'mega';
@@ -523,7 +523,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                         <div className="p-1 rounded-md bg-zinc-800 border border-zinc-700 text-zinc-200">
                           <BrainCircuit className="w-3.5 h-3.5" />
                         </div>
-                        <span className="font-semibold text-xs text-white font-mono">Search V3 Mega</span>
+                        <span className="font-semibold text-xs text-white font-mono">Search V3.1 Mega</span>
                         <span className="px-1.5 py-0.2 rounded bg-zinc-800 border border-zinc-700 text-[9px] font-mono font-bold text-zinc-300">
                           CREATOR SWARM
                         </span>
@@ -697,11 +697,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     setIsSearchPopoverOpen(prev => !prev);
                   }}
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-950/60 border border-cyan-600/70 text-cyan-200 hover:bg-cyan-900/60 text-[10.5px] font-mono cursor-pointer transition-all shadow-[0_0_12px_rgba(6,182,212,0.25)] flex-shrink-0"
-                  title="Search V3 Engine Active • Click to configure"
+                  title="Search V3.1 Engine Active • Click to configure"
                 >
                   <Globe className="w-3.5 h-3.5 text-cyan-300 animate-pulse flex-shrink-0" />
                   <span className="font-semibold">
-                    {searchMode === 'fast' ? 'Search V3 Fast' : searchMode === 'mega' ? 'Search V3 Mega' : 'Search V3 Standard'}
+                    {searchMode === 'fast' ? 'Search V3.1 Fast' : searchMode === 'mega' ? 'Search V3.1 Mega' : 'Search V3.1 Standard'}
                   </span>
                   <span className="relative flex h-1.5 w-1.5 ml-0.5">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75" />
@@ -779,7 +779,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                         className="flex items-center gap-1.5 pl-2.5 sm:pl-3 pr-1 py-1.5 cursor-pointer"
                         title={
                           isOmni && !(thinkingMode === 'basic' || thinkingMode === 'deep' || thinkingMode === 'ultra' || deepThink)
-                            ? `Omni Thinking Engine (Autonomous On-Demand • Click to lock active) • Concurrent with Search V3`
+                            ? `Omni Thinking Engine (Autonomous On-Demand • Click to lock active) • Concurrent with Search V3.1`
                             : thinkingMode === 'ultra'
                             ? t.chatInput.ultraThinkingTooltip
                             : thinkingMode === 'basic'
@@ -840,7 +840,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                     </div>
                   </div>
 
-                  {/* Search V3 Engine Control (Unified Sleek Titanium Pill) */}
+                  {/* Search V3.1 Engine Control (Unified Sleek Titanium Pill) */}
                   <div className="relative flex items-center flex-shrink-0 z-30" ref={searchMenuRef}>
                     <div
                       className={`flex items-center rounded-full text-xs font-mono transition-all duration-200 border select-none ${
@@ -855,9 +855,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                         className="flex items-center gap-1.5 pl-2.5 sm:pl-3 pr-1 py-1.5 cursor-pointer"
                         title={
                           isOmni && !webSearch
-                            ? `Omni Search V3 (Autonomous On-Demand • Click to lock active) • Concurrent with DeepThinking`
+                            ? `Omni Search V3.1 (Autonomous On-Demand • Click to lock active) • Concurrent with DeepThinking`
                             : webSearch
-                            ? `Search V3 ${searchMode.toUpperCase()} active • Click to cycle`
+                            ? `Search V3.1 ${searchMode.toUpperCase()} active • Click to cycle`
                             : t.chatInput.searchTooltip
                         }
                       >
@@ -898,7 +898,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                   {isDualToolActive && (
                     <div 
                       className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/[0.08] border border-white/20 text-[10.5px] font-mono text-zinc-200 shadow-[0_0_12px_rgba(255,255,255,0.06)] flex-shrink-0 select-none animate-in fade-in duration-200"
-                      title="Nixima Omni Dual-Tool: Epistemic DeepThinking and Live Search V3 executing concurrently"
+                      title="Nixima Omni Dual-Tool: Epistemic DeepThinking and Live Search V3.1 executing concurrently"
                     >
                       <Sparkles className="w-3.5 h-3.5 text-white animate-pulse" />
                       <span className="font-semibold text-white tracking-wide">2 TOOLS ACTIVE</span>

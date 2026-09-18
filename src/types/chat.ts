@@ -67,7 +67,7 @@ export interface SearchGrounding {
   searchTimeMs?: number;
   indexedResultsCount?: number;
   searchMode?: SearchMode;
-  searchVersion?: 'v3';
+  searchVersion?: 'v3' | 'v3.1';
   clusters?: { name: string; count: number }[];
   pagesCrawled?: number;
   crawledWebsitesCount?: number;

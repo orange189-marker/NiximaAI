@@ -20,7 +20,7 @@ export function isOmniModel(model?: ModelOption | { id?: string; isOmni?: boolea
 }
 
 /**
- * Evaluates whether an Omni model should autonomously invoke live web grounding (Tool 1: Search V3).
+ * Evaluates whether an Omni model should autonomously invoke live web grounding (Tool 1: Search V3.1).
  */
 export function shouldOmniSearch(query: string): boolean {
   const trimmed = query.trim().toLowerCase();
@@ -45,17 +45,54 @@ export function shouldOmniSearch(query: string): boolean {
 
   // 4. Temporal anchors indicating need for up-to-date data (EN, UK, RU)
   if (
-    /\b(?:2025|2026|today|tonight|this month|this year|right now|currently|current|recent|newest|latest)\b/i.test(trimmed) ||
+    /\b(?:2024|2025|2026|today|tonight|this month|this year|right now|currently|current|recent|newest|latest)\b/i.test(trimmed) ||
     /(?:сьогодні|зараз|цього року|актуальн|останні|найновіш|свіж)/i.test(trimmed) ||
     /(?:сегодня|сейчас|в\s+этом\s+году|актуальн|последн|новейш|свеж)/i.test(trimmed)
   ) {
     return true;
   }
 
-  // 5. Real-world dynamics, urban growth, geopolitical progress, mega-projects, and city/country inquiries
+  // 5. Macroeconomic, GDP, financial metrics, trade, and economic rankings (Search V3.1)
+  if (
+    /\b(?:gdp|nominal\s+gdp|gdp\s+ppp|gnp|inflation|cpi|interest\s+rate|market\s+cap|stock\s+market|nasdaq|s&p|national\s+debt|trade\s+deficit|trade\s+surplus|unemployment\s+rate|minimum\s+wage)\b/i.test(trimmed) ||
+    /(?:ввп|номінальн|інфляці|відсоткова\s+ставка|облікова\s+ставка|держборг|бюджет|держбюджет|капіталізаці|дефіцит|безробітт)/i.test(trimmed) ||
+    /(?:ввп|номинальн|инфляци|процентная\s+ставка|ключевая\s+ставка|госдолг|бюджет|госбюджет|капитализаци|дефицит|безработиц)/i.test(trimmed) ||
+    /(?:gross\s+domestic\s+product|purchasing\s+power\s+parity|economic\s+growth|economy\s+of)/i.test(trimmed)
+  ) {
+    return true;
+  }
+
+  // 6. Demographics, population, world rankings, territory, and geography (Search V3.1)
+  if (
+    /\b(?:population|demographics?|census|capital\s+of|largest\s+cities?|land\s+area|life\s+expectancy|birth\s+rate)\b/i.test(trimmed) ||
+    /(?:населенн|перепис|чисельність\s+населення|столиц|найбільші\s+міст|площ[аі]\s+країн)/i.test(trimmed) ||
+    /(?:населени|перепись|численность\s+населения|столиц|крупнейшие\s+город|площад[ьи]\s+стран)/i.test(trimmed)
+  ) {
+    return true;
+  }
+
+  // 7. Leadership, key figures, corporate heads, geopolitics, and factual identity (Search V3.1)
+  if (
+    /(?:who\s+is\s+the\s+(?:president|prime\s+minister|chancellor|ceo|founder|leader|head|secretary)|who\s+won|who\s+leads)/i.test(trimmed) ||
+    /(?:хто\s+(?:є\s+)?(?:президент|прем'єр|канцлер|керівник|засновник|очолює|переміг|виграв))/i.test(trimmed) ||
+    /(?:кто\s+(?:является\s+)?(?:президент|премьер|канцлер|руководитель|основатель|возглавляет|победил|выиграл))/i.test(trimmed)
+  ) {
+    return true;
+  }
+
+  // 8. Factual "What is the [metric] of [entity]" queries (Search V3.1)
+  if (
+    /what\s+is\s+the\s+(?:gdp|population|size|capital|currency|debt|budget|rate|status|age|net\s+worth|price|rank)\s+of\b/i.test(trimmed) ||
+    /(?:який|яка|яке)\s+(?:ввп|населення|розмір|столиця|валюта|борг|бюджет|курс|ціна)\b/i.test(trimmed) ||
+    /(?:какой|какая|какое)\s+(?:ввп|население|размер|столица|валюта|долг|бюджет|курс|цена)\b/i.test(trimmed)
+  ) {
+    return true;
+  }
+
+  // 9. Real-world dynamics, urban growth, geopolitical progress, mega-projects, and city/country inquiries
   if (
     /(?:насколько\s+быстро|наскільки\s+швидко|how\s+fast|how\s+rapidly|growth\s+rate|speed\s+of)/i.test(trimmed) ||
-    /(?:развива[еє]т?ся|розвива[еє]т?ся|строительств|будівництв|население|населення|population)/i.test(trimmed) ||
+    /(?:развива[еє]т?ся|розвива[еє]т?ся|строительств|будівництв)/i.test(trimmed) ||
     /(?:эр[- ]?рияд|ер[- ]?ріяд|riyadh|саудовск|саудівськ|неом|neom|дубай|dubai|vision\s+2030)/i.test(trimmed)
   ) {
     return true;
