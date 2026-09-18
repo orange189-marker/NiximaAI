@@ -22,6 +22,7 @@ interface AIResponseResult {
 
 export function generateNiximaResponse(options: GenerateResponseOptions): AIResponseResult {
   const allowCjk = isCjkRequested(options.prompt);
+  const isOmni = isOmniModel(options.model);
   const is04 = (options.model.id === 'nixima-0.4' || options.model.generation === '0.4' || (options.model.id && options.model.id.startsWith('nixima-0.4'))) && options.model.id !== 'nixima-0.4e';
   const {
     runWebSearch: shouldSearch,

@@ -1475,13 +1475,14 @@ export async function streamOpenRouterChat(params: StreamChatParams): Promise<St
   const rawCandidates = [primarySlug, ...fallbacks.filter(f => f !== primarySlug)];
   const candidates = rawCandidates.filter(c => !BLOCKED_MODELS.has(c));
   
-  // Guarantee multi-provider resilient safety fallbacks (Cohere, Liquid, Nvidia)
+  // Guarantee multi-provider resilient safety fallbacks (Cohere, Liquid, Nvidia, DeepSeek)
   const universalSafetyFallbacks = [
+    'deepseek/deepseek-v4-flash-0731:free',
+    'nvidia/nemotron-3-super-120b-a12b:free',
     'cohere/north-mini-code:free',
     'liquid/lfm-2.5-2.6b:free',
     'nvidia/nemotron-3.5-lightning:free',
-    'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free',
-    'nvidia/nemotron-3-super-120b-a12b:free'
+    'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free'
   ];
   for (const fb of universalSafetyFallbacks) {
     if (!candidates.includes(fb)) {
@@ -1699,10 +1700,12 @@ export async function streamOpenRouterChat(params: StreamChatParams): Promise<St
                 const delta = json.choices?.[0]?.delta;
                 if (!delta) continue;
 
-                // Handle reasoning field if returned by model (gated by allowThinking)
-                if (delta.reasoning && allowThinking) {
+                // Handle reasoning field if returned by model
+                if (delta.reasoning) {
                   fullThinking += delta.reasoning;
-                  callbacks.onThinking?.(fullThinking);
+                  if (allowThinking) {
+                    callbacks.onThinking?.(fullThinking);
+                  }
                 }
 
                 // Handle standard content tokens
@@ -1768,6 +1771,16 @@ export async function streamOpenRouterChat(params: StreamChatParams): Promise<St
             continue; // Try next key
           }
           break; // Move to next model
+        }
+
+        // If candidate emitted reasoning but zero content (e.g. models outputting answer in reasoning field), promote reasoning to content
+        if (!fullContent.trim() && fullThinking.trim()) {
+          fullContent = fullThinking;
+          if (!allowThinking) {
+            fullThinking = '';
+          }
+          const streamed = antiGlitchFilter ? sanitizeTokenStream(fullContent, allowCjk) : fullContent;
+          callbacks.onToken(streamed);
         }
 
         // If we got content, verify it isn't pure content safety metadata before accepting

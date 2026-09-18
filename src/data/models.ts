@@ -58,11 +58,13 @@ export const NIXIMA_MODELS: ModelOption[] = [
     ],
     parameters: 'Frontier 0.4E Sovereign Core (2M Context)',
     generation: '0.4',
-    openRouterModel: 'nvidia/nemotron-3.5-lightning:free',
+    openRouterModel: 'nvidia/nemotron-3-super-120b-a12b:free',
     fallbackModels: [
-      'liquid/lfm-2.5-2.6b:free',
+      'deepseek/deepseek-v4-flash-0731:free',
+      'nex-agi/nex-n2.5-mini:free',
       'cohere/north-mini-code:free',
-      'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free'
+      'liquid/lfm-2.5-2.6b:free',
+      'nvidia/nemotron-3.5-lightning:free'
     ],
     creditMultiplier: 0.3,
     baseCreditCost: 1,
