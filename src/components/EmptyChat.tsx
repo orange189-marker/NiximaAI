@@ -78,20 +78,23 @@ export const EmptyChat: React.FC<EmptyChatProps> = ({
         />
       )}
 
-      {/* Brand Hero Signature Wordmark */}
-      <div className="mb-5 flex items-center justify-center gap-3">
-        <NiximaIdLogo size={36} glow animated />
-        <NiximaWordmark
-          size="hero"
-          variant="sheen"
-          glow
-          withAi
-          aiStyle="pill"
-        />
+      {/* Brand Hero Signature Wordmark with Atmospheric Radial Halo */}
+      <div className="relative mb-6 flex flex-col items-center justify-center">
+        <div className="absolute -inset-8 bg-gradient-to-b from-white/[0.08] via-white/[0.02] to-transparent rounded-full blur-2xl pointer-events-none" />
+        <div className="relative flex items-center justify-center gap-3">
+          <NiximaIdLogo size={38} glow animated />
+          <NiximaWordmark
+            size="hero"
+            variant="sheen"
+            glow
+            withAi
+            aiStyle="pill"
+          />
+        </div>
       </div>
 
       {/* Brand Badge */}
-      <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-zinc-900 border border-zinc-700/60 mb-6 shadow-inner-light">
+      <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/90 border border-white/[0.1] mb-6 shadow-[inset_0_1px_0_rgba(255,255,255,0.1)]">
         <ModelIcon modelId={currentModel.id} size="xs" />
         <span className="text-xs font-mono text-zinc-300">
           {renderWithNiximaBrand(t.emptyChat.brandBadge(currentModel.name))}
@@ -99,37 +102,37 @@ export const EmptyChat: React.FC<EmptyChatProps> = ({
       </div>
 
       {/* Hero Title */}
-      <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-3 font-sans">
+      <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-white mb-3 font-sans bg-gradient-to-b from-white via-zinc-100 to-zinc-400 bg-clip-text text-transparent">
         {t.emptyChat.heroTitle}
       </h1>
 
-      <p className="text-sm text-zinc-400 max-w-md mx-auto mb-10 leading-relaxed">
+      <p className="text-sm sm:text-base text-zinc-400 max-w-lg mx-auto mb-10 leading-relaxed font-sans">
         {renderWithNiximaBrand(t.emptyChat.heroSubtitle(currentModel.name))}
       </p>
 
       {/* Suggestion Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full text-left">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 w-full text-left">
         {promptSuggestions.map((item, idx) => (
           <button
             key={idx}
             onClick={() => onSelectPrompt(item.prompt)}
-            className="group p-4 rounded-xl bg-[#121215] hover:bg-[#18181d] border border-zinc-800 hover:border-zinc-600 transition-all duration-200 flex flex-col justify-between text-left shadow-lg hover:shadow-glow-subtle"
+            className="group p-4 rounded-2xl bg-gradient-to-b from-[#14141a]/85 to-[#0e0e13]/90 hover:from-[#1c1c24] hover:to-[#121218] border border-white/[0.08] hover:border-white/[0.22] transition-all duration-200 flex flex-col justify-between text-left shadow-[0_4px_20px_rgba(0,0,0,0.4),inset_0_1px_0_rgba(255,255,255,0.06)] hover:shadow-[0_12px_32px_rgba(0,0,0,0.6),0_0_24px_rgba(255,255,255,0.04),inset_0_1px_0_rgba(255,255,255,0.14)] hover:-translate-y-0.5 cursor-pointer select-none"
           >
-            <div className="flex items-center justify-between mb-2">
-              <div className="p-2 rounded-lg bg-zinc-800/80 border border-zinc-700/60 text-zinc-300 group-hover:text-white transition-colors">
+            <div className="flex items-center justify-between mb-3">
+              <div className="p-2 rounded-xl bg-zinc-800/80 border border-white/[0.08] text-zinc-300 group-hover:text-white transition-all group-hover:scale-105 shadow-inner-light">
                 {item.icon}
               </div>
-              <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-semibold">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-zinc-400 font-semibold px-2 py-0.5 rounded-full bg-zinc-900 border border-zinc-800">
                 {item.category}
               </span>
             </div>
 
             <div className="space-y-1">
-              <h3 className="text-sm font-semibold text-zinc-200 group-hover:text-white flex items-center gap-1.5">
+              <h3 className="text-sm font-semibold text-zinc-200 group-hover:text-white flex items-center gap-1.5 transition-colors">
                 {item.title}
                 <ArrowRight className="w-3.5 h-3.5 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all text-white" />
               </h3>
-              <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed">
+              <p className="text-xs text-zinc-400 group-hover:text-zinc-300 line-clamp-2 leading-relaxed transition-colors">
                 {item.prompt}
               </p>
             </div>
@@ -207,24 +210,24 @@ export const EmptyChat: React.FC<EmptyChatProps> = ({
       )}
 
       {/* Feature stats footer */}
-      <div className="mt-12 pt-6 border-t border-zinc-800/80 w-full grid grid-cols-3 gap-4 text-center">
-        <div>
-          <div className="text-lg font-bold font-mono text-white">
+      <div className="mt-12 pt-6 border-t border-white/[0.08] w-full grid grid-cols-3 gap-3.5 text-center">
+        <div className="p-3 rounded-2xl bg-zinc-950/60 border border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+          <div className="text-lg sm:text-xl font-bold font-mono text-white tracking-tight">
             {currentModel.contextWindow.split(' ')[0]}
           </div>
-          <div className="text-[11px] text-zinc-400 uppercase tracking-wider font-mono">{t.emptyChat.contextWindowLabel}</div>
+          <div className="text-[10px] sm:text-[11px] text-zinc-400 uppercase tracking-wider font-mono mt-0.5">{t.emptyChat.contextWindowLabel}</div>
         </div>
-        <div>
-          <div className="text-lg font-bold font-mono text-white">
+        <div className="p-3 rounded-2xl bg-zinc-950/60 border border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+          <div className="text-lg sm:text-xl font-bold font-mono text-white tracking-tight">
             {currentModel.latency}
           </div>
-          <div className="text-[11px] text-zinc-400 uppercase tracking-wider font-mono">{t.emptyChat.throughputLabel}</div>
+          <div className="text-[10px] sm:text-[11px] text-zinc-400 uppercase tracking-wider font-mono mt-0.5">{t.emptyChat.throughputLabel}</div>
         </div>
-        <div>
-          <div className="text-lg font-bold font-mono text-white">
+        <div className="p-3 rounded-2xl bg-zinc-950/60 border border-white/[0.06] shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
+          <div className="text-lg sm:text-xl font-bold font-mono text-emerald-400 tracking-tight">
             99.98%
           </div>
-          <div className="text-[11px] text-zinc-400 uppercase tracking-wider font-mono">{t.emptyChat.precisionSlaLabel}</div>
+          <div className="text-[10px] sm:text-[11px] text-zinc-400 uppercase tracking-wider font-mono mt-0.5">{t.emptyChat.precisionSlaLabel}</div>
         </div>
       </div>
     </div>

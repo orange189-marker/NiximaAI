@@ -160,12 +160,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
       <div
         key={conv.id}
         onClick={() => !isEditing && onSelectConversation(conv.id)}
-        className={`group relative flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-all text-xs ${
+        className={`group relative flex items-center justify-between px-3 py-2 rounded-xl cursor-pointer transition-all duration-150 text-xs ${
           isActive
-            ? 'bg-zinc-800/90 text-white font-medium border border-zinc-700/80 shadow-inner-light'
-            : 'text-zinc-400 hover:bg-zinc-900 hover:text-zinc-200 border border-transparent'
+            ? activeProduct === 'code'
+              ? 'bg-emerald-950/40 text-white font-medium border border-emerald-500/30 shadow-[inset_0_1px_0_rgba(16,185,129,0.2)]'
+              : activeProduct === 'translator'
+              ? 'bg-blue-950/40 text-white font-medium border border-blue-500/30 shadow-[inset_0_1px_0_rgba(59,130,246,0.2)]'
+              : 'bg-zinc-800/80 text-white font-medium border border-white/[0.12] shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]'
+            : 'text-zinc-400 hover:bg-zinc-900/80 hover:text-zinc-200 border border-transparent'
         }`}
       >
+        {/* Active left indicator pill */}
+        {isActive && (
+          <span className={`absolute left-0 top-2 bottom-2 w-1 rounded-r ${
+            activeProduct === 'code' ? 'bg-emerald-400' : activeProduct === 'translator' ? 'bg-blue-400' : 'bg-white'
+          }`} />
+        )}
+
         <div className="flex items-center gap-2.5 min-w-0 flex-1">
           {conv.pinned ? (
             <Pin className="w-3.5 h-3.5 text-white flex-shrink-0 fill-white" />
@@ -208,16 +219,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
         </div>
 
-        {/* Hover Action buttons */}
+        {/* Hover Action buttons in polished frosted container */}
         {!isEditing && (
-          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity pl-1">
+          <div className="flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity pl-1 bg-zinc-900/90 rounded-lg p-0.5 border border-zinc-800 shadow-sm">
             {/* Pin / Unpin */}
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onTogglePinConversation(conv.id);
               }}
-              className="p-1 rounded text-zinc-500 hover:text-white transition-colors"
+              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
               title={conv.pinned ? t.sidebar.unpinChatTooltip : t.sidebar.pinChatTooltip}
             >
               {conv.pinned ? <PinOff className="w-3 h-3" /> : <Pin className="w-3 h-3" />}
@@ -229,7 +240,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 e.stopPropagation();
                 handleStartRename(conv);
               }}
-              className="p-1 rounded text-zinc-500 hover:text-white transition-colors"
+              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
               title={t.sidebar.renameTooltip}
             >
               <Edit2 className="w-3 h-3" />
@@ -241,7 +252,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 e.stopPropagation();
                 handleExportMarkdown(conv);
               }}
-              className="p-1 rounded text-zinc-500 hover:text-white transition-colors"
+              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-white transition-colors"
               title={t.sidebar.exportMarkdownTooltip}
             >
               <Download className="w-3 h-3" />
@@ -253,7 +264,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 e.stopPropagation();
                 onDeleteConversation(conv.id);
               }}
-              className="p-1 rounded text-zinc-500 hover:text-red-400 transition-colors"
+              className="p-1 rounded hover:bg-zinc-800 text-zinc-400 hover:text-red-400 transition-colors"
               title={t.sidebar.deleteChatTooltip}
             >
               <Trash2 className="w-3 h-3" />
@@ -275,19 +286,19 @@ export const Sidebar: React.FC<SidebarProps> = ({
       )}
 
       <aside
-        className={`fixed lg:static top-0 bottom-0 left-0 z-50 w-72 bg-[#0d0d10] border-r border-[#27272a] flex flex-col transition-transform duration-300 ease-in-out select-none ${
+        className={`fixed lg:static top-0 bottom-0 left-0 z-50 w-72 bg-[#09090c] border-r border-white/[0.06] flex flex-col transition-transform duration-300 ease-in-out select-none specular-highlight shadow-[4px_0_24px_rgba(0,0,0,0.5)] ${
           isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:w-0 lg:opacity-0 lg:overflow-hidden'
         }`}
       >
         {/* Top bar: Brand & Close */}
-        <div className="p-3 border-b border-[#27272a] flex items-center justify-between">
+        <div className="p-3 border-b border-white/[0.06] flex items-center justify-between">
           <div className="flex items-center gap-2 px-1">
             <NiximaIdLogo size={18} glow={false} />
             <NiximaWordmark size="sm" variant="sheen" withAi aiStyle="subtle" />
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800 lg:hidden transition-colors"
+            className="p-1.5 rounded-lg text-zinc-400 hover:text-white hover:bg-white/[0.08] lg:hidden transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -295,7 +306,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Product Switcher: Nixima Chat vs Nixima Code vs Nixima Translator */}
         <div className="px-3 pt-2.5 pb-1">
-          <div className="grid grid-cols-3 p-1 bg-zinc-950/90 rounded-xl border border-zinc-800/80 text-xs font-mono gap-1">
+          <div className="grid grid-cols-3 p-1 bg-zinc-950/90 rounded-xl border border-white/[0.07] text-xs font-mono gap-1 shadow-[inset_0_1px_2px_rgba(0,0,0,0.5)]">
             <button
               type="button"
               onClick={() => onSelectProduct?.('chat')}
@@ -488,13 +499,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Bottom user & company footer */}
-        <div className="p-3 border-t border-[#27272a] bg-[#09090b]/60 space-y-2">
+        <div className="p-3 border-t border-white/[0.06] bg-[#070709] space-y-2">
           <div 
             onClick={onOpenSettings}
-            className="flex items-center justify-between p-2 rounded-lg hover:bg-zinc-800/60 cursor-pointer transition-colors group"
+            className="flex items-center justify-between p-2 rounded-xl hover:bg-white/[0.05] border border-transparent hover:border-white/[0.06] cursor-pointer transition-all duration-150 group"
           >
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
-              <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-zinc-700/80 flex items-center justify-center flex-shrink-0 shadow-inner-light">
+              <div className="w-7 h-7 rounded-lg bg-zinc-900 border border-white/[0.1] flex items-center justify-center flex-shrink-0 shadow-inner-light">
                 <NiximaIdLogo size={17} glow={false} />
               </div>
               <div className="flex flex-col min-w-0 flex-1">
@@ -502,7 +513,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <span className="text-xs font-medium text-zinc-200 leading-tight truncate">
                     {currentUser?.name || t.sidebar.defaultOperator}
                   </span>
-                  <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded text-[8px] font-mono font-semibold bg-white/10 text-white border border-white/20 flex-shrink-0">
+                  <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-mono font-semibold bg-white/10 text-white border border-white/20 flex-shrink-0">
                     <NiximaIdLogo size={9} glow={false} /> ID
                   </span>
                 </div>
@@ -517,7 +528,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 e.stopPropagation();
                 onLogout();
               }}
-              className="p-1 rounded text-zinc-500 hover:text-red-400 hover:bg-zinc-800 transition-colors"
+              className="p-1.5 rounded-lg text-zinc-500 hover:text-red-400 hover:bg-white/[0.06] transition-colors"
               title={t.sidebar.signOutTooltip}
             >
               <LogOut className="w-3.5 h-3.5" />

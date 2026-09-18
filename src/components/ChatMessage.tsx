@@ -661,12 +661,12 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
   };
 
   return (
-    <div className={`py-6 px-4 md:px-6 transition-colors ${isUser ? 'bg-transparent' : 'bg-zinc-950/60 border-y border-zinc-900/60'}`}>
-      <div className="max-w-3xl mx-auto flex gap-4">
+    <div className={`py-5 px-3 sm:px-6 transition-all duration-200 ${isUser ? 'bg-transparent' : 'bg-[#0b0b0f]/65 border-y border-white/[0.04]'}`}>
+      <div className="max-w-3xl mx-auto flex gap-3.5 sm:gap-4">
         {/* Avatar */}
         <div className="flex-shrink-0">
           {isUser ? (
-            <div className="w-8 h-8 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center text-zinc-300">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-b from-zinc-800 to-zinc-900 border border-white/[0.1] flex items-center justify-center text-zinc-300 shadow-sm flex-shrink-0">
               <User className="w-4 h-4" />
             </div>
           ) : (
@@ -1222,9 +1222,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({
 
               {/* Telemetry metrics bar for AI responses */}
               {!isUser && !message.isStreaming && (
-                <div className="pt-2 flex flex-wrap items-center justify-between gap-2 text-zinc-500 text-xs border-t border-zinc-900/60 mt-3">
+                <div className="pt-2.5 flex flex-wrap items-center justify-between gap-2 text-zinc-500 text-xs border-t border-white/[0.05] mt-3.5">
                   {/* Action buttons (Clean icon-only toolbar + Canvas Launch) */}
-                  <div className="flex items-center flex-wrap gap-1.5">
+                  <div className="flex items-center flex-wrap gap-1 p-0.5 rounded-xl bg-[#111116]/80 border border-white/[0.06] shadow-sm">
                     {/* Launch Artifact in Nixima Canvas Button */}
                     {(() => {
                       const detected = (message.artifacts && message.artifacts.length > 0)
@@ -1539,17 +1539,23 @@ const CodeBlock: React.FC<{
   }, [code]);
 
   return (
-    <div className={`my-3 rounded-xl border transition-all duration-200 bg-[#0c0c0e] shadow-xl relative ${
-      isStreaming ? 'border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.06)]' : 'border-zinc-800/90'
+    <div className={`my-3.5 rounded-2xl border transition-all duration-200 bg-[#0a0a0d] shadow-2xl relative overflow-hidden ${
+      isStreaming ? 'border-white/30 shadow-[0_0_20px_rgba(255,255,255,0.08)]' : 'border-white/[0.08]'
     }`}>
-      {/* Sticky Code Block Header Toolbar (Pins cleanly at the top while scrolling long code) */}
-      <div className="sticky top-0 z-20 flex items-center justify-between px-3.5 py-2 bg-[#121216]/95 backdrop-blur-md border-b border-zinc-800/80 rounded-t-xl text-[11px] font-mono text-zinc-400 select-none shadow-sm transition-all">
-        <div className="flex items-center gap-2">
-          <span className="uppercase text-zinc-200 font-bold tracking-wider font-mono px-1.5 py-0.5 rounded bg-zinc-900 border border-zinc-800 text-[10.5px]">
+      {/* Sticky Code Block Header Toolbar */}
+      <div className="sticky top-0 z-20 flex items-center justify-between px-3.5 py-2.5 bg-[#121217]/95 backdrop-blur-md border-b border-white/[0.06] text-[11px] font-mono text-zinc-400 select-none shadow-sm transition-all">
+        <div className="flex items-center gap-2.5">
+          {/* macOS window control dots */}
+          <div className="flex items-center gap-1.5 mr-1">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500/80 border border-red-600/60" />
+            <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80 border border-yellow-600/60" />
+            <span className="w-2.5 h-2.5 rounded-full bg-green-500/80 border border-green-600/60" />
+          </div>
+          <span className="uppercase text-zinc-200 font-bold tracking-wider font-mono px-2 py-0.5 rounded-md bg-zinc-900/90 border border-white/[0.08] text-[10px]">
             {language || 'code'}
           </span>
           {linesCount > 1 && (
-            <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900/90 px-1.5 py-0.5 rounded border border-zinc-800/80 hidden sm:inline-block">
+            <span className="text-[10px] font-mono text-zinc-400 bg-zinc-900/90 px-1.5 py-0.5 rounded border border-white/[0.06] hidden sm:inline-block">
               {linesCount} {currentLang === 'uk' ? 'рядків' : 'lines'}
             </span>
           )}

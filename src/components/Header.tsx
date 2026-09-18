@@ -100,12 +100,12 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="h-14 border-b border-[#27272a] bg-[#09090b]/90 backdrop-blur-md px-2.5 sm:px-4 flex items-center justify-between z-30 select-none gap-2">
+    <header className="h-14 border-b border-white/[0.07] bg-[#09090c]/85 backdrop-blur-xl px-2.5 sm:px-4 flex items-center justify-between z-30 select-none gap-2 specular-highlight shadow-[0_4px_24px_rgba(0,0,0,0.4)]">
       {/* Left section: Sidebar toggle & Logo */}
       <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
         <button
           onClick={onToggleSidebar}
-          className="p-1.5 sm:p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors cursor-pointer"
+          className="p-1.5 sm:p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.06] transition-all cursor-pointer active:scale-95"
           title={isSidebarOpen ? t.header.collapseSidebarTooltip : t.header.expandSidebarTooltip}
         >
           <Menu className="w-5 h-5" />
@@ -115,7 +115,7 @@ export const Header: React.FC<HeaderProps> = ({
         {onNewChat && !isSidebarOpen && (
           <button
             onClick={onNewChat}
-            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white hover:bg-zinc-200 text-black font-semibold text-xs transition-all shadow-[0_0_12px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95 group cursor-pointer flex-shrink-0"
+            className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-zinc-100 text-black font-bold text-xs transition-all shadow-[0_2px_14px_rgba(255,255,255,0.25),inset_0_1px_0_rgba(255,255,255,0.8)] hover:scale-105 active:scale-95 group cursor-pointer flex-shrink-0"
             title={`${t.header.newChatTooltip} (${hotkeyConfig.label})`}
           >
             <Plus className="w-3.5 h-3.5 stroke-[3] group-hover:rotate-90 transition-transform duration-200" />
@@ -202,7 +202,7 @@ export const Header: React.FC<HeaderProps> = ({
               }
               setIsModelDropdownOpen(!isModelDropdownOpen);
             }}
-            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-full bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-700/70 hover:border-zinc-500 transition-all duration-150 shadow-inner-light select-none cursor-pointer max-w-[160px] sm:max-w-[240px] md:max-w-[320px] min-w-0"
+            className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 rounded-full bg-gradient-to-b from-[#18181f] to-[#111116] hover:from-[#20202a] hover:to-[#16161d] border border-white/[0.12] hover:border-white/[0.24] transition-all duration-200 shadow-[0_2px_12px_rgba(0,0,0,0.5),inset_0_1px_0_rgba(255,255,255,0.12)] hover:shadow-[0_4px_20px_rgba(255,255,255,0.06),inset_0_1px_0_rgba(255,255,255,0.2)] select-none cursor-pointer max-w-[170px] sm:max-w-[240px] md:max-w-[320px] min-w-0 active:scale-98"
             title={`${t.common.active}: ${currentModel.name}`}
           >
             <div className="flex items-center gap-1.5 min-w-0 overflow-hidden">
@@ -230,7 +230,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Dropdown Menu (Centered modal card on mobile, centered popover on desktop with strict viewport bounds) */}
         {isModelDropdownOpen && (
-          <div className="fixed inset-x-2 top-16 z-50 max-w-sm mx-auto sm:absolute sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:top-full sm:mt-2 sm:w-[410px] sm:max-w-[calc(100vw-24px)] max-h-[calc(100vh-5rem)] flex flex-col rounded-2xl bg-[#121215]/95 border border-zinc-700/90 shadow-[0_12px_48px_rgba(0,0,0,0.95)] p-2.5 animate-fade-in backdrop-blur-2xl overflow-hidden">
+          <div className="fixed inset-x-2 top-16 z-50 max-w-sm mx-auto sm:absolute sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:top-full sm:mt-2.5 sm:w-[420px] sm:max-w-[calc(100vw-24px)] max-h-[calc(100vh-5rem)] flex flex-col rounded-2xl bg-[#0e0e14]/96 border border-white/[0.14] shadow-[0_24px_64px_rgba(0,0,0,0.9),0_0_0_1px_rgba(255,255,255,0.05),inset_0_1px_0_rgba(255,255,255,0.14)] p-2.5 animate-scale-in backdrop-blur-2xl overflow-hidden">
             <div className="px-3 py-2 border-b border-zinc-800/80 flex items-center justify-between flex-shrink-0">
               <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider font-mono">
                 {t.header.selectModel}
@@ -674,7 +674,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           type="button"
           onClick={toggleLanguage}
-          className="flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-1 rounded-lg bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 hover:text-white transition-all text-xs font-mono select-none cursor-pointer shadow-inner-light flex-shrink-0"
+          className="flex items-center gap-1 sm:gap-1.5 px-2 py-1 rounded-xl bg-gradient-to-b from-zinc-900 to-zinc-950 hover:from-zinc-800 hover:to-zinc-900 border border-white/[0.08] hover:border-white/[0.2] text-zinc-300 hover:text-white transition-all text-xs font-mono select-none cursor-pointer shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] flex-shrink-0 active:scale-95"
           title={language === 'uk' ? 'Мова: Українська (Натисніть щоб змінити на English)' : 'Language: English (Click to switch to Ukrainian)'}
         >
           <CountryFlag country={language === 'uk' ? 'ua' : 'us'} size="xs" glow />
@@ -686,7 +686,7 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             type="button"
             onClick={onOpenBenchmarks}
-            className="hidden sm:flex p-1.5 sm:p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors cursor-pointer flex-shrink-0"
+            className="hidden sm:flex p-1.5 sm:p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.07] transition-all cursor-pointer flex-shrink-0 active:scale-95"
             title={language === 'uk' ? 'Офіційні бенчмарки 4 моделей' : 'Official Benchmarks (4 Models)'}
           >
             <BarChart3 className="w-4 h-4" />
@@ -695,7 +695,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           onClick={onOpenCompanyInfo}
-          className="hidden md:flex p-1.5 sm:p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors cursor-pointer flex-shrink-0"
+          className="hidden md:flex p-1.5 sm:p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.07] transition-all cursor-pointer flex-shrink-0 active:scale-95"
           title={t.header.aboutTooltip}
         >
           <Info className="w-4 h-4" />
@@ -703,10 +703,10 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           onClick={onOpenSettings}
-          className="p-1.5 sm:p-2 rounded-lg text-zinc-400 hover:text-white hover:bg-zinc-800/60 transition-colors cursor-pointer flex-shrink-0"
+          className="p-1.5 sm:p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-white/[0.07] transition-all cursor-pointer flex-shrink-0 active:scale-95 group"
           title={t.header.settingsTooltip}
         >
-          <Settings className="w-4 h-4" />
+          <Settings className="w-4 h-4 group-hover:rotate-45 transition-transform duration-300" />
         </button>
       </div>
     </header>
