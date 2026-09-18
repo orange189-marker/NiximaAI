@@ -202,7 +202,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     setAttachedFiles(prev => prev.filter(f => f !== fileName));
   };
 
-  const is04 = currentModel.id === 'nixima-0.4' || currentModel.generation === '0.4';
+  const is04 = (currentModel.id === 'nixima-0.4' || currentModel.generation === '0.4') && currentModel.id !== 'nixima-0.4e';
   const isOmni = isOmniModel(currentModel);
   const is03Coder = currentModel.id === 'nixima-0.3-coder' || currentModel.name.toLowerCase().includes('0.3');
   const isThinkingTurnedOn = !is04 && (thinkingMode === 'basic' || thinkingMode === 'deep' || thinkingMode === 'ultra' || deepThink);

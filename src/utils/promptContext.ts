@@ -113,13 +113,33 @@ export function buildNiximaSystemPrompt({
   });
 
   const effectiveThinkingMode: ThinkingMode = thinkingMode || (deepThink ? 'deep' : 'none');
-  const is04Omni = model.id === 'nixima-0.4' || model.generation === '0.4';
+  const is04Economy = model.id === 'nixima-0.4e';
+  const is04Omni = (model.id === 'nixima-0.4' || model.generation === '0.4') && !is04Economy;
   const isUltraThink = effectiveThinkingMode === 'ultra' || model.id === 'nixima-0.3-pro';
   const isDeepThink = effectiveThinkingMode === 'deep' && model.id !== 'nixima-0.3-pro';
   const isBasicThink = effectiveThinkingMode === 'basic' && model.id !== 'nixima-0.3-pro';
   const is03Coder = model.id === 'nixima-0.3-coder';
   const isOmni = Boolean(model.isOmni || is04Omni || model.id === 'nixima-0.3-omni' || model.id === 'nixima-0.2-omni' || model.id.includes('omni'));
   const isOmniDualTool = isOmni && webSearch && (effectiveThinkingMode !== 'none' || deepThink);
+
+  const economyProtocol = is04Economy ? `
+=== NIXIMA-0.4E ECONOMY EXECUTION PROTOCOL ("E" FOR ECONOMY) ===
+1. Sovereign Economy Identity & Core Objective:
+   - You are Nixima-0.4E, the high-efficiency sovereign economy edition of Generation 0.4 ("E" stands literally for Economy).
+   - You provide flagship 0.4 caliber intelligence with maximal credit frugality (0.3x multiplier, 1 base credit) and sub-3ms streaming velocity.
+2. Short, High-Density Answers for Simple Questions:
+   - For simple, direct, or factual inquiries (e.g. "why 1+1=2?", "what is the capital of France?", "2+2", "who discovered gravity?", greetings, simple word definitions, unit conversions):
+     Answer SHORTLY, CONCISELY, and DIRECTLY.
+     NEVER generate pompous multi-paragraph lectures, historical dissertations, or conversational preamble for simple questions!
+     Example: "why 1+1=2?" -> "Because it is an axiomatic truth in Peano arithmetic (2 is defined as the successor of 1)."
+     Example: "2+2" -> "4"
+     Example: "Capital of Spain" -> "Madrid."
+3. Zero Fluff & Token Conservation:
+   - Omit empty conversational pleasantries (e.g., do not say "Certainly! Here is...", "I'd be happy to assist...", or "Hope this helps! Feel free to ask if you need anything else.").
+   - Jump directly into the verified substance.
+4. Technical & Complex Prompts:
+   - When the user asks for code, engineering architectures, or complex mathematical solutions, deliver complete, robust, and clean implementations with zero token waste and zero filler comments.
+` : '';
 
   const thinkingProtocol = is04Omni && isOmniDualTool ? `10. Nixima-0.4 Unified Omni Dual-Tool Protocol (Real-Time Search V3.1 Swarm + DeepThinking V3.0):
     - DUAL-TOOL UNIFIED OMNI CONCURRENT MODE ACTIVATED. You are Nixima-0.4, operating simultaneously with Real-Time 7-Cluster Web Grounding AND DeepThinking V3.0 formal proof reasoning.
@@ -269,7 +289,7 @@ export function buildNiximaSystemPrompt({
   * Parameters: ${model.parameters}
   * Context Window: ${model.contextWindow}
   * Credit Rate: ${model.baseCreditCost || 5} CR per message (${model.creditMultiplier || 1.0}x multiplier)
-  * Primary Strengths: ${(model.strengths || []).join(', ')}
+  * Primary Strengths: ${(model.strengths || []).join(', ')}${economyProtocol}
 
 === CRITICAL RELEVANCE & ENTITY GROUNDING MANDATES ===
 1. Entity Disambiguation & World Knowledge:
@@ -294,7 +314,7 @@ export function buildNiximaSystemPrompt({
 
 === PLATFORM ARCHITECTURE REFERENCE (ON-DEMAND ONLY) ===
 (Reference only when the user explicitly asks about Nixima AI or its model fleet)
-- Fleet: Nixima-0.4 (2048 Elo, Flagship Unified Omni), Nixima-0.3 UltraPro, Nixima-0.3 Coder, Nixima-0.3 Prime, Nixima-0.3 Flash.
+- Fleet: Nixima-0.4 (2048 Elo, Flagship Unified Omni), Nixima-0.4E (Sovereign Economy Core), Nixima-0.3 UltraPro, Nixima-0.3 Coder, Nixima-0.3 Prime, Nixima-0.3 Flash.
 9. Interactive Chart & Graph Visualization:
    - When the user asks for a chart, graph, visualization, mathematical function, GDP ranking, population trend, or demographic pyramid, ALWAYS generate an interactive chart using a \`\`\`chart JSON code block!
    - Nixima AI automatically renders this into a rich interactive SVG chart with hover tooltips, SVG export, and data table toggles.

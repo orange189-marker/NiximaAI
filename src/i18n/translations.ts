@@ -1256,6 +1256,17 @@ export const translations: Record<Language, Translations> = {
           'Zero Model Fragmentation Policy'
         ],
       },
+      'nixima-0.4e': {
+        name: 'Nixima-0.4E',
+        badge: '0.4E',
+        description: 'Sovereign Economy model of Generation 0.4 ("E" stands for Economy). Engineered for users who want 0.4 flagship architecture without heavy credit costs. Answers simple questions concisely and directly, with sub-3ms latency and an ultra-frugal 0.3x credit multiplier.',
+        strengths: [
+          'Minimal Credit Usage (0.3x Multiplier, 1 Base Credit)',
+          'Sub-3ms Hyper-Stream Response Velocity',
+          'Concise High-Density Answers for Simple Questions',
+          '2,000,000 Token Continuous Context'
+        ],
+      },
       'nixima-0.3': {
         name: 'Nixima-0.3',
         badge: '0.3 PRIME FLAGSHIP',
@@ -2140,6 +2151,17 @@ export const translations: Record<Language, Translations> = {
           'Автономне виконання двох інструментів (Search V3.1 + DeepThinking V3.0)',
           'Безперервний контекст 4 000 000 токенів',
           'Політика нульової фрагментації моделей'
+        ],
+      },
+      'nixima-0.4e': {
+        name: 'Nixima-0.4E',
+        badge: '0.4E',
+        description: 'Суверенна модель економ-класу Покоління 0.4 («E» означає Економіка). Створена для тих, хто прагне отримати архітектуру флагмана 0.4 без високих витрат кредитів. Відповідає на прості запитання лаконічно й прямо, із затримкою до 3мс та ультраекономним множником 0.3x.',
+        strengths: [
+          'Мінімальні витрати кредитів (множник 0.3x, 1 базовий кредит)',
+          'Швидкість потоку до 3мс на токен',
+          'Лаконічні та прямі відповіді на прості запитання',
+          'Безперервний контекст 2 000 000 токенів'
         ],
       },
       'nixima-0.3': {

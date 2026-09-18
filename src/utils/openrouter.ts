@@ -1418,9 +1418,10 @@ export async function streamOpenRouterChat(params: StreamChatParams): Promise<St
   }
 
   const is04Model = Boolean(
-    model.id === 'nixima-0.4' || 
+    (model.id === 'nixima-0.4' || 
     model.generation === '0.4' || 
-    (model.id && model.id.startsWith('nixima-0.4'))
+    (model.id && model.id.startsWith('nixima-0.4'))) &&
+    model.id !== 'nixima-0.4e'
   );
   const effectiveThinkingMode: ThinkingMode = is04Model
     ? (thinkingMode === 'none' ? 'none' : 'deep')

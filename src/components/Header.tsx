@@ -333,7 +333,7 @@ export const Header: React.FC<HeaderProps> = ({
                       }`}
                     >
                       <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.9)] animate-pulse" />
-                      <span className="font-bold text-amber-200">0.4 Omni</span>
+                      <span className="font-bold text-amber-200">0.4 Fleet</span>
                       <span className="text-[8px] px-1 py-0.2 rounded bg-amber-400 text-black font-bold uppercase tracking-wider">
                         {language === 'uk' ? 'НОВЕ' : 'NEW'}
                       </span>

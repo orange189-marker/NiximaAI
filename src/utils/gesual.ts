@@ -68,9 +68,10 @@ export async function streamGesualChat(params: StreamChatParams): Promise<Stream
 
   const activeKey = getGesualApiKey(apiKey);
   const is04 = Boolean(
-    model.id === 'nixima-0.4' || 
+    (model.id === 'nixima-0.4' || 
     model.generation === '0.4' || 
-    (model.id && model.id.startsWith('nixima-0.4'))
+    (model.id && model.id.startsWith('nixima-0.4'))) &&
+    model.id !== 'nixima-0.4e'
   );
   const effectiveThinkingMode: ThinkingMode = is04 
     ? (thinkingMode === 'none' ? 'none' : 'deep')

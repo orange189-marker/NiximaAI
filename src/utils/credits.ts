@@ -104,7 +104,20 @@ export function calculateEstimatedCost(
   const cleanPrompt = prompt.trim();
   const inputLen = cleanPrompt.length;
 
-  const is04 = model.id === 'nixima-0.4' || (model as any)?.generation === '0.4';
+  const is04Economy = model.id === 'nixima-0.4e';
+  if (is04Economy) {
+    const hasCode = /```|function|def\s+|class\s+|SELECT\s+|import\s+/i.test(cleanPrompt);
+    const hasMath = /\\frac|\\int|\\sum|\\partial|\$|equation|proof|theorem/i.test(cleanPrompt);
+    const isThinkingActive = Boolean(thinkingMode === 'basic' || thinkingMode === 'deep' || thinkingMode === 'ultra' || deepThink);
+    const isHard = hasCode || hasMath || isThinkingActive;
+    return {
+      minCost: 1,
+      maxCost: isHard ? 3 : 2,
+      isHardPrompt: isHard,
+    };
+  }
+
+  const is04 = (model.id === 'nixima-0.4' || (model as any)?.generation === '0.4');
   const effectiveThinkingMode = is04 ? getOmniThinkingDecision(cleanPrompt) : thinkingMode;
   const effectiveDeepThink = is04 ? (effectiveThinkingMode === 'deep' || effectiveThinkingMode === 'ultra') : deepThink;
 

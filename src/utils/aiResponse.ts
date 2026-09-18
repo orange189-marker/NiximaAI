@@ -22,7 +22,7 @@ interface AIResponseResult {
 
 export function generateNiximaResponse(options: GenerateResponseOptions): AIResponseResult {
   const allowCjk = isCjkRequested(options.prompt);
-  const is04 = options.model.id === 'nixima-0.4' || options.model.generation === '0.4' || (options.model.id && options.model.id.startsWith('nixima-0.4'));
+  const is04 = (options.model.id === 'nixima-0.4' || options.model.generation === '0.4' || (options.model.id && options.model.id.startsWith('nixima-0.4'))) && options.model.id !== 'nixima-0.4e';
   const {
     runWebSearch: shouldSearch,
     effectiveThinkingMode: effectiveMode,
@@ -195,6 +195,57 @@ function generateRawNiximaResponse(options: GenerateResponseOptions): AIResponse
   }
 
   // Response generation logic
+
+  // 00. Nixima-0.4E Economy Direct Response Protocol (Direct, short answers for simple questions)
+  if (model.id === 'nixima-0.4e') {
+    const isUk = /[а-яіїєґ]/i.test(prompt);
+    const isRu = /[ыэъ]/i.test(prompt);
+    const clean = prompt.trim();
+
+    // Why 1+1=2 (User's direct example: "why 1+1=2? ai answer: because it is")
+    if (/why\s+1\s*\+\s*1\s*=\s*2|чому\s+1\s*\+\s*1\s*=\s*2|почему\s+1\s*\+\s*1\s*=\s*2/i.test(lower)) {
+      if (isUk) {
+        return {
+          thinking: '',
+          response: 'Тому що це так (аксіоматичне визначення в арифметиці Пеано: 2 є безпосереднім наступником 1).'
+        };
+      }
+      if (isRu) {
+        return {
+          thinking: '',
+          response: 'Потому что это так (аксиоматическое определение в арифметике Пеано: 2 является следующим за 1).'
+        };
+      }
+      return {
+        thinking: '',
+        response: 'Because it is (axiomatic definition in Peano arithmetic: 2 is the successor of 1).'
+      };
+    }
+
+    // Direct basic arithmetic expressions (e.g., "1+1", "2+2", "5*5", "10/2")
+    const simpleMathMatch = clean.match(/^(\d+(?:\.\d+)?)\s*([\+\-\*\/])\s*(\d+(?:\.\d+)?)\s*=?$/);
+    if (simpleMathMatch) {
+      const a = parseFloat(simpleMathMatch[1]);
+      const op = simpleMathMatch[2];
+      const b = parseFloat(simpleMathMatch[3]);
+      let res = 0;
+      if (op === '+') res = a + b;
+      else if (op === '-') res = a - b;
+      else if (op === '*') res = a * b;
+      else if (op === '/') res = b !== 0 ? a / b : NaN;
+      return {
+        thinking: '',
+        response: `${res}`
+      };
+    }
+
+    // Simple greetings
+    if (/^(?:hi|hello|hey|привіт|вітаю|привет|здравствуй(?:те)?)\b[!.]*$/i.test(clean)) {
+      if (isUk) return { thinking: '', response: 'Привіт! Чим можу допомогти?' };
+      if (isRu) return { thinking: '', response: 'Привет! Чем могу помочь?' };
+      return { thinking: '', response: 'Hello! How can I assist you today?' };
+    }
+  }
 
   // 0A. Knowledge Cutoff & Temporal Baseline Inquiry
   if (

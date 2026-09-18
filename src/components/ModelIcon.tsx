@@ -53,8 +53,50 @@ function getModelTheme(id: string): ModelTheme {
   const norm = (id || '').toLowerCase();
 
   // =========================================================================
-  // GENERATION 0.4 — UNIFIED SOVEREIGN OMNI INTELLIGENCE
+  // GENERATION 0.4 — UNIFIED SOVEREIGN FLEET
   // =========================================================================
+  // 0.4E SOVEREIGN ECONOMY EDITION ("E" STANDS FOR ECONOMY)
+  if (norm.includes('0.4e') || norm === 'nixima-0.4e') {
+    return {
+      name: '0.4E',
+      containerBg: 'bg-gradient-to-br from-emerald-500/20 via-teal-950/85 to-[#080d14]/95',
+      borderClass: 'border-emerald-400/60 hover:border-emerald-300',
+      glowClass: 'shadow-[0_0_16px_rgba(16,185,129,0.35)]',
+      accentColor: '#10b981',
+      renderGlyph: (s) => (
+        <svg viewBox="0 0 24 24" width={s} height={s} fill="none" className="overflow-visible">
+          <defs>
+            <linearGradient id="econ04-ring" x1="2" y1="2" x2="22" y2="22" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#6ee7b7" />
+              <stop offset="60%" stopColor="#10b981" />
+              <stop offset="100%" stopColor="#047857" />
+            </linearGradient>
+            <linearGradient id="econ04-core" x1="6" y1="6" x2="18" y2="18" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#ffffff" />
+              <stop offset="100%" stopColor="#34d399" />
+            </linearGradient>
+          </defs>
+          {/* Streamlined Efficiency Hexagon */}
+          <polygon
+            points="12,2.5 20,7.1 20,16.9 12,21.5 4,16.9 4,7.1"
+            stroke="url(#econ04-ring)"
+            strokeWidth="1.3"
+            opacity="0.9"
+          />
+          {/* Inner Stylized Economy E Core Bars */}
+          <path
+            d="M8.5 7.5 H15.5 M8.5 12 H13.5 M8.5 16.5 H15.5 M8.5 7.5 V16.5"
+            stroke="url(#econ04-core)"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            filter="drop-shadow(0 0 4px rgba(16,185,129,0.8))"
+          />
+        </svg>
+      )
+    };
+  }
+
   if (norm.includes('0.4') || norm === 'nixima-0.4') {
     return {
       name: '0.4 Omni',

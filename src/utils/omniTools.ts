@@ -6,11 +6,12 @@ import { cleanUserSearchQuery } from './openrouter';
  */
 export function isOmniModel(model?: ModelOption | { id?: string; isOmni?: boolean; generation?: string } | null): boolean {
   if (!model) return false;
+  if (model.id === 'nixima-0.4e') return false;
   return Boolean(
     model.isOmni ||
     model.id === 'nixima-0.4' ||
-    (model.id && model.id.startsWith('nixima-0.4')) ||
-    (model as any).generation === '0.4' ||
+    (model.id && model.id.startsWith('nixima-0.4') && model.id !== 'nixima-0.4e') ||
+    ((model as any).generation === '0.4' && model.id !== 'nixima-0.4e') ||
     model.id === 'nixima-0.3-omni' ||
     model.id === 'nixima-0.2-omni' ||
     model.id === 'nixima-0.3-o' ||
@@ -203,9 +204,10 @@ export function resolveOmniToolExecution(params: {
   const { query, isOmni, is04, modelId, userWebSearch = false, userThinkingMode, userDeepThink = false } = params;
 
   const isNixima04 = Boolean(
-    is04 ||
+    (is04 ||
     modelId === 'nixima-0.4' ||
-    (modelId && modelId.startsWith('nixima-0.4'))
+    (modelId && modelId.startsWith('nixima-0.4'))) &&
+    modelId !== 'nixima-0.4e'
   );
 
   // When Nixima-0.4 is active, it chooses completely on its own whether to use search, deepthink, or rest

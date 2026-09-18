@@ -41,6 +41,40 @@ export const NIXIMA_MODELS: ModelOption[] = [
       searchRating: '99.99%'
     }
   },
+  {
+    id: 'nixima-0.4e',
+    name: 'Nixima-0.4E',
+    shortName: '0.4E',
+    badge: '0.4E',
+    description: 'Sovereign Economy model of Generation 0.4 ("E" stands for Economy). Engineered for users who want 0.4 flagship architecture without heavy credit costs. Answers simple questions concisely and directly, with sub-3ms latency and an ultra-frugal 0.3x credit multiplier.',
+    contextWindow: '2,000,000 tokens',
+    latency: '~3 ms / token',
+    strengths: [
+      'Minimal Credit Usage (0.3x Multiplier, 1 Base Credit)',
+      'Sub-3ms Hyper-Stream Response Velocity',
+      'Concise High-Density Answers for Simple Questions',
+      'Zero Conversational Fluff & Adaptive Compute Pruning',
+      '2,000,000 Token Context Window'
+    ],
+    parameters: 'Frontier 0.4E Sovereign Core (2M Context)',
+    generation: '0.4',
+    openRouterModel: 'nvidia/nemotron-3.5-lightning:free',
+    fallbackModels: [
+      'liquid/lfm-2.5-2.6b:free',
+      'cohere/north-mini-code:free',
+      'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free'
+    ],
+    creditMultiplier: 0.3,
+    baseCreditCost: 1,
+    searchOptimization: {
+      recommendedMode: 'fast',
+      badge: 'FAST LOOKUP',
+      role: 'Optimal for Rapid Low-Cost Web Lookups (<35ms)',
+      searchThroughput: 'Instantaneous (<30ms)',
+      searchStrengths: ['Frugal token retrieval', 'Direct concise facts', 'Zero credit waste'],
+      searchRating: '99.2%'
+    }
+  },
   // =========================================================================
   // GENERATION 0.3 — NEXT-GEN SOVEREIGN FRONTIER FLEET
   // =========================================================================

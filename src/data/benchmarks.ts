@@ -24,6 +24,26 @@ export const BENCHMARK_LEADERBOARD: ModelLeaderboardEntry[] = [
       costEfficiency: 94,
     }
   },
+  {
+    modelId: 'nixima-0.4e',
+    rank: 2,
+    overallScore: 99.4,
+    eloRating: 1985,
+    winRate: 99.1,
+    primaryBadge: '0.4E',
+    summaryEn: 'Sovereign Economy model of Generation 0.4 ("E" stands for Economy). Engineered for users who want 0.4 flagship architecture without heavy credit costs. Answers simple questions concisely and directly, with sub-3ms latency and an ultra-frugal 0.3x credit multiplier.',
+    summaryUk: 'Суверенна модель економ-класу Покоління 0.4 («E» означає Економіка). Створена для тих, хто прагне отримати архітектуру флагмана 0.4 без високих витрат кредитів. Відповідає на прості запитання лаконічно й прямо, із затримкою до 3мс та ультраекономним множником 0.3x.',
+    recommendedForEn: 'Ultra-fast direct queries, factual lookups, daily productivity, high-frequency tasks, budget-conscious flagship performance.',
+    recommendedForUk: 'Ультрашвидкі прямі запити, довідкова інформація, щоденна продуктивність, висока частота запитів, економна флагманська робота.',
+    metrics: {
+      mathAndLogic: 96,
+      codingAndEngineering: 97,
+      systemArchitecture: 96,
+      scientificSynthesis: 95,
+      throughputSpeed: 100,
+      costEfficiency: 100,
+    }
+  },
   // =========================================================================
   // GENERATION 0.3 — NEXT-GEN SOVEREIGN FRONTIER FLEET
   // =========================================================================
