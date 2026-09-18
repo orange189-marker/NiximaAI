@@ -138,11 +138,16 @@ export interface Translations {
     productChat: string;
     productCode: string;
     productCodeBadge: string;
+    productTranslator: string;
+    productTranslatorBadge: string;
     conversationsTitle: string;
     newChatButton: string;
     newCodeProjectButton: string;
+    newTranslationButton: string;
     codeProjectsSection: string;
+    translationsSection: string;
     noCodeProjects: string;
+    noTranslations: string;
     searchPlaceholder: string;
     pinnedSection: string;
     recentSection: string;
@@ -641,6 +646,64 @@ export interface Translations {
     followUpAudio: string;
     followUpTests: string;
   };
+
+  niximaTranslator: {
+    heroTitle: string;
+    heroSubtitle: string;
+    heroBadge: string;
+    globalMeshNotice: string;
+    sourceLanguageLabel: string;
+    targetLanguageLabel: string;
+    autoDetectLabel: string;
+    detectedLabel: string;
+    swapLanguagesTooltip: string;
+    translateButton: string;
+    translatingButton: string;
+    autoTranslateToggle: string;
+    autoTranslateActive: string;
+    sourcePlaceholder: string;
+    targetPlaceholder: string;
+    characters: string;
+    words: string;
+    clearSource: string;
+    pasteSource: string;
+    listenText: string;
+    copyTranslation: string;
+    copiedTranslation: string;
+    downloadTranslation: string;
+    uploadDocument: string;
+    uploadDocumentHint: string;
+    toneLabel: string;
+    toneStandard: string;
+    toneFormal: string;
+    toneCasual: string;
+    toneTechnical: string;
+    toneLiterary: string;
+    toneStandardDesc: string;
+    toneFormalDesc: string;
+    toneCasualDesc: string;
+    toneTechnicalDesc: string;
+    toneLiteraryDesc: string;
+    insightsTab: string;
+    historyTab: string;
+    phrasebookTab: string;
+    synonymsTitle: string;
+    vocabularyTitle: string;
+    culturalNotesTitle: string;
+    grammarNotesTitle: string;
+    transliterationTitle: string;
+    saveToPhrasebook: string;
+    savedToPhrasebook: string;
+    removeFromPhrasebook: string;
+    clearHistory: string;
+    noHistoryYet: string;
+    noSavedPhrasesYet: string;
+    searchLanguagesPlaceholder: string;
+    popularLanguages: string;
+    allLanguages: string;
+    sendToChat: string;
+    sendToCode: string;
+  };
 }
 
 export const translations: Record<Language, Translations> = {
@@ -782,11 +845,16 @@ export const translations: Record<Language, Translations> = {
       productChat: 'Nixima Chat',
       productCode: 'Nixima Code',
       productCodeBadge: '0.3 TITAN',
+      productTranslator: 'Nixima Translator',
+      productTranslatorBadge: '0.4 OMNI',
       conversationsTitle: 'Conversations',
       newChatButton: 'New conversation',
       newCodeProjectButton: 'New Code Project',
+      newTranslationButton: 'New Translation',
       codeProjectsSection: 'Code Projects',
+      translationsSection: 'Translations',
       noCodeProjects: 'No code projects yet. Start by creating one!',
+      noTranslations: 'No translation records yet.',
       searchPlaceholder: 'Search chats...',
       pinnedSection: 'Pinned',
       recentSection: 'Recent',
@@ -1448,6 +1516,64 @@ export const translations: Record<Language, Translations> = {
       followUpAudio: '🔊 Add Web Audio Sound Effects',
       followUpTests: '🧪 Generate Unit Test Suite',
     },
+
+    niximaTranslator: {
+      heroTitle: 'Nixima Neural Translator',
+      heroSubtitle: 'High-fidelity sovereign neural translation across 100+ world languages with deep linguistic insights',
+      heroBadge: 'NEURAL TRANSLATOR',
+      globalMeshNotice: 'Powered by Nixima-0.4 Sovereign Omni Core with Zero-Drift cross-lingual precision.',
+      sourceLanguageLabel: 'Source Language',
+      targetLanguageLabel: 'Target Language',
+      autoDetectLabel: 'Auto-Detect',
+      detectedLabel: 'Detected',
+      swapLanguagesTooltip: 'Swap source and target languages',
+      translateButton: 'Translate',
+      translatingButton: 'Translating...',
+      autoTranslateToggle: 'Live Instant Translation',
+      autoTranslateActive: 'Instant',
+      sourcePlaceholder: 'Type or paste text, markdown, or code to translate...',
+      targetPlaceholder: 'Translation will appear here...',
+      characters: 'characters',
+      words: 'words',
+      clearSource: 'Clear',
+      pasteSource: 'Paste',
+      listenText: 'Listen',
+      copyTranslation: 'Copy',
+      copiedTranslation: 'Copied!',
+      downloadTranslation: 'Download',
+      uploadDocument: 'Upload Document',
+      uploadDocumentHint: 'Translate .txt, .md, .json, .csv files',
+      toneLabel: 'Tone & Style',
+      toneStandard: 'Fluent & Natural',
+      toneFormal: 'Formal & Executive',
+      toneCasual: 'Casual & Idiomatic',
+      toneTechnical: 'Technical & Code',
+      toneLiterary: 'Literary & Creative',
+      toneStandardDesc: 'Authentic cadence, ideal for everyday communication',
+      toneFormalDesc: 'Polished diplomatic and academic vocabulary',
+      toneCasualDesc: 'Informal register, colloquialisms, and slang',
+      toneTechnicalDesc: 'Preserves technical keywords, markdown syntax, and code fences',
+      toneLiteraryDesc: 'Evocative phrasing, metaphoric resonance, and stylistic rhythm',
+      insightsTab: 'Linguistic Insights',
+      historyTab: 'Recent Translations',
+      phrasebookTab: 'Saved Phrasebook',
+      synonymsTitle: 'Alternative Phrasing & Synonyms',
+      vocabularyTitle: 'Key Vocabulary & Nuances',
+      culturalNotesTitle: 'Cultural & Pragmatic Context',
+      grammarNotesTitle: 'Grammatical Structure & Concordance',
+      transliterationTitle: 'Phonetic & Romanization',
+      saveToPhrasebook: 'Save phrase',
+      savedToPhrasebook: 'Saved to phrasebook',
+      removeFromPhrasebook: 'Remove from phrasebook',
+      clearHistory: 'Clear History',
+      noHistoryYet: 'No translation history yet. Enter text above to translate!',
+      noSavedPhrasesYet: 'No saved phrases yet. Star any translation to bookmark it here!',
+      searchLanguagesPlaceholder: 'Search 100+ languages...',
+      popularLanguages: 'Popular',
+      allLanguages: 'All Languages',
+      sendToChat: 'Open in Nixima Chat',
+      sendToCode: 'Open in Nixima Code',
+    },
   },
 
   uk: {
@@ -1588,11 +1714,16 @@ export const translations: Record<Language, Translations> = {
       productChat: 'Nixima Chat',
       productCode: 'Nixima Code',
       productCodeBadge: '0.3 TITAN',
+      productTranslator: 'Nixima Translator',
+      productTranslatorBadge: '0.4 OMNI',
       conversationsTitle: 'Діалоги',
       newChatButton: 'Новий діалог',
       newCodeProjectButton: 'Новий проєкт коду',
+      newTranslationButton: 'Новий переклад',
       codeProjectsSection: 'Проєкти коду',
+      translationsSection: 'Переклади',
       noCodeProjects: 'Ще немає проєктів коду. Створіть перший!',
+      noTranslations: 'Історія перекладів порожня.',
       searchPlaceholder: 'Пошук діалогів...',
       pinnedSection: 'Закріплені',
       recentSection: 'Недавні',
@@ -2263,6 +2394,64 @@ export const translations: Record<Language, Translations> = {
       followUpOptimize: '⚡ Оптимізувати продуктивність та пам’ять',
       followUpAudio: '🔊 Додати звукові ефекти Web Audio',
       followUpTests: '🧪 Згенерувати набір юніт-тестів',
+    },
+
+    niximaTranslator: {
+      heroTitle: 'Нейронний перекладач Nixima',
+      heroSubtitle: 'Суверенний нейропереклад найвищої точності між 100+ мовами світу з аналізом лінгвістичних нюансів',
+      heroBadge: 'НЕЙРОПЕРЕКЛАДАЧ',
+      globalMeshNotice: 'Працює на базі суверенного ядра Nixima-0.4 Omni з нульовим мовним дрейфом.',
+      sourceLanguageLabel: 'Вихідна мова',
+      targetLanguageLabel: 'Цільова мова',
+      autoDetectLabel: 'Автовизначення',
+      detectedLabel: 'Визначено',
+      swapLanguagesTooltip: 'Поміняти мови місцями',
+      translateButton: 'Перекласти',
+      translatingButton: 'Переклад...',
+      autoTranslateToggle: 'Миттєвий живий переклад',
+      autoTranslateActive: 'Миттєво',
+      sourcePlaceholder: 'Введіть або вставте текст, markdown чи код для перекладу...',
+      targetPlaceholder: 'Тут з’явиться переклад...',
+      characters: 'символів',
+      words: 'слів',
+      clearSource: 'Очистити',
+      pasteSource: 'Вставити',
+      listenText: 'Озвучити',
+      copyTranslation: 'Копіювати',
+      copiedTranslation: 'Скопійовано!',
+      downloadTranslation: 'Завантажити',
+      uploadDocument: 'Завантажити файл',
+      uploadDocumentHint: 'Переклад файлів .txt, .md, .json, .csv',
+      toneLabel: 'Тон та стиль',
+      toneStandard: 'Природний та живий',
+      toneFormal: 'Офіційно-діловий',
+      toneCasual: 'Розмовний та сленг',
+      toneTechnical: 'Технічний та код',
+      toneLiterary: 'Художній та поетичний',
+      toneStandardDesc: 'Автентичне звучання для повсякденного спілкування',
+      toneFormalDesc: 'Витончена дипломатична, академічна та ділова лексика',
+      toneCasualDesc: 'Неформальний регістр, ідіоми та розмовні звороти',
+      toneTechnicalDesc: 'Збереження термінів, синтаксису markdown та блоків коду',
+      toneLiteraryDesc: 'Художня виразність, метафоричність та естетичний ритм',
+      insightsTab: 'Лінгвістичні нюанси',
+      historyTab: 'Історія перекладів',
+      phrasebookTab: 'Збережені фрази',
+      synonymsTitle: 'Альтернативні варіанти та синоніми',
+      vocabularyTitle: 'Ключовий словниковий запас',
+      culturalNotesTitle: 'Культурний та контекстний аналіз',
+      grammarNotesTitle: 'Граматична структура та узгодження',
+      transliterationTitle: 'Фонетична транслітерація',
+      saveToPhrasebook: 'Зберегти фразу',
+      savedToPhrasebook: 'Збережено у фразеологізм',
+      removeFromPhrasebook: 'Видалити із збережених',
+      clearHistory: 'Очистити історію',
+      noHistoryYet: 'Історія перекладів порожня. Введіть текст вище для перекладу!',
+      noSavedPhrasesYet: 'Немає збережених фраз. Натисніть зірочку біля перекладу, щоб зберегти його!',
+      searchLanguagesPlaceholder: 'Пошук серед 100+ мов...',
+      popularLanguages: 'Популярні',
+      allLanguages: 'Всі мови',
+      sendToChat: 'Відкрити в Nixima Chat',
+      sendToCode: 'Відкрити в Nixima Code',
     },
   },
 };

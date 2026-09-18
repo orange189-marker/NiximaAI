@@ -18,7 +18,8 @@ import {
   BarChart3,
   Code2,
   Terminal,
-  FileCode
+  FileCode,
+  Languages
 } from 'lucide-react';
 import { Conversation, NiximaProduct } from '../types/chat';
 import { NiximaUser } from '../types/user';
@@ -47,6 +48,7 @@ interface SidebarProps {
   activeProduct?: NiximaProduct;
   onSelectProduct?: (product: NiximaProduct) => void;
   onNewCodeProject?: () => void;
+  onNewTranslation?: () => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -67,6 +69,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeProduct = 'chat',
   onSelectProduct,
   onNewCodeProject,
+  onNewTranslation,
 }) => {
   const { language, t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
@@ -124,7 +127,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
       if (activeProduct === 'code') {
         return c.product === 'code';
       }
-      return c.product !== 'code';
+      if (activeProduct === 'translator') {
+        return c.product === 'translator';
+      }
+      return !c.product || c.product === 'chat';
     });
   }, [conversations, activeProduct]);
 
@@ -166,6 +172,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
           ) : activeProduct === 'code' ? (
             <div className="w-5 h-5 rounded-md bg-emerald-950/90 border border-emerald-500/40 flex items-center justify-center text-emerald-400 flex-shrink-0">
               <Code2 className="w-3 h-3" />
+            </div>
+          ) : activeProduct === 'translator' ? (
+            <div className="w-5 h-5 rounded-md bg-blue-950/90 border border-blue-500/40 flex items-center justify-center text-blue-400 flex-shrink-0">
+              <Languages className="w-3 h-3" />
             </div>
           ) : (
             <ModelIcon modelId={conv.modelId || 'nixima-0.2'} size="xs" />
@@ -283,47 +293,62 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </button>
         </div>
 
-        {/* Product Switcher: Nixima Chat vs Nixima Code */}
+        {/* Product Switcher: Nixima Chat vs Nixima Code vs Nixima Translator */}
         <div className="px-3 pt-2.5 pb-1">
-          <div className="grid grid-cols-2 p-1 bg-zinc-950/90 rounded-xl border border-zinc-800/80 text-xs font-mono">
+          <div className="grid grid-cols-3 p-1 bg-zinc-950/90 rounded-xl border border-zinc-800/80 text-xs font-mono gap-1">
             <button
               type="button"
               onClick={() => onSelectProduct?.('chat')}
-              className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg transition-all select-none cursor-pointer ${
+              className={`flex items-center justify-center gap-1 py-1.5 px-1.5 rounded-lg transition-all select-none cursor-pointer text-xs ${
                 activeProduct === 'chat'
                   ? 'bg-zinc-800 text-white font-bold shadow-sm'
                   : 'text-zinc-400 hover:text-zinc-200'
               }`}
+              title="Nixima Chat"
             >
-              <MessageSquare className="w-3.5 h-3.5" />
-              <span>{t.sidebar.productChat}</span>
+              <MessageSquare className="w-3.5 h-3.5 flex-shrink-0" />
+              <span className="truncate">{t.sidebar.productChat}</span>
             </button>
 
             <button
               type="button"
               onClick={() => onSelectProduct?.('code')}
-              className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg transition-all select-none cursor-pointer ${
+              className={`flex items-center justify-center gap-1 py-1.5 px-1.5 rounded-lg transition-all select-none cursor-pointer text-xs ${
                 activeProduct === 'code'
                   ? 'bg-gradient-to-r from-emerald-950/90 to-cyan-950/90 border border-emerald-500/50 text-emerald-300 font-bold shadow-[0_0_12px_rgba(16,185,129,0.25)]'
                   : 'text-zinc-400 hover:text-emerald-300'
               }`}
+              title="Nixima Code"
             >
-              <Code2 className="w-3.5 h-3.5 text-emerald-400" />
-              <span>{t.sidebar.productCode}</span>
-              <span className="text-[8px] px-1 py-0.2 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                0.3
-              </span>
+              <Code2 className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+              <span className="truncate">{t.sidebar.productCode}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onSelectProduct?.('translator')}
+              className={`flex items-center justify-center gap-1 py-1.5 px-1.5 rounded-lg transition-all select-none cursor-pointer text-xs ${
+                activeProduct === 'translator'
+                  ? 'bg-gradient-to-r from-blue-950/90 to-indigo-950/90 border border-blue-500/50 text-blue-300 font-bold shadow-[0_0_12px_rgba(59,130,246,0.25)]'
+                  : 'text-zinc-400 hover:text-blue-300'
+              }`}
+              title="Nixima Translator"
+            >
+              <Languages className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+              <span className="truncate">{t.sidebar.productTranslator}</span>
             </button>
           </div>
         </div>
 
-        {/* Action button: New Chat / New Code Project */}
+        {/* Action button: New Chat / New Code Project / New Translation */}
         <div className="p-3 space-y-2.5">
           <div className="relative group">
             {/* Ambient Radiant Glow Aura on Hover */}
             <div className={`absolute -inset-0.5 rounded-2xl opacity-0 group-hover:opacity-100 blur-sm transition-all duration-300 pointer-events-none ${
               activeProduct === 'code'
                 ? 'bg-gradient-to-r from-emerald-500/30 via-cyan-500/40 to-emerald-500/30'
+                : activeProduct === 'translator'
+                ? 'bg-gradient-to-r from-blue-500/30 via-indigo-500/40 to-cyan-500/30'
                 : 'bg-gradient-to-r from-white/20 via-white/40 to-white/20'
             }`} />
 
@@ -342,6 +367,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </div>
                 <span className="text-[10px] font-mono font-bold bg-black/10 border border-black/15 px-2 py-0.5 rounded-md text-zinc-950">
                   0.3 CODER
+                </span>
+              </button>
+            ) : activeProduct === 'translator' ? (
+              <button
+                onClick={onNewTranslation || onNewChat}
+                className="relative w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 via-indigo-400 to-cyan-400 hover:from-blue-400 hover:to-cyan-300 text-black font-semibold text-sm transition-all duration-200 shadow-[0_4px_20px_rgba(59,130,246,0.3)] active:scale-[0.98] cursor-pointer select-none"
+              >
+                <div className="flex items-center gap-2.5">
+                  <div className="w-6 h-6 rounded-lg bg-zinc-950 text-blue-400 flex items-center justify-center border border-blue-500/30 shadow-sm transition-transform duration-300 group-hover:rotate-12 group-hover:scale-105">
+                    <Languages className="w-3.5 h-3.5 stroke-[2.5]" />
+                  </div>
+                  <span className="font-bold text-xs tracking-tight text-zinc-950 font-sans">
+                    {t.sidebar.newTranslationButton}
+                  </span>
+                </div>
+                <span className="text-[10px] font-mono font-bold bg-black/15 border border-black/20 px-2 py-0.5 rounded-md text-zinc-950">
+                  0.4 OMNI
                 </span>
               </button>
             ) : (
@@ -407,7 +449,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="flex-1 overflow-y-auto px-2 py-1 space-y-3">
           {filteredConversations.length === 0 ? (
             <div className="text-center py-8 px-4 text-xs text-zinc-500">
-              {searchQuery ? t.sidebar.noMatchingConversations : (activeProduct === 'code' ? t.sidebar.noCodeProjects : t.sidebar.noConversations)}
+              {searchQuery ? t.sidebar.noMatchingConversations : (
+                activeProduct === 'code'
+                  ? t.sidebar.noCodeProjects
+                  : activeProduct === 'translator'
+                  ? t.sidebar.noTranslations
+                  : t.sidebar.noConversations
+              )}
             </div>
           ) : (
             <>
@@ -426,7 +474,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="space-y-1">
                 {pinnedConversations.length > 0 && (
                   <div className="px-2 pt-2 text-[10px] font-mono uppercase tracking-wider text-zinc-500 font-bold">
-                    {activeProduct === 'code' ? t.sidebar.codeProjectsSection : t.sidebar.recentSection}
+                    {activeProduct === 'code' 
+                      ? t.sidebar.codeProjectsSection 
+                      : activeProduct === 'translator'
+                      ? t.sidebar.translationsSection
+                      : t.sidebar.recentSection}
                   </div>
                 )}
                 {regularConversations.map(renderConversationItem)}

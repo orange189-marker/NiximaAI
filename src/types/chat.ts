@@ -153,7 +153,30 @@ export interface Message {
   canvasContext?: CanvasCodeContext;
 }
 
-export type NiximaProduct = 'chat' | 'code';
+export type NiximaProduct = 'chat' | 'code' | 'translator';
+
+export type TranslationTone = 'standard' | 'formal' | 'casual' | 'technical' | 'literary';
+
+export interface LinguisticInsight {
+  synonyms?: string[];
+  vocabulary?: Array<{ term: string; pos?: string; meaning: string }>;
+  grammarNotes?: string[];
+  culturalContext?: string;
+  transliteration?: string;
+}
+
+export interface TranslationRecord {
+  id: string;
+  sourceLang: string;
+  targetLang: string;
+  sourceText: string;
+  translatedText: string;
+  tone: TranslationTone;
+  timestamp: number;
+  isFavorite?: boolean;
+  modelId?: string;
+  insights?: LinguisticInsight;
+}
 
 export interface Conversation {
   id: string;

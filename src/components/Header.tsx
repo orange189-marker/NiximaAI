@@ -141,6 +141,15 @@ export const Header: React.FC<HeaderProps> = ({
                   STUDIO
                 </span>
               </div>
+            ) : activeProduct === 'translator' ? (
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold text-sm sm:text-base tracking-tight bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-400 bg-clip-text text-transparent font-sans">
+                  Nixima Translator
+                </span>
+                <span className="px-1.5 py-0.2 rounded bg-blue-950/80 border border-blue-500/40 text-[9px] font-mono text-blue-300 font-bold uppercase tracking-wider">
+                  OMNI
+                </span>
+              </div>
             ) : (
               <>
                 <NiximaWordmark

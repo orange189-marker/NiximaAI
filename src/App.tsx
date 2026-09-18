@@ -12,6 +12,7 @@ import { ReleaseAnnouncementModal } from './components/ReleaseAnnouncementModal'
 import { AuthPortal } from './components/AuthPortal';
 import { NiximaCanvas } from './components/NiximaCanvas';
 import { NiximaCodeStudio } from './components/NiximaCodeStudio';
+import { NiximaTranslatorStudio } from './components/NiximaTranslatorStudio';
 import { Conversation, Message, ModelOption, UserSettings, MessageTelemetry, SearchMode, ThinkingMode, NiximaArtifact, SearchGrounding, CanvasCodeContext, NiximaProduct } from './types/chat';
 import { NiximaUser } from './types/user';
 import { NIXIMA_MODELS, DEFAULT_MODEL } from './data/models';
@@ -92,10 +93,10 @@ const AppContent: React.FC = () => {
     };
   });
 
-  // 2.5 Active Product ('chat' | 'code')
+  // 2.5 Active Product ('chat' | 'code' | 'translator')
   const [activeProduct, setActiveProduct] = useState<NiximaProduct>(() => {
     const savedProd = localStorage.getItem('nixima_active_product_v1');
-    return (savedProd === 'code' || savedProd === 'chat') ? savedProd : 'chat';
+    return (savedProd === 'code' || savedProd === 'chat' || savedProd === 'translator') ? savedProd : 'chat';
   });
 
   useEffect(() => {
@@ -108,6 +109,10 @@ const AppContent: React.FC = () => {
     if (savedProd === 'code') {
       const coder = NIXIMA_MODELS.find(m => m.id === 'nixima-0.3-coder');
       if (coder) return coder;
+    }
+    if (savedProd === 'translator') {
+      const omni = NIXIMA_MODELS.find(m => m.id === 'nixima-0.4');
+      if (omni) return omni;
     }
     const savedModelId = localStorage.getItem(STORAGE_KEY_MODEL);
     if (savedModelId) {
@@ -135,13 +140,16 @@ const AppContent: React.FC = () => {
   // 5. Active conversation ID
   const [activeId, setActiveId] = useState<string>(() => {
     const savedProd = localStorage.getItem('nixima_active_product_v1');
-    const isCode = savedProd === 'code';
     if (conversations.length > 0) {
-      const match = conversations.find(c => isCode ? c.product === 'code' : c.product !== 'code');
+      const match = conversations.find(c => {
+        if (savedProd === 'code') return c.product === 'code';
+        if (savedProd === 'translator') return c.product === 'translator';
+        return !c.product || c.product === 'chat';
+      });
       if (match) return match.id;
       return conversations[0].id;
     }
-    return isCode ? 'code-initial' : 'new-chat';
+    return savedProd === 'code' ? 'code-initial' : savedProd === 'translator' ? 'translate-initial' : 'new-chat';
   });
 
   // 6. UI & Modals
@@ -461,7 +469,7 @@ All conversations and model preferences in this workspace are private to your Ni
     scrollToBottom(false);
   }, [activeId]);
 
-  // Handler: Switch Product (Nixima Chat vs Nixima Code)
+  // Handler: Switch Product (Nixima Chat vs Nixima Code vs Nixima Translator)
   const handleSelectProduct = (prod: NiximaProduct) => {
     setActiveProduct(prod);
     if (prod === 'code') {
@@ -491,8 +499,29 @@ All conversations and model preferences in this workspace are private to your Ni
         setConversations(prev => [newConv, ...prev]);
         setActiveId(newId);
       }
+    } else if (prod === 'translator') {
+      const omniModel = NIXIMA_MODELS.find(m => m.id === 'nixima-0.4') || currentModel;
+      setCurrentModel(omniModel);
+      const existingTranslateConv = conversations.find(c => c.product === 'translator');
+      if (existingTranslateConv) {
+        setActiveId(existingTranslateConv.id);
+      } else {
+        const newId = 'translate-' + Date.now();
+        const newConv: Conversation = {
+          id: newId,
+          title: language === 'uk' ? 'Новий переклад' : 'New Translation',
+          messages: [],
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+          modelId: omniModel.id,
+          product: 'translator',
+          pinned: false,
+        };
+        setConversations(prev => [newConv, ...prev]);
+        setActiveId(newId);
+      }
     } else {
-      const existingChatConv = conversations.find(c => c.product !== 'code');
+      const existingChatConv = conversations.find(c => !c.product || c.product === 'chat');
       if (existingChatConv) {
         setActiveId(existingChatConv.id);
         if (existingChatConv.modelId) {
@@ -541,6 +570,25 @@ All conversations and model preferences in this workspace are private to your Ni
     }));
   };
 
+  // Handler: New Translation
+  const handleNewTranslation = () => {
+    const newId = 'translate-' + Date.now();
+    const omniModel = NIXIMA_MODELS.find(m => m.id === 'nixima-0.4') || currentModel;
+    const newConv: Conversation = {
+      id: newId,
+      title: language === 'uk' ? 'Новий переклад' : 'New Translation',
+      messages: [],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      modelId: omniModel.id,
+      product: 'translator',
+      pinned: false,
+    };
+    setConversations(prev => [newConv, ...prev]);
+    setActiveId(newId);
+    setCurrentModel(omniModel);
+  };
+
   // Handler: Send Code Prompt from Nixima Code Studio
   const handleSendCodePrompt = (
     promptText: string,
@@ -572,6 +620,10 @@ All conversations and model preferences in this workspace are private to your Ni
       handleNewCodeProject();
       return;
     }
+    if (activeProduct === 'translator') {
+      handleNewTranslation();
+      return;
+    }
     const newId = 'chat-' + Date.now();
     const newConv: Conversation = {
       id: newId,
@@ -591,19 +643,28 @@ All conversations and model preferences in this workspace are private to your Ni
   const handleDeleteConversation = (id: string) => {
     setConversations(prev => {
       const remaining = prev.filter(c => c.id !== id);
-      const isCode = activeProduct === 'code';
-      const remainingInProduct = remaining.filter(c => isCode ? c.product === 'code' : c.product !== 'code');
+      const remainingInProduct = remaining.filter(c => {
+        if (activeProduct === 'code') return c.product === 'code';
+        if (activeProduct === 'translator') return c.product === 'translator';
+        return !c.product || c.product === 'chat';
+      });
 
       if (remainingInProduct.length === 0) {
-        const freshId = (isCode ? 'code-' : 'chat-') + Date.now();
+        const isCode = activeProduct === 'code';
+        const isTrans = activeProduct === 'translator';
+        const freshId = (isCode ? 'code-' : isTrans ? 'translate-' : 'chat-') + Date.now();
         const freshConv: Conversation = {
           id: freshId,
-          title: isCode ? (language === 'uk' ? 'Новий код-проєкт' : 'New Code Project') : t.sidebar.newChatButton,
+          title: isCode 
+            ? (language === 'uk' ? 'Новий код-проєкт' : 'New Code Project')
+            : isTrans
+            ? (language === 'uk' ? 'Новий переклад' : 'New Translation')
+            : t.sidebar.newChatButton,
           messages: [],
           createdAt: Date.now(),
           updatedAt: Date.now(),
-          modelId: isCode ? 'nixima-0.3-coder' : currentModel.id,
-          product: isCode ? 'code' : 'chat',
+          modelId: isCode ? 'nixima-0.3-coder' : isTrans ? (NIXIMA_MODELS.find(m => m.id === 'nixima-0.4')?.id || currentModel.id) : currentModel.id,
+          product: activeProduct,
           pinned: false,
         };
         setActiveId(freshId);
@@ -1237,6 +1298,7 @@ All conversations and model preferences in this workspace are private to your Ni
         activeProduct={activeProduct}
         onSelectProduct={handleSelectProduct}
         onNewCodeProject={handleNewCodeProject}
+        onNewTranslation={handleNewTranslation}
       />
 
       {/* Main Content Area: Global Header + Split-Screen Workspace */}
@@ -1251,7 +1313,7 @@ All conversations and model preferences in this workspace are private to your Ni
           onOpenReleaseModal={() => setIsReleaseModalOpen(true)}
           isSidebarOpen={isSidebarOpen}
           onToggleSidebar={() => setIsSidebarOpen(prev => !prev)}
-          onNewChat={activeProduct === 'code' ? handleNewCodeProject : handleNewChat}
+          onNewChat={activeProduct === 'code' ? handleNewCodeProject : activeProduct === 'translator' ? handleNewTranslation : handleNewChat}
           credits={getUserCredits(currentUser)}
           onOpenCredits={handleOpenCredits}
           webSearchEnabled={settings.webSearchEnabled}
@@ -1261,7 +1323,7 @@ All conversations and model preferences in this workspace are private to your Ni
 
         {/* Workspace Area: Chat / Nixima Code Studio + Nixima Canvas Split Screen */}
         <div className="flex-1 flex overflow-hidden min-w-0 relative h-full">
-          {/* Main Column: Nixima Code Studio or Nixima Chat */}
+          {/* Main Column: Nixima Code Studio, Nixima Translator Studio, or Nixima Chat */}
           {activeProduct === 'code' ? (
             <div className={`flex flex-col h-full min-w-0 relative transition-all duration-200 ${isPureBlack ? 'bg-black' : 'bg-[#09090b]'} ${
               isCanvasOpen && !isCanvasMaximized
@@ -1301,6 +1363,15 @@ All conversations and model preferences in this workspace are private to your Ni
                 onNewProject={handleNewCodeProject}
                 onToggleCanvas={() => setIsCanvasOpen(prev => !prev)}
                 isCanvasOpen={isCanvasOpen}
+              />
+            </div>
+          ) : activeProduct === 'translator' ? (
+            <div className={`flex flex-col h-full min-w-0 relative transition-all duration-200 ${isPureBlack ? 'bg-black' : 'bg-[#09090b]'} w-full flex-1`}>
+              <NiximaTranslatorStudio
+                currentModel={currentModel}
+                onSelectModel={handleSelectModel}
+                userCredits={getUserCredits(currentUser)}
+                apiKey={settings.openRouterApiKey}
               />
             </div>
           ) : (
