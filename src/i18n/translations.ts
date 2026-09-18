@@ -167,6 +167,13 @@ export interface Translations {
     signOutTooltip: string;
     researchLink: string;
     clearAllChats: string;
+    statusThinking: string;
+    statusDeepThinking: string;
+    statusCompleted: string;
+    statusError: string;
+    statusActive: string;
+    statusIdle: string;
+    statusNew: string;
   };
 
   chatInput: {
@@ -874,6 +881,13 @@ export const translations: Record<Language, Translations> = {
       signOutTooltip: 'Sign out / Switch account',
       researchLink: 'Nixima AI Research',
       clearAllChats: 'Clear all chats',
+      statusThinking: 'AI is generating response...',
+      statusDeepThinking: 'DeepThinking epistemic reasoning in progress...',
+      statusCompleted: 'Task completed successfully',
+      statusError: 'Generation interrupted or error',
+      statusActive: 'Active conversation',
+      statusIdle: 'Chat history',
+      statusNew: 'New conversation',
     },
 
     chatInput: {
@@ -1743,6 +1757,13 @@ export const translations: Record<Language, Translations> = {
       signOutTooltip: 'Вийти / Змінити профіль',
       researchLink: 'Дослідження Nixima AI',
       clearAllChats: 'Очистити всі діалоги',
+      statusThinking: 'ШІ генерує відповідь...',
+      statusDeepThinking: 'Триває глибоке міркування DeepThinking...',
+      statusCompleted: 'Завдання успішно завершено',
+      statusError: 'Генерацію перервано або помилка',
+      statusActive: 'Поточний активний діалог',
+      statusIdle: 'Збережений діалог',
+      statusNew: 'Новий діалог',
     },
 
     chatInput: {

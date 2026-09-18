@@ -29,6 +29,7 @@ import { getSavedHotkey, HotkeyConfig, HOTKEY_CHANGE_EVENT } from '../utils/hotk
 import { HotkeyCustomizerModal } from './HotkeyCustomizerModal';
 import { useLanguage } from '../context/LanguageContext';
 import { NiximaWordmark } from './NiximaWordmark';
+import { ConversationStatusDot, ConversationStatus } from './ConversationStatusDot';
 
 interface SidebarProps {
   conversations: Conversation[];
@@ -49,6 +50,9 @@ interface SidebarProps {
   onSelectProduct?: (product: NiximaProduct) => void;
   onNewCodeProject?: () => void;
   onNewTranslation?: () => void;
+  isLoading?: boolean;
+  activeGeneratingId?: string;
+  recentlyCompletedConvIds?: Record<string, number>;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({
@@ -70,6 +74,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onSelectProduct,
   onNewCodeProject,
   onNewTranslation,
+  isLoading = false,
+  activeGeneratingId,
+  recentlyCompletedConvIds = {},
 }) => {
   const { language, t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
@@ -152,9 +159,95 @@ export const Sidebar: React.FC<SidebarProps> = ({
     [filteredConversations]
   );
 
+  // Periodic re-render timer to smoothly expire recently completed badges (60s window)
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTick(t => (t + 1) % 1000);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const getConversationStatus = (conv: Conversation): { status: ConversationStatus; tooltip: string } => {
+    // 1. Actively streaming / generating
+    const hasStreamingMsg = conv.messages.some(m => m.isStreaming);
+    const isCurrentlyGenerating = (isLoading && conv.id === (activeGeneratingId || activeConversationId)) || hasStreamingMsg;
+
+    if (isCurrentlyGenerating) {
+      const streamingMsg = conv.messages.find(m => m.isStreaming);
+      const isDeepThinking = Boolean(
+        streamingMsg?.thinkingMode === 'deep' ||
+        streamingMsg?.thinkingMode === 'ultra' ||
+        streamingMsg?.deepThinkingTelemetry ||
+        conv.modelId === 'nixima-0.4' ||
+        (streamingMsg?.thinking && streamingMsg.thinking.trim().length > 0)
+      );
+
+      return {
+        status: isDeepThinking ? 'deep_thinking' : 'thinking',
+        tooltip: isDeepThinking ? t.sidebar.statusDeepThinking : t.sidebar.statusThinking,
+      };
+    }
+
+    // 2. Just completed task (with glowing green tick)
+    const completionTimestamp = recentlyCompletedConvIds?.[conv.id];
+    const lastMsg = conv.messages[conv.messages.length - 1];
+    const isJustCompleted = Boolean(
+      (completionTimestamp && Date.now() - completionTimestamp < 60000) ||
+      (!isCurrentlyGenerating && lastMsg?.role === 'assistant' && conv.updatedAt && Date.now() - conv.updatedAt < 45000 && !lastMsg?.isStreaming)
+    );
+
+    if (isJustCompleted) {
+      return {
+        status: 'completed',
+        tooltip: t.sidebar.statusCompleted,
+      };
+    }
+
+    // 3. Error / Interrupted state
+    if (lastMsg?.role === 'assistant') {
+      const hasError = Boolean(
+        lastMsg.content.includes('RATE_LIMIT') ||
+        lastMsg.content.includes('Rate limit exceeded') ||
+        lastMsg.content.includes('Вичерпано добовий ліміт') ||
+        lastMsg.content.includes('помилка з’єднання') ||
+        lastMsg.content.includes('connection error occurred')
+      );
+      if (hasError) {
+        return {
+          status: 'error',
+          tooltip: t.sidebar.statusError,
+        };
+      }
+    }
+
+    // 4. Empty conversation
+    if (conv.messages.length === 0) {
+      return {
+        status: 'new',
+        tooltip: t.sidebar.statusNew,
+      };
+    }
+
+    // 5. Active focused conversation
+    if (conv.id === activeConversationId) {
+      return {
+        status: 'active',
+        tooltip: t.sidebar.statusActive,
+      };
+    }
+
+    // 6. Idle settled conversation
+    return {
+      status: 'idle',
+      tooltip: t.sidebar.statusIdle,
+    };
+  };
+
   const renderConversationItem = (conv: Conversation) => {
     const isActive = conv.id === activeConversationId;
     const isEditing = editingId === conv.id;
+    const convStatus = getConversationStatus(conv);
 
     return (
       <div
@@ -177,7 +270,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           }`} />
         )}
 
-        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           {conv.pinned ? (
             <Pin className="w-3.5 h-3.5 text-white flex-shrink-0 fill-white" />
           ) : activeProduct === 'code' ? (
@@ -191,6 +284,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
           ) : (
             <ModelIcon modelId={conv.modelId || 'nixima-0.2'} size="xs" />
           )}
+
+          {/* Situational Status Dot / Completed Tick Badge */}
+          <ConversationStatusDot
+            status={convStatus.status}
+            product={activeProduct}
+            tooltip={convStatus.tooltip}
+          />
 
           {isEditing ? (
             <div className="flex items-center gap-1 flex-1 pr-1" onClick={(e) => e.stopPropagation()}>

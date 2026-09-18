@@ -229,6 +229,7 @@ const AppContent: React.FC = () => {
 
   // 7. Streaming & generation state
   const [isLoading, setIsLoading] = useState(false);
+  const [recentlyCompletedConvIds, setRecentlyCompletedConvIds] = useState<Record<string, number>>({});
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -1120,6 +1121,7 @@ All conversations and model preferences in this workspace are private to your Ni
         if (c.id === targetConvId) {
           return {
             ...c,
+            updatedAt: Date.now(),
             messages: c.messages.map(m => m.id === aiMessageId ? { 
               ...m, 
               content: fullContent,
@@ -1134,6 +1136,11 @@ All conversations and model preferences in this workspace are private to your Ni
           };
         }
         return c;
+      }));
+
+      setRecentlyCompletedConvIds(prev => ({
+        ...prev,
+        [targetConvId]: Date.now()
       }));
 
       if (settings.soundEnabled) {
@@ -1202,6 +1209,7 @@ All conversations and model preferences in this workspace are private to your Ni
             if (c.id === targetConvId) {
               return {
                 ...c,
+                updatedAt: Date.now(),
                 messages: c.messages.map(m => m.id === aiMessageId ? {
                   ...m,
                   content: fallback.response,
@@ -1215,6 +1223,11 @@ All conversations and model preferences in this workspace are private to your Ni
               };
             }
             return c;
+          }));
+
+          setRecentlyCompletedConvIds(prev => ({
+            ...prev,
+            [targetConvId]: Date.now()
           }));
         } catch (fallbackErr) {
           console.error('[Nixima Core] Fallback generation error:', fallbackErr);
@@ -1299,6 +1312,9 @@ All conversations and model preferences in this workspace are private to your Ni
         onSelectProduct={handleSelectProduct}
         onNewCodeProject={handleNewCodeProject}
         onNewTranslation={handleNewTranslation}
+        isLoading={isLoading}
+        activeGeneratingId={isLoading ? activeId : undefined}
+        recentlyCompletedConvIds={recentlyCompletedConvIds}
       />
 
       {/* Main Content Area: Global Header + Split-Screen Workspace */}
